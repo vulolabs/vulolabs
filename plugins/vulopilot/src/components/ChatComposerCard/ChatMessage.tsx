@@ -3,7 +3,7 @@ import { IconComponent } from '@zyra/components';
 
 interface ChatMessageProps {
 	sender?: 'ai' | 'user';
-	/** adminfont icon glyph shown in the avatar circle — defaults to 'ai'. */
+	/** adminfont icon glyph shown in the avatar circle — defaults to 'person'. */
 	avatarIcon?: string;
 	children: React.ReactNode;
 }
@@ -20,8 +20,8 @@ interface ChatMessageProps {
  * of ChatComposerCard instead of in the shared design system.
  */
 const ChatMessage: React.FC<ChatMessageProps> = ({
-	sender = 'ai',
-	avatarIcon = 'ai',
+	sender = 'person',
+	avatarIcon = 'person',
 	children,
 }) => {
 	return (

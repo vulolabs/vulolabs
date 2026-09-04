@@ -1,11 +1,12 @@
 @use '../config' as *;
 
-.ai-card {
+.ai-card-wrapper {
 	padding: 0 !important;
 	gap: 0 !important;
+	border: 0.063rem solid #ea7a2f41;
 
 	.chat-composer-body {
-		background: $background-white;
+		background: #ea7a2f10;
 	}
 
 	.card-header {
@@ -13,11 +14,26 @@
 		border: none;
 		margin-bottom: 0;
 	}
+	.chat-turns{
 
+	}
 	.chat-composer-body {
 		min-height: 35rem;
 		max-height: 35rem;
 
+		// chat body start
+		.chat-message{
+			padding: 0.625rem 1rem;
+
+			.chat-message-content{
+				background: #fff;
+			}
+		}
+
+
+		.attachment-icon{
+			font-size: 1.813rem;
+		}
 		.chat-input {
 			border-radius: 0.313rem;
 			padding: 0.625rem 0.75rem;
@@ -25,6 +41,24 @@
 			width: 100%;
 			box-sizing: border-box;
 			bottom: 0;
+			background: #fff;
+
+
+			.chat-input-row {
+				display: flex;
+				align-items: center;
+				flex-wrap: wrap;
+				gap: 0.75rem;
+				border: $border-light-small;
+				border-radius: $border-radius-small;
+				padding: 0.45rem;
+			}
+
+			.chat-input-actions {
+				display: flex;
+				justify-content: space-between;
+				margin-top: 0.313rem;
+			}
 		}
 	}
 }
@@ -102,12 +136,7 @@ $chat-message-avatar-bg: #e67a2e;
 // 	background: #ffffff82;
 // }
 
-.chat-input-row {
-	display: flex;
-	align-items: center;
-	flex-wrap: wrap;
-	gap: 0.75rem;
-}
+
 
 .chat-input-textarea {
 	flex: 1 1 10rem;

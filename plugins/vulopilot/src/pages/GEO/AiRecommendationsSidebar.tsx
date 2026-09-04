@@ -43,7 +43,7 @@ const AiRecommendationsSidebar = () => {
 	return (
 		<AiCopilotGuard>
 			<CardComponent>
-				<ChatMessage sender="ai" avatarIcon="ai">
+				<ChatMessage sender="ai" avatarIcon="person">
 					{__(
 						"I'm continuously monitoring your site's SEO, GEO, and brand visibility signals.",
 						'vulopilot'

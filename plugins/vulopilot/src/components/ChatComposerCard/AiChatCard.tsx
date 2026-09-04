@@ -65,7 +65,7 @@ export interface AiChatCardProps<TTurn> {
  */
 const AiChatCard = <TTurn,>({
 	guarded = true,
-	sendingAvatarIcon = 'ai',
+	sendingAvatarIcon = 'person',
 	cardClassName,
 	cardTitle,
 	cardTitleIcon = 'ai',

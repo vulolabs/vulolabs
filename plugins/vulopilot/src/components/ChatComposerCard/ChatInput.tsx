@@ -1,6 +1,6 @@
 import React from 'react';
 import { TooltipComponent, IconComponent, ButtonInput } from '@zyra/components';
-import { MultiCheckboxInput } from '@zyra/inputs';
+import { MultiCheckboxInput, TextAreaInput } from '@zyra/inputs';
 
 interface ChatInputProps {
 	value: string;
@@ -69,39 +69,34 @@ const ChatInput: React.FC<ChatInputProps> = ({
 		<div className="chat-input">
 			<div className="chat-input-row">
 				{onAttach && (
-					<button
-						type="button"
-						className="chat-input-action"
-						onClick={onAttach}
-					>
-						<IconComponent name="attachment" />
-						{attachLabel}
-					</button>
+					<TooltipComponent text={attachLabel}>
+						<IconComponent className="attachment-icon" onClick={onAttach} name="attachment" />
+					</TooltipComponent>
 				)}
-				{onAddContext && (
-					<button
-						type="button"
-						className="chat-input-action"
-						onClick={onAddContext}
-					>
-						<IconComponent name="plus-circle" />
-						{addContextLabel}
-					</button>
-				)}
-				<textarea
-					className="chat-input-textarea"
+				<TextAreaInput
+					inputClass="chat-input-textarea"
 					value={value}
 					placeholder={placeholder}
 					disabled={disabled}
-					rows={1}
-					onChange={(e) => onChange(e.target.value)}
-					onKeyDown={(e) => {
+					usePlainText
+					rowNumber={1}
+					onChange={onChange}
+					onKeyDown={(e: React.KeyboardEvent<HTMLTextAreaElement>) => {
 						if (e.key === 'Enter' && !e.shiftKey) {
 							e.preventDefault();
 							handleSend();
 						}
 					}}
 				/>
+				{sendDisabledReason ? (
+					<TooltipComponent text={sendDisabledReason}>
+						{sendButton}
+					</TooltipComponent>
+				) : (
+					sendButton
+				)}
+			</div>
+			<div className='chat-input-actions'>
 				{autoApply && (
 					<div className="chat-input-autoapply">
 						<MultiCheckboxInput
@@ -124,12 +119,18 @@ const ChatInput: React.FC<ChatInputProps> = ({
 						)}
 					</div>
 				)}
-				{sendDisabledReason ? (
-					<TooltipComponent text={sendDisabledReason}>
-						{sendButton}
-					</TooltipComponent>
-				) : (
-					sendButton
+				{onAddContext && (
+					<>
+						<ButtonInput
+							buttons={[
+								{
+									onClick: onAddContext,
+									color: 'text-purple',
+									text: 'Add site context',
+								},
+							]}
+						/>
+					</>
 				)}
 			</div>
 		</div>

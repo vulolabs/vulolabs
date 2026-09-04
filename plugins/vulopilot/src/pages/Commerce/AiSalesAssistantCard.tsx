@@ -56,7 +56,7 @@ const AiSalesAssistantCard = ({
 			>
 				<AiCopilotGuard>
 					{!isLoading && (
-						<ChatMessage sender="ai" avatarIcon="ai">
+						<ChatMessage sender="ai" avatarIcon="person">
 							{total > 0
 								? sprintf(
 										/* translators: %d is the number of open WooCommerce findings. */

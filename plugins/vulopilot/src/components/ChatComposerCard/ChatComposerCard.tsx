@@ -105,7 +105,7 @@ const ChatComposerCard = <TTurn,>({
 		emptyState && 0 === turns.length && !isSending ? (
 			emptyState
 		) : (
-			<>
+			<div className='chat-turns'>
 				{welcome && (
 					<ChatMessage
 						sender="ai"
@@ -138,7 +138,7 @@ const ChatComposerCard = <TTurn,>({
 						{sendingLabel}
 					</ChatMessage>
 				)}
-			</>
+			</div>
 		);
 
 	const body = (
@@ -159,10 +159,10 @@ const ChatComposerCard = <TTurn,>({
 			titleIcon={cardTitleIcon}
 			desc={cardDesc}
 			action={cardAction}
-			className={`${cardClassName} ai-card`}
+			className={`${cardClassName} ai-card-wrapper`}
 		>
 			<div className='chat-composer-body'>
-			{guarded ? <AiCopilotGuard>{body}</AiCopilotGuard> : body}
+				{guarded ? <AiCopilotGuard>{body}</AiCopilotGuard> : body}
 			</div>
 		</CardComponent>
 	);

@@ -132,6 +132,17 @@ const AiProvidersPanel = () => {
 	// `default_model`) in `heroPanelValues` just like that section's own
 	// `otherPanelValues` already does.
 	const [heroValues, setHeroValues] = useState<Record<string, Record<string, unknown>>>({});
+	// `ExpandablePanelInput` decides whether to re-sync a row's own
+	// `formFields` (and, with them, get a fresh `onClick` closure) by
+	// diffing its `methods` prop with `[Function]` standing in for every
+	// function value — so once a row's other fields (e.g. `disabled`) stop
+	// changing, its `onClick` closure stays frozen at whatever
+	// `heroPanelValues` looked like at that moment, even as the user keeps
+	// typing. Same staleness `newProviderValuesRef` above already guards
+	// against for "Other providers" — read through this ref inside
+	// Connect/Save key's own `onClick` instead of the render-scoped
+	// `heroPanelValues` so a click always sees the latest typed value.
+	const heroPanelValuesRef = useRef<Record<string, Record<string, unknown>>>({});
 	const [heroTestState, setHeroTestState] = useState<
 		Record<string, { isTesting: boolean; testResult: { success: boolean; message: string } | null }>
 	>({});
@@ -194,6 +205,16 @@ const AiProvidersPanel = () => {
 	/** Real `POST /ai-providers` connect, scoped to one hero provider's own card rather than the generic "Add a new provider" picker below. */
 	const handleHeroConnect = (providerId: string, credential: string, defaultModel: string) => {
 		if (isSavingRef.current) {
+			return;
+		}
+
+		if ('' === credential.trim()) {
+			NoticeManager.add({
+				uniqueKey: 'vulopilot-ai-provider-add',
+				type: 'error',
+				position: 'float',
+				message: __('Enter an API key first.', 'vulopilot'),
+			});
 			return;
 		}
 
@@ -589,6 +610,7 @@ const AiProvidersPanel = () => {
 			];
 		})
 	);
+	heroPanelValuesRef.current = heroPanelValues;
 
 	const heroMethods = heroProviderIds.map((providerId) => {
 		const adapter = adapters[providerId];
@@ -653,12 +675,26 @@ const AiProvidersPanel = () => {
 					type: 'button',
 					label: '',
 					text: connecting ? __('Connecting…', 'vulopilot') : __('Connect', 'vulopilot'),
-					disabled: connecting || '' === String(heroPanelValues[providerId]?.api_key ?? '').trim(),
+					// Not gated on `connecting`/an empty api_key here —
+					// `ExpandablePanelInput` seeds `state.methods` (and
+					// every `formFields` property, `disabled` included)
+					// from this `methods` prop only once, at mount, for a
+					// non-`isCustom` row like this one; its own resync
+					// effect only refreshes *custom* methods' formFields
+					// from `value`, so a `disabled` computed from live
+					// typed state here would freeze at whatever it was on
+					// first render (permanently `true`, since the field
+					// starts empty) — exactly the "Connect never becomes
+					// clickable" bug this replaced. `isSavingRef`
+					// (double-submit) and the empty-credential check
+					// (handleHeroConnect's own docblock-adjacent guard,
+					// same pattern handleReconnect already uses) do this
+					// job instead, inside the handler itself.
 					onClick: () =>
 						handleHeroConnect(
 							providerId,
-							String(heroPanelValues[providerId]?.api_key ?? ''),
-							String(heroPanelValues[providerId]?.model ?? '')
+							String(heroPanelValuesRef.current[providerId]?.api_key ?? ''),
+							String(heroPanelValuesRef.current[providerId]?.model ?? '')
 						),
 				},
 			];
@@ -677,8 +713,11 @@ const AiProvidersPanel = () => {
 					type: 'button',
 					label: '',
 					text: isSaving ? __('Saving…', 'vulopilot') : __('Save key', 'vulopilot'),
-					disabled: isSaving || '' === String(heroPanelValues[providerId]?.api_key ?? '').trim(),
-					onClick: () => handleReconnect(config, String(heroPanelValues[providerId]?.api_key ?? '')),
+					// See the "connect" field above — not gated on
+					// `isSaving`/an empty api_key for the same
+					// frozen-`state.methods` reason; `handleReconnect`
+					// already guards the empty case itself.
+					onClick: () => handleReconnect(config, String(heroPanelValuesRef.current[providerId]?.api_key ?? '')),
 				},
 				{
 					key: 'disconnect',
