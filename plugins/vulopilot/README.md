@@ -25,19 +25,6 @@ Whether you're chasing better Google rankings, trying to keep your site secure, 
 
 VuloPilot is built for business websites, blogs, membership sites, LMS platforms, agencies, and developers who want real **Website Monitoring** and **Website Maintenance** without stitching it together by hand. It runs full **SEO Optimization** and **WordPress Optimization** scans, **Performance Optimization** checks aligned to **Core Web Vitals**, a full **Accessibility** audit, and a live **Site Health** score that tracks updates, broken links, and database health over time.
 
-### The problem
- 
-Most WordPress sites don't have an SEO problem, or a performance problem, or an accessibility problem — they have all of them, quietly, at the same time, spread across plugins that don't talk to each other. You end up assembling your own patchwork: an SEO plugin, a performance plugin, an accessibility checker, a separate maintenance service, and a standalone AI writing tool — each with its own dashboard, its own update schedule, and no shared view of how the site is actually doing.
- 
-### What VuloPilot is
- 
-**VuloPilot is the AI Website Operations Platform for WordPress** — one intelligent dashboard that continuously monitors, audits, and improves every layer of your site, built around a single idea: Website Optimization is one ongoing discipline, not five unrelated jobs. SEO, Site Health, Performance, Accessibility, and AI Visibility are all scanned, scored, and tracked from the same dashboard.
- 
-It's built for business websites, blogs, membership sites, LMS platforms, agencies, and developers who want real Website Monitoring and Website Maintenance without stitching it together by hand — running full SEO Optimization and WordPress Optimization scans, Performance Optimization checks aligned to Core Web Vitals, a full Accessibility audit, and a live Site Health score that tracks updates, broken links, and database health over time.
- 
-### And it doesn't stop at Google
- 
-As AI assistants like ChatGPT, Claude, Gemini, and Perplexity increasingly answer questions directly instead of linking out, VuloPilot also scores your **AI Visibility** — how discoverable, understandable, and citable your content is for AI Search — so your website is optimized for how people find information today, not just how they found it five years ago.
  
 ### Why Choose VuloPilot?
  
