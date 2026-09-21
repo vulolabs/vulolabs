@@ -243,7 +243,6 @@ Everything above is available in the free version, no credit card required:
 * AI Visibility (AEO/GEO) scoring
 * Website Performance monitoring
 * Accessibility Scanner (WCAG-aligned)
-* AI Assistant — bring your own API key (BYOK), no subscription required
 * Reports & Activity Timeline
 * Modern, React-powered WordPress Dashboard
  
