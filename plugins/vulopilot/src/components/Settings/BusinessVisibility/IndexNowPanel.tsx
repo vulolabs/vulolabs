@@ -193,9 +193,9 @@ const IndexNowPanel = () => {
 		<>
 			<FormGroupWrapperComponent>
 				<FormGroupComponent cols={6}
-					label={__('Auto-submit post types', 'vulopilot')}
+					label={__('What should notify search engines automatically', 'vulopilot')}
 					desc={__(
-						'Submit posts from these post types automatically to the IndexNow API when a post is published, updated, or trashed.',
+						'When one of these is published, edited, or deleted, VuloPilot tells search engines right away. Everything else you will need to submit yourself, below.',
 						'vulopilot'
 					)}
 				>
@@ -214,7 +214,7 @@ const IndexNowPanel = () => {
 						<SectionComponent
 							title={__('IndexNow is ready', 'vulopilot-pro')}
 							icon='plus green'
-							desc={__('High impact actions suggested by AI', 'vulopilot-pro')}
+							desc={__('Search engines can confirm this site owns the content it submits.', 'vulopilot-pro')}
 						/>
 						<FormGroupComponent
 							label={__('API key', 'vulopilot')}
@@ -265,8 +265,8 @@ const IndexNowPanel = () => {
 					</FormGroupWrapperComponent>
 				</FormGroupComponent>
 				<FormGroupComponent
-					label={__('URLs to submit', 'vulopilot')}
-					desc={__('One per line, up to 10,000.', 'vulopilot')}
+					label={__('Submit specific URLs', 'vulopilot')}
+					desc={__('Already published something and want search engines to recheck it now? Paste the URLs below - one per line. Up to 10,000 URLs, one per line.', 'vulopilot')}
 					cols={6}
 				>
 					<TextAreaInput
