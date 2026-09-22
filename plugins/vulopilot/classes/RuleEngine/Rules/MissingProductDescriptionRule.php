@@ -19,7 +19,7 @@ defined( 'ABSPATH' ) || exit;
  * WooCommerce AI's "AI Improvements" fix loop (ARCHITECTURE.md's Prompt 11):
  * turns Scanners\Basic\ProductMissingDescriptionScanner's Finding into a
  * recommendation to generate a long description, closed by
- * AIActions\Actions\WriteProductLongDescriptionAction — the same
+ * AiCopilot\Actions\WriteProductLongDescriptionAction — the same
  * Finding-to-Recommendation-to-Action shape as MissingAltTextRule's.
  *
  * @class       MissingProductDescriptionRule class

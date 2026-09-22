@@ -74,7 +74,102 @@ class WordPressHealthScanner extends AbstractBasicScanner {
             }
         }
 
+        $inactive_plugins_finding = $this->check_inactive_plugins();
+
+        if ( $inactive_plugins_finding ) {
+            $findings[] = $inactive_plugins_finding;
+        }
+
         return $findings;
+    }
+
+    /**
+     * Real, own check (not a `WP_Site_Health` wrapper like the 3 above —
+     * core's own Site Health only ever *lists* inactive plugins on its
+     * Info tab, it never flags them as a pass/fail test) — installed but
+     * deactivated plugins are still real files sitting on disk, still a
+     * real attack surface if one of them has a known vulnerability, and
+     * still something WordPress keeps auto-updating by default even while
+     * inactive, so "not currently running" doesn't mean "no risk," just
+     * lower risk than an active one. Standard WordPress hardening
+     * guidance (and every mainstream security plugin's own housekeeping
+     * check) is the same: review and remove what you're not using, rather
+     * than letting deactivated plugins accumulate indefinitely.
+     *
+     * `LOW` severity (recommendation, not a real problem the way a
+     * pending core update or a failing REST API is) — every plugin name
+     * is real, read straight from `get_plugins()`, the same core function
+     * the Plugins admin screen itself uses.
+     *
+     * @return Finding|null Null when there are no inactive plugins.
+     */
+    private function check_inactive_plugins(): ?Finding {
+        if ( ! function_exists( 'get_plugins' ) ) {
+            require_once ABSPATH . 'wp-admin/includes/plugin.php';
+        }
+
+        $all_plugins    = get_plugins();
+        $active_plugins = (array) get_option( 'active_plugins', array() );
+        $inactive_names = array();
+        // Real basenames (e.g. `hello-dolly/hello.php`) alongside the
+        // display names above — `delete_plugins()`/`deactivate_plugins()`
+        // both need this exact identifier, not the human-readable Name;
+        // stored in `meta` below so vulopilot-pro's own OneClickFix
+        // MechanicalFixRunner (Pro-owned; Free never runs the actual
+        // delete itself — see DATABASE.md's Free/Pro schema-vs-logic
+        // split this codebase already follows elsewhere) can act on
+        // exactly the plugins this scan actually found, not guess.
+        $inactive_files = array();
+
+        foreach ( $all_plugins as $plugin_file => $plugin_data ) {
+            if ( in_array( $plugin_file, $active_plugins, true ) ) {
+                continue;
+            }
+
+            $inactive_names[] = $plugin_data['Name']; // phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase -- get_plugins()'s own array key, not ours to rename.
+            $inactive_files[] = $plugin_file;
+        }
+
+        if ( empty( $inactive_names ) ) {
+            return null;
+        }
+
+        $count = count( $inactive_names );
+
+        return new Finding(
+            sprintf(
+                /* translators: %d is how many installed plugins are currently deactivated. */
+                _n(
+                    '%d inactive plugin installed',
+                    '%d inactive plugins installed',
+                    $count,
+                    'vulopilot'
+                ),
+                $count
+            ),
+            Severity::LOW,
+            $this->get_category(),
+            sprintf(
+                /* translators: %s is a comma-separated list of inactive plugin names. */
+                __( 'Deactivated plugins are still real files on disk and still a real attack surface if one has a known vulnerability, even while not running. Review and remove what you no longer use: %s.', 'vulopilot' ),
+                implode( ', ', $inactive_names )
+            ),
+            'wordpress_inactive_plugins',
+            null,
+            array(
+                'inactive_plugins' => $inactive_names,
+                'inactive_plugin_files' => $inactive_files,
+            ),
+            // The title's own count legitimately fluctuates scan to scan
+            // (a plugin gets deactivated/deleted) — a stable dedupe_key
+            // keeps this one finding refreshed in place across rescans
+            // instead of find_open_duplicate()'s title-match fallback
+            // treating "3 inactive plugins" and "4 inactive plugins" as
+            // two different findings. Same reasoning Finding's own
+            // constructor docblock gives for every other fluctuating-title
+            // scanner.
+            'wordpress_inactive_plugins'
+        );
     }
 
     /**

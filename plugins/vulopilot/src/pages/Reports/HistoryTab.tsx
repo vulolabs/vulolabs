@@ -69,7 +69,7 @@ const resolveDateFrom = (preset: DateRangePreset): string | undefined => {
  * $row['id']` off that same source table). Same real
  * `window.location.hash.split('?')[1] || window.location.hash.substring(1)`
  * parsing every other in-app deep link already uses
- * (AiProvidersPanel.tsx/useGoogleServicesConnection.ts).
+ * (VuloCloudAiConnectionPanel.tsx/useGoogleServicesConnection.ts).
  */
 const getDeepLinkHistoryId = (): number | null => {
 	const params = new URLSearchParams(

@@ -7,8 +7,6 @@
 
 namespace VuloPilot\BrandIntelligence;
 
-use VuloPilot\Scanners\Basic;
-
 defined( 'ABSPATH' ) || exit;
 
 /**
@@ -55,9 +53,9 @@ class Module {
         return array_merge(
             $scanners,
             array(
-                Basic\OrganizationSchemaScanner::class,
-                Basic\AuthorSchemaScanner::class,
-                Basic\AboutPageAnalysisScanner::class,
+                Scanners\OrganizationSchemaScanner::class,
+                Scanners\AuthorSchemaScanner::class,
+                Scanners\AboutPageAnalysisScanner::class,
             )
         );
     }

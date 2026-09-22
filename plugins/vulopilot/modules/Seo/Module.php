@@ -7,8 +7,6 @@
 
 namespace VuloPilot\Seo;
 
-use VuloPilot\Scanners\Basic;
-
 defined( 'ABSPATH' ) || exit;
 
 /**
@@ -61,30 +59,30 @@ class Module {
         return array_merge(
             $scanners,
             array(
-                Basic\SeoScanner::class,
-                Basic\SchemaScanner::class,
-                Basic\ImagesScanner::class,
-                Basic\BrokenLinksScanner::class,
-                Basic\BrokenImagesScanner::class,
-                Basic\MetaDescriptionScanner::class,
-                Basic\CanonicalUrlScanner::class,
-                Basic\InternalLinkingScanner::class,
-                Basic\HeadingStructureScanner::class,
-                Basic\ThinContentScanner::class,
-                Basic\DuplicateContentScanner::class,
-                Basic\SitemapScanner::class,
-                Basic\RobotsTxtScanner::class,
-                Basic\OpenGraphScanner::class,
-                Basic\TwitterCardScanner::class,
-                Basic\OrphanPageScanner::class,
-                Basic\SeoImagesScanner::class,
-                Basic\StructuredDataValidationScanner::class,
+                Scanners\SeoScanner::class,
+                Scanners\SchemaScanner::class,
+                Scanners\ImagesScanner::class,
+                Scanners\BrokenLinksScanner::class,
+                Scanners\BrokenImagesScanner::class,
+                Scanners\MetaDescriptionScanner::class,
+                Scanners\CanonicalUrlScanner::class,
+                Scanners\InternalLinkingScanner::class,
+                Scanners\HeadingStructureScanner::class,
+                Scanners\ThinContentScanner::class,
+                Scanners\DuplicateContentScanner::class,
+                Scanners\SitemapScanner::class,
+                Scanners\RobotsTxtScanner::class,
+                Scanners\OpenGraphScanner::class,
+                Scanners\TwitterCardScanner::class,
+                Scanners\OrphanPageScanner::class,
+                Scanners\SeoImagesScanner::class,
+                Scanners\StructuredDataValidationScanner::class,
                 // AI Crawler Analytics (AI-CRAWLER-ANALYTICS-MODULE.md) —
                 // "Blocked Pages," the one genuinely new Free scanner that
                 // pass adds. Registered here (not ScannerRegistry's core
                 // list) since it's a real robots.txt/SEO check, same
                 // category and module home as RobotsTxtScanner above.
-                Basic\AiCrawlerBlockedPagesScanner::class,
+                Scanners\AiCrawlerBlockedPagesScanner::class,
             )
         );
     }

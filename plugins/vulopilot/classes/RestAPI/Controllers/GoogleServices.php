@@ -26,8 +26,8 @@ defined( 'ABSPATH' ) || exit;
  * — see those classes' own docblocks. `get_status()` never returns a
  * client secret, access token, or refresh token — same
  * "repositories/REST controllers never see a raw secret" boundary
- * Controllers\AiProviders::prepare_config_for_response() already
- * documents for AI provider credentials.
+ * Controllers\VuloCloudAiConnection::prepare_config_for_response() already
+ * documents for AI service credentials.
  *
  * @class       GoogleServices controller
  * @version     1.0.0

@@ -57,7 +57,7 @@ export interface ContentTool {
  * free — `POST /ai-action-runs` (Free's own shared
  * AIActions\ActionRunner::propose(), still there, still free for "Fix
  * with AI" buttons elsewhere too), gated only on `useAiCredits()`'s own
- * real AI-provider-connected check (ConnectVuloCloudPopup opens
+ * real AI-connected check (ConnectVuloCloudPopup opens
  * immediately on click if not). The other 9 (`pro: true`) are a real
  * Pro feature — `POST /content-tools/runs` (vulopilot-pro's own
  * ContentTools\Rest.php, a SEPARATE route forwarding to that exact same
@@ -272,7 +272,7 @@ const ContentToolsGrid = () => {
 	/**
 	 * Checked up front, before a tool even opens — per direct instruction.
 	 * A `pro` tile with `content-tools` inactive opens ShowProPopup
-	 * immediately; a free tile with no AI provider connected opens
+	 * immediately; a free tile with no AI service connected opens
 	 * ConnectVuloCloudPopup immediately — either way, instead of letting
 	 * the tool's own form open first and only discovering a real failure
 	 * at Generate time (both still real fallbacks too — see

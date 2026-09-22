@@ -1,6 +1,6 @@
 import { __, sprintf } from '@wordpress/i18n';
 import { COLOR_PALETTE } from '@zyra/core';
-import { CardComponent, ChartComponent, IconComponent, ListComponent, MetricTileComponent, TypographyComponent } from '@zyra/components';
+import { AnalyticsComponent, CardComponent, ChartComponent, IconComponent, ListComponent, TypographyComponent } from '@zyra/components';
 import type { FindingGroup } from '../../components/Issues/issuesTypes';
 import type { TrendChange } from './GeoTrendCompactCard';
 
@@ -52,7 +52,7 @@ const overallRatingLabel = (score: number): string => {
 	if (score >= 40) {
 		return __('Needs Work', 'vulopilot');
 	}
-	return __('Poor', 'vulopilot');
+	return __('At Risk', 'vulopilot');
 };
 
 /**
@@ -293,24 +293,6 @@ const AeoScoreSummaryCard = ({
 							)}
 						</div>
 					</div>
-					<div className="aeo-score-goal-box">
-						<i className="adminfont-light" />
-						<div>
-							<strong>
-								{sprintf(
-									/* translators: %d is the real score this tab's own "Good" rating starts at. */
-									__('Goal: %d+ for strong AI visibility', 'vulopilot'),
-									GOOD_RATING_THRESHOLD
-								)}
-							</strong>
-							<p>
-								{__(
-									'Improve content structure and clarity to be more discoverable by AI engines.',
-									'vulopilot'
-								)}
-							</p>
-						</div>
-					</div>
 				</div>
 				<div className="aeo-score-summary-stat">
 					<ListComponent
@@ -320,41 +302,39 @@ const AeoScoreSummaryCard = ({
 					/>
 				</div>
 			</div>
-			<MetricTileComponent
+			<AnalyticsComponent
+				variant="background-color"
 				cols={3}
 				isLoading={isLoading}
 				data={[
 					{
-						id: 'questions-answered',
-						icon: 'question blue',
-						title: __('Questions Answered', 'vulopilot'),
+						colorClass: 'admin-bg-color2',
 						number: sprintf(
 							/* translators: 1: real questions-answered count, 2: real total published pages checked. */
 							__('%1$d / %2$d', 'vulopilot'),
 							questionsAnswered,
 							totalPages
 						),
+						text: __('Questions Answered', 'vulopilot'),
 					},
 					{
-						id: 'pages-ready',
-						icon: 'check pink',
-						title: __('Pages Ready', 'vulopilot'),
+						colorClass: 'admin-bg-color3',
 						number: sprintf(
 							/* translators: 1: real pages-ready count, 2: real total published pages checked. */
 							__('%1$d / %2$d', 'vulopilot'),
 							pagesReady,
 							totalPages
 						),
+						text: __('Pages Ready', 'vulopilot'),
 					},
 					{
-						id: 'content-change',
-						icon: 'edit green',
-						title: __('Content Change (last 30 days)', 'vulopilot'),
+						colorClass: 'admin-bg-color4',
 						number: (
 							<span className={trend && trend.change < 0 ? 'is-attention' : 'is-good'}>
 								{changeValue}
 							</span>
 						),
+						text: __('Content Change', 'vulopilot'),
 					},
 				]}
 			/>

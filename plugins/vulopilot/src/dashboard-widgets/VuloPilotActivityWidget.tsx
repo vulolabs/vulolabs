@@ -230,17 +230,17 @@ const VuloPilotActivityWidget: React.FC<WidgetProps> = ({
 					cols={3}
 					data={[
 						{
-							icon: 'global-community green',
+							// icon: 'global-community green',
 							number: crawlerCurrent,
 							text: __('AI crawler visits', 'vulopilot'),
 						},
 						{
-							icon: 'automation blue',
+							// icon: 'automation blue',
 							number: summary.automation_status.enabled,
 							text: __('Automations', 'vulopilot'),
 						},
 						{
-							icon: 'ai purple',
+							// icon: 'ai purple',
 							number: summary.pending_approvals,
 							text: __('Pending approvals', 'vulopilot'),
 						}

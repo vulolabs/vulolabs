@@ -75,6 +75,15 @@ class UpdatesScanner extends AbstractBasicScanner {
 
         $plugin_updates = get_plugin_updates();
         foreach ( $plugin_updates as $plugin_file => $plugin_data ) {
+            // `$description` was `null` here — Finding::__construct()'s
+            // own `$description` parameter is a non-nullable `string`, so
+            // this threw a real `TypeError` the moment there was ever a
+            // real plugin update pending, crashing this whole scanner
+            // (confirmed live: 0 findings, status 'failed', every other
+            // real update — including a genuinely stale, no-longer-true
+            // "core update available" finding — silently stuck open
+            // forever because the scan never got far enough to say
+            // otherwise).
             $findings[] = new Finding(
                 sprintf(
                     /* translators: %s is the plugin name. */
@@ -83,7 +92,11 @@ class UpdatesScanner extends AbstractBasicScanner {
                 ),
                 Severity::MEDIUM,
                 $this->get_category(),
-                null,
+                sprintf(
+                    /* translators: %s is the plugin name. */
+                    __( 'A newer version of %s is available. Keeping plugins up to date closes known security holes and fixes bugs.', 'vulopilot' ),
+                    $plugin_data->Name // phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase -- get_plugin_updates()'s own property name, not ours to rename.
+                ),
                 'plugin',
                 $plugin_file
             );
@@ -99,7 +112,11 @@ class UpdatesScanner extends AbstractBasicScanner {
                 ),
                 Severity::MEDIUM,
                 $this->get_category(),
-                null,
+                sprintf(
+                    /* translators: %s is the theme name. */
+                    __( 'A newer version of %s is available. Keeping themes up to date closes known security holes and fixes bugs.', 'vulopilot' ),
+                    $theme->get( 'Name' )
+                ),
                 'theme',
                 $stylesheet
             );

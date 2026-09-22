@@ -260,7 +260,7 @@ export default {
 			noticeType: 'info',
 			label: '',
 			message: __(
-				'GEO/AEO score drop alerts (and their threshold) are configured under <a href="?page=vulopilot#&tab=settings&subtab=visibility-alerts">Notifications → Visibility Alerts</a>.',
+				'GEO/AEO score drop alerts (and their threshold) are configured under <a href="?page=vulopilot#&tab=settings&subtab=notifications">Notifications → Visibility Alerts</a>.',
 				'vulopilot'
 			),
 			moduleEnabled: 'geo',

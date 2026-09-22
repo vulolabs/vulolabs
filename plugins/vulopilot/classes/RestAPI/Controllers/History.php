@@ -34,7 +34,7 @@ defined( 'ABSPATH' ) || exit;
  * every real chat turn (Controllers\Copilot.php/ContentAssistant.php)
  * writes there, tagged with a real `surface` column so this can tell a
  * genuine chat turn apart from every other feature that shares the same
- * AIProviderInterface call chain (GEO scoring, schema generation, content
+ * AI\AiRequestSender path (GEO scoring, schema generation, content
  * intelligence — see AiHistoryRepository::CHAT_SURFACES's own docblock).
  *
  * "Automations" stays a real category filter the client always sends but

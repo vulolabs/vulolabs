@@ -7,8 +7,6 @@
 
 namespace VuloPilot\ContentIntelligence;
 
-use VuloPilot\Scanners\Basic;
-
 defined( 'ABSPATH' ) || exit;
 
 /**
@@ -54,7 +52,7 @@ class Module {
         return array_merge(
             $scanners,
             array(
-                Basic\ReadabilityScanner::class,
+                Scanners\ReadabilityScanner::class,
             )
         );
     }

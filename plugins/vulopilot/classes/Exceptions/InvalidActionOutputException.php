@@ -9,7 +9,7 @@ namespace VuloPilot\Exceptions;
 
 /**
  * Thrown by an AIActionInterface implementation's validate_output() when
- * the AI provider's response fails validation (e.g. empty content, missing
+ * the AI response fails validation (e.g. empty content, missing
  * required fields, malformed JSON-LD) before it's shown to the user as a
  * preview.
  *

@@ -8,7 +8,7 @@
 namespace VuloPilot\Services;
 
 use VuloPilot\Repositories\FindingRepository;
-use VuloPilot\Scanners\Basic\StructuredDataValidationScanner;
+use VuloPilot\Seo\Scanners\StructuredDataValidationScanner;
 use VuloPilot\ValueObjects\ScanResult;
 
 defined( 'ABSPATH' ) || exit;

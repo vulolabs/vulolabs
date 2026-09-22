@@ -2,7 +2,8 @@
 import React, { useEffect, useState } from 'react';
 import { __, sprintf } from '@wordpress/i18n';
 import { getApiLink, getApiResponse } from '@zyra/core';
-import { ListComponent, SectionComponent, CardComponent, AnalyticsComponent } from '@zyra/components';
+import { AnalyticsComponent, ListComponent, SectionComponent, CardComponent, TypographyComponent } from '@zyra/components';
+import { ButtonInput } from '@zyra/inputs';
 import DashboardWidget from './DashboardWidget';
 import AutomationStatusWidget from './AutomationStatusWidget';
 import { useGeoScore } from '../pages/GEO/useGeoScore';
@@ -10,46 +11,12 @@ import { useLastScanTime } from '../services/useLastScanTime';
 import { formatWpDate } from '../services/formatWpDate';
 import type { EntitiesResponse, Entity } from '../pages/GEO/SchemaKnowledge/KnowledgeGraphSection';
 import { WidgetProps } from './types';
-import { useApiList } from '../services/useApiList';
-import { SEO_SECTIONS } from '../pages/GEO/seoSections';
-import { ALL_AEO_SCANNER_IDS } from '../pages/GEO/AeoTab';
 
 /** Same real gate BusinessProfileCard.tsx's own identical check already uses — EntityExtractor returns empty groups when this module is inactive, so a real `''`/`[]` here is a genuine "not set" state, not a broken fetch. */
 const isEntityExtractionModuleActive = () =>
 	appLocalizer.active_modules?.includes('entity-extraction') ?? false;
 
 const NOT_SET = '—';
-type GlanceRow = {
-	key: 'seo' | 'geo' | 'aeo';
-	label: string;
-	subtab: string;
-	/** `scanner_id`/`category` REST params to count real open findings with — see each row's own definition below for why GEO uses `category` while SEO/AEO use an explicit `scanner_id` list. */
-	params: Record<string, string>;
-};
-const SEO_SCANNER_IDS = SEO_SECTIONS.flatMap((section) => section.scannerIds);
-
-/** Same 3 real "Issues at a glance" rows KeyPagesWidget.tsx used — GEO filters by `category`, SEO/AEO by an explicit `scanner_id` allowlist (see KeyPagesWidget.tsx's own docblock for why). */
-const GLANCE_ROWS: GlanceRow[] = [
-	{
-		key: 'seo',
-		label: __('SEO', 'vulopilot'),
-		subtab: 'seo',
-		params: { scanner_id: SEO_SCANNER_IDS.join(',') },
-	},
-	{
-		key: 'geo',
-		label: __('GEO', 'vulopilot'),
-		subtab: 'geo',
-		params: { category: 'geo' },
-	},
-	{
-		key: 'aeo',
-		label: __('AEO', 'vulopilot'),
-		subtab: 'aeo',
-		params: { scanner_id: ALL_AEO_SCANNER_IDS.join(',') },
-	},
-];
-
 /** `score`/`open_count` are `null` for a signal with no real data to compute from yet (GeoSignalScore's own docblock) — shown honestly as "—", never a fabricated 0. */
 const formatScore = (score: number | null): string =>
 	null === score
@@ -58,6 +25,29 @@ const formatScore = (score: number | null): string =>
 
 const formatCount = (count: number | null): string =>
 	null === count ? NOT_SET : String(count);
+
+/**
+ * A public site's homepage screenshot from WordPress.com's mShots service
+ * (the same one WP.org uses for plugin/theme previews). It can only reach
+ * publicly-reachable sites, so localhost, `.local`/`.test` hosts and private
+ * IPs get no screenshot URL at all.
+ */
+const getHomeScreenshotUrl = (siteUrl: string): string => {
+	try {
+		const { hostname } = new URL(siteUrl);
+		const isPrivate =
+			'localhost' === hostname ||
+			/\.(local|localhost|test|invalid|example)$/i.test(hostname) ||
+			/^(127\.|10\.|192\.168\.|172\.(1[6-9]|2\d|3[01])\.)/.test(hostname) ||
+			!hostname.includes('.');
+
+		return isPrivate
+			? ''
+			: `https://s0.wp.com/mshots/v1/${encodeURIComponent(siteUrl)}?w=560&h=350`;
+	} catch {
+		return '';
+	}
+};
 
 /**
  * "Site snapshot" — real WordPress core counts (`summary.site_snapshot`,
@@ -121,29 +111,6 @@ const SiteSnapshotWidget: React.FC<WidgetProps> = ({
 
 	const { score: geoScore } = useGeoScore();
 
-	// Fixed cardinality (always exactly 3 rows), so one real `useApiList`
-	// call each rather than a loop — `per_page: 1` since only `total` is used.
-	const seoFindings = useApiList<{ id: number }>('findings', {
-		...GLANCE_ROWS[0].params,
-		status: 'open',
-		per_page: 1,
-	});
-	const geoFindings = useApiList<{ id: number }>('findings', {
-		...GLANCE_ROWS[1].params,
-		status: 'open',
-		per_page: 1,
-	});
-	const aeoFindings = useApiList<{ id: number }>('findings', {
-		...GLANCE_ROWS[2].params,
-		status: 'open',
-		per_page: 1,
-	});
-	const totals: Record<GlanceRow['key'], number> = {
-		seo: seoFindings.total,
-		geo: geoFindings.total,
-		aeo: aeoFindings.total,
-	};
-
 	// Real most recent completed scan, site-wide (same source
 	// RunScanHeaderExtra's own "Last scan" caption already reads) — the
 	// "Last updated" badge in the mockup header, not a fabricated
@@ -175,12 +142,6 @@ const SiteSnapshotWidget: React.FC<WidgetProps> = ({
 				title: __('Company Details', 'vulopilot'),
 				icon: 'global-community',
 				rows: [
-					{
-						key: 'brand',
-						icon: 'global-community pink',
-						label: __('Brand', 'vulopilot'),
-						value: brandName,
-					},
 					{
 						key: 'entity',
 						icon: 'module indigo',
@@ -354,85 +315,139 @@ const SiteSnapshotWidget: React.FC<WidgetProps> = ({
 
 		];
 
+	const byId = Object.fromEntries(
+		[...groups, ...groups2].map((group) => [group.id, group])
+	);
+
+	/** Mockup order, two per row — each header's arrow jumps to that area's real page. */
+	const sections = [
+		{ ...byId.content, link: '?page=vulopilot#&tab=content' },
+
+		{
+			...byId.products,
+			title: __('Commerce', 'vulopilot'),
+			link: '?page=vulopilot#&tab=commerce',
+		},
+		{
+			...byId.users,
+			rows: [...byId.users.rows, ...byId.additional.rows],
+			link: null as string | null,
+		},
+	];
+	const sections2 = [
+		{ ...byId.seo, link: '?page=vulopilot#&tab=seo-visibility' },
+		{
+			...byId.company,
+			title: __('Organization', 'vulopilot'),
+			link: '?page=vulopilot#&tab=settings&subtab=business-information',
+		},
+	];
+
+	const siteUrl = appLocalizer.site_url as string;
+	const screenshotUrl = getHomeScreenshotUrl(siteUrl);
+	const [screenshotFailed, setScreenshotFailed] = useState(false);
+	const previewImage =
+		screenshotUrl && !screenshotFailed
+			? screenshotUrl
+			: appLocalizer.home_preview_image;
+
 	return (
 		<>
-			<CardComponent
-				title={__('Site snapshot', 'vulopilot')}
-				desc={__('Which of your automations are enabled and running.', 'vulopilot')}
-				titleIcon="plus"
+			<DashboardWidget
+				title={__('Site overview', 'vulopilot')}
+				desc={__("Key details about your site's content, technology and audience.", 'vulopilot')}
+				icon="global-community"
 				isLoading={isLoading}
 				onHide={onHide}
 				isCustomizing={isCustomizing}
 			>
-				<>
-					<div className='group-wrapper'>
-						<div className="group">
-							{groups.map((group) => (
-								<div key={group.id} className="site-snapshot-group-card">
-									<SectionComponent
-										title={group.title}
-										icon={group.icon}
-									/>
-									<ListComponent
-										className="mini-card report without-border site-snapshot-list"
-										items={group.rows.map((row) => ({
-											id: row.key,
-											icon: row.icon,
-											title: row.label,
-											tags: (
-												<>
-													<span className="desc">
-														{row.value}
-													</span>
-												</>
-											),
-										}))}
-									/>
-								</div>
-							))}
+				<div className="site-overview-intro">
+					<div className="site-overview-identity-row">
+						<div className="site-overview-preview">
+							{previewImage ? (
+								<img
+									src={previewImage}
+									alt={__('Your homepage', 'vulopilot')}
+									onError={() => setScreenshotFailed(true)}
+								/>
+							) : (
+								<i className="adminfont-global-community site-overview-preview-empty" />
+							)}
 						</div>
-						<div className="group">
-							{groups2.map((group) => (
-								<div key={group.id} className="site-snapshot-group-card">
-									<SectionComponent
-										title={group.title}
-										icon={group.icon}
-									/>
-									<ListComponent
-										className="mini-card report without-border site-snapshot-list"
-										items={group.rows.map((row) => ({
-											id: row.key,
-											icon: row.icon,
-											title: row.label,
-											tags: (
-												<>
-													<span className="desc">
-														{row.value}
-													</span>
-												</>
-											),
-										}))}
-									/>
-								</div>
-							))}
+						<div className="site-overview-identity">
+							<TypographyComponent variant="h4">
+								{appLocalizer.site_title || brandName}
+							</TypographyComponent>
+							<a href={siteUrl} target="_blank" rel="noreferrer" className="site-overview-url">
+								<TypographyComponent variant="desc" color="purple">
+									{siteUrl.replace(/^https?:\/\//, '')}
+								</TypographyComponent>
+								<i className='adminfont-external'/>
+							</a>
+							{appLocalizer.site_description && (
+								<div className="desc">{appLocalizer.site_description}</div>
+							)}
+							
 						</div>
 					</div>
 					<AnalyticsComponent
-						variant="background-color"
+						variant="small"
 						cols={3}
-						data={GLANCE_ROWS.map((row, index) => ({
-							colorClass: `admin-bg-color${index + 2}`,
-							number: totals[row.key],
-							text: sprintf(
-								/* translators: %s: sub-tab name, e.g. "SEO". */
-								__('%s issues', 'vulopilot'),
-								row.label
-							),
-							link: `?page=vulopilot#&tab=seo-visibility&subtab=${row.subtab}`,
-						}))}
+						data={[
+							{ icon: 'wordpress blue', number: snapshot.wp_version || NOT_SET, text: __('WordPress', 'vulopilot') },
+							{ icon: 'coding purple', number: snapshot.php_version || NOT_SET, text: __('PHP', 'vulopilot') },
+							{
+								icon: 'module orange',
+								number: `${snapshot.plugins_active} / ${snapshot.plugins_total}`,
+								text: __('Plugins active', 'vulopilot'),
+							},
+						]}
 					/>
-				</>
-			</CardComponent>
+				</div>
+				<div className="site-overview-groups">
+					<div className="group">
+						{sections.map((group) => (
+							<div key={group.id} className={`site-snapshot-group-card is-${group.id}`}>
+								<CardComponent
+									title={group.title}
+									icon={group.icon}
+								>
+									<ListComponent
+										className="mini-card report without-border site-snapshot-list"
+										items={group.rows.map((row) => ({
+											id: row.key,
+											icon: row.icon,
+											title: row.label,
+											tags: <span className="desc">{row.value}</span>,
+										}))}
+									/>
+								</CardComponent>
+							</div>
+
+						))}
+					</div>
+					<div className="group">
+						{sections2.map((group) => (
+							<div key={group.id} className={`site-snapshot-group-card is-${group.id}`}>
+								<CardComponent
+									title={group.title}
+									icon={group.icon}
+								>
+									<ListComponent
+										className="mini-card report without-border site-snapshot-list"
+										items={group.rows.map((row) => ({
+											id: row.key,
+											icon: row.icon,
+											title: row.label,
+											tags: <span className="desc">{row.value}</span>,
+										}))}
+									/>
+								</CardComponent>
+							</div>
+						))}
+					</div>
+				</div>
+			</DashboardWidget>
 			<AutomationStatusWidget
 				summary={summary}
 				isLoading={isLoading}

@@ -7,6 +7,13 @@
 
 namespace VuloPilot\RestAPI;
 
+use VuloPilot\AiCopilot\Rest as AiCopilotRest;
+use VuloPilot\BrandIntelligence\Rest as BrandIntelligenceRest;
+use VuloPilot\ContentIntelligence\Rest as ContentIntelligenceRest;
+use VuloPilot\EntityExtraction\Rest as EntityExtractionRest;
+use VuloPilot\Geo\Rest as GeoRest;
+use VuloPilot\Seo\Rest as SeoRest;
+
 defined( 'ABSPATH' ) || exit;
 
 /**
@@ -61,8 +68,8 @@ class Rest {
             'findings'                    => new Controllers\Findings(),
             'reports'                     => new Controllers\Reports(),
             'ai_history'                  => new Controllers\AiHistory(),
-            'ai_providers'                => new Controllers\AiProviders(),
-            'ai_action_runs'              => new Controllers\AiActionRuns(),
+            'vulocloud_ai_connection'     => new Controllers\VuloCloudAiConnection(),
+            'ai_action_runs'              => new AiCopilotRest\AiActionRuns(),
             'activity_logs'               => new Controllers\ActivityLogs(),
             'history'                     => new Controllers\History(),
             'automations'                 => new Controllers\Automations(),
@@ -77,7 +84,7 @@ class Rest {
             // `automation_runs` key) is this route's only real owner.
             'automation_dashboard'        => new Controllers\AutomationDashboardStats(),
             'settings'                    => new Controllers\Settings(),
-            'llms_txt'                    => new Controllers\LlmsTxt(),
+            'llms_txt'                    => new GeoRest\LlmsTxt(),
             'crawler_traffic'             => new Controllers\CrawlerTraffic(),
             'post_seo'                    => new Controllers\PostSeo(),
             'redirects'                   => new Controllers\Redirects(),
@@ -100,7 +107,7 @@ class Rest {
             // module); moved back here, genuinely free again, gated the
             // same way as every other AI surface (Controllers\Copilot's
             // own create_item_permissions_check()) rather than a license.
-            'copilot'                     => new Controllers\Copilot(),
+            'copilot'                     => new AiCopilotRest\Copilot(),
             'store_readiness'             => new Controllers\StoreReadiness(),
             'efficiency_checks'           => new Controllers\EfficiencyChecks(),
             'plugin_overlap'              => new Controllers\PluginOverlap(),
@@ -115,21 +122,21 @@ class Rest {
             // registered. Different key, same REST base string is safe —
             // WP_REST_Server registers routes per controller instance, not
             // per unique base.
-            'geo_top_pages'               => new Controllers\GeoAnalysis(),
+            'geo_top_pages'               => new GeoRest\GeoAnalysis(),
             // Deliberately NOT keyed 'content_analysis' — vulopilot-pro's
             // own ContentIntelligence module adds its per-post AI "Topic
             // Authority" controller into $extra_controllers below under
             // that key (same 'content-intelligence' REST base, a
             // `/(?P<post_id>\d+)/analyze` sub-route) — same key-collision
             // reasoning as 'geo_top_pages' above.
-            'content_score'               => new Controllers\ContentIntelligence(),
+            'content_score'               => new ContentIntelligenceRest\ContentIntelligence(),
             // Deliberately NOT keyed 'brand_insights' — vulopilot-pro's own
             // BrandIntelligence module adds its own history/competitor-
             // comparison/knowledge-panel controller into $extra_controllers
             // below under that key (same 'brand-intelligence' REST base) —
             // same key-collision reasoning as 'geo_top_pages'/'content_score'
             // above.
-            'brand_score'                 => new Controllers\BrandIntelligence(),
+            'brand_score'                 => new BrandIntelligenceRest\BrandIntelligence(),
             // Deliberately NOT keyed 'knowledge_graph' — vulopilot-pro's own
             // KnowledgeGraph module adds its own relationships/health-
             // history/recommendations controller into $extra_controllers
@@ -137,9 +144,9 @@ class Rest {
             // 'knowledge-graph', so this one isn't strictly required to
             // differ — kept different anyway for consistency with every
             // other Free/Pro controller pairing above).
-            'entities'                    => new Controllers\EntityExtraction(),
-            'seo_score'                   => new Controllers\Seo(),
-            'geo_score'                   => new Controllers\Geo(),
+            'entities'                    => new EntityExtractionRest\EntityExtraction(),
+            'seo_score'                   => new SeoRest\Seo(),
+            'geo_score'                   => new GeoRest\Geo(),
             'visibility_score'            => new Controllers\Visibility(),
             'schema_coverage'             => new Controllers\Schema(),
             'google_services'             => new Controllers\GoogleServices(),

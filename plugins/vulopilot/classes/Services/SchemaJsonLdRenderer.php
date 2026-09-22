@@ -10,7 +10,7 @@ namespace VuloPilot\Services;
 defined( 'ABSPATH' ) || exit;
 
 /**
- * Closes AIActions\Actions\GenerateSchemaAction's own documented gap:
+ * Closes AiCopilot\Actions\GenerateSchemaAction's own documented gap:
  * that action only ever saved AI-generated JSON-LD to a postmeta key
  * (`_vulopilot_schema_json`) and said so itself — "Actually outputting
  * this JSON-LD on the frontend ... isn't built yet. This action's job

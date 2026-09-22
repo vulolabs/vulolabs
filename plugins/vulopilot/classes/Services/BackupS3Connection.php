@@ -7,7 +7,6 @@
 
 namespace VuloPilot\Services;
 
-use VuloPilot\Repositories\BackupStorageConfigRepository;
 use VuloPilot\Services\CloudStorage\S3Client;
 
 defined( 'ABSPATH' ) || exit;
@@ -15,13 +14,9 @@ defined( 'ABSPATH' ) || exit;
 /**
  * Real Amazon S3 credential storage for Backups' own remote storage
  * destination — Access Key ID/Secret Access Key/bucket/region, saved as one
- * encrypted JSON blob (Services\CredentialEncryption) in
- * `vulopilot_backup_storage_configs` (provider `'s3'`), same "one
- * encrypted blob per provider row" shape
- * Repositories\BackupStorageConfigRepository's own docblock describes.
- * Never a client secret round-tripped to the browser — same posture
- * Controllers\AiProviders::prepare_config_for_response() already
- * established for AI provider keys.
+ * encrypted JSON blob (Services\CredentialEncryption) held by
+ * Services\BackupCredentialStore under provider `'s3'`.
+ * Never a client secret round-tripped to the browser.
  *
  * @class       BackupS3Connection class
  * @version     1.0.0
@@ -32,16 +27,16 @@ class BackupS3Connection {
     private const PROVIDER = 's3';
 
     /**
-     * @return array{access_key: string, secret_key: string, bucket: string, region: string}|null Null if never configured, or the stored blob can no longer be decrypted (a rotated wp_salt(), same failure mode CredentialEncryption's own docblock already describes for AI provider keys).
+     * @return array{access_key: string, secret_key: string, bucket: string, region: string}|null Null if never configured, or the stored blob can no longer be decrypted (a rotated wp_salt(), same failure mode CredentialEncryption's own docblock already describes for AI service keys).
      */
     public function get_credentials(): ?array {
-        $row = ( new BackupStorageConfigRepository() )->find_by_provider( self::PROVIDER );
+        $stored = ( new BackupCredentialStore() )->get( self::PROVIDER );
 
-        if ( ! $row || empty( $row['credentials'] ) ) {
+        if ( null === $stored ) {
             return null;
         }
 
-        $decrypted = CredentialEncryption::decrypt( (string) $row['credentials'] );
+        $decrypted = CredentialEncryption::decrypt( $stored );
 
         if ( null === $decrypted ) {
             return null;
@@ -80,7 +75,7 @@ class BackupS3Connection {
             )
         );
 
-        ( new BackupStorageConfigRepository() )->upsert_credentials( self::PROVIDER, $encrypted );
+        ( new BackupCredentialStore() )->save( self::PROVIDER, $encrypted );
     }
 
     /**
@@ -120,11 +115,7 @@ class BackupS3Connection {
      * @return void
      */
     public function disconnect(): void {
-        $row = ( new BackupStorageConfigRepository() )->find_by_provider( self::PROVIDER );
-
-        if ( $row ) {
-            ( new BackupStorageConfigRepository() )->delete( (int) $row['id'] );
-        }
+        ( new BackupCredentialStore() )->delete( self::PROVIDER );
     }
 
     /**

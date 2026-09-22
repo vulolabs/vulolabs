@@ -8,7 +8,7 @@
 namespace VuloPilot\ValueObjects;
 
 /**
- * A chat-style request sent to an AIProviderInterface.
+ * A chat-style request sent to VuloCloud through AI\AiRequestSender.
  *
  * @class       AIRequest class
  * @version     1.0.0
@@ -39,11 +39,9 @@ final class AIRequest {
     /**
      * A single inline image for the current turn, `{mime_type, data}`
      * (`data` base64-encoded) — additive and optional so every existing
-     * caller building a text-only request is unaffected. No adapter
-     * currently reads this (ProviderRegistry::supports_vision() is always
-     * false today — see its own docblock on why); every adapter simply
-     * never looks at it, the same way they already ignore
-     * get_temperature()/get_max_tokens() when null.
+     * caller building a text-only request is unaffected. The VuloCloud
+     * gateway's wire contract carries text only, so nothing reads this today;
+     * it stays on the request for when that changes.
      *
      * @var array{mime_type: string, data: string}|null
      */
@@ -53,10 +51,10 @@ final class AIRequest {
      * Which real feature/endpoint triggered this call — e.g. 'copilot_chat',
      * 'content_assistant_chat', 'ai_action', 'geo_analysis',
      * 'content_intelligence'. Purely an audit-trail tag: read only by
-     * UsageTrackingProvider, written to `vulopilot_ai_history.surface`, so
+     * AI\AiRequestSender, written to `vulopilot_ai_history.surface`, so
      * AI Copilot History's "Conversations" filter (and any future
      * per-feature usage breakdown) can tell a real chat turn apart from
-     * every other feature that shares the same AIProviderInterface chain.
+     * every other feature that shares the same sender.
      * Null for any caller that doesn't pass one — no behavior change.
      *
      * @var string|null
@@ -66,8 +64,8 @@ final class AIRequest {
     /**
      * @param string                                      $model       Model id to use.
      * @param array                                       $messages    array<int, array{role: string, content: string}>.
-     * @param float|null                                  $temperature Optional; providers apply their own default when null.
-     * @param int|null                                    $max_tokens  Optional; providers apply their own default when null.
+     * @param float|null                                  $temperature Optional; the gateway applies its own default when null.
+     * @param int|null                                    $max_tokens  Optional; the gateway applies its own default when null.
      * @param array{mime_type: string, data: string}|null $image   Optional inline image for the current turn.
      * @param string|null                                 $surface Optional real feature label — see get_surface()'s own docblock.
      */
@@ -92,23 +90,6 @@ final class AIRequest {
      */
     public function get_model(): string {
         return $this->model;
-    }
-
-    /**
-     * A copy of this request with a different `$model` — everything else
-     * unchanged. `ProviderFallbackChain::try_each()`'s own real fix needs
-     * this: the model a request should use is provider-specific (an
-     * OpenAI model id sent to Gemini's own API is a real, confirmed-live
-     * "model not found" failure, not a hypothetical one), so a fallback
-     * attempt on the *next* provider in the chain needs its own freshly
-     * resolved model, not whichever provider's model this request started
-     * with.
-     *
-     * @param string $model Model id to use instead.
-     * @return self
-     */
-    public function with_model( string $model ): self {
-        return new self( $model, $this->messages, $this->temperature, $this->max_tokens, $this->image, $this->surface );
     }
 
     /**

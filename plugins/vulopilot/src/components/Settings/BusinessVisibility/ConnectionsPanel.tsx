@@ -1,7 +1,7 @@
 import type { ReactNode } from 'react';
 import { __ } from '@wordpress/i18n';
 import { SectionComponent, FormGroupComponent } from '@zyra/components';
-import AiProvidersPanel from './AiProvidersPanel';
+import VuloCloudAiConnectionPanel from './VuloCloudAiConnectionPanel';
 import GoogleServicesPanel from './GoogleServicesPanel';
 import SiteVerificationPanel from './SiteVerificationPanel';
 import PageSpeedStatusPanel from './PageSpeedStatusPanel';
@@ -34,7 +34,7 @@ const SectionRow = ({
  * Services, PageSpeed Insights, Site Verification, Preferences) into this
  * one tab per direct instruction ("merge all tabs into one tab under get
  * started called connections") — each section below is the same real
- * component its own old standalone tab already used (AiProvidersPanel.tsx/
+ * component its own old standalone tab already used (VuloCloudAiConnectionPanel.tsx/
  * GoogleServicesPanel.tsx/SiteVerificationPanel.tsx unchanged). No real
  * setting/backend changed shape; only where the UI for it lives.
  *
@@ -80,16 +80,16 @@ const ConnectionsPanel = () => {
 		<>
 			<SectionRow
 				icon="ai"
-				title={__('AI Providers', 'vulopilot')}
+				title={__('VuloCloud AI', 'vulopilot')}
 				desc={__(
-					'Configure and manage your AI provider connections. Add API keys to enable AI features across VuloPilot.',
+					'Connect this site to VuloCloud to enable AI features across VuloPilot.',
 					'vulopilot'
 				)}
 			>
-				<AiProvidersPanel />
+				<VuloCloudAiConnectionPanel />
 			</SectionRow>
 			<SectionRow
-				icon="search-discovery"
+				icon="google"
 				title={__('Google Services', 'vulopilot')}
 				desc={__(
 					'Connect your Google account to allow VuloPilot to fetch real data from Google services.',
@@ -109,6 +109,16 @@ const ConnectionsPanel = () => {
 				<TagManagerPanel />
 			</SectionRow>
 			<SectionRow
+				icon="web-page-website"
+				title={__('PageSpeed Insights', 'vulopilot')}
+				desc={__(
+					'Get real-performance data and optimization insights directly from Google PageSpeed Insights.',
+					'vulopilot'
+				)}
+			>
+				<PageSpeedStatusPanel />
+			</SectionRow>
+			<SectionRow
 				icon="check"
 				title={__('Webmaster Tools', 'vulopilot')}
 				desc={__(
@@ -117,16 +127,6 @@ const ConnectionsPanel = () => {
 				)}
 			>
 				<SiteVerificationPanel />
-			</SectionRow>
-			<SectionRow
-				icon="check"
-				title={__('PageSpeed Insights', 'vulopilot')}
-				desc={__(
-					'Get real-performance data and optimization insights directly from Google PageSpeed Insights.',
-					'vulopilot'
-				)}
-			>
-				<PageSpeedStatusPanel />
 			</SectionRow>
 		</>
 	);

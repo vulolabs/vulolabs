@@ -82,7 +82,7 @@ interface StoredConversation {
 /**
  * The shape WP_REST_Server::error_to_response() gives a WP_Error — what
  * actually arrives in `error.response.data` when Copilot.php returns one
- * (e.g. "No AI provider is configured…", a safety-validator rejection).
+ * (e.g. "No AI connection is configured…", a safety-validator rejection).
  * Raw axios rather than @zyra/core's sendApiResponse() here on purpose,
  * same reasoning as AiContentAssistantSidebar.tsx: sendApiResponse()
  * swallows the response body on any error.
@@ -109,7 +109,7 @@ interface WpRestErrorBody {
  * thread (not just an excerpt) after a refresh or a brand-new session.
  * Every real call is *separately* still recorded to `vulopilot_ai_history`
  * too, unchanged — that table stays a permanent, excerpt-only audit trail
- * (UsageTrackingProvider::record_success()), not the source this hook
+ * (AiRequestSender::record_success()), not the source this hook
  * reloads from.
  *
  * A message like "write a blog about X" really creates and saves a
@@ -127,8 +127,8 @@ interface WpRestErrorBody {
  * it would create instead of creating it, same "advice-only" shape every
  * other kind of request already gets.
  *
- * Genuinely free, not Pro-gated: `send()` only needs a real AI provider
- * configured (BYOK under Settings → AI Providers, or a connected VuloCloud
+ * Genuinely free, not Pro-gated: `send()` only needs a real AI service
+ * configured (BYOK under Settings → Connections, or a connected VuloCloud
  * account) — the same gate ContentAssistant.php's own chat and
  * ContentToolsGrid.tsx's free tiles already use. `useAiCredits()`'s
  * `status.connected` is checked up front, before ever calling the API
@@ -136,7 +136,7 @@ interface WpRestErrorBody {
  * posture AiContentAssistantSidebar.tsx's own handleChipClick() already
  * documents), setting `isCloudConnectPromptOpen` instead of making a
  * request that would just fail. As defense-in-depth, a real send that
- * still comes back with Copilot.php's own "No AI provider is configured."
+ * still comes back with Copilot.php's own "No AI connection is configured."
  * error (e.g. `creditsStatus` hadn't loaded yet, or the connection dropped
  * between the check and the request) opens the same popup instead of a
  * dead-end error toast. ChatTab.tsx reads `isCloudConnectPromptOpen` to
@@ -151,7 +151,7 @@ export const useCopilotChat = ( noticeKey: string ) => {
 	/** The real `vulopilot_ai_conversations.id` this session is saving to — null until the first successful reply of a fresh conversation, or until loadConversation() below hydrates it from a past one. */
 	const [ conversationId, setConversationId ] = useState< number | null >( null );
 	const [ isLoadingConversation, setIsLoadingConversation ] = useState( false );
-	/** True right after a real send was blocked (or failed) because no AI provider is configured — see this hook's own docblock. Reset via `dismissCloudConnectPrompt()`. */
+	/** True right after a real send was blocked (or failed) because no AI connection is configured — see this hook's own docblock. Reset via `dismissCloudConnectPrompt()`. */
 	const [ isCloudConnectPromptOpen, setIsCloudConnectPromptOpen ] = useState( false );
 	const { status: creditsStatus } = useAiCredits();
 
@@ -232,15 +232,15 @@ export const useCopilotChat = ( noticeKey: string ) => {
 				const message = ( error?.response?.data as WpRestErrorBody | undefined )
 					?.message;
 
-				// Copilot.php's own real "No AI provider is configured."
-				// (SafeRequestSender) — defense-in-depth for the same
+				// Copilot.php's own real "No AI connection is configured."
+				// (AiRequestSender) — defense-in-depth for the same
 				// condition the up-front `creditsStatus` check above
 				// normally already catches (e.g. that status hadn't
 				// loaded yet, or the connection dropped since); same
 				// real fix, so it gets the same popup instead of just
 				// another error toast (AiContentAssistantSidebar.tsx's
 				// own sendToAi() applies this identical check).
-				if ( message?.includes( 'No AI provider is configured' ) && ! creditsStatus?.connected ) {
+				if ( message?.includes( 'No AI connection is configured' ) && ! creditsStatus?.connected ) {
 					setIsCloudConnectPromptOpen( true );
 					return;
 				}
@@ -287,7 +287,7 @@ export const useCopilotChat = ( noticeKey: string ) => {
 	 * `conversationId`, so sending a new message afterward appends to this
 	 * same thread server-side instead of starting a new one. No gate here —
 	 * a past conversation only exists if it was already sent for real, which
-	 * already required a connected AI provider; reading it back doesn't
+	 * already required a connected VuloCloud AI account; reading it back doesn't
 	 * make a new AI call of its own.
 	 */
 	const loadConversation = ( id: number ) => {

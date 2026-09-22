@@ -13,7 +13,7 @@ defined( 'ABSPATH' ) || exit;
  * Persistence for vulopilot_ai_action_runs (see AI-ACTIONS.md) — the
  * record of one AIAction going through propose → approve/reject →
  * execute → rollback. `input`/`output`/`preview`/`snapshot` are stored as
- * JSON; AIActions\ActionRunner is the only code that encodes/decodes
+ * JSON; AiCopilot\ActionRunner is the only code that encodes/decodes
  * them, this repository just persists strings.
  *
  * @class       ActionRunRepository class
@@ -46,7 +46,7 @@ class ActionRunRepository extends AbstractRepository {
      * never touched again by approve(), so it's the real, final generated
      * text, not a stale draft. Word count uses the exact same
      * wp_strip_all_tags()+str_word_count() pair
-     * Scanners\Basic\ThinContentScanner already uses for real content
+     * Seo\Scanners\ThinContentScanner already uses for real content
      * elsewhere in this codebase, not a different heuristic.
      *
      * @param string   $period_start Y-m-d, inclusive.

@@ -12,7 +12,7 @@ defined( 'ABSPATH' ) || exit;
 /**
  * Parses `/robots.txt` into per-user-agent Disallow groups, scoped to the
  * known AI bot tokens (CrawlerTrafficLogger::get_bot_signatures()) — the
- * one piece Scanners\Basic\RobotsTxtScanner deliberately doesn't cover
+ * one piece Seo\Scanners\RobotsTxtScanner deliberately doesn't cover
  * (its own docblock: a narrow, wildcard-only check, not a full parser).
  * Real RFC 9309 precedence (Allow overrides, longest-match) is out of
  * scope here too — same "narrow, deliberate check" restraint, just applied

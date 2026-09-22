@@ -16,7 +16,7 @@ import { __ } from '@wordpress/i18n';
  * persisted settings fields.
  *
  * `modal` below still lists `indexnow_api_key`/`indexnow_post_types` (the
- * two fields of this tab that ARE real flat settings, unlike AI provider
+ * two fields of this tab that ARE real flat settings, unlike AI service
  * configs which live in their own table) purely so Settings.tsx's existing
  * per-tab seeding logic (`fieldKeys` from `modal[].key`) populates
  * SettingContext with their current values before IndexNowPanel reads them

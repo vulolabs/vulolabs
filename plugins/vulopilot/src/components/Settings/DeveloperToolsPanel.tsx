@@ -9,7 +9,7 @@ import CardHeader from '../CardHeader';
 
 /**
  * Hand-built rather than InputRenderer-driven — same escape hatch
- * AiProvidersPanel.tsx/IndexNowPanel.tsx already use (Settings.tsx's
+ * VuloCloudAiConnectionPanel.tsx/IndexNowPanel.tsx already use (Settings.tsx's
  * GetForm() special-cases `currentTab === 'developer-tools'`).
  *
  * "Keep VuloPilot data after uninstall"/"Anonymous usage data" — moved
@@ -28,7 +28,7 @@ import CardHeader from '../CardHeader';
  * clears every real content cache both this plugin and vulopilot-pro (if
  * active) own — Knowledge Graph's own extracted entities, the Schema
  * Coverage snapshot, the robots.txt bot-group parse, and Pro's own
- * Knowledge Graph recommendations. Deliberately does NOT touch AI-provider
+ * Knowledge Graph recommendations. Deliberately does NOT touch AI
  * rate-limit counters, Pro's security-alert-already-sent dedup marker, or
  * the license status cache — see that controller method's own docblock for
  * why those aren't "stale data" the same way.
@@ -59,6 +59,15 @@ const DeveloperToolsPanel = () => {
 		updateSetting(key, value);
 		sendApiResponse(appLocalizer, getApiLink(appLocalizer, 'settings'), {
 			setting: { [key]: value },
+		}).then((response) => {
+			NoticeManager.add({
+				uniqueKey: 'vulopilot-developer-tools-saved',
+				type: response ? 'success' : 'error',
+				position: 'float',
+				message: response
+					? __('Settings saved.', 'vulopilot')
+					: __('Could not save settings. Please try again.', 'vulopilot'),
+			});
 		});
 	};
 

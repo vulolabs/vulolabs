@@ -88,7 +88,8 @@ this codebase to invoke `ActionInterface::execute()` outside
 
 ### Conditions — a flat, ANDed layer, not a condition tree
 
-`Contracts\Automation\ConditionInterface` (Free, mirroring
+`VuloPilotPro\Automations\Contracts\ConditionInterface` (Pro — moved out of
+Free, since only Pro's `Conditions/` implement it; mirrors
 `ActionInterface`'s shape) + `Automation\ConditionRegistry` (Pro, same
 filter-based discovery as `TriggerRegistry`/`ActionRegistry`, filter
 `vulopilot_automation_condition_sources`). Four built-in conditions

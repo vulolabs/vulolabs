@@ -35,7 +35,7 @@ const nonceHeaders = { headers: { 'X-WP-Nonce': appLocalizer.nonce } };
  * used to be rendered separately by InputRenderer against this tab's own
  * `modal` array — now fully self-contained, same "one real component per
  * section" shape ConnectionsPanel.tsx composes GoogleServicesPanel.tsx/
- * SiteVerificationPanel.tsx/AiProvidersPanel.tsx from.
+ * SiteVerificationPanel.tsx/VuloCloudAiConnectionPanel.tsx from.
  *
  * Reads real state from `GET /settings/test-pagespeed`
  * (Services\PageSpeedInsightsFetcher::get_status() — no live API call) on
@@ -131,105 +131,39 @@ const PageSpeedStatusPanel = () => {
 
 	return (
 		<FormGroupWrapperComponent>
-			{/* <FormGroupComponent>
-				<CardHeader
-					icon="analytics green"
-					className='compact'
-					title={__('PageSpeed Insights', 'vulopilot')}
-					desc={__(
-						'Get real-performance data and optimization insights directly from Google PageSpeed Insights.',
-						'vulopilot'
-					)}
-					badge={
-						<span className={`admin-badge ${status?.connected ? 'green' : 'red'}`}>
-							{status?.connected ? __('Connected', 'vulopilot') : __('Not Connected', 'vulopilot')}
-						</span>
-					}
-					action={
-						<>
-							<ButtonInput
-								wrapperClass="psi-test-connection-button"
-								buttons={{
-									text: isTesting ? __('Testing…', 'vulopilot') : __('Test Connection', 'vulopilot'),
-									icon: 'refresh',
-									disabled: isTesting,
-									onClick: testConnection,
-								}}
-							/>
-						</>
-					}
-				>
-					<div className="ai-provider-card-body">
-						{status && status.daily_limit > 0 && (
-							<div className="psi-usage">
-								<div className="psi-usage-label">
-									<span>{__('Daily API Usage', 'vulopilot')}</span>
-									<span>{usagePercent}%</span>
-								</div>
-								<div className="psi-usage-bar">
-									<div className="psi-usage-bar-fill" style={{ width: `${usagePercent}%` }} />
-								</div>
-								<div className="desc">
-									{sprintf(
-										__('%1$s / %2$s requests used', 'vulopilot'),
-										status.requests_today.toLocaleString(),
-										status.daily_limit.toLocaleString()
-									)}
-								</div>
-							</div>
-						)}
-
-						{status?.connected && status.checked_at && (
-							<div className="desc psi-last-checked">
-								{sprintf(
-									
-									__('Last checked on %s.', 'vulopilot'),
-									formatWpDate(status.checked_at)
-								)}
-								{'number' === typeof status.mobile && 'number' === typeof status.desktop && (
-									<>
-										{' '}
-										{sprintf(
-											__('Mobile %1$d/100, Desktop %2$d/100.', 'vulopilot'),
-											status.mobile,
-											status.desktop
-										)}
-									</>
-								)}
-							</div>
-						)}
-					</div>
-				</CardHeader>
-			</FormGroupComponent> */}
-			<FormGroupComponent cols={8} row label={__('Google API key', 'vulopilot')} htmlFor="psi-daily-limit-input">
-				<TextInput
-					id="psi-daily-limit-input"
-					type="number"
-					value={dailyLimit}
-					onChange={(value) => handleDailyLimitChange(String(value))}
-				/>
-			</FormGroupComponent>
-			<FormGroupComponent cols={4} label={__('', 'vulopilot')} htmlFor="psi-daily-limit-input">
-				<ButtonInput
-					buttons={{ text: __('Connect PageSpeed Insights', 'vulopilot-pro'), position: 'left', icon: 'link' }}
-				/>
-			</FormGroupComponent>
-			{/* <FormGroupComponent cols={6} label={__('API Key', 'vulopilot')} htmlFor="psi-api-key-input">
-				<TextInput
-					id="psi-api-key-input"
-					type="password"
-					value={apiKey}
-					onChange={(value) => handleApiKeyChange(String(value))}
-				/>
-			</FormGroupComponent>
-			<FormGroupComponent cols={6} label={__('Daily API Limit', 'vulopilot')} htmlFor="psi-daily-limit-input">
-				<TextInput
-					id="psi-daily-limit-input"
-					type="number"
-					value={dailyLimit}
-					onChange={(value) => handleDailyLimitChange(String(value))}
-				/>
-			</FormGroupComponent> */}
+			<CardHeader
+				icon="analytics green"
+				title={__('Google API key', 'vulopilot')}
+				desc={__(
+					'Get real-performance data and optimization insights directly from Google PageSpeed Insights.',
+					'vulopilot'
+				)}
+				badge={
+					<span className={`admin-badge ${status?.connected ? 'green' : 'red'}`}>
+						{status?.connected ? __('Connected', 'vulopilot') : __('Not Connected', 'vulopilot')}
+					</span>
+				}
+				action={
+					<ButtonInput
+						wrapperClass="psi-test-connection-button"
+						buttons={{
+							text: isTesting ? __('Testing…', 'vulopilot') : __('Connect PageSpeed Insights', 'vulopilot'),
+							icon: 'link',
+							disabled: isTesting,
+							onClick: testConnection,
+						}}
+					/>
+				}
+			>
+				<div className='ai-provider-card-body'>
+					<TextInput
+						id="psi-api-key-input"
+						type="password"
+						value={apiKey}
+						onChange={(value) => handleApiKeyChange(String(value))}
+					/>
+				</div>
+			</CardHeader>
 			<FormGroupComponent>
 				<NoticeComponent
 					displayPosition="inline-notice"

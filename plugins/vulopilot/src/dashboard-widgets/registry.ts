@@ -139,7 +139,7 @@ const STAT_WIDGETS: WidgetDefinition[] = STAT_WIDGET_CONFIGS.map(
  * Pro module or third-party plugin can append its own WidgetDefinition
  * without touching this file — the same "register a source, don't
  * modify the registry" pattern used by every PHP-side registry in this
- * plugin (ScannerRegistry, RuleRegistry, ProviderRegistry, ActionRegistry).
+ * plugin (ScannerRegistry, RuleRegistry, ActionRegistry).
  */
 
 export const DEFAULT_DASHBOARD_WIDGETS: WidgetDefinition[] = applyFilters(

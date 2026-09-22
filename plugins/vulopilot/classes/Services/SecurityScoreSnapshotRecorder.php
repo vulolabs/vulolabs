@@ -8,13 +8,13 @@
 namespace VuloPilot\Services;
 
 use VuloPilot\Repositories\FindingRepository;
-use VuloPilot\Repositories\SecurityScoreSnapshotRepository;
+use VuloPilot\Repositories\ScoreSnapshotRepository;
 
 defined( 'ABSPATH' ) || exit;
 
 /**
  * Writes today's real security-category score into
- * `vulopilot_security_score_snapshots` — the data SecurityTrendCard.tsx's
+ * `vulopilot_score_snapshots` (category `security`) — the data SecurityTrendCard.tsx's
  * chart reads. Not a reuse of `vulopilot_site_health_snapshots` — that
  * table's own `security_score` column is only ever written by Pro's
  * AdvancedReports module, so a Free-tier "Security Trend" card can't
@@ -63,7 +63,7 @@ class SecurityScoreSnapshotRecorder {
 
         $score = max( 0, min( 100, $score ) );
 
-        $repository     = new SecurityScoreSnapshotRepository();
+        $repository     = new ScoreSnapshotRepository( 'security' );
         $previous_score = $this->find_previous_score( $repository );
 
         $repository->upsert_today( $score );
@@ -83,10 +83,10 @@ class SecurityScoreSnapshotRecorder {
     }
 
     /**
-     * @param SecurityScoreSnapshotRepository $repository Repository to read history from.
+     * @param ScoreSnapshotRepository $repository Repository to read history from.
      * @return int|null The most recent snapshot strictly before today, or null if none exists yet.
      */
-    private function find_previous_score( SecurityScoreSnapshotRepository $repository ): ?int {
+    private function find_previous_score( ScoreSnapshotRepository $repository ): ?int {
         $today = current_time( 'Y-m-d' );
 
         foreach ( array_reverse( $repository->get_recent( 7 ) ) as $row ) {

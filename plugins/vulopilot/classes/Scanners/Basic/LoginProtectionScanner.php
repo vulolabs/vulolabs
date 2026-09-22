@@ -16,7 +16,7 @@ defined( 'ABSPATH' ) || exit;
 
 /**
  * Turns Services\LoginProtectionGuard's own real login-attempt log
- * (`vulopilot_login_attempts`) into real Finding rows — one per IP that
+ * (`vulopilot_security_events` (type `login_attempt`)) into real Finding rows — one per IP that
  * actually tripped the real, currently-configured `login_max_attempts`
  * lockout threshold in the last 7 days. Deliberately re-derives "did this
  * IP trip the threshold" from the raw attempt rows against the *current*

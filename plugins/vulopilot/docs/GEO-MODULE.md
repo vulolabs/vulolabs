@@ -58,7 +58,7 @@ casing/spelling variant (e.g. "VuloPilot" in one paragraph, "Vulopilot" in
 another). It wasn't part of the original 12-item checklist above; it's a
 separate, later addition (`AI-VISIBILITY-MODULE.md`'s audit already documents it
 as "already Free" — its paired `normalize-entity-naming` AI action lives
-alongside the others in `classes/AIActions/Actions/`). All 9 deterministic
+alongside the others in `modules/AiCopilot/Actions/`). All 9 deterministic
 scanners are what `GeoAnalyzer::calculate_deterministic_score()` below actually
 counts against (`TOTAL_DETERMINISTIC_CHECKS = 9`), not just the original 8.
 
@@ -75,7 +75,7 @@ duplicated here.
 
 ## `GeoAnalysis\GeoAnalyzer` — "Generate GEO Score" / "Generate AI suggestions"
 
-A plain, concrete orchestrator (`classes/GeoAnalysis/GeoAnalyzer.php`) — no
+A plain, concrete orchestrator (`modules/Geo/GeoAnalyzer.php`) — no
 interface, same reasoning `Scanners\ScanRunner`/`RuleEngine\RuleEngine` already
 establish: there's exactly one way "analyze this post for GEO" happens, so an
 interface would have one implementer.
@@ -146,11 +146,11 @@ see `AI-VISIBILITY-MODULE.md`'s "Monitoring".
 ### Reusing the AI call path — and a small refactor to make that possible
 
 `GeoAnalyzer` needed the exact "safety-validate → build provider chain → send →
-sanitize response" sequence `AIActions\ActionRunner::propose()` already had, inline.
+sanitize response" sequence `AiCopilot\ActionRunner::propose()` already had, inline.
 Rather than copy those six lines into a second consumer, they were extracted into
-a new **`AIProviders\Support\SafeRequestSender`** class, and `ActionRunner` was
-refactored to use it too (its own constructor now takes `SafeRequestSender` instead
-of `ProviderRegistry`+`AISafetyValidator` separately). Both `ActionRunner` and
+a new **`AI\AiRequestSender`** class, and `ActionRunner` was
+refactored to use it too (its own constructor now takes `AiRequestSender` instead
+of a provider registry + `AISafetyValidator` separately — that registry has since been removed). Both `ActionRunner` and
 `GeoAnalyzer` now go through the identical safety-validated call path — no parallel
 "send an AI request" logic exists anywhere in this codebase.
 
@@ -188,7 +188,7 @@ engine underneath it is shared Free infrastructure, the same way Automation's
 module reaches into Free's `RuleEngine`/`FindingRepository` without those being
 Pro-only.
 
-Free's own `classes/RestAPI/Controllers/GeoAnalysis.php` still exists at the same
+Free's own `modules/Geo/Rest/GeoAnalysis.php` still exists at the same
 filename, but now hosts a different, unrelated route — `GET
 /geo-analysis/top-pages`, the GEO page's deterministic "Top Pages" ranking (no
 AI cost). See that controller's own docblock and `AI-VISIBILITY-MODULE.md` for
@@ -207,7 +207,7 @@ already-translated title text — `SEO-MODULE.md`'s "Fixing a category collision
 section documents exactly why that discipline matters once many scanners share one
 category (`geo` is now shared by 10 scanners, per the table above).
 
-**`GenerateFaqAction`** and **`GenerateSummaryBlockAction`** (`classes/AIActions/Actions/`)
+**`GenerateFaqAction`** and **`GenerateSummaryBlockAction`** (`modules/AiCopilot/Actions/`)
 close those two fix loops — both a content-mutation pattern none of the existing 5
 actions used yet:
 
@@ -314,5 +314,5 @@ Identical shape to every other engine in this codebase:
   this bullet is specifically about a single post's own score over time,
   which still has no equivalent.)
 - **Quota/cost guardrails specific to GEO analysis** — it goes through the same
-  `RateLimitedProvider`/`UsageTrackingProvider` every AI call does, but there's no
+  the same per-minute budget and history recording `AiRequestSender` applies to every AI call, but there's no
   GEO-specific "you've analyzed N posts this month" limit.

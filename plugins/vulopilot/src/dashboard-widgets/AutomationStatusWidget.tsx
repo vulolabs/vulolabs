@@ -2,8 +2,8 @@
 import React from 'react';
 import { __, sprintf } from '@wordpress/i18n';
 import { getApiLink, sendApiResponse } from '@zyra/core';
-import { ListComponent, ModuleGuardComponent, BadgeComponent, NoticeComponent } from '@zyra/components';
-import { MultiCheckboxInput } from '@zyra/inputs';
+import { ListComponent, ModuleGuardComponent, BadgeComponent } from '@zyra/components';
+import { ButtonInput, MultiCheckboxInput } from '@zyra/inputs';
 import DashboardWidget from './DashboardWidget';
 import { useApiList } from '../services/useApiList';
 import { WidgetProps } from './types';
@@ -12,17 +12,30 @@ interface AutomationRow {
 	id: number;
 	name: string;
 	status: 'enabled' | 'disabled';
+	trigger_type: string;
 }
 
+/** Free ships exactly these 2 built-in automations (Automations\BuiltinAutomationSeeder) — the card lists only them, in this order, with their own icon/description. */
+const BUILTIN_ROWS = [
+	{
+		trigger: 'free_visibility_report',
+		icon: 'mail',
+		desc: __("Receive a summary of your website's visibility, issues, and opportunities.", 'vulopilot'),
+	},
+	{
+		trigger: 'free_full_site_scan',
+		icon: 'search blue',
+		desc: __('Automatically scan your website and refresh your VuloPilot insights.', 'vulopilot'),
+	},
+];
+
 /**
- * Enabled/disabled counts come straight off the shared summary payload
- * (`summary.automation_status`, Controllers/Dashboard.php) — no extra
- * request needed for those two numbers. The row list underneath is a
- * second, small fetch against the same `/automations` endpoint
- * src/pages/Automations/Automations.tsx already uses, capped to 5 rows.
+ * Lists Free's 2 built-in automations (fetched from the same `/automations`
+ * endpoint src/pages/Automations/Automations.tsx uses), each with an
+ * Enabled/Not active badge and the real `PATCH /automations/{id}` toggle,
+ * plus — until Pro is active — an "Unlock more automations" banner.
  */
 const AutomationStatusWidget: React.FC<WidgetProps> = ({
-	summary,
 	isLoading,
 	onHide,
 	isCustomizing,
@@ -33,11 +46,16 @@ const AutomationStatusWidget: React.FC<WidgetProps> = ({
 		isLoading: isListLoading,
 		error,
 		refetch,
-	} = useApiList<AutomationRow>('automations', { per_page: 5 });
+	} = useApiList<AutomationRow>('automations', { per_page: 100 });
 
-	// Same real `PATCH /automations/{id}` toggle
-	// BuiltinAutomationCards.tsx's own `handleToggle` already uses —
-	// reused here rather than a second, separate enable/disable path.
+	const rows = BUILTIN_ROWS.map((builtin) => ({
+		...builtin,
+		row: data.find((item) => item.trigger_type === builtin.trigger),
+	})).filter((item) => item.row);
+	const enabledCount = rows.filter((item) => 'enabled' === item.row?.status).length;
+
+	// Same real `PATCH /automations/{id}` toggle BuiltinAutomationCards.tsx's
+	// own `handleToggle` already uses — reused here rather than a second path.
 	const handleToggle = (row: AutomationRow) => {
 		sendApiResponse(
 			appLocalizer,
@@ -45,9 +63,7 @@ const AutomationStatusWidget: React.FC<WidgetProps> = ({
 			{ status: 'enabled' === row.status ? 'disabled' : 'enabled' }
 		).then(() => {
 			refetch();
-			// `summary.automation_status.enabled`/`.disabled` (the
-			// "N Enabled"/"N Disabled" badges above) is a sibling payload
-			// this row list's own `refetch` never touches — see
+			// Keeps sibling payloads (`summary.automation_status`) in step — see
 			// `onRefreshSummary`'s own docblock (types.ts).
 			onRefreshSummary();
 		});
@@ -55,24 +71,37 @@ const AutomationStatusWidget: React.FC<WidgetProps> = ({
 
 	return (
 		<DashboardWidget
-			title={__('Automation status', 'vulopilot')}
+			title={
+				<>
+					{__('Automation status', 'vulopilot')}
+					<BadgeComponent
+						color="green"
+						text={sprintf(
+							/* translators: %d: number of enabled built-in automations. */
+							__('%d Enabled', 'vulopilot'),
+							enabledCount
+						)}
+					/>
+				</>
+			}
 			desc={__('Which of your automations are enabled and running.', 'vulopilot')}
 			icon="toggle"
 			isLoading={isLoading}
 			onHide={onHide}
 			isCustomizing={isCustomizing}
+			headerAction={
+				<ButtonInput
+					buttons={{
+						text: __('Manage', 'vulopilot'),
+						rightIcon: 'pagination-right-arrow',
+						color: 'text-purple',
+						onClick: () => {
+							window.location.href = '?page=vulopilot#&tab=automations';
+						},
+					}}
+				/>
+			}
 		>
-			<div className='buttons-wrapper'>
-				<BadgeComponent
-					color="green"
-					text={sprintf('%d enabled', summary.automation_status.enabled)}
-				/>
-				<BadgeComponent
-					color="red"
-					text={sprintf('%d disabled', summary.automation_status.disabled)}
-				/>
-			</div>
-
 			{error ? (
 				<ModuleGuardComponent
 					icon="error"
@@ -81,52 +110,72 @@ const AutomationStatusWidget: React.FC<WidgetProps> = ({
 					buttonText={__('Retry', 'vulopilot')}
 					onButtonClick={refetch}
 				/>
-			) : !isListLoading && data.length === 0 ? (
+			) : !isListLoading && 0 === rows.length ? (
 				<ModuleGuardComponent
 					icon="automation"
 					title={__('No automations yet', 'vulopilot')}
 					desc={__(
-						'Create one from the Automation page to react to scan findings automatically.',
+						'Open the Automations page to set up your built-in automations.',
 						'vulopilot'
 					)}
 				/>
 			) : (
 				<ListComponent
-					className='mini-card report'
-					items={data.map((row) => ({
-						id: String(row.id),
-						title: row.name,
-						tags: (
-							<MultiCheckboxInput
-								look="toggle"
-								options={[
-									{
-										key: `automation-${row.id}-enabled`,
-										value: 'enabled',
-										label: '',
-									},
-								]}
-								value={
-									'enabled' === row.status ? ['enabled'] : []
-								}
-								onChange={() => handleToggle(row)}
-							/>
-						),
-					}))}
+					className="mini-card report"
+					items={rows.map(({ trigger, icon, desc, row }) => {
+						const automation = row as AutomationRow;
+						const isEnabled = 'enabled' === automation.status;
+
+						return {
+							id: trigger,
+							icon,
+							title: automation.name,
+							desc,
+							tags: (
+								<>
+									<BadgeComponent
+										color={isEnabled ? 'green' : 'gray'}
+										text={isEnabled ? __('Enabled', 'vulopilot') : __('Not active', 'vulopilot')}
+									/>
+									<MultiCheckboxInput
+										look="toggle"
+										options={[
+											{
+												key: `automation-${automation.id}-enabled`,
+												value: 'enabled',
+												label: '',
+											},
+										]}
+										value={isEnabled ? ['enabled'] : []}
+										onChange={() => handleToggle(automation)}
+									/>
+								</>
+							),
+						};
+					})}
 				/>
 			)}
-
 			{/* Free ships exactly 2 built-in automations; custom ones are Pro. Hidden once Pro is active. */}
 			{!appLocalizer.khali_dabba && (
-				<NoticeComponent
-					displayPosition="inline"
-					type="info"
-					message={__('Want to add more automations?', 'vulopilot')}
-					actionLabel={__('Upgrade to Pro', 'vulopilot')}
-					onAction={() =>
-						window.open(appLocalizer.shop_url, '_blank', 'noopener,noreferrer')
-					}
-				/>
+				<div className="automation-upgrade-banner">
+					<i className="adminfont-pro-tab automation-upgrade-banner-icon" />
+					<div className="automation-upgrade-banner-text">
+						<div className="automation-upgrade-banner-title">
+							{__('Unlock more automations', 'vulopilot')}
+						</div>
+						<div className="desc">
+							{__('Get Website Health daily scans, advanced reports, and more with Pro.', 'vulopilot')}
+						</div>
+					</div>
+					<ButtonInput
+						buttons={{
+							text: __('Upgrade to Pro', 'vulopilot'),
+							rightIcon: 'arrow-right',
+							onClick: () =>
+								window.open(appLocalizer.shop_url, '_blank', 'noopener,noreferrer'),
+						}}
+					/>
+				</div>
 			)}
 		</DashboardWidget>
 	);

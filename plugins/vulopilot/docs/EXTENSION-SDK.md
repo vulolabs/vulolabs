@@ -31,8 +31,7 @@ This is not a module system. `module-architecture.md`'s folder-scan/reflection d
 | `vulopilot_automation_action_sources` | `VuloPilotPro\Automation\ActionRegistry` | Automation `ActionInterface` implementations |
 | `vulopilot_report_type_sources` | `Reports\ReportTypeRegistry` | `ReportTypeInterface` implementations |
 | `vulopilot_report_exporter_sources` | `Reports\ReportExporterRegistry` | `ReportExporterInterface` implementations |
-| `vulopilot_ai_provider_sources` | `AIProviders\ProviderRegistry` | `AIProviderInterface` implementations (`AI-ARCHITECTURE.md`) |
-| `vulopilot_ai_action_sources` | `AIActions\ActionRegistry` | `AIActionInterface` implementations (`AI-ACTIONS.md`) |
+| `vulopilot_ai_action_sources` | `AiCopilot\ActionRegistry` | `AIActionInterface` implementations (`AI-ACTIONS.md`) |
 | `vulopilot_rest_controllers` | `RestAPI\Rest` | Extra `\WP_REST_Controller` instances, keyed by an id, added to the central dispatcher |
 
 All ten follow the same shape: a class-string (or, for `vulopilot_rest_controllers`, an instance)

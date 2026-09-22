@@ -140,6 +140,31 @@ class FindingRepository extends AbstractRepository {
     }
 
     /**
+     * Every currently-open row id for one scanner — unpaginated (unlike
+     * `find_all()`, which caps at 100 rows), since
+     * `ScanPersistenceListener::handle_scan_completed()`'s own real
+     * auto-resolve step (see that method's own docblock) needs the
+     * complete set to diff against, not a page of it, and a scanner like
+     * `broken-links` can legitimately have more than 100 open rows on a
+     * large site.
+     *
+     * @param string $scanner_id Finding::get_category()'s owning scanner's own get_id().
+     * @return int[]
+     */
+    public function get_open_finding_ids_for_scanner( string $scanner_id ): array {
+        global $wpdb;
+
+        $ids = $wpdb->get_col(
+            $wpdb->prepare(
+                "SELECT id FROM {$this->get_table()} WHERE status = 'open' AND scanner_id = %s", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+                $scanner_id
+            )
+        );
+
+        return array_map( 'intval', $ids );
+    }
+
+    /**
      * Open/resolved/ignored/snoozed counts, zero-filled and optionally
      * scoped to one category and/or one section's scanner_id list — backs
      * the Health/SEO/GEO/WooCommerce findings tables' status-count pill

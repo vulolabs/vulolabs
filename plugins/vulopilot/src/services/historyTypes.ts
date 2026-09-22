@@ -27,7 +27,7 @@ export interface ConversationDetail {
 	model: string | null;
 	status: 'success' | 'failure';
 	excerpt: string | null;
-	/** The real, human-typed question this reply answers — null for any row logged before this column existed (UsageTrackingProvider.php's own build_prompt_excerpt()), never fabricated. */
+	/** The real, human-typed question this reply answers — null for any row logged before this column existed (AiRequestSender.php's own build_prompt_excerpt()), never fabricated. */
 	prompt_excerpt: string | null;
 	/** Real `ai_action.*` history rows this exact turn caused, if any — see Controllers/History.php's own build_related_actions() for why this can be real and tightly matched rather than a fuzzy guess. Empty for the overwhelming majority of turns (a plain question causes no action). */
 	related_actions: RelatedAction[];
@@ -179,7 +179,7 @@ export const humanizeConversationExcerpt = (
 	} catch {
 		// Either not actually the orchestrator's JSON shape, or — very
 		// commonly for a real "respond" reply with substantial content —
-		// genuinely valid JSON that UsageTrackingProvider::build_excerpt()
+		// genuinely valid JSON that AiRequestSender::build_excerpt()
 		// truncated to its own 300-char audit-trail cap, cutting off the
 		// closing `"}` and leaving unparseable JSON. That truncation only
 		// ever lands inside the "message" field's own text (the only long
@@ -194,7 +194,7 @@ export const humanizeConversationExcerpt = (
 				.replace(/\\"/g, '"')
 				.trim();
 
-			// build_excerpt() (UsageTrackingProvider.php) already appends its
+			// build_excerpt() (AiRequestSender.php) already appends its
 			// own '…' when it truncates — don't double it up.
 			return recovered.endsWith('…') ? recovered : recovered + '…';
 		}

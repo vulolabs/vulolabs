@@ -45,9 +45,9 @@ class AiByokGatewayClient {
      *   A \WP_Error for connectivity/configuration failure OR VuloCloud
      *   reporting `AI_BYOK_NOT_CONFIGURED` (code
      *   'vulopilot_ai_byok_not_configured') — the caller
-     *   (VuloCloudProxyProvider) maps that one specific code to
+     *   (AI\AiRequestSender) maps that one specific code to
      *   AiByokNotConfiguredException; every other \WP_Error becomes a
-     *   generic ProviderRequestException.
+     *   generic GatewayRequestException.
      * }
      */
     public function execute( string $feature, string $prompt, array $context, string $site_tone ) {
@@ -109,7 +109,7 @@ class AiByokGatewayClient {
         }
 
         if ( $status < 200 || $status >= 300 ) {
-            // 'AI_BYOK_NOT_CONFIGURED' is the one code VuloCloudProxyProvider
+            // 'AI_BYOK_NOT_CONFIGURED' is the one code AiCopilot\ActionRunner
             // specifically recognizes to decide whether to fall through to
             // AI Credits (see that class's own docblock) — passed through
             // verbatim via the \WP_Error code rather than translated to a
@@ -117,7 +117,7 @@ class AiByokGatewayClient {
             // expose VuloCloud's internal error text to the end user,
             // VuloPilot brief §19/§26).
             if ( 'AI_BYOK_NOT_CONFIGURED' === ( $decoded['error'] ?? '' ) ) {
-                return new \WP_Error( 'vulopilot_ai_byok_not_configured', __( 'No AI provider is configured for this site.', 'vulopilot' ), array( 'status' => $status ) );
+                return new \WP_Error( 'vulopilot_ai_byok_not_configured', __( 'No AI connection is configured for this site.', 'vulopilot' ), array( 'status' => $status ) );
             }
 
             return new \WP_Error(
@@ -137,7 +137,7 @@ class AiByokGatewayClient {
     /**
      * `POST /plugin/ai/byok-status` — a cheap boolean-only check, no
      * prompt/key material involved. Used only by the Settings UI's status
-     * display (AiProvidersPanel.tsx), never by ActionRunner's own
+     * display (VuloCloudAiConnectionPanel.tsx), never by ActionRunner's own
      * per-request decision (which always attempts execute() directly and
      * reacts to a real AI_BYOK_NOT_CONFIGURED response instead — see that
      * class's own docblock on why a separate pre-check there would just
@@ -148,7 +148,7 @@ class AiByokGatewayClient {
      * not one collapsed into the other, because "this site has no
      * site_id/secret at all" and "this site has one, but VuloCloud says
      * no key resolves for it" are genuinely different states the caller
-     * (RestAPI\Controllers\AiProviders::get_items()) needs to tell apart
+     * (RestAPI\Controllers\VuloCloudAiConnection::get_items()) needs to tell apart
      * to decide whether to show a Connect form or a "configure a key"
      * notice. An earlier version of this method returned plain `false`
      * for "no credential" — indistinguishable, to a caller only checking

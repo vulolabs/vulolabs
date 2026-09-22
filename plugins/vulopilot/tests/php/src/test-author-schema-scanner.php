@@ -8,7 +8,7 @@
 namespace VuloPilot\Tests;
 
 use Brain\Monkey\Functions;
-use VuloPilot\Scanners\Basic\AuthorSchemaScanner;
+use VuloPilot\BrandIntelligence\Scanners\AuthorSchemaScanner;
 
 require_once __DIR__ . '/TestCase.php';
 

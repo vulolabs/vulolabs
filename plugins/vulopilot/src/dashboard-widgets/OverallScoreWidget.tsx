@@ -1,7 +1,8 @@
 import React from 'react';
-import { __ } from '@wordpress/i18n';
+import { __, sprintf } from '@wordpress/i18n';
 import { COLOR_PALETTE } from '@zyra/core';
 import {
+	AnalyticsComponent,
 	ChartComponent,
 	TypographyComponent,
 	ListComponent,
@@ -12,7 +13,41 @@ import DashboardWidget from './DashboardWidget';
 import { useLastScanTime } from '../services/useLastScanTime';
 import { formatWpDate } from '../services/formatWpDate';
 import { WidgetProps } from './types';
+import { useApiList } from '../services/useApiList';
+import { SEO_SECTIONS } from '../pages/GEO/seoSections';
+import { ALL_AEO_SCANNER_IDS } from '../pages/GEO/AeoTab';
 import VuloPilotActivityWidget from './VuloPilotActivityWidget';
+
+type GlanceRow = {
+	key: 'seo' | 'geo' | 'aeo';
+	label: string;
+	subtab: string;
+	/** `scanner_id`/`category` REST params to count real open findings with — see each row's own definition below for why GEO uses `category` while SEO/AEO use an explicit `scanner_id` list. */
+	params: Record<string, string>;
+};
+const SEO_SCANNER_IDS = SEO_SECTIONS.flatMap((section) => section.scannerIds);
+
+/** Same 3 real "Issues at a glance" rows KeyPagesWidget.tsx used — GEO filters by `category`, SEO/AEO by an explicit `scanner_id` allowlist (see KeyPagesWidget.tsx's own docblock for why). */
+const GLANCE_ROWS: GlanceRow[] = [
+	{
+		key: 'seo',
+		label: __('SEO', 'vulopilot'),
+		subtab: 'seo',
+		params: { scanner_id: SEO_SCANNER_IDS.join(',') },
+	},
+	{
+		key: 'geo',
+		label: __('GEO', 'vulopilot'),
+		subtab: 'geo',
+		params: { category: 'geo' },
+	},
+	{
+		key: 'aeo',
+		label: __('AEO', 'vulopilot'),
+		subtab: 'aeo',
+		params: { scanner_id: ALL_AEO_SCANNER_IDS.join(',') },
+	},
+];
 
 /**
  * "Vital Pulse" — the Dashboard's hero status ring: one real 0-100
@@ -102,6 +137,29 @@ const OverallScoreWidget: React.FC<WidgetProps> = ({
 	// one category.
 	const { lastScanAt } = useLastScanTime();
 
+	// Fixed cardinality (always exactly 3 rows), so one real `useApiList`
+	// call each rather than a loop — `per_page: 1` since only `total` is used.
+	const seoFindings = useApiList<{ id: number }>('findings', {
+		...GLANCE_ROWS[0].params,
+		status: 'open',
+		per_page: 1,
+	});
+	const geoFindings = useApiList<{ id: number }>('findings', {
+		...GLANCE_ROWS[1].params,
+		status: 'open',
+		per_page: 1,
+	});
+	const aeoFindings = useApiList<{ id: number }>('findings', {
+		...GLANCE_ROWS[2].params,
+		status: 'open',
+		per_page: 1,
+	});
+	const totals: Record<GlanceRow['key'], number> = {
+		seo: seoFindings.total,
+		geo: geoFindings.total,
+		aeo: aeoFindings.total,
+	};
+
 	// --- Category score breakdown data (from ScoreBreakdownWidget) ---
 	const cs = summary.category_scores;
 	const visibility = average([cs.seo, cs.geo, cs.content, cs.brand]);
@@ -173,7 +231,6 @@ const OverallScoreWidget: React.FC<WidgetProps> = ({
 			isCustomizing={isCustomizing}
 			headerAction={
 				<ButtonInput
-					wrapperClass="vital-pulse-full-report-link"
 					buttons={{
 						text: __('View full report', 'vulopilot'),
 						rightIcon: 'pagination-right-arrow',
@@ -274,6 +331,20 @@ const OverallScoreWidget: React.FC<WidgetProps> = ({
 					/>
 				</div>
 			</div>
+			<AnalyticsComponent
+				variant="background-color"
+				cols={3}
+				data={GLANCE_ROWS.map((row, index) => ({
+					colorClass: `admin-bg-color${index + 2}`,
+					number: totals[row.key],
+					text: sprintf(
+						/* translators: %s: sub-tab name, e.g. "SEO". */
+						__('%s issues', 'vulopilot'),
+						row.label
+					),
+					link: `?page=vulopilot#&tab=seo-visibility&subtab=${row.subtab}`,
+				}))}
+			/>
 		</DashboardWidget>
 		<VuloPilotActivityWidget
 			summary={summary}

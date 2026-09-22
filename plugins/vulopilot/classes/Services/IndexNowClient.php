@@ -13,8 +13,7 @@ defined( 'ABSPATH' ) || exit;
  * Real HTTP client for the IndexNow protocol (indexnow.org) — a single
  * submission to this one neutral aggregator endpoint is picked up by every
  * participating search engine (Bing, Yandex, Seznam.cz, Naver, and others),
- * so this never needs a per-engine endpoint list. Modeled on
- * AIProviders\Providers\OllamaProvider's own
+ * so this never needs a per-engine endpoint list. Uses
  * `wp_remote_post()` + explicit status-code branching (real pass/fail
  * responses worth surfacing to an admin), not SitemapManager's fire-and-
  * forget ping — IndexNow's response codes are meaningful and documented

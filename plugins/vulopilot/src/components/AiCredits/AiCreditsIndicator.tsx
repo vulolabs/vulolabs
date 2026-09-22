@@ -22,7 +22,7 @@ import './AiCreditsIndicator.scss';
  * Three real states, all driven by useAiCredits()'s own live
  * `GET /ai-credits/status` read — never a fabricated number:
  * - Not connected: "Claim your 100 Free AI Credits" — opens the same
- *   passwordless "Connect to VuloCloud" redirect Settings → AI Providers'
+ *   passwordless "Connect to VuloCloud" redirect Settings → Connections'
  *   own button uses (AiCreditsConnection::get_broker_authorize_url()'s own
  *   docblock for the full sequence) rather than a second, separate
  *   embedded login/signup form — one connect flow in the whole plugin, not

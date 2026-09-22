@@ -16,7 +16,7 @@ defined( 'ABSPATH' ) || exit;
 
 /**
  * Turns Services\FirewallGuard's own real request block/log
- * (`vulopilot_firewall_blocks`) into one real summary Finding when there's
+ * (`vulopilot_security_events` (type `firewall_block`)) into one real summary Finding when there's
  * been any activity in the last 7 days — `HIGH` when a single IP repeatedly
  * hit real exploit-signature rules (a real, escalating threat signal, not a
  * one-off), `MEDIUM` otherwise. Zero findings when the log is empty, or

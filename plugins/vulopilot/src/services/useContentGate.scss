@@ -81,7 +81,7 @@
 	font-size: 0.75rem;
 	font-weight: 600;
 	color: $sub-text-color;
-	// Same translucent idiom Connections/AiProvidersPanel.tsx's own icon
+	// Same translucent idiom Connections/VuloCloudAiConnectionPanel.tsx's own icon
 	// box uses ($theme-color mixed toward transparent), mixed against the
 	// theme's own background token here instead of a hardcoded color.
 	background: color-mix(in srgb, $background-white 65%, transparent);

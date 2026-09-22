@@ -7,7 +7,7 @@
 
 namespace VuloPilot\Tests;
 
-use VuloPilot\Scanners\Basic\ReadabilityScanner;
+use VuloPilot\ContentIntelligence\Scanners\ReadabilityScanner;
 
 require_once __DIR__ . '/TestCase.php';
 

@@ -16,7 +16,7 @@ use VuloPilot\ValueObjects\RuleType;
 defined( 'ABSPATH' ) || exit;
 
 /**
- * Turns Scanners\Basic\SeoScanner's title-length Finding into a
+ * Turns Seo\Scanners\SeoScanner's title-length Finding into a
  * recommendation to rewrite the title. Like MissingAltTextRule, this
  * needs AI: a good title has to actually summarize the page's content
  * within a length constraint, which isn't something a fixed template can

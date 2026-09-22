@@ -1,283 +1,122 @@
-# VuloPilot — AI provider architecture
+# VuloPilot — AI request architecture
 
 Companion to [`RULE-ENGINE.md`](RULE-ENGINE.md), [`SCANNERS.md`](SCANNERS.md), and
-[`DATABASE.md`](DATABASE.md). Covers the adapter contract, the 2 provider adapters, the
-decorator stack (usage-tracking/retry/rate-limit/fallback), `SafeRequestSender`, safety
-validation, and the extension strategy.
+[`DATABASE.md`](DATABASE.md). Covers how an AI call gets from a feature to VuloCloud and back:
+`AiRequestSender`, the exceptions it throws, safety validation, and where AI actions live.
 
-## Contracts (`vulolabs/plugins/vulopilot/classes/`)
+There is **no provider concept** in this plugin. VuloCloud is the only place an AI answer comes
+from — it holds every key and decides which vendor serves a call — so there is nothing to register,
+select, decorate or fall back between. Earlier versions had a `ProviderRegistry`,
+`AIProviderInterface`, a `VuloCloudProxyProvider` adapter, three decorators and a fallback chain
+around that single gateway call; all of it was removed, and the decorators' real work (budget,
+retry, history) became plain steps inside `AiRequestSender`.
 
-These, like every other contract in this codebase, used to live in a separate Composer path
-package, `vulolabs/packages/php/vulopilot-core` — that package no longer exists (see
-`SCANNERS.md`'s and `RULE-ENGINE.md`'s own "Contracts" sections for the same correction). Every
-class below lives directly in the plugin under `VuloPilot\`:
+## The request path (`classes/AI/`)
+
+```
+feature  →  VuloPilot()->ai_request_sender->send( $messages, $image, $surface )
+              1. AISafetyValidator::validate_prompt()      (UnsafePromptException)
+              2. AiCreditsConnection::is_connected()        (\RuntimeException "No AI connection is configured.")
+              3. per-minute request budget                  (RateLimitExceededException)
+              4. AiByokGatewayClient::execute()             {feature, prompt, context, site_tone} → VuloCloud
+                 retried on TransientGatewayException, exponential backoff, 3 attempts
+              5. one vulopilot_ai_history row              (success and failure both)
+              6. AISafetyValidator::sanitize_response()
+```
+
+`AiRequestSender` is built once in `VuloPilot::init_classes()` and shared — every caller
+(`AiCopilot\ActionRunner`, `Geo\GeoAnalyzer`, `ContentIntelligence\ContentAnalyzer`,
+`Services\SiteToneLearner`, and vulopilot-pro's analyzers/REST controllers) is handed that same
+instance (`VuloPilot()->ai_request_sender`) rather than constructing its own.
+
+- **Budget.** `MAX_REQUESTS_PER_MINUTE` (20), a WP transient counter keyed by minute
+  (`vulopilot_ai_rate_vulocloud_<minute>`). Every attempt, retries included, spends from it. It is
+  a local pre-emptive guard against burning AI credits, not a spend cap.
+- **History.** Recorded around the retries, so one call is one row regardless of how many attempts
+  it took. Failures are recorded too (`status = 'failure'`, zero tokens) so the audit trail covers
+  what was tried, not only what worked. The `provider` column and `AIResponse::get_provider()` are
+  kept as a source label (always `'vulocloud'` today) — it is stored data, not a provider concept.
+- **Images.** `AIRequest::get_image()` exists, but the VuloCloud wire contract carries text only,
+  so nothing sends one. Image attachments in Copilot chat get the same honest "can't be read" note
+  any other unsupported file does.
+
+## Contracts and value objects
 
 ```
 classes/
 ├── Contracts/AI/
-│   └── AIProviderInterface.php    get_id/get_label/supports_streaming/get_available_models/send()/send_streaming()
+│   └── AIActionInterface.php         one AI-assisted workflow (see AI-ACTIONS.md)
 ├── ValueObjects/
-│   ├── AIRequest.php               model, messages, temperature, max_tokens — no credential
-│   └── AIResponse.php              content, provider, model, prompt/completion tokens, finish_reason
-└── Exceptions/
-    ├── AIProviderException.php         base — catch this for "any provider failure"
-    ├── TransientProviderException.php  retry-eligible (network error, 5xx, 429)
-    ├── ProviderRequestException.php    not retry-eligible (bad key, malformed request)
-    ├── RateLimitExceededException.php  thrown before an inner call even happens
-    └── UnsafePromptException.php       thrown by the safety validator, before any provider is touched
+│   ├── AIRequest.php                 model, messages, temperature, max_tokens, image, surface
+│   └── AIResponse.php                content, provider, model, prompt/completion tokens, finish_reason
+├── Exceptions/
+│   ├── AiRequestException.php          base — catch this for "the AI request failed"
+│   ├── TransientGatewayException.php   retry-eligible (network error, 5xx, 429)
+│   ├── GatewayRequestException.php     not retry-eligible (malformed request, rejected)
+│   ├── RateLimitExceededException.php  thrown before the request is sent
+│   ├── AiByokNotConfiguredException.php VuloCloud has no AI key that resolves for this site
+│   └── UnsafePromptException.php       thrown by the safety validator; deliberately NOT an AiRequestException
+└── AI/
+    ├── AiRequestSender.php
+    └── AISafetyValidator.php
 ```
 
-> **Superseded:** this pass originally also defined `AIJobHandlerInterface` (context/prompt/parse
-> for one AI conversation tied to a `Recommendation`) plus `AIJobRunner` and two job handlers. A
-> later pass ([`AI-ACTIONS.md`](AI-ACTIONS.md)) replaced all of that with `AIActionInterface` +
-> `AIActions\ActionRunner` once a second, genuinely different kind of AI-assisted workflow
-> (user-typed input with no `Recommendation` at all, e.g. "Generate Blog") showed the
-> Recommendation-only assumption was already too narrow. Those files were deleted, not left
-> around deprecated — see `AI-ACTIONS.md`'s "Why this supersedes `AIJobHandlerInterface`" for the
-> full reasoning. Everything below this note (providers, decorators, safety validation) is
-> unaffected and still current.
+A caller that wants to turn any request failure into a 502 catches `AiRequestException`; one that
+wants to tell "not connected" apart catches `\RuntimeException` (thrown by the sender when this site
+isn't connected to VuloCloud).
 
-- **`AIProviderInterface` is the only interface for a "provider"** — and every decorator
-  (`Decorators\*`) implements the *same* interface it wraps. That's what makes "no
-  provider-specific code outside adapters" structurally true: `AIActions\ActionRunner` calling
-  `send()` never knows or needs to know whether it's talking to a raw `VuloCloudProxyProvider` or
-  several decorators deep.
-- **No `AIRequestInterface`/`AIResponseInterface`** — same reasoning as `Finding`/`ScanResult`/
-  `Recommendation` in the Scanner/Rule Engine passes: there's exactly one shape for "a
-  provider-agnostic chat request/response," so an interface for either would have one
-  implementation and add nothing. (Unlike `Finding`/`Recommendation`, neither `AIRequest` nor
-  `AIResponse` claims to validate its own constructor input either way — there's simply nothing
-  to validate here: every field is a plain scalar or array with no closed vocabulary attached.)
-- **The exception hierarchy is what makes the decorator stack composable without any decorator
-  inspecting *what kind* of provider it's wrapping** — `RetryingProvider` only ever asks "was
-  this a `TransientProviderException`?", never "was this an OpenAI rate limit?".
+## VuloCloud connection and credits
 
-## The 2 adapters (`classes/AIProviders/Providers/`)
+This site holds no AI credential. `Services\AiCreditsConnection` is the site-scoped connection to
+VuloCloud (the passwordless broker flow behind Settings → Connections → VuloCloud AI, served by
+`Controllers\VuloCloudAiConnection`), and `Services\AiByokGatewayClient` is the call itself.
 
-An earlier pass of this doc described 6 adapters here — one per cloud vendor
-(OpenAI/Anthropic/Gemini/OpenRouter/Groq) plus Ollama, each holding its own locally-stored,
-per-vendor-wire-format credential. That's gone: the 5 cloud adapters (and their shared
-`AbstractOpenAiCompatibleProvider` base) were deleted once cloud BYOK moved server-side (see
-"Credentials (BYOK)" above) — none of them held real, distinguishable logic once every cloud
-vendor's actual key resolution and wire-format translation moved to VuloCloud. Two adapters
-remain:
+AI Credits are a separate, metered path, not a layer on top: `Services\AiCreditGatewayClient` calls
+VuloCloud's credit-metered `POST /plugin/ai/execute` (a different wire contract —
+`{featureId, action, context}`). `AiCopilot\ActionRunner::send_prompt_or_credits()` is where the two
+meet: it always sends through `AiRequestSender` first, and only falls through to credits — for the
+action ids in `CREDIT_FEATURE_MAP` — when that throws `AiByokNotConfiguredException`. Every other
+action id's "not configured" is a final `\RuntimeException`.
 
-| Adapter | Auth | Notable difference from the other |
-|---|---|---|
-| `VuloCloudProxyProvider` | none locally — VuloCloud resolves the real credential server-side | `get_id()` returns `'vulocloud'` regardless of which real vendor answers; `send()` flattens `AIRequest`'s messages into one prompt string and posts it to VuloCloud (`Services\AiByokGatewayClient`) instead of building any vendor-specific wire request itself; `get_available_models()` is always empty — model choice is no longer this site's decision |
-| `OllamaProvider` | none (local server) | No API key at all — what's "configured" is a base URL; streaming is raw NDJSON, not SSE; the one adapter that still builds a real, local wire request itself |
+## AI actions (`modules/AiCopilot/`)
 
-`ProviderRegistry::get_default_adapter_classes()` maps `'vulocloud'|'ollama'` to these two classes
-today — see that method's own docblock for why `'vulocloud'` collapses what used to be 5 separate
-ids into one.
+AI actions belong to the AI Copilot module: `ActionRegistry`, `ActionRunner`,
+`ContentCreationOrchestrator`, every `Actions\*Action` class, and the `Rest\AiActionRuns` and
+`Rest\Copilot` controllers all live under `modules/AiCopilot/` (`VuloPilot\AiCopilot\…`). The
+contract they implement, `Contracts\AI\AIActionInterface`, stays in shared core because vulopilot-pro
+implements it too. See [`AI-ACTIONS.md`](AI-ACTIONS.md) for the full lifecycle
+(propose → validate → preview → approve → execute → rollback → log).
 
-### Streaming — what's real here and what's a documented gap
+`ai_action_registry` and `ai_action_runner` are constructed in `VuloPilot::init_classes()` and read
+from the container by vulopilot-pro and the Dashboard/History controllers, so they exist whether or
+not the module is active; the REST surface itself gates on the module being active.
 
-`StreamingHttpClient` (`AIProviders/Support/`) opens a real blocking socket read via PHP's native
-`http://`/`https://` stream wrapper (`fopen()` + `fread()` in a loop) — not `wp_remote_post()`,
-which buffers WordPress's entire HTTP response before returning and has no incremental-read hook
-at all. This is genuine, working streaming transport: bytes are delivered to each *streaming-capable*
-adapter's line-parsing callback as the server sends them, not simulated after the fact.
-`OllamaProvider` is the one left that actually does this — `VuloCloudProxyProvider::supports_streaming()`
-is `false` (VuloCloud's own `/plugin/ai/byok-execute` is a single request/response call, not a
-streamed one), and its `send_streaming()` just calls `send()`.
+## Safety validation (`AI\AISafetyValidator`)
 
-What's **not** here: real concurrent multi-stream handling (e.g. a raw cURL multi-handle) — every
-`send_streaming()` call is a single blocking connection, which is the correct and sufficient
-shape for "stream one AI response to one dashboard request," the only use case this pass builds
-for.
-
-## Credentials (BYOK)
-
-An earlier pass of this doc described BYOK as five locally-configured cloud adapters
-(OpenAI/Anthropic/Gemini/OpenRouter/Groq), each decrypting its own stored key via
-`ProviderRegistry::build_provider()`. That's no longer how cloud BYOK works: those five classes
-are gone, collapsed into one adapter, **`AIProviders\Providers\VuloCloudProxyProvider`**
-(`get_id()` returns `'vulocloud'`). This site no longer holds a cloud provider credential at all —
-`VuloCloudProxyProvider::send()` calls `Services\AiByokGatewayClient::execute()`, which posts
-`{siteId, secret, feature, prompt, context, site_tone}` to VuloCloud's own
-`POST /plugin/ai/byok-execute`, and VuloCloud alone resolves whichever Organization's (or allowed
-Customer backup's) key should actually answer — this site never learns which vendor/key was used.
-`vulopilot_ai_provider_configs` and `Services\CredentialEncryption` (still AES-256-CBC, key
-derived via `wp_salt('auth')`, exactly as originally designed) are **not gone** — they're just down
-to one real row now: **`ollama`**, the one adapter that stays local (its "credential" is a base
-URL, not a secret — see that adapter's own docblock). `ProviderRegistry::build_provider()` is still
-the one place a credential is ever decrypted, for the one provider that still has one.
-
-`ProviderRegistry::get_available_adapters()` (backs the Settings UI's provider list) deliberately
-excludes `'vulocloud'` — it has nothing to configure from that panel. The panel instead shows a
-connection-status readout via `AiByokGatewayClient::status()` (`POST /plugin/ai/byok-status`, a
-cheap boolean-only check) and a "site tone" field (`vulopilot_site_tone`, sent as a hint on every
-BYOK request) — see `RestAPI\Controllers\AiProviders::update_site_tone()` and
-`Services\SiteToneLearner`, which keeps that field populated automatically from the site's own
-recent published content (`save_post` → deferred `wp_schedule_single_event()`, never inline with
-the save; never overwrites a site owner's own manually-saved value).
-
-### BYOK vs. Built-in Credits
-
-An earlier pass of this doc described Built-in Credits as an unbuilt Pro-tier extension point.
-**It's built now, and it isn't a decorator on top of BYOK — it's a separate fallback path**,
-`Services\AiCreditGatewayClient`/`AiCreditsConnection` calling VuloCloud's credit-metered
-`POST /plugin/ai/execute` (a genuinely different wire contract —
-`{featureId, action, context}`, VuloCloud's own feature catalog — from BYOK's
-`{feature, prompt, context, site_tone}`). `AIActions\ActionRunner::send_prompt_or_credits()` is
-where the two paths meet: it always attempts BYOK first (`SafeRequestSender` →
-`VuloCloudProxyProvider`), and only falls through to credits — for the three action ids in
-`CREDIT_FEATURE_MAP` — when that attempt throws `Exceptions\AiByokNotConfiguredException` (VuloCloud
-reporting `AI_BYOK_NOT_CONFIGURED`; every other action id's "not configured" is a final
-`\RuntimeException`, not a credits fallback). This still keeps BYOK the free, always-preferred path
-and credits a metered fallback, just resolved per-request against a live VuloCloud answer instead of
-a local "is a key configured" check — see `ActionRunner::send_prompt_or_credits()`'s own docblock
-for why a separate local pre-check would just be a redundant, staleness-prone round trip.
-
-### Settings UI
-
-`RestAPI\Controllers\AiProviders` (`GET/POST /ai-providers`, `POST /ai-providers/{id}`,
-`POST /ai-providers/{id}/delete`) is what actually writes to `vulopilot_ai_provider_configs` from
-the dashboard. It never returns a stored row's `credentials` value — only a `has_credential`
-boolean — the same decrypt-only-in-`ProviderRegistry::build_provider()` boundary described above.
-Backs `src/components/Settings/AiProvidersPanel.tsx` — an earlier pass of this doc placed that
-file under a `Settings/Account/` subfolder; it actually lives directly under `Settings/`. Wired
-into the Settings page as its own `ai-providers` tab (`src/pages/Settings/Settings.tsx`'s
-`currentTab === 'ai-providers'` escape hatch, same shape as the `import-export` tab, joined since
-by an `indexnow` tab using the identical pattern) — hand-built rather than `InputRenderer`-driven
-since provider configs live in their own table, not the flat settings option every other tab
-auto-saves into.
-
-## The decorator stack (`classes/AIProviders/Decorators/`)
-
-An earlier pass of this doc described the build order as
-`RateLimitedProvider → RetryingProvider → UsageTrackingProvider → (raw adapter)`. Reading
-`ProviderRegistry::build_provider()`'s actual construction shows the nesting is the other way
-around:
-
-```php
-return new Decorators\UsageTrackingProvider(
-    new Decorators\RetryingProvider(
-        new Decorators\RateLimitedProvider( $adapter )
-    )
-);
-```
-
-```
-UsageTrackingProvider → RetryingProvider → RateLimitedProvider → (raw adapter)
-```
-
-`UsageTrackingProvider` is the **outermost** wrapper — its `send()` runs first when a caller
-invokes the built provider — not the innermost as previously documented. Working through what
-each layer actually does, in the order a call really passes through them:
-
-1. **`UsageTrackingProvider`** — wraps everything else in a `try`/`catch`, calls its inner
-   provider, and records one `vulopilot_ai_history` row per call regardless of outcome (its own
-   docblock: "an audit trail... is only complete if it includes the calls that didn't work").
-   Because it's outermost, this also means it logs a `'failure'` row even for a request that never
-   reached a real provider at all — one rejected by `RateLimitedProvider`'s local budget check,
-   three layers in. That's a real, observable consequence of the actual nesting order, not just a
-   documentation nuance: `vulopilot_ai_history` is an audit trail of "every attempt this site
-   made," not only "every attempt that actually left the server."
-2. **`RetryingProvider`** — retries only `TransientProviderException` with exponential backoff
-   (500ms, 1s, 2s, …); a `ProviderRequestException` or `RateLimitExceededException` passes
-   straight through untouched (`with_retries()`'s `catch` clause is typed to
-   `TransientProviderException` specifically), because retrying either would never help (see each
-   exception's own docblock).
-3. **`RateLimitedProvider`** — checks a per-minute budget (a WP transient, not a new caching
-   layer — see its docblock) immediately before calling its own inner provider, so a spent budget
-   never wastes a network round trip to the raw adapter. This is the innermost decorator, right
-   next to the real adapter — still true to the original intent ("check the budget before even
-   trying the network call"), just not the outermost wrapper the way an earlier pass of this doc
-   implied.
-
-The net externally-observable behavior this doc originally described is still accurate — a
-locally rate-limited request never reaches the network, and only transient failures get retried —
-the correction above is specifically about which decorator sits where in the actual object graph,
-which matters if you're reasoning about exactly what "record every attempt" captures.
-
-**`ProviderFallbackChain`** is the "Fallback" requirement — also `AIProviderInterface`-shaped, but
-built differently: `ProviderRegistry::build_fallback_chain()` builds one already-decorated chain
-per configured provider (so each provider in the chain still gets its own usage-tracking/retry/
-rate-limit stack) and tries them in order (`try_each()`), moving on at any `AIProviderException`.
-Fallback is what happens *after* an individual provider's own retries are exhausted, not a
-replacement for them.
-
-## `SafeRequestSender` — the "safety-validate → send → sanitize" sequence
-
-**`AIProviders\Support\SafeRequestSender`** is the class every real AI call in this codebase goes
-through today. Its own docblock is explicit about where it came from: originally written once,
-inline, inside `AIActions\ActionRunner::propose()`; extracted out into its own small, reusable
-class once [`GEO-MODULE.md`](GEO-MODULE.md)'s `GeoAnalysis\GeoAnalyzer` needed the identical
-sequence for a read-only analysis call that isn't an `AIAction` at all (no mutation, so no
-Approval/Execution/Rollback lifecycle applies). `ContentIntelligence\ContentAnalyzer`
-(`CONTENT-INTELLIGENCE-MODULE.md`) reuses the same instance for the same reason. `VuloPilot.php`'s
-bootstrap constructs exactly one `SafeRequestSender`
-(`container['ai_request_sender']`), shared by `ai_action_runner`, `geo_analyzer`, and
-`content_analyzer` alike — one safety-validated call path, not three.
-
-```php
-public function send( array $messages ): AIResponse
-```
-
-1. `AISafetyValidator::validate_prompt( $messages )` — throws `UnsafePromptException` before
-   anything is sent.
-2. `ProviderRegistry::build_fallback_chain()` — throws a plain `\RuntimeException` if no provider
-   is configured at all.
-3. Picks the fallback chain's first model (`get_available_models()[0]`) and sends.
-4. `AISafetyValidator::sanitize_response()` on whatever comes back, always — even a successful
-   response is never trusted un-sanitized.
-
-Deliberately narrow: this is not a new "AI request abstraction layer" — it's the one sequence
-`AIProviderInterface::send()` always needs wrapped around it, given a shared name so every call
-site reads as "send this safely" instead of restating the mechanics.
-
-## Job orchestration — now `AIActions\ActionRunner`
-
-Superseded by the full action lifecycle in [`AI-ACTIONS.md`](AI-ACTIONS.md) — `propose()` covers
-what this section used to describe (build a prompt, send it via `SafeRequestSender`, parse the
-result), then adds the Validator/Preview/Approval/Execution/Rollback/Logging stages `AIJobRunner`
-never had. See that document for the full orchestration, including its now-larger list of real
-callers.
-
-## Safety validation (`Safety\AISafetyValidator`)
-
-Two gates, not one — still used exactly as described here, called from both `SafeRequestSender`
-consumers (`AIActions\ActionRunner`, `GeoAnalysis\GeoAnalyzer`, `ContentIntelligence\ContentAnalyzer`),
-not directly by adapters:
+Two gates, called from `AiRequestSender` for every caller:
 
 - **`validate_prompt()`** — runs *before* a request is ever sent. Rejects prompts over 32,000
   characters (`MAX_PROMPT_LENGTH`), and rejects (rather than silently stripping) any prompt whose
   text matches a known API-key shape (OpenAI-style `sk-[a-zA-Z0-9]{20,}`, Google
   `AIza[0-9A-Za-z\-_]{35}`, a PEM `-----BEGIN (RSA |EC )?PRIVATE KEY-----` header) — a
-  self-consistency check against exactly the kind of credential this codebase's own adapters
-  handle, not a general PII scanner.
-- **`sanitize_response()`** — runs on every response before an action ever sees it. Strips all
+  self-consistency check against a prompt-builder interpolating a credential, not a general PII
+  scanner.
+- **`sanitize_response()`** — runs on every response before anything sees it. Strips all
   HTML/script content via `wp_kses( $content, array() )` — an AI response is never trusted as
   safe-to-render markup just because the HTTP call succeeded.
 
 ## Extension strategy
 
-Identical shape to `SCANNERS.md`/`RULE-ENGINE.md`, again on purpose:
-
-1. **A new local adapter** (like Ollama): implement `AIProviderInterface`, add it to
-   `ProviderRegistry::get_default_adapter_classes()`. A new *cloud* vendor is no longer added this
-   way — that's a VuloCloud-side change (`contexts/vulopilot/ai-byok`), not a new class here.
-2. **The Built-in Credits fallback**: real now (see "BYOK vs. Built-in Credits" above) —
-   `AIActions\ActionRunner`'s own `CREDIT_FEATURE_MAP`, not a provider-registry extension point.
-3. **A third-party adapter**: `add_filter( 'vulopilot_ai_provider_sources', ... )`, the same path
-   Ollama itself would use — no more privileged a path for Pro than for a third party.
+- **A new AI action**: implement `AIActionInterface` and add the class through
+  `vulopilot_ai_action_sources` (`AiCopilot\ActionRegistry`), the same discovery-by-filter shape as
+  `SCANNERS.md`/`RULE-ENGINE.md`. vulopilot-pro's `AbstractBasicAction` is the model.
+- **A new AI backend**: not an extension point. Which vendor answers is a VuloCloud-side change
+  (`contexts/vulopilot/ai-byok`), not a class here.
 
 ## What's not here yet
 
-- **Multimodal (vision) messages.** `AIRequest::get_image()` exists, but
-  `ProviderRegistry::supports_vision()` is unconditionally `false` today — the one adapter this was
-  ever true for (`GeminiProvider`) is gone now that cloud providers resolve through
-  `VuloCloudProxyProvider`, and neither that adapter's wire contract
-  (`AiByokGatewayClient::execute()`) nor `OllamaProvider` sends an image. `CopilotChat\Rest.php`
-  (`vulopilot-pro`) still checks `supports_vision()` before attaching one, so this is a real,
-  currently-dead capability, not a removed code path — restoring it needs either a VuloCloud-side
-  wire contract change or a local vision-capable adapter, not just flipping a flag here.
-  `AI-ACTIONS.md`'s `GenerateAltAction` is context-based, not vision-based, as an honest answer to
-  that gap, not a stand-in claiming to be vision-based.
-- **Quota enforcement** against `vulopilot_ai_provider_configs.quota_limit`/`quota_used` — the
-  columns exist in `DATABASE.md`'s schema (confirmed still present in `Install.php`); nothing
-  reads or increments them anywhere in the codebase today. `RateLimitedProvider` enforces a *rate*
-  (requests per minute), not a *budget* (total spend/tokens per period) — a related but different
-  mechanism, deliberately not conflated here.
+- **Multimodal (vision) messages** — see "Images" above; needs a VuloCloud-side wire contract
+  change. `AI-ACTIONS.md`'s `GenerateAltAction` is context-based, not vision-based, as an honest
+  answer to that gap.
+- **Quota enforcement** — nothing reads or increments a spend/token budget. The per-minute budget
+  in `AiRequestSender` limits *rate*, not total spend, a related but different mechanism.

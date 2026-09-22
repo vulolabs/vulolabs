@@ -8,7 +8,7 @@
 namespace VuloPilot\Tests;
 
 use Brain\Monkey\Functions;
-use VuloPilot\AIProviders\Support\SafeRequestSender;
+use VuloPilot\AI\AiRequestSender;
 use VuloPilot\ContentIntelligence\ContentAnalyzer;
 use VuloPilot\Repositories\FindingRepository;
 use VuloPilot\ValueObjects\AIResponse;
@@ -20,7 +20,7 @@ require_once __DIR__ . '/TestCase.php';
  * calculate_deterministic_score()/calculate_overall_score()/parse_response()
  * (all private, invoked via Reflection — same posture
  * test-aeo-schema-scanner.php's own docblock documents) plus analyze()'s
- * published-post guard clause. SafeRequestSender/FindingRepository are
+ * published-post guard clause. AiRequestSender/FindingRepository are
  * Mockery doubles, not real AI calls or a real database.
  *
  * @class       TestContentAnalyzer class
@@ -55,7 +55,7 @@ class TestContentAnalyzer extends TestCase {
      */
     private function make_analyzer(): ContentAnalyzer {
         return new ContentAnalyzer(
-            \Mockery::mock( SafeRequestSender::class ),
+            \Mockery::mock( AiRequestSender::class ),
             \Mockery::mock( FindingRepository::class )
         );
     }
@@ -110,7 +110,7 @@ class TestContentAnalyzer extends TestCase {
             ->once()
             ->andReturn( array( 'total' => 0 ) );
 
-        $analyzer = new ContentAnalyzer( \Mockery::mock( SafeRequestSender::class ), $findings );
+        $analyzer = new ContentAnalyzer( \Mockery::mock( AiRequestSender::class ), $findings );
 
         $this->assertNull( $this->invoke_private( 'calculate_deterministic_score', $analyzer, array( 42 ) ) );
     }
@@ -127,7 +127,7 @@ class TestContentAnalyzer extends TestCase {
             ->once()
             ->andReturn( array( 'total' => 0 ) ); // open_failures for this post.
 
-        $analyzer = new ContentAnalyzer( \Mockery::mock( SafeRequestSender::class ), $findings );
+        $analyzer = new ContentAnalyzer( \Mockery::mock( AiRequestSender::class ), $findings );
 
         $this->assertSame( 100, $this->invoke_private( 'calculate_deterministic_score', $analyzer, array( 42 ) ) );
     }
@@ -144,7 +144,7 @@ class TestContentAnalyzer extends TestCase {
             ->once()
             ->andReturn( array( 'total' => 1 ) ); // 1 of 5 checks currently open/failing.
 
-        $analyzer = new ContentAnalyzer( \Mockery::mock( SafeRequestSender::class ), $findings );
+        $analyzer = new ContentAnalyzer( \Mockery::mock( AiRequestSender::class ), $findings );
 
         // (5 - 1) / 5 * 100 = 80.
         $this->assertSame( 80, $this->invoke_private( 'calculate_deterministic_score', $analyzer, array( 42 ) ) );

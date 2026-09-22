@@ -7,7 +7,7 @@
 
 namespace VuloPilot\Tests;
 
-use VuloPilot\Scanners\Basic\AiCrawlerBlockedPagesScanner;
+use VuloPilot\Seo\Scanners\AiCrawlerBlockedPagesScanner;
 
 require_once __DIR__ . '/TestCase.php';
 

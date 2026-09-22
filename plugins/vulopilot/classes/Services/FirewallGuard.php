@@ -28,7 +28,7 @@ defined( 'ABSPATH' ) || exit;
  * Scanners\Basic\MalwareScanner's Check A uses, here checked at request
  * time instead of at rest), and null-byte injection.
  *
- * On a match, **always** logs a real row (`vulopilot_firewall_blocks`).
+ * On a match, **always** logs a real row (`vulopilot_security_events` (type `firewall_block`)).
  * Only actually blocks (403 + terminate) when `enable_firewall_blocking`
  * is explicitly turned on — off by default, so a false positive can't lock
  * out a legitimate request the moment this ships. See

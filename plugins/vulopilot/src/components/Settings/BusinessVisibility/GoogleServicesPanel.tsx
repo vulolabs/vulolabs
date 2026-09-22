@@ -3,7 +3,6 @@ import React, { useEffect, useState } from 'react';
 import { __ } from '@wordpress/i18n';
 import { getApiLink, getApiResponse, sendApiResponse } from '@zyra/core';
 import {
-	ModuleGuardComponent,
 	NoticeComponent,
 	NoticeManager,
 	PopupComponent,
@@ -385,27 +384,43 @@ const GoogleServicesPanel = () => {
 		return (
 			<>
 				{ ! status.has_client_credentials && ! status.has_broker ? (
-					<ModuleGuardComponent
-						icon="info"
+					<CardHeader
+						icon="error red"
 						title={ __( 'Google Connect isn’t available yet', 'vulopilot' ) }
 						desc={ __(
 							'This build doesn’t have a Google Cloud OAuth Client configured yet — that’s a one-time setup VuloLabs does, not something you configure. Flag if you’re seeing this on a real release.',
 							'vulopilot'
 						) }
+						action={
+							<ButtonInput
+								buttons={ {
+									text: __( 'Connect Google Services', 'vulopilot' ),
+									icon: 'link',
+									disabled: true,
+									onClick: () => {},
+								} }
+							/>
+						}
 					/>
 				) : (
-					<div className="gsc-connect-hero">
-						<ButtonInput
-							buttons={ {
-								text: isConnecting ? __( 'Redirecting…', 'vulopilot' ) : __( 'Connect Google Services', 'vulopilot' ),
-								icon: 'link',
-								onClick: handleConnect,
-								disabled: isConnecting,
-							} }
-						/>
-						<div className="gsc-benefits-title">
-							{ __( 'Benefits of connecting your Google account', 'vulopilot' ) }
-						</div>
+					<CardHeader
+						icon="check green"
+						title={ __( 'Benefits of connecting your Google account', 'vulopilot' ) }
+						desc={ __(
+							'We don’t store any of your Google account’s data on our servers — everything is processed and stored on your own site. Tokens are encrypted at rest the same way every other API key in VuloPilot is.',
+							'vulopilot'
+						) }
+						action={
+							<ButtonInput
+								buttons={ {
+									text: isConnecting ? __( 'Redirecting…', 'vulopilot' ) : __( 'Connect Google Services', 'vulopilot' ),
+									icon: 'link',
+									onClick: handleConnect,
+									disabled: isConnecting,
+								} }
+							/>
+						}
+					>
 						<ul className="gsc-benefits-list">
 							{ BENEFITS.map( ( benefit ) => (
 								<li key={ benefit }>
@@ -413,14 +428,7 @@ const GoogleServicesPanel = () => {
 								</li>
 							) ) }
 						</ul>
-						<NoticeComponent
-							displayPosition="inline"
-							message={ __(
-								'We don’t store any of your Google account’s data on our servers — everything is processed and stored on your own site. Tokens are encrypted at rest the same way every other API key in VuloPilot is.',
-								'vulopilot'
-							) }
-						/>
-					</div>
+					</CardHeader>
 				) }
 			</>
 		);

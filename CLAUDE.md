@@ -32,6 +32,12 @@ Don't assume a change to one plugin's `Utill.php`/`Modules.php`/REST controllers
 - `vulopilot`: 2 modules (`Geo`, `Seo`), auto-activated on fresh install.
 - `vulocart`: 9 modules. `Cart`/`Order` auto-activate on fresh install and are treated more like built-in core than optional add-ons (seeded once via a `vulocart_cart_order_modules_seeded` option flag). `Customer`/`Address`/`Shipping`/`Taxes`/`Payment`/`Review`/`Confirmation` back the storefront checkout wizard's own steps, auto-activated the same way via a separate `vulocart_checkout_modules_seeded` flag.
 
+## Where `vulopilot` code lives
+
+- **Module code goes in `modules/<Module>/`**, namespaced `VuloPilot\<Module>\...` (composer PSR-4 maps `VuloPilot\` to both `classes/` and `modules/`). Scanners in `<Module>/Scanners/`, REST controllers in `<Module>/Rest/`, analyzers/services directly in the module folder. Only a folder with a `Module.php` at the top level of `modules/` is discovered as a module — `Scanners/`/`Rest/` subfolders are just autoloaded.
+- **`classes/` is shared core and always-on features only**: bootstrap, `Utill`/`Install`, contracts, value objects, repositories, the scanner/rule/report/AI registries and runners, and features that aren't a Modules-page module (performance, security, backups, sitemaps, redirects, Google/VuloCloud connections).
+- **Pro-only code belongs in `vulolabs-pro`, not here.** If a class is referenced only by the Pro plugin, it moves there (e.g. `ConditionInterface` now lives in `vulopilot-pro/modules/Automations/Contracts/`).
+
 ## `zyra` is an external npm dependency here, not a local package
 
 Both plugins depend on the published package `@multivendorx/zyra` (aliased in `tools/webpack/create-config.js` so existing `import ... from 'zyra'` call sites resolve correctly). There is no `packages/js/zyra` in this repo — don't look for one, and don't fork zyra into this repo; it's a shared design-system package maintained elsewhere.

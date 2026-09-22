@@ -10,7 +10,7 @@ namespace VuloPilot\Repositories;
 defined( 'ABSPATH' ) || exit;
 
 /**
- * Persistence for `vulopilot_performance_requests` — one row per sampled
+ * Persistence for `vulopilot_performance_samples` (type `request`) — one row per sampled
  * real front-end request, written by Services\PerformanceRequestLogger.
  * Read-only from this repository's own perspective (no insert helper here
  * — the logger writes directly via the inherited insert()); the one real
@@ -23,12 +23,26 @@ defined( 'ABSPATH' ) || exit;
 class PerformanceRequestRepository extends AbstractRepository {
 
     /**
+     * This repository's `sample_type` in the shared `vulopilot_performance_samples` table.
+     */
+    private const SAMPLE_TYPE = 'request';
+
+    /**
      * Utill::TABLES key this repository owns.
      *
      * @inheritDoc
      */
+    /**
+     * @inheritDoc
+     */
+    public function insert( array $data ): int {
+        $data['sample_type'] = self::SAMPLE_TYPE;
+
+        return parent::insert( $data );
+    }
+
     protected function get_table_key(): string {
-        return 'performance_request';
+        return 'performance_sample';
     }
 
     /**
@@ -41,21 +55,24 @@ class PerformanceRequestRepository extends AbstractRepository {
 
         $avg_response_time_ms = $wpdb->get_var( // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
             $wpdb->prepare(
-                "SELECT AVG(response_time_ms) FROM {$table} WHERE created_at >= %s", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+                "SELECT AVG(response_time_ms) FROM {$table} WHERE sample_type = %s AND created_at >= %s", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+                self::SAMPLE_TYPE,
                 gmdate( 'Y-m-d H:i:s', time() - HOUR_IN_SECONDS )
             )
         );
 
         $page_views_last_5_min = (int) $wpdb->get_var( // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
             $wpdb->prepare(
-                "SELECT COUNT(*) FROM {$table} WHERE created_at >= %s", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+                "SELECT COUNT(*) FROM {$table} WHERE sample_type = %s AND created_at >= %s", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+                self::SAMPLE_TYPE,
                 gmdate( 'Y-m-d H:i:s', time() - 5 * MINUTE_IN_SECONDS )
             )
         );
 
         $samples_last_hour = (int) $wpdb->get_var( // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
             $wpdb->prepare(
-                "SELECT COUNT(*) FROM {$table} WHERE created_at >= %s", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+                "SELECT COUNT(*) FROM {$table} WHERE sample_type = %s AND created_at >= %s", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+                self::SAMPLE_TYPE,
                 gmdate( 'Y-m-d H:i:s', time() - HOUR_IN_SECONDS )
             )
         );
@@ -79,7 +96,8 @@ class PerformanceRequestRepository extends AbstractRepository {
 
         $wpdb->query( // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
             $wpdb->prepare(
-                "DELETE FROM {$this->get_table()} WHERE created_at < %s", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+                "DELETE FROM {$this->get_table()} WHERE sample_type = %s AND created_at < %s", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+                self::SAMPLE_TYPE,
                 gmdate( 'Y-m-d H:i:s', time() - $days * DAY_IN_SECONDS )
             )
         );

@@ -102,10 +102,10 @@ const ReportsOverviewHeader = ({
 											onClick: () => setIsProPopupOpen(true),
 										}}
 									/>
-									<span className="admin-tag pro-tag pro-tag-inline">
+									{/* <span className="admin-tag pro-tag pro-tag-inline">
 										<i className="adminfont-lock" />
 										{proTagText}
-									</span>
+									</span> */}
 								</span>
 								<span className="reports-overview-action-with-tag">
 									<ButtonInput
@@ -116,10 +116,10 @@ const ReportsOverviewHeader = ({
 											onClick: () => setIsProPopupOpen(true),
 										}}
 									/>
-									<span className="admin-tag pro-tag pro-tag-inline">
+									{/* <span className="admin-tag pro-tag pro-tag-inline">
 										<i className="adminfont-lock" />
 										{proTagText}
-									</span>
+									</span> */}
 								</span>
 								<span className="reports-overview-action-with-tag">
 									<ButtonInput
@@ -130,10 +130,10 @@ const ReportsOverviewHeader = ({
 											onClick: () => setIsProPopupOpen(true),
 										}}
 									/>
-									<span className="admin-tag pro-tag pro-tag-inline">
+									{/* <span className="admin-tag pro-tag pro-tag-inline">
 										<i className="adminfont-lock" />
 										{proTagText}
-									</span>
+									</span> */}
 								</span>
 							</>
 						)}

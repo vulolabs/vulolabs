@@ -18,7 +18,7 @@ import ConnectionsPanel from './ConnectionsPanel';
  * (first).
  *
  * `ConnectionsPanel.tsx` and the real per-provider panel components it
- * composes (`AiProvidersPanel.tsx`/`GoogleServicesPanel.tsx`/
+ * composes (`VuloCloudAiConnectionPanel.tsx`/`GoogleServicesPanel.tsx`/
  * `PageSpeedStatusPanel.tsx`/`SiteVerificationPanel.tsx`) already lived in
  * this same `GetStarted/` folder — they're plain `.tsx` components, not
  * settings-tab configs (`templateService.ts`'s own `require.context` only
@@ -47,7 +47,7 @@ export default {
 	priority: 6,
 	headerTitle: __('Connections', 'vulopilot'),
 	headerDescription: __(
-		'Connect VuloPilot to AI providers, Google services, and verify your site ownership.',
+		'Connect VuloPilot to AI services, Google services, and verify your site ownership.',
 		'vulopilot'
 	),
 	hideSettingHeader: true,

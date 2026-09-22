@@ -144,26 +144,6 @@ const PageAnalysisPanel = ({ postId, onClose }: PageAnalysisPanelProps) => {
 			title={__('Page Analysis', 'vulopilot')}
 			titleIcon="search"
 			desc={__('A single page\'s real SEO/GEO signals, checked live.', 'vulopilot')}
-			action={
-				<div className="page-analysis-panel-actions">
-					{/*
-					 * Edit/View/Fix with AI — moved here from
-					 * SeoIssuesByPageTable.tsx's own row actions (per direct
-					 * instruction: that table's "Pages & Posts" row now shows
-					 * only "Analyze"/"Viewing"), since this panel is the one
-					 * real place left that already knows this page's own
-					 * edit link/permalink/worst-check.
-					 */}
-					<button
-						type="button"
-						className="page-analysis-panel-close"
-						onClick={onClose}
-						aria-label={__('Close', 'vulopilot')}
-					>
-						<i className="adminfont-close" />
-					</button>
-				</div>
-			}
 			isLoading={isLoading}
 		>
 			{error && (
@@ -203,9 +183,10 @@ const PageAnalysisPanel = ({ postId, onClose }: PageAnalysisPanelProps) => {
 							title: template.label,
 							desc: template.message,
 							action: () => {
-								window.location.href = buildCheckEditLink(
-									data.post_id,
-									template.key
+								window.open(
+									buildCheckEditLink(data.post_id, template.key),
+									'_blank',
+									'noopener,noreferrer'
 								);
 							},
 							tags: (
@@ -226,7 +207,7 @@ const PageAnalysisPanel = ({ postId, onClose }: PageAnalysisPanelProps) => {
 							{
 								icon: 'edit',
 								color: 'border-green',
-								text: __('Edit', 'vulopilot'),
+								text: __('Edit page', 'vulopilot'),
 								onClick: () => {
 									window.location.href = buildEditLink(postId);
 								},
@@ -234,7 +215,7 @@ const PageAnalysisPanel = ({ postId, onClose }: PageAnalysisPanelProps) => {
 							{
 								icon: 'eye',
 								color: 'border-blue',
-								text: __('View', 'vulopilot'),
+								text: __('View page', 'vulopilot'),
 								disabled: !data?.permalink,
 								onClick: () => {
 									if (data?.permalink) {

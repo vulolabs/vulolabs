@@ -19,6 +19,8 @@ declare global {
 		site_title: string;
 		/** `get_bloginfo('description')` — see `site_title` above. */
 		site_description: string;
+		/** Homepage thumbnail: front page featured image, else custom logo, else site icon — `''` when none exist (FrontendScripts::get_home_preview_image()). */
+		home_preview_image: string;
 		/** The real logged-in WP user's own display name (`wp_get_current_user()->display_name`) — e.g. AiContentAssistantSidebar.tsx's own "Hi {name}!" greeting. */
 		current_user_display_name: string;
 		version: string;

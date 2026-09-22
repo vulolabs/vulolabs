@@ -124,7 +124,7 @@ class CrawlerTrafficLogger {
      * User-Agent substring => display name, extensible via
      * `vulopilot_crawler_bot_signatures` — the shared source of truth for
      * every place in this codebase that needs to know which AI bots are
-     * detectable (Scanners\Basic\AiCrawlerBlockedPagesScanner, and
+     * detectable (Seo\Scanners\AiCrawlerBlockedPagesScanner, and
      * vulopilot-pro's crawler-analytics correlation/alert code).
      *
      * @return array<string, string>

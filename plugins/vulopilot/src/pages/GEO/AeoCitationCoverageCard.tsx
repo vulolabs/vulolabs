@@ -106,7 +106,7 @@ const AeoCitationCoverageCard = ({ isActive }: AeoCitationCoverageCardProps) => 
 				{sprintf(
 					/* translators: %d is a placeholder example percent, not real data. */
 					__(
-						'questions your AI provider already recognized this site for (%d%%).',
+						'questions your AI service already recognized this site for (%d%%).',
 						'vulopilot'
 					),
 					60
@@ -116,12 +116,12 @@ const AeoCitationCoverageCard = ({ isActive }: AeoCitationCoverageCardProps) => 
 	);
 
 	return (
-		<ColumnComponent grid={6}>
+		<ColumnComponent grid={6} fullHeight>
 			<CardComponent
 				title={__('Answer Engine Coverage', 'vulopilot')}
 				titleIcon="global-community"
 				desc={__(
-					"Asks your own configured AI provider real questions from your content — without ever naming your site — and checks whether it already recognizes you as a source. A real, disclosed simulation of what that model already knows, not a live ChatGPT/Perplexity search.",
+					"Asks your own configured AI service real questions from your content — without ever naming your site — and checks whether it already recognizes you as a source. A real, disclosed simulation of what that model already knows, not a live ChatGPT/Perplexity search.",
 					'vulopilot'
 				)}
 				badges={badges}
@@ -156,7 +156,7 @@ const AeoCitationCoverageCard = ({ isActive }: AeoCitationCoverageCardProps) => 
 								icon="info"
 								title={__('Not run yet', 'vulopilot')}
 								desc={__(
-									'Click "Run check" to ask your configured AI provider a handful of real questions from your own published content.',
+									'Click "Run check" to ask your configured AI service a handful of real questions from your own published content.',
 									'vulopilot'
 								)}
 							/>
@@ -168,9 +168,9 @@ const AeoCitationCoverageCard = ({ isActive }: AeoCitationCoverageCardProps) => 
 								</div>
 								<div className="desc">
 									{sprintf(
-										/* translators: %d is the percent of tested questions the AI provider already recognized this site for. */
+										/* translators: %d is the percent of tested questions the AI service already recognized this site for. */
 										__(
-											'questions your AI provider already recognized this site for (%d%%).',
+											'questions your AI service already recognized this site for (%d%%).',
 											'vulopilot'
 										),
 										coverage.coverage_percent

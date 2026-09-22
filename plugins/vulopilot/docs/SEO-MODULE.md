@@ -202,7 +202,7 @@ more natural one-click fix: describing a page from its own content is a
 well-bounded AI task, matching `GenerateAltAction`'s reasoning, whereas a good
 title rewrite has tighter, harder-to-validate length constraints):
 
-**`AIActions\Actions\WriteMetaDescriptionAction`** (`write-meta-description`) —
+**`AiCopilot\Actions\WriteMetaDescriptionAction`** (`write-meta-description`) —
 shaped like `ImproveReadabilityAction` (a real `wp_update_post()` write, so it also
 creates a WordPress revision as a bonus safety net) rather than
 `GenerateAltAction`'s raw postmeta write, since `post_excerpt` is a first-class post
@@ -213,7 +213,7 @@ documents (no formal Recommendation → Action mapping exists yet — see that d
 own "What's not here yet").
 
 **`SeoTitleRewriteRule`'s own gap has since been closed too**, by
-`AIActions\Actions\WriteMetaTitleAction` (`write-meta-title` — not
+`AiCopilot\Actions\WriteMetaTitleAction` (`write-meta-title` — not
 `write-seo-title`, despite what an earlier version of this doc predicted the id
 would be). Unlike `WriteMetaDescriptionAction`'s `post_excerpt` write, this
 writes directly to the native `post_title` field via `wp_update_post()` — the

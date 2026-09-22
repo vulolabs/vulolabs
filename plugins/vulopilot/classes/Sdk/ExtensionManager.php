@@ -30,7 +30,7 @@ defined( 'ABSPATH' ) || exit;
  * Hooked at `init` priority 15, one tick before the per-concern registries
  * (ScannerRegistry et al., all priority 20) read their own filters — so an
  * extension's register() call has already added its own scanner/rule/
- * automation/report/AI-provider classes to those filters by the time the
+ * automation/report classes to those filters by the time the
  * registries that consume them run.
  *
  * @class       ExtensionManager class

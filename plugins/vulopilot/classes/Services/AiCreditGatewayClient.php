@@ -20,7 +20,7 @@ defined( 'ABSPATH' ) || exit;
  * Deliberately its own class, separate from AiCreditsApiClient (which
  * only talks to the `ai-credits` context's connect/balance endpoints) —
  * this is a different bounded context on the vulocloud side and a
- * different real caller here (AIActions\ActionRunner, not Settings/the
+ * different real caller here (AiCopilot\ActionRunner, not Settings/the
  * credit indicator).
  *
  * @class       AiCreditGatewayClient class
@@ -39,15 +39,15 @@ class AiCreditGatewayClient {
      * @param string               $feature_id e.g. 'seo_title'.
      * @param string               $action     e.g. 'generate'.
      * @param array<string, mixed> $context    Structured feature input — see
-     *                                          each AIActions\Actions\* class's
+     *                                          each AiCopilot\Actions\* class's
      *                                          own credit-context mapping in
-     *                                          AIActions\ActionRunner.
+     *                                          AiCopilot\ActionRunner.
      * @return array{success: true, request_id: string, credits_used: int, credits_remaining: int, response: string}|array{success: false, error: string, credits_remaining: int, can_buy_credits: bool, can_upgrade: bool}|\WP_Error {
      *   A \WP_Error only for a genuine connectivity/configuration failure
      *   (not connected, network unreachable, malformed response) — every
      *   OTHER outcome (including "insufficient credits" and any
      *   VuloCloud-side DomainError, e.g. an unknown feature) comes back as
-     *   a plain array so AIActions\ActionRunner's own credits branch can
+     *   a plain array so AiCopilot\ActionRunner's own credits branch can
      *   handle "insufficient_credits" as a real, structured, user-facing
      *   outcome (VuloPilot brief §15) rather than an exception.
      * }

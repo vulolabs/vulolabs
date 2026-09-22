@@ -74,8 +74,8 @@ const TONE_COLOR: Record<ScoreTone, string> = {
 
 const TONE_RATING_LABEL: Record<ScoreTone, string> = {
 	green: __('Good', 'vulopilot'),
-	orange: __('Needs improvement', 'vulopilot'),
-	red: __('Needs attention', 'vulopilot'),
+	orange: __('Needs Work', 'vulopilot'),
+	red: __('At Risk', 'vulopilot'),
 };
 
 /**

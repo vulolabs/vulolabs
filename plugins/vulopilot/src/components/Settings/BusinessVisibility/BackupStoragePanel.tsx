@@ -65,7 +65,7 @@ const AUTOSAVE_DEBOUNCE_MS = 1200;
  * card — see Backups.ts's own docblock for exactly where this is appended.
  *
  * Both destinations are now one real `ExpandablePanelInput` (per direct
- * instruction, matching AiProvidersPanel.tsx's own "Other providers"
+ * instruction, matching VuloCloudAiConnectionPanel.tsx's own "Other providers"
  * list) instead of two hand-rolled `is-clickable` header divs — same real
  * zyra component, `isCustom`/`hideDeleteBtn`/`badgeColor`/`badgeText` rows
  * with no on/off `enable` semantics of their own (neither destination has
@@ -74,7 +74,7 @@ const AUTOSAVE_DEBOUNCE_MS = 1200;
  * than the `isS3Open`/`isGoogleDriveOpen` state this file used to keep by
  * hand. Each row's live-typed fields (access key, client secret, ...) live
  * in `panelValues`, merged with real server state in `mergedValues` the
- * same way AiProvidersPanel.tsx's own `heroPanelValues` merges `heroValues`
+ * same way VuloCloudAiConnectionPanel.tsx's own `heroPanelValues` merges `heroValues`
  * with `configured` — `handleSaveS3`/`handleSaveGoogleClient` read off
  * `mergedValues` instead of the individual `accessKey`/`secretKey`/...
  * state this file used to keep per field.
@@ -209,7 +209,7 @@ const BackupStoragePanel = () => {
 
 	// Live-typed fields merged with real server state — `bucket`/`region`
 	// fall back to the saved values until the user types their own, same
-	// "live merged with saved" shape AiProvidersPanel.tsx's own
+	// "live merged with saved" shape VuloCloudAiConnectionPanel.tsx's own
 	// `heroPanelValues` uses.
 	const mergedValues: Record<string, Record<string, unknown>> = {
 		s3: {

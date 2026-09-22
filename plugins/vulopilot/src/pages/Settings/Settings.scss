@@ -126,12 +126,11 @@
 // CardHeader.tsx's own `.common-card*` rules moved to its co-located
 // CardHeader.scss (imported directly by CardHeader.tsx) — see that file.
 
-// AiProvidersPanel.tsx/GoogleServicesPanel.tsx/PageSpeedStatusPanel.tsx/
+// VuloCloudAiConnectionPanel.tsx/GoogleServicesPanel.tsx/PageSpeedStatusPanel.tsx/
 // SiteVerificationPanel.tsx's own shared card-body shell.
 .ai-provider-card-body {
 	// padding: 0 1rem 1rem;
-	padding-top: 1rem;
-	width: 100%;
+	// padding-top: 1rem;
 	box-sizing: border-box;
 }
 
@@ -302,4 +301,14 @@
 	flex: 1;
 	min-width: 16rem;
 	margin-bottom: 0;
+}
+
+// Settings/SendTestReportButton.tsx — Settings → Reports' header "Send Test
+// Report" button. Without Pro it carries an inline "Pro" tag (a plain
+// `.admin-tag.pro-tag` is an absolute-positioned corner ribbon; `.pro-tag-inline`
+// makes it static) beside the button, so the two share one row.
+.send-test-report-actions {
+	display: flex;
+	align-items: center;
+	gap: 0.5rem;
 }

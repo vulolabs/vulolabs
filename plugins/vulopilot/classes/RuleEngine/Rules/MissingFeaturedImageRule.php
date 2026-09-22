@@ -16,7 +16,7 @@ use VuloPilot\ValueObjects\RuleType;
 defined( 'ABSPATH' ) || exit;
 
 /**
- * Turns Scanners\Basic\SeoImagesScanner's "no featured image" Finding
+ * Turns Seo\Scanners\SeoImagesScanner's "no featured image" Finding
  * into a recommendation. Deliberately fixable() = true but
  * requires_ai() = false — unlike MissingAltTextRule/SeoTitleRewriteRule/
  * MissingMetaDescriptionRule, there's nothing for AI to generate here:

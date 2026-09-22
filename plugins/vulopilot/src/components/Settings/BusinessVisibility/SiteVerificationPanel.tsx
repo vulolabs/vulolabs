@@ -75,7 +75,7 @@ const PLAIN_CODE_FIELDS: PlainCodeFieldConfig[] = [
 		key: 'webmaster_baidu_verification',
 		icon: 'search-discovery red',
 		title: __('Baidu', 'vulopilot'),
-		fieldLabel: __('Baidu Webmaster Tools verification ID', 'vulopilot'),
+		// fieldLabel: __('Baidu Webmaster Tools verification ID', 'vulopilot'),
 		desc: __(
 			'Enter your Baidu Webmaster Tools verification ID. Rendered as <meta name="baidu-site-verification" content="...">.',
 			'vulopilot'
@@ -85,7 +85,7 @@ const PLAIN_CODE_FIELDS: PlainCodeFieldConfig[] = [
 		key: 'webmaster_yandex_verification',
 		icon: 'search yellow',
 		title: __('Yandex', 'vulopilot'),
-		fieldLabel: __('Yandex verification ID', 'vulopilot'),
+		// fieldLabel: __('Yandex verification ID', 'vulopilot'),
 		desc: __(
 			'Enter your Yandex.Webmaster verification ID. Rendered as <meta name="yandex-verification" content="...">.',
 			'vulopilot'
@@ -95,7 +95,7 @@ const PLAIN_CODE_FIELDS: PlainCodeFieldConfig[] = [
 		key: 'webmaster_norton_verification',
 		icon: 'security green',
 		title: __('Norton Safe Web', 'vulopilot'),
-		fieldLabel: __('Norton Safe Web verification ID', 'vulopilot'),
+		// fieldLabel: __('Norton Safe Web verification ID', 'vulopilot'),
 		desc: __(
 			'Enter your Norton Safe Web ownership verification ID. Rendered as <meta name="norton-safeweb-site-verification" content="...">.',
 			'vulopilot'
@@ -374,13 +374,12 @@ const ProviderRow = ({ provider, icon, title, desc }: ProviderRowConfig) => {
 		>
 			<div className="ai-provider-card-body gsc-service-body">
 				<div className="ai-provider-field site-verification-code-field">
-					<label htmlFor={`${codeKey}-input`}>
+					{/* <label htmlFor={`${codeKey}-input`}>
 						{sprintf(
-							/* translators: %s is the provider name (Google, Bing, Pinterest). */
 							__('%s verification code', 'vulopilot'),
 							title
 						)}
-					</label>
+					</label> */}
 					<TextInput
 						id={`${codeKey}-input`}
 						type="text"
@@ -435,17 +434,13 @@ const SiteVerificationPanel = () => {
 		<>
 
 			<FormGroupWrapperComponent>
-				<FormGroupComponent>
-					{PROVIDERS.map((row) => (
-						<ProviderRow key={row.provider} {...row} />
-					))}
-				</FormGroupComponent>
-				<FormGroupComponent>
-					{PLAIN_CODE_FIELDS.map((field) => (
-						<PlainCodeField key={field.key} field={field} />
-					))}
-					<CustomTagsField />
-				</FormGroupComponent>
+				{PROVIDERS.map((row) => (
+					<ProviderRow key={row.provider} {...row} />
+				))}
+				{PLAIN_CODE_FIELDS.map((field) => (
+					<PlainCodeField key={field.key} field={field} />
+				))}
+				<CustomTagsField />
 				<FormGroupComponent>
 					<NoticeComponent
 						displayPosition="inline-notice"

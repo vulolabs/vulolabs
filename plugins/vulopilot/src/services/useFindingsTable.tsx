@@ -416,8 +416,8 @@ export const useFindingsTable = ({
 				{
 					label: (row?: Record<string, unknown>) =>
 						row?.status === 'open'
-							? __('Mark resolved', 'vulopilot')
-							: __('Resolved', 'vulopilot'),
+							? __('Mark as Fixed', 'vulopilot')
+							: __('Fixed', 'vulopilot'),
 					icon: 'check',
 					onClick: handleResolve,
 				},
@@ -425,7 +425,7 @@ export const useFindingsTable = ({
 					label: (row?: Record<string, unknown>) =>
 						row?.status === 'ignored'
 							? __('Ignored', 'vulopilot')
-							: __('Ignore', 'vulopilot'),
+							: __('Ignore Issue', 'vulopilot'),
 					icon: 'eye-blocked',
 					onClick: handleIgnore,
 				},
@@ -498,13 +498,13 @@ export const useFindingsTable = ({
 				},
 				{
 					type: 'button',
-					label: __('Resolve', 'vulopilot'),
+					label: __('Mark as Fixed', 'vulopilot'),
 					hidden: (row) => 'open' !== (row as Finding | undefined)?.status,
 					onClick: (row) => handleResolve(row),
 				},
 				{
 					type: 'button',
-					label: __('Ignore', 'vulopilot'),
+					label: __('Ignore Issue', 'vulopilot'),
 					hidden: (row) => 'open' !== (row as Finding | undefined)?.status,
 					onClick: (row) => handleIgnore(row),
 				},
@@ -611,10 +611,10 @@ export const useFindingsTable = ({
 				: undefined,
 		bulkActions: [
 			{
-				label: __('Mark resolved', 'vulopilot'),
+				label: __('Mark as Fixed', 'vulopilot'),
 				value: 'resolved',
 			},
-			{ label: __('Ignore', 'vulopilot'), value: 'ignored' },
+			{ label: __('Ignore Issue', 'vulopilot'), value: 'ignored' },
 			// Always visible, same "register a source, don't modify
 			// the host" reasoning as the per-row "Fix" action above —
 			// its onClick below only ever calls the Pro-registered

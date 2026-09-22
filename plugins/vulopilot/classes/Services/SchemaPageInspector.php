@@ -7,7 +7,7 @@
 
 namespace VuloPilot\Services;
 
-use VuloPilot\Scanners\Basic\StructuredDataValidationScanner;
+use VuloPilot\Seo\Scanners\StructuredDataValidationScanner;
 
 defined( 'ABSPATH' ) || exit;
 

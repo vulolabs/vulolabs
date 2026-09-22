@@ -8,13 +8,13 @@
 namespace VuloPilot\Services;
 
 use VuloPilot\Repositories\FindingRepository;
-use VuloPilot\Repositories\PerformanceScoreSnapshotRepository;
+use VuloPilot\Repositories\ScoreSnapshotRepository;
 
 defined( 'ABSPATH' ) || exit;
 
 /**
  * Writes today's real performance-category score into
- * `vulopilot_performance_score_snapshots` — the data SpeedHistoryCard.tsx's
+ * `vulopilot_score_snapshots` (category `performance`) — the data SpeedHistoryCard.tsx's
  * chart reads. Hooked on `vulopilot_scan_completed` at priority 20 (after
  * Services\ScanPersistenceListener's own default-priority-10 handler has
  * already written that scanner's findings to the database) so the score
@@ -65,7 +65,7 @@ class PerformanceScoreSnapshotRecorder {
 
         $score = max( 0, min( 100, $score ) );
 
-        ( new PerformanceScoreSnapshotRepository() )->upsert_today( $score );
+        ( new ScoreSnapshotRepository( 'performance' ) )->upsert_today( $score );
     }
 
     /**

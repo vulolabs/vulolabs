@@ -13,6 +13,17 @@ claim above still holds.)
 `1.0.0` baseline (tables 1–13 below) plus 11 tables added one-at-a-time in later passes (tables
 14–24 below), each still created/owned entirely by Free's `Install.php`.
 
+
+> **Consolidated tables (current schema).** Where the sections below still show the original one-table-per-feature sketch, the shipped schema merged these:
+> - `vulopilot_ai_provider_configs` and `vulopilot_backup_storage_configs` were removed: no AI provider key is stored locally (VuloCloud holds them), and Backups' S3/Drive credentials live in one encrypted, non-autoloaded option (`vulopilot_backup_storage_credentials`, `Services\BackupCredentialStore`).
+> - `vulopilot_performance_requests` + `vulopilot_core_web_vitals` → **`vulopilot_performance_samples`** (`sample_type` = `request` | `vital`).
+> - Eight daily score-history tables (performance/security score, accessibility, site health, store trends, brand score, GEO visibility, Knowledge Graph health) → **`vulopilot_snapshots`** (`snapshot_type` + `snapshot_date` unique, values as JSON in `data`; `Repositories\SnapshotRepository`).
+> - `vulopilot_rules` and `vulopilot_ai_jobs` were removed (never used).
+> - `vulopilot_login_attempts` + `vulopilot_firewall_blocks` → **`vulopilot_security_events`** (`event_type` = `login_attempt` | `firewall_block`).
+> - `vulopilot_indexnow_log` was removed: submissions are rows in `vulopilot_activity_logs` (`event_type` = `indexnow.submitted`, details in `meta`).
+> - **Pro-only tables now live in vulopilot-pro**, not Free: `vulopilot_scheduled_jobs`, `vulopilot_keyword_rankings`, `vulopilot_brand_mentions`, `vulopilot_entity_relationships`, `vulopilot_file_baselines` are created by `VuloPilotPro\Install::ensure_tables()` and read/written through Pro's own repositories (`Install::TABLES` is their registry). Free creates 17 tables; Pro adds these 5.
+> The plugin is unreleased, so there are no upgrade/migration steps for any of this — tables are created fresh by `Install::install()`.
+
 ## Design principles (matched against the real schema in `vulolabs/plugins/vulopilot/classes/Install.php`)
 
 - **`bigint(20) unsigned` primary keys, `AUTO_INCREMENT`, lower-case `id`** — the existing schema is
@@ -29,7 +40,7 @@ claim above still holds.)
   either). VuloPilot follows the same convention — every `*_id` column below is a plain indexed
   `bigint(20) unsigned`, not a constraint.
 - **`object_type` + `object_id` only where the target genuinely varies by row** (`vulopilot_scan_findings.object_ref`,
-  `vulopilot_ai_jobs`/`vulopilot_ai_history`/`vulopilot_activity_logs`). This isn't a general
+  `vulopilot_ai_history`/`vulopilot_activity_logs`). This isn't a general
   polymorphic-association framework bolted on — the existing schema always uses a specific typed
   column (`store_id`, `product_id`) when the target is a single known entity, and this design does
   the same everywhere a specific target type exists (`vulopilot_automations.rule_id`,
@@ -54,10 +65,8 @@ claim above still holds.)
 const TABLES = array(
     'scan'                   => 'vulopilot_scans',
     'scan_finding'           => 'vulopilot_scan_findings',
-    'rule'                   => 'vulopilot_rules',
     'automation'             => 'vulopilot_automations',
     'automation_run'         => 'vulopilot_automation_runs',
-    'ai_job'                 => 'vulopilot_ai_jobs',
     'ai_history'             => 'vulopilot_ai_history',
     'ai_provider_config'     => 'vulopilot_ai_provider_configs',
     'report'                 => 'vulopilot_reports',
@@ -90,11 +99,9 @@ separate pass — tables 14–24 below, in the same order `Install.php`'s own
 ```mermaid
 erDiagram
     vulopilot_scans ||--o{ vulopilot_scan_findings : "produces"
-    vulopilot_rules ||--o{ vulopilot_automations : "evaluated by"
     vulopilot_automations ||--o{ vulopilot_automation_runs : "executes as"
     vulopilot_scans ||--o| vulopilot_automation_runs : "can trigger"
-    vulopilot_ai_provider_configs ||--o{ vulopilot_ai_jobs : "services"
-    vulopilot_ai_jobs ||--o| vulopilot_ai_history : "settles into"
+    vulopilot_ai_provider_configs ||--o{ vulopilot_ai_history : "services"
     vulopilot_scans ||--o{ vulopilot_reports : "aggregated into"
     vulopilot_scheduled_jobs ||--o{ vulopilot_scans : "kicks off"
     vulopilot_scan_findings ||--o{ vulopilot_site_health_snapshots : "rolled up into"
@@ -196,32 +203,10 @@ CREATE TABLE IF NOT EXISTS `{$wpdb->prefix}vulopilot_scan_findings` (
   finishes once, but a finding's lifecycle continues independently (someone can resolve/snooze it
   days later). `idx_status` backs the default "open findings" dashboard filter.
 
-## 3. `vulopilot_rules` — condition definitions (Rule Engine)
+## 3. ~~`vulopilot_rules`~~ — removed
 
-```sql
-CREATE TABLE IF NOT EXISTS `{$wpdb->prefix}vulopilot_rules` (
-    `id`              bigint(20) unsigned NOT NULL AUTO_INCREMENT,
-    `name`            varchar(191) NOT NULL,
-    `description`     text DEFAULT NULL,
-    `condition_tree`  longtext NOT NULL,
-    `is_active`       tinyint(1) NOT NULL DEFAULT 1,
-    `created_by`      bigint(20) unsigned DEFAULT NULL,
-    `created_at`      timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    `updated_at`      timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    PRIMARY KEY (`id`),
-    KEY `idx_active` (`is_active`)
-) $collate;
-```
-
-- Deliberately separate from `vulopilot_automations` (not one merged table): a rule is a reusable
-  condition tree (evaluated by `RuleEngine`/`ConditionRegistry`), and more than one automation can
-  reuse the same rule (e.g. "any critical finding exists" gates both an email automation and an
-  auto-rollback automation). Merging them would force duplicating the condition tree per automation.
-- `condition_tree` — JSON, the nested condition/operator structure `RuleEngine.php` evaluates; each
-  leaf condition type is whatever's registered via `vulopilot_condition_sources` (free or Pro).
-- `is_active` lets a rule be disabled without deleting it (and without cascading to every automation
-  that references it) — `idx_active` backs the "only evaluate active rules" query the engine runs on
-  every tick.
+Never had a reader or writer (rules are code-defined, `RuleEngine\RuleRegistry`), so the table
+was dropped. A future custom-rule builder would re-introduce its own table.
 
 ## 4. `vulopilot_automations` — binds a trigger + conditions to actions
 
@@ -324,48 +309,16 @@ CREATE TABLE IF NOT EXISTS `{$wpdb->prefix}vulopilot_automation_runs` (
   `AutomationEngine::retry_run()` has re-attempted this run's failed
   actions, capped at the `automation_max_retries` setting.
 
-## 6. `vulopilot_ai_jobs` — queued/in-flight AI provider requests
+## 6. ~~`vulopilot_ai_jobs`~~ — removed
 
-```sql
-CREATE TABLE IF NOT EXISTS `{$wpdb->prefix}vulopilot_ai_jobs` (
-    `id`                bigint(20) unsigned NOT NULL AUTO_INCREMENT,
-    `job_type`          varchar(50) NOT NULL,
-    `provider`          varchar(50) NOT NULL,
-    `model`             varchar(100) DEFAULT NULL,
-    `status`            varchar(20) NOT NULL DEFAULT 'queued',
-    `priority`          tinyint(3) unsigned NOT NULL DEFAULT 5,
-    `object_type`       varchar(50) DEFAULT NULL,
-    `object_id`         bigint(20) unsigned DEFAULT NULL,
-    `request_payload`   longtext NOT NULL,
-    `attempts`          tinyint(3) unsigned NOT NULL DEFAULT 0,
-    `requested_by`      bigint(20) unsigned DEFAULT NULL,
-    `created_at`        timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    `started_at`        datetime DEFAULT NULL,
-    `completed_at`      datetime DEFAULT NULL,
-    `error_message`     text DEFAULT NULL,
-    PRIMARY KEY (`id`),
-    KEY `idx_status_priority` (`status`, `priority`),
-    KEY `idx_object` (`object_type`, `object_id`)
-) $collate;
-```
-
-- This is the **work queue**, not the audit ledger (that's `vulopilot_ai_history` below) — rows here
-  are operationally transient: created queued, updated as they process, and are safe to prune once
-  completed (their permanent record lives in `ai_history`).
-- `job_type` (`summarize_findings`/`explain_finding`/`suggest_automation`/`generate_report_summary`,
-  etc.) — what kind of AI call this is; drives which `PromptTemplates/` entry gets used.
-- `object_type`/`object_id` — the loose pair again, used here because a job's subject varies
-  (a finding, a scan, a report) the same way a finding's subject varies above.
-- `idx_status_priority` — a composite index because the job runner's actual query is always "next
-  queued job, highest priority first" (`WHERE status = 'queued' ORDER BY priority DESC, id ASC`); a
-  single-column index on `status` alone would still need a filesort for the `priority` ordering.
+An AI work queue that was never wired up: AI calls settle straight into `vulopilot_ai_history`.
+The table was dropped.
 
 ## 7. `vulopilot_ai_history` — permanent ledger of completed AI calls
 
 ```sql
 CREATE TABLE IF NOT EXISTS `{$wpdb->prefix}vulopilot_ai_history` (
     `id`                  bigint(20) unsigned NOT NULL AUTO_INCREMENT,
-    `job_id`              bigint(20) unsigned DEFAULT NULL,
     `provider`            varchar(50) NOT NULL,
     `model`               varchar(100) DEFAULT NULL,
     `object_type`         varchar(50) DEFAULT NULL,
@@ -384,9 +337,8 @@ CREATE TABLE IF NOT EXISTS `{$wpdb->prefix}vulopilot_ai_history` (
 ) $collate;
 ```
 
-- `job_id` is nullable and deliberately **not** the primary key relationship — a synchronous AI call
-  (small enough to not need queueing) can write straight to `ai_history` without ever having a row in
-  `ai_jobs`. Every async job, once it completes, writes exactly one `ai_history` row referencing it.
+- Every AI call writes exactly one row here directly — there is no separate job queue table (`job_id` and
+  `vulopilot_ai_jobs` were removed; nothing ever wrote them).
 - `prompt_tokens`/`completion_tokens`/`cost_estimate` — this is the table `vulopilot_ai_provider_configs.quota_used`
   gets recalculated from and what a future billing/usage screen queries; keeping it append-only and
   separate from the job queue means quota math never has to account for jobs being pruned.
@@ -1057,8 +1009,7 @@ unconditional, self-healing calls to backfill them.
   version-gated `1.1.0` block, matching `AI-ACTIONS.md`'s reasoning: there is no real deployed
   `1.0.0` install of this still-in-development plugin to preserve compatibility with yet, so a
   fake version bump would misrepresent the schema's actual history rather than reflect it.
-- **Retention is an application-layer job, not a schema concern.** `vulopilot_ai_jobs` (queue churn),
-  `vulopilot_scan_findings`/`vulopilot_activity_logs` (potentially high volume), and
+- **Retention is an application-layer job, not a schema concern.** `vulopilot_scan_findings`/`vulopilot_activity_logs` (potentially high volume), and
   `vulopilot_crawler_visits`/`vulopilot_not_found_logs` (per-visit/per-404 logs) are candidates for a
   scheduled pruning job — `vulopilot_crawler_visits` already has one
   (`vulopilot_crawler_log_retention_days`, table 14 above); the rest would register the same way,

@@ -15,7 +15,7 @@ defined( 'ABSPATH' ) || exit;
  * sitemap index, backing RobotsSitemapSection.tsx's "Robots.txt
  * Analysis"/"XML Sitemap Overview" cards.
  *
- * Neither existing scanner (Scanners\Basic\RobotsTxtScanner/SitemapScanner)
+ * Neither existing scanner (Seo\Scanners\RobotsTxtScanner/SitemapScanner)
  * does this: they only check reachability (and one narrow "blocks every
  * crawler" case for robots.txt) for the findings feed, never return file
  * content or a structured rules/child-sitemap breakdown to the frontend —
@@ -248,7 +248,7 @@ class RobotsSitemap extends \WP_REST_Controller {
     /**
      * Live-fetches this site's own sitemap index — real `/wp-sitemap.xml`
      * (WordPress core's own native sitemap since 5.5) first, falling back
-     * to `/sitemap.xml`, same discovery order Scanners\Basic\SitemapScanner
+     * to `/sitemap.xml`, same discovery order Seo\Scanners\SitemapScanner
      * already uses. Enumerates every real `<sitemap>` child entry (a real
      * index) or treats a flat `<url>` set as one real sitemap — for each
      * real child, a second real request counts its own real `<url>`

@@ -98,9 +98,8 @@ const AccessibilityChecksGrid = ({ onReview }: AccessibilityChecksGridProps) => 
 					title: check.title,
 					tags: (
 						<TypographyComponent
-							as="span"
-							variant="h5"
-							style={{ color: check.color }}
+							variant="desc"
+							// style={{ color: check.color }}
 						>
 							{sprintf(
 								/* translators: %d is the number of open findings. */

@@ -13,7 +13,7 @@ defined( 'ABSPATH' ) || exit;
  * Optional companion to ScannerInterface (same "optional, instanceof-checked
  * add-on" shape as TracksScannedObjectsInterface), implemented only by a
  * scanner that self-rate-limits its own real work independently of the
- * shared scan cadence (Scanners\Basic\BrokenLinksScanner/
+ * shared scan cadence (Seo\Scanners\BrokenLinksScanner/
  * BrokenImagesScanner's own `due_to_run()` — see that method's docblock).
  *
  * ScannerInterface::scan() deliberately takes no parameters, and isn't

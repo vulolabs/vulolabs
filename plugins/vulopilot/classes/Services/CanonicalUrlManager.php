@@ -13,7 +13,7 @@ defined( 'ABSPATH' ) || exit;
 
 /**
  * Scanning → SEO's "Add canonical URL tags" toggle — the mechanical fix
- * behind Scanners\Basic\CanonicalUrlScanner's finding. That scanner's own
+ * behind Seo\Scanners\CanonicalUrlScanner's finding. That scanner's own
  * docblock explains WordPress core already outputs a canonical tag by
  * default (`rel_canonical()` on `wp_head`); its absence almost always
  * means a theme has removed `wp_head()` entirely or a caching/

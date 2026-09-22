@@ -537,7 +537,7 @@ type StatusFilter = 'all' | 'open' | 'resolved' | 'ignored' | 'snoozed';
  * `href`/`src` attribute), then marks the finding resolved. No AI call —
  * broken-link/image URLs are a mechanical find-and-replace, not something
  * that needs a model's judgment the way other scanners' findings do; the
- * gate here is licensing, not a missing AI provider.
+ * gate here is licensing, not a missing AI service.
  */
 const BrokenLinksSection = () => {
 	const [allFindings, setAllFindings] = useState<BrokenLinkFinding[]>([]);
@@ -1011,7 +1011,7 @@ const BrokenLinksSection = () => {
 					label: (row: Record<string, unknown>) =>
 						'ignored' === (row as unknown as BrokenLinkFinding).status
 							? __('Unignore', 'vulopilot')
-							: __('Ignore', 'vulopilot'),
+							: __('Ignore Issue', 'vulopilot'),
 					icon: 'eye-blocked',
 					color: 'text-red',
 					type: 'button',

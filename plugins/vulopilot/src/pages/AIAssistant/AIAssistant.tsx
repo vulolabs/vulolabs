@@ -33,9 +33,8 @@ const MAX_ATTACHMENTS = 3;
 
 /**
  * The types vulopilot-pro's own Rest.php actually does something real with: text/csv files
- * are read as text (ATTACHMENT_TEXT_MIME_TYPES), images are sent as a real
- * inline image when the active provider supports vision
- * (ATTACHMENT_IMAGE_MIME_TYPES/supports_vision() — Gemini today). Only
+ * are read as text (ATTACHMENT_TEXT_MIME_TYPES); anything else, images included, gets
+ * an honest "can't be read" note since the VuloCloud gateway carries text only. Only
  * restricts the drag-and-drop/native-picker validation path — the
  * "Upload File" button's wp.media() library picker ignores `accept`
  * entirely and can select anything already in the Media Library, which
@@ -116,7 +115,7 @@ const SUGGESTED_PROMPTS = [
  * `appLocalizer.vulocloud_connected` (VuloCloudAccountConnection, the
  * *personal* VuloCloud login) as an earlier pass here had it. That flag
  * turned out to be the wrong one: confirmed live that
- * ProviderRegistry::build_provider('vulocloud') — the real gate every
+ * AI\AiRequestSender::send() — the real gate every
  * chat send actually goes through — checks `AiCreditsConnection::
  * is_connected()` instead (a separate, site-scoped credential; see that
  * class's own docblock for how it layers on top of, but doesn't require
@@ -519,7 +518,7 @@ const AIAssistant = () => {
 								}}
 							/>
 						</PopupComponent>
-						{/* useCopilotChat.ts's own send() sets this the moment a real send is attempted (or fails) with no AI provider configured — same free "Connect to VuloCloud" popup every other free AI surface in this plugin uses for this exact condition (ConnectVuloCloudPopup.tsx's own docblock). */}
+						{/* useCopilotChat.ts's own send() sets this the moment a real send is attempted (or fails) with no AI connection configured — same free "Connect to VuloCloud" popup every other free AI surface in this plugin uses for this exact condition (ConnectVuloCloudPopup.tsx's own docblock). */}
 						<ConnectVuloCloudPopup
 							open={isCloudConnectPromptOpen}
 							onClose={dismissCloudConnectPrompt}

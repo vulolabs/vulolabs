@@ -165,6 +165,10 @@ class FrontendScripts {
                 // itself resolves the exact same way (get_bloginfo()).
                 'site_title'                => get_bloginfo( 'name' ),
                 'site_description'          => get_bloginfo( 'description' ),
+                // Dashboard → Site overview's homepage thumbnail: the static front
+                // page's featured image, else the site logo, else the site icon —
+                // a real image this site already has, not a rendered screenshot.
+                'home_preview_image'        => self::get_home_preview_image(),
                 // The real logged-in user's own display name — e.g. the
                 // AI Content Assistant's greeting (AiContentAssistantSidebar.tsx)
                 // reads this to say "Hi {name}!" instead of a generic
@@ -299,5 +303,81 @@ class FrontendScripts {
         }
 
         return trim( $js_format );
+    }
+
+    /**
+     * Best real image to represent the homepage: the static front page's
+     * featured image, else the custom logo, else the site icon, else the
+     * newest post featured image, else the newest media-library image.
+     *
+     * @return string Image URL, or '' when the site has none of them.
+     */
+    private static function get_home_preview_image(): string {
+        $front_page_id = (int) get_option( 'page_on_front' );
+
+        if ( $front_page_id ) {
+            $thumbnail = get_the_post_thumbnail_url( $front_page_id, 'large' );
+
+            if ( $thumbnail ) {
+                return esc_url_raw( $thumbnail );
+            }
+        }
+
+        $logo_id = (int) get_theme_mod( 'custom_logo' );
+
+        if ( $logo_id ) {
+            $logo = wp_get_attachment_image_url( $logo_id, 'large' );
+
+            if ( $logo ) {
+                return esc_url_raw( $logo );
+            }
+        }
+
+        $site_icon = get_site_icon_url( 512 );
+
+        if ( $site_icon ) {
+            return esc_url_raw( $site_icon );
+        }
+
+        // Sites that show their latest posts (no static front page) have
+        // none of the above by default — fall back to the newest published
+        // post that has a featured image, then the newest image in the
+        // media library.
+        $posts_with_image = get_posts(
+            array(
+                'post_type'      => array( 'post', 'page' ),
+                'post_status'    => 'publish',
+                'posts_per_page' => 1,
+                'fields'         => 'ids',
+                'meta_key'       => '_thumbnail_id',
+                'orderby'        => 'date',
+                'order'          => 'DESC',
+            )
+        );
+
+        if ( $posts_with_image ) {
+            $thumbnail = get_the_post_thumbnail_url( (int) $posts_with_image[0], 'large' );
+
+            if ( $thumbnail ) {
+                return esc_url_raw( $thumbnail );
+            }
+        }
+
+        $images = get_posts(
+            array(
+                'post_type'      => 'attachment',
+                'post_status'    => 'inherit',
+                'post_mime_type' => 'image',
+                'posts_per_page' => 1,
+                'fields'         => 'ids',
+                'orderby'        => 'date',
+                'order'          => 'DESC',
+            )
+        );
+
+        $image_url = $images ? (string) wp_get_attachment_image_url( (int) $images[0], 'large' ) : '';
+
+        // WooCommerce's stock placeholder image isn't this site's own picture.
+        return ( '' !== $image_url && false === strpos( $image_url, 'placeholder' ) ) ? esc_url_raw( $image_url ) : '';
     }
 }

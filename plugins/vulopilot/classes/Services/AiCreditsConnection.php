@@ -26,8 +26,8 @@ defined( 'ABSPATH' ) || exit;
  * site owner authenticates on a VuloCloud-hosted page instead of typing a
  * VuloCloud password into this plugin at all (ConnectBrokerClient/
  * ConnectBrokerCallbackHandler), landing on the identical `save_connection()`
- * call `connect_and_claim()`'s legacy path already uses. Settings → AI
- * Providers' own Connect button uses this path exclusively;
+ * call `connect_and_claim()`'s legacy path already uses. Settings →
+ * Connections' own Connect button uses this path exclusively;
  * `connect_and_claim()` remains for AiCreditsIndicator.tsx's existing
  * toolbar dropdown.
  *
@@ -522,8 +522,8 @@ class AiCreditsConnection {
     }
 
     /**
-     * The passwordless "Connect to VuloCloud" URL — Settings → AI
-     * Providers' own Connect button 302s the browser here instead of
+     * The passwordless "Connect to VuloCloud" URL — Settings →
+     * Connections' own Connect button 302s the browser here instead of
      * rendering a login/signup form itself (see this repo's
      * ConnectBrokerClient/ConnectBrokerCallbackHandler for the rest of the
      * sequence). `state` is a real WP nonce (verified in

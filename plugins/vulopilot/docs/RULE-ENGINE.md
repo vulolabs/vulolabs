@@ -274,11 +274,11 @@ inventing a parallel-but-different extension mechanism:
   directly off that Finding rather than going through
   `RuleEngine::generate_recommendations()` at all, since a manual run has
   no rule that matched in the first place.
-- **User-authored custom rules.** `vulopilot_rules` (the DB table in
-  `DATABASE.md`, with its `condition_tree` column) is reserved for a
-  *different*, later feature: letting a site owner author or override
-  rules from the dashboard. The 19 rules in this codebase are code-defined,
-  like scanners — nothing here reads or writes that table today; when the
+- **User-authored custom rules.** The former `vulopilot_rules` table was
+  removed (nothing read or wrote it). A *different*, later feature — letting
+  a site owner author or override rules from the dashboard — would add its
+  own table. The 19 rules in this codebase are code-defined,
+  like scanners; when the
   custom-rule-builder feature is built, it's an addition alongside these,
   not a replacement.
 

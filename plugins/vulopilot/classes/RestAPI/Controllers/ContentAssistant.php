@@ -7,7 +7,7 @@
 
 namespace VuloPilot\RestAPI\Controllers;
 
-use VuloPilot\AIActions\ContentCreationOrchestrator;
+use VuloPilot\AiCopilot\ContentCreationOrchestrator;
 use VuloPilot\Exceptions\UnsafePromptException;
 
 defined( 'ABSPATH' ) || exit;
@@ -20,13 +20,12 @@ defined( 'ABSPATH' ) || exit;
  * decides, per turn, whether to ask one more clarifying question, answer
  * directly, or hand off to a real AIAction — never a second, separate
  * "chit-chat" code path. Reuses VuloPilot()->ai_request_sender
- * (AIProviders\Support\SafeRequestSender, already wired in
- * VuloPilot::init_classes() for AIActions\ActionRunner and
- * GeoAnalysis\GeoAnalyzer) for that call — the same safety-validate →
- * provider-fallback-chain → sanitize sequence, and every call is
- * automatically recorded to `vulopilot_ai_history` by ProviderRegistry's
- * own UsageTrackingProvider decorator, so this controller doesn't do any
- * logging of its own.
+ * (AI\AiRequestSender, already wired in
+ * VuloPilot::init_classes() for AiCopilot\ActionRunner and
+ * Geo\GeoAnalyzer) for that call — the same safety-validate → send →
+ * sanitize sequence, and every call is automatically recorded to
+ * `vulopilot_ai_history` by AI\AiRequestSender itself, so this controller
+ * doesn't do any logging of its own.
  *
  * Once the orchestrator decides it has enough information, it hands off
  * to the exact same real AIAction ContentToolsGrid.tsx's own tiles run —
@@ -63,7 +62,7 @@ class ContentAssistant extends \WP_REST_Controller {
 
     /**
      * How many prior turns of client-supplied history to include — bounds
-     * the prompt sent to the AI provider on a long-running chat.
+     * the prompt sent to the AI service on a long-running chat.
      */
     private const MAX_HISTORY_MESSAGES = 20;
 
@@ -153,10 +152,10 @@ class ContentAssistant extends \WP_REST_Controller {
             return new \WP_Error( 'vulopilot_unsafe_prompt', $exception->getMessage(), array( 'status' => 400 ) );
         } catch ( \RuntimeException $exception ) {
             return new \WP_Error(
-                'vulopilot_no_provider',
+                'vulopilot_ai_not_connected',
                 sprintf(
-                    /* translators: %s is the exception's own real message, e.g. "No AI provider is configured." */
-                    __( '%s Add one in Settings → AI Providers.', 'vulopilot' ),
+                    /* translators: %s is the exception's own real message, e.g. "No AI connection is configured." */
+                    __( '%s Connect this site to VuloCloud in Settings → Connections.', 'vulopilot' ),
                     $exception->getMessage()
                 ),
                 array( 'status' => 400 )
@@ -197,7 +196,7 @@ class ContentAssistant extends \WP_REST_Controller {
      * validate_input() by hand), the client's own recent turns, then the
      * new user message. Instructed to respond with strict JSON only —
      * the same "respond with ONLY raw JSON" structured-output technique
-     * GeoAnalysis\GeoAnalyzer and AIActions\Actions\GenerateBlogAction
+     * GeoAnalysis\GeoAnalyzer and AiCopilot\Actions\GenerateBlogAction
      * already use for their own AI calls.
      *
      * @param string            $message     The new user message.

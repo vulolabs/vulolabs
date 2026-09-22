@@ -13,9 +13,8 @@ defined( 'ABSPATH' ) || exit;
 
 /**
  * GET /ai-history backs src/pages/AIAssistant/AIAssistant.tsx's table.
- * Read-only — rows are only ever written by AIProviders\Decorators\
- * UsageTrackingProvider (part of every real AI provider call's fallback
- * chain), never by this controller.
+ * Read-only — rows are only ever written by AI\AiRequestSender (one per real
+ * AI call), never by this controller.
  *
  * @class       AiHistory controller
  * @version     1.0.0

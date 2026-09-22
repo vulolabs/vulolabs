@@ -248,7 +248,7 @@ const Automations = () => {
 						// Pro. Allow 'Create from scratch' as a secondary Pro option" —
 						// this button keeps working exactly as before, just no longer
 						// the rightmost/most prominent one.
-						label: __('Create Automation', 'vulopilot'),
+						label: __('Create Your Own', 'vulopilot'),
 						icon: 'plus',
 						color: 'border-purple',
 						onClick: openCreateWizard,
@@ -256,7 +256,7 @@ const Automations = () => {
 					{
 						// Preferred/rightmost — same "templates first, from-scratch
 						// second" ordering as above.
-						label: __('Browse Templates', 'vulopilot'),
+						label: __('AI-Powered Automations', 'vulopilot'),
 						icon: 'search',
 						onClick: openTemplatesLibrary,
 					},

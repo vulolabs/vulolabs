@@ -33,7 +33,7 @@ defined( 'ABSPATH' ) || exit;
  *
  * For `post`/`page`, `description_format_*` is only ever a FALLBACK — a
  * real, non-empty `post_excerpt` (this codebase's already-established
- * "meta description" field; see Scanners\Basic\MetaDescriptionScanner's
+ * "meta description" field; see Seo\Scanners\MetaDescriptionScanner's
  * own docblock and `WriteMetaDescriptionAction`, which both treat
  * `post_excerpt` as the real per-post description, not a bespoke postmeta
  * key) always wins when the current post/page actually has one.

@@ -2,6 +2,7 @@
 import { useState } from 'react';
 import { __ } from '@wordpress/i18n';
 import { getApiLink, sendApiResponse } from '@zyra/core';
+import { NoticeManager } from '@zyra/components';
 import { ButtonInput } from '@zyra/inputs';
 import { useSetting } from '../../../contexts/SettingContext';
 
@@ -38,6 +39,14 @@ const AccessibilityRestoreDefaultsHeader = () => {
 			{ setting: DEFAULTS, settingName: 'accessibility' }
 		)
 			.then((response) => {
+				NoticeManager.add({
+					uniqueKey: 'vulopilot-accessibility-restore-defaults',
+					type: response ? 'success' : 'error',
+					position: 'float',
+					message: response
+						? __('Settings restored to defaults.', 'vulopilot')
+						: __('Could not restore defaults. Please try again.', 'vulopilot'),
+				});
 				if (!response) {
 					return;
 				}

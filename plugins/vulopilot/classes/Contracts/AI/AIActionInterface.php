@@ -19,7 +19,7 @@ use VuloPilot\ValueObjects\Impact;
  * propose()/approve()/reject()/rollback() lifecycle (AI-ACTIONS.md) —
  * distinct from RuleInterface, which is Recommendation-only and doesn't
  * cover a workflow like "Generate Blog" that has no triggering Finding at
- * all. Implemented by AIActions\Actions\AbstractBasicAction (free) and any
+ * all. Implemented by AiCopilot\Actions\AbstractBasicAction (free) and any
  * premium action Pro registers via `vulopilot_ai_action_sources`.
  *
  * @class       AIActionInterface interface
@@ -68,7 +68,7 @@ interface AIActionInterface {
     public function validate_input( array $input ): array;
 
     /**
-     * Builds the chat-style message list to send to the AI provider.
+     * Builds the chat-style message list to send to the AI service.
      *
      * @param array $input Validated input.
      * @return array<int, array{role: string, content: string}>
@@ -76,9 +76,9 @@ interface AIActionInterface {
     public function build_prompt( array $input ): array;
 
     /**
-     * Parses the raw provider response into this action's output shape.
+     * Parses the raw AI response into this action's output shape.
      *
-     * @param AIResponse $response Raw provider response.
+     * @param AIResponse $response Raw AI response.
      * @return array Parsed output.
      */
     public function parse_response( AIResponse $response ): array;

@@ -16,7 +16,7 @@ use VuloPilot\ValueObjects\RuleType;
 defined( 'ABSPATH' ) || exit;
 
 /**
- * Closed by AIActions\Actions\WriteProductShortDescriptionAction. Lower
+ * Closed by AiCopilot\Actions\WriteProductShortDescriptionAction. Lower
  * priority/impact than MissingProductDescriptionRule — the short
  * description is a conversion nicety next to the add-to-cart button, not
  * the primary body of on-page product content the long description is.

@@ -33,7 +33,7 @@ class ConnectBrokerCallbackHandler {
 	/**
 	 * Verifies the real `state` nonce, exchanges the real `code` for a
 	 * ConnectedSite credential (AiCreditsConnection::exchange_broker_code()),
-	 * then redirects back to Settings → AI Providers with a real
+	 * then redirects back to Settings → Connections with a real
 	 * success/error query flag. Never renders its own page, same
 	 * "redirect back into the SPA" shape GoogleSearchConsoleOAuthCallbackHandler
 	 * already uses.
@@ -45,7 +45,7 @@ class ConnectBrokerCallbackHandler {
 			wp_die( esc_html__( 'You do not have permission to do this.', 'vulopilot' ) );
 		}
 
-		$redirect_base = admin_url( 'admin.php?page=vulopilot#&tab=settings&subtab=ai-providers' );
+		$redirect_base = admin_url( 'admin.php?page=vulopilot#&tab=settings&subtab=connections' );
 		$connection    = new AiCreditsConnection();
 
 		$state = isset( $_GET['state'] ) ? sanitize_text_field( wp_unslash( $_GET['state'] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- this IS the real CSRF guard, verified explicitly below via verify_broker_state().

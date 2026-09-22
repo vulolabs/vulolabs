@@ -19,7 +19,7 @@ export default {
 			label: __('Reset All Settings', 'vulopilot'),
 			position: 'left',
 			desc: __(
-				'Restores every VuloPilot setting on this site to its default value. Findings, history, and connected AI provider keys are not affected.',
+				'Restores every VuloPilot setting on this site to its default value. Findings, history, and your VuloCloud AI connection are not affected.',
 				'vulopilot'
 			),
 			redirect_url: '',

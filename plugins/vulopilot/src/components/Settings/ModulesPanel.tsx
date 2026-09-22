@@ -13,7 +13,7 @@ import proPopupContent from '../Popup/Popup';
  * `headerTitle`/`headerDescription`/`headerIcon` instead, the same way
  * every other Settings tab gets its header from NavigatorComponent reading
  * that tab's own config rather than rendering one itself (see
- * AiProvidersPanel.tsx for the same "no header inside the panel body"
+ * VuloCloudAiConnectionPanel.tsx for the same "no header inside the panel body"
  * pattern). No own `ContainerComponent general` wrapper either (per direct
  * instruction) — NavigatorComponent.tsx's own `<ContainerComponent general>`
  * already wraps `tab-content` (and this panel's own render output inside

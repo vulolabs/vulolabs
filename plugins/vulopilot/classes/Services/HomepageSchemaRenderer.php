@@ -12,7 +12,7 @@ defined( 'ABSPATH' ) || exit;
 /**
  * Outputs the `vulopilot_homepage_schema_json` option on `wp_head` for the
  * front page — the sitewide counterpart to Services\SchemaJsonLdRenderer's
- * per-post `_vulopilot_schema_json`. Distinct because Scanners\Basic\SchemaScanner/
+ * per-post `_vulopilot_schema_json`. Distinct because Seo\Scanners\SchemaScanner/
  * StructuredDataValidationScanner both check `home_url('/')` specifically,
  * which isn't always a single post (a "latest posts" front page has no
  * one post to attach schema to), so this is a dedicated option rather than

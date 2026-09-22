@@ -71,22 +71,24 @@ const CrawlerTrafficWidget: React.FC<WidgetProps> = ({
 
 	return (
 		<DashboardWidget
-			title={__('AI crawler traffic', 'vulopilot')}
+			title={
+				<>
+					{__('AI crawler traffic', 'vulopilot')}
+					<BadgeComponent
+						color="purple"
+						text={sprintf(
+							/* translators: %d: AI crawler visit count. */
+							__('%d visits', 'vulopilot'),
+							totalVisits
+						)}
+					/>
+				</>
+			}
 			desc={__('Visits from GPTBot, ClaudeBot, PerplexityBot, and other AI crawlers.', 'vulopilot')}
 			icon="global-community"
 			isLoading={isLoading}
 			onHide={onHide}
 			isCustomizing={isCustomizing}
-			headerAction={
-				<BadgeComponent
-					color="purple"
-					text={sprintf(
-						/* translators: %d: AI crawler visit count. */
-						__('%d visits, last 30 days', 'vulopilot'),
-						totalVisits
-					)}
-				/>
-			}
 		>
 			<>
 				<ListComponent

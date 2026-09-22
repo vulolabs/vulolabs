@@ -10,7 +10,7 @@ namespace VuloPilot\Repositories;
 defined( 'ABSPATH' ) || exit;
 
 /**
- * Persistence for `vulopilot_login_attempts` (DATABASE.md) —
+ * Persistence for `vulopilot_security_events` (type `login_attempt`) (DATABASE.md) —
  * Services\LoginProtectionGuard's own real failed/successful login log,
  * backing both the live brute-force lockout check and
  * Scanners\Basic\LoginProtectionScanner's Finding rows.
@@ -22,6 +22,11 @@ defined( 'ABSPATH' ) || exit;
 class LoginAttemptRepository extends AbstractRepository {
 
     /**
+     * This repository's `event_type` in the shared `vulopilot_security_events` table.
+     */
+    private const EVENT_TYPE = 'login_attempt';
+
+    /**
      * @var string[]
      */
     protected array $filterable_columns = array( 'ip_address', 'success' );
@@ -29,8 +34,17 @@ class LoginAttemptRepository extends AbstractRepository {
     /**
      * @inheritDoc
      */
+    /**
+     * @inheritDoc
+     */
+    public function insert( array $data ): int {
+        $data['event_type'] = self::EVENT_TYPE;
+
+        return parent::insert( $data );
+    }
+
     protected function get_table_key(): string {
-        return 'login_attempt';
+        return 'security_event';
     }
 
     /**
@@ -46,7 +60,8 @@ class LoginAttemptRepository extends AbstractRepository {
 
         return (int) $wpdb->get_var(
             $wpdb->prepare(
-                "SELECT COUNT(*) FROM {$this->get_table()} WHERE ip_address = %s AND success = 0 AND attempted_at >= %s", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+                "SELECT COUNT(*) FROM {$this->get_table()} WHERE event_type = %s AND ip_address = %s AND success = 0 AND created_at >= %s", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+                self::EVENT_TYPE,
                 $ip_address,
                 gmdate( 'Y-m-d H:i:s', time() - ( $minutes * MINUTE_IN_SECONDS ) )
             )
@@ -72,7 +87,8 @@ class LoginAttemptRepository extends AbstractRepository {
 
         $rows = $wpdb->get_results(
             $wpdb->prepare(
-                "SELECT ip_address, COUNT(*) AS failure_count FROM {$this->get_table()} WHERE success = 0 AND attempted_at >= %s GROUP BY ip_address HAVING failure_count >= %d ORDER BY failure_count DESC", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+                "SELECT ip_address, COUNT(*) AS failure_count FROM {$this->get_table()} WHERE event_type = %s AND success = 0 AND created_at >= %s GROUP BY ip_address HAVING failure_count >= %d ORDER BY failure_count DESC", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+                self::EVENT_TYPE,
                 gmdate( 'Y-m-d H:i:s', time() - ( $days * DAY_IN_SECONDS ) ),
                 $threshold
             ),

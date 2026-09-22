@@ -7,7 +7,7 @@
 
 namespace VuloPilot\Services;
 
-use VuloPilot\AIProviders\Support\SafeRequestSender;
+use VuloPilot\AI\AiRequestSender;
 use VuloPilot\Repositories\ActivityLogRepository;
 use VuloPilot\Utill;
 use VuloPilot\ValueObjects\Severity;
@@ -17,15 +17,14 @@ defined( 'ABSPATH' ) || exit;
 /**
  * Keeps `vulopilot_site_tone` (the placeholder field added earlier this
  * session — sent as a `site_tone` hint on every BYOK AI request, see
- * AIProviders\Providers\VuloCloudProxyProvider's own docblock) learned
+ * AI\AiRequestSender) learned
  * automatically from the site's own recent content instead of starting
- * permanently empty. Same "NOT an AIAction" posture as GeoAnalysis\GeoAnalyzer/
+ * permanently empty. Same "NOT an AIAction" posture as Geo\GeoAnalyzer/
  * ContentIntelligence\ContentAnalyzer: nothing about a post's own content
  * is mutated, so there is no Approval/Execution/Rollback lifecycle — it
- * reuses the exact same SafeRequestSender every AIAction and those two
+ * reuses the exact same AiRequestSender every AIAction and those two
  * analyzers already go through (which is also why this needs zero new
- * VuloCloud-side code: SafeRequestSender's own fallback chain already
- * resolves to VuloCloudProxyProvider or a local Ollama, exactly like
+ * VuloCloud-side code: it goes through AiRequestSender exactly like
  * every other direct caller of it).
  *
  * Triggered by content changes (`save_post`), not a schedule or an
@@ -48,16 +47,16 @@ class SiteToneLearner {
     /** Per-post excerpt length — enough real body text to judge tone from without needing the full post. */
     private const EXCERPT_LENGTH = 300;
 
-    private SafeRequestSender $request_sender;
+    private AiRequestSender $request_sender;
     private ActivityLogRepository $activity_logs;
 
     /**
      * SiteToneLearner constructor.
      *
-     * @param SafeRequestSender          $request_sender Sends a prompt through the safety-validate → provider chain → sanitize sequence.
+     * @param AiRequestSender          $request_sender Sends a prompt through the safety-validate → send → sanitize sequence.
      * @param ActivityLogRepository|null $activity_logs  Defaults to a new instance (injectable for tests).
      */
-    public function __construct( SafeRequestSender $request_sender, ?ActivityLogRepository $activity_logs = null ) {
+    public function __construct( AiRequestSender $request_sender, ?ActivityLogRepository $activity_logs = null ) {
         $this->request_sender = $request_sender;
         $this->activity_logs  = $activity_logs ?? new ActivityLogRepository();
 

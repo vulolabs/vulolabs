@@ -10,6 +10,9 @@ namespace VuloPilot\RestAPI\Controllers;
 use VuloPilot\Repositories\FindingRepository;
 use VuloPilot\Services\GoogleAnalyticsClient;
 use VuloPilot\Services\GoogleServicesConnection;
+use VuloPilot\Seo\Rest\Seo;
+use VuloPilot\Geo\Rest\Geo;
+use VuloPilot\BrandIntelligence\Rest\BrandIntelligence;
 
 defined( 'ABSPATH' ) || exit;
 

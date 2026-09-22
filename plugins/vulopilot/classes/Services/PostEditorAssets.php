@@ -7,7 +7,7 @@
 
 namespace VuloPilot\Services;
 
-use VuloPilot\AIActions\Actions\GenerateSchemaAction;
+use VuloPilot\AiCopilot\Actions\GenerateSchemaAction;
 
 defined( 'ABSPATH' ) || exit;
 

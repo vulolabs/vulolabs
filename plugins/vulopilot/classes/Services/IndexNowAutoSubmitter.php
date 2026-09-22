@@ -22,7 +22,7 @@ defined( 'ABSPATH' ) || exit;
  * rather than continuing to serve a stale cached result).
  *
  * Every submission (success or failure) is logged to
- * `vulopilot_indexnow_log` via IndexNowLogRepository with
+ * the shared activity log (`indexnow.submitted`) via IndexNowLogRepository with
  * `trigger_type = 'auto'`, same table the manual "Submit URLs" button's
  * own submissions land in — the mockup's own History card is described as
  * "the last 100 IndexNow API requests," not "manual requests only."

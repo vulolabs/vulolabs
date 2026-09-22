@@ -16,11 +16,11 @@ use VuloPilot\ValueObjects\RuleType;
 defined( 'ABSPATH' ) || exit;
 
 /**
- * Turns Scanners\Basic\GeoSummaryBlockScanner's "no upfront summary"
+ * Turns Geo\Scanners\GeoSummaryBlockScanner's "no upfront summary"
  * Finding into a recommendation to draft one with AI — a good summary
  * has to actually distill this specific content's key points, which
  * needs the content itself. Pairs with
- * AIActions\Actions\GenerateSummaryBlockAction (GEO-MODULE.md).
+ * AiCopilot\Actions\GenerateSummaryBlockAction (GEO-MODULE.md).
  *
  * @class       MissingSummaryBlockRule class
  * @version     1.0.0

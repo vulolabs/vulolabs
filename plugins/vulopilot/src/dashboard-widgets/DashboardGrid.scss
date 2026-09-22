@@ -15,30 +15,6 @@
 // 	}
 // }
 
-.dashboard-widget {
-	height: 100%;
-
-	.dashboard-widget-title {
-		display: inline-flex;
-		align-items: center;
-		gap: 0.5rem;
-	}
-
-	// .dashboard-widget-controls {
-	// 	display: inline-flex;
-	// 	align-items: center;
-	// 	gap: 0.75rem;
-
-	// 	.widget-drag-handle {
-	// 		cursor: grab;
-	// 	}
-
-	// 	[role='button'] {
-	// 		cursor: pointer;
-	// 	}
-	// }
-}
-
 .dashboard-trend-chart {
 	width: 100%;
 	height: 18.75rem;
@@ -191,16 +167,6 @@
 	}
 }
 
-.vital-pulse-full-report-link {
-	font-size: 0.8125rem;
-	font-weight: 600;
-	color: $theme-color;
-	text-decoration: none;
-
-	&:hover {
-		text-decoration: underline;
-	}
-}
 
 // "VuloPilot activity" — 5 real tiles in one row (VuloPilotActivityWidget.tsx),
 // separated by a hairline rather than individual card borders per tile.

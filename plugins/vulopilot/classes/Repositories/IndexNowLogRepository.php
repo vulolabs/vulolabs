@@ -10,7 +10,7 @@ namespace VuloPilot\Repositories;
 defined( 'ABSPATH' ) || exit;
 
 /**
- * Persistence for vulopilot_indexnow_log (Scanning → Instant Indexing's
+ * Persistence for the shared activity log (`indexnow.submitted`) (Scanning → Instant Indexing's
  * "History" card — the mockup's own "The last 100 IndexNow API requests"
  * copy). `find_all()`/pagination is entirely inherited from
  * AbstractRepository, same "repository adds its own query methods beyond
@@ -25,39 +25,38 @@ defined( 'ABSPATH' ) || exit;
  * @version     1.0.0
  * @author      VuloLabs
  */
-class IndexNowLogRepository extends AbstractRepository {
+class IndexNowLogRepository {
 
-    /**
-     * Rows kept — the mockup's own "last 100" cap. trim() below deletes
-     * anything beyond this after every insert, so the table never grows
-     * unboundedly the way a per-visit log without a cap would.
-     */
+    private const EVENT_TYPE = 'indexnow.submitted';
+
     private const MAX_ROWS = 100;
 
     /**
-     * @inheritDoc
-     */
-    protected function get_table_key(): string {
-        return 'indexnow_log';
-    }
-
-    /**
-     * Records one IndexNow submission attempt and trims the table back
-     * down to MAX_ROWS.
+     * Records one submission in the shared activity log
+     * (`vulopilot_activity_logs`) — the URL as the message, the rest as
+     * JSON in `meta`. No table of its own: this is a short, capped,
+     * read-newest-first log, which is exactly what the activity log is.
      *
-     * @param string   $url             The submitted URL.
-     * @param int|null $response_code   HTTP status code IndexNow returned, or null on a request-level failure (no response at all).
-     * @param string   $response_status Human-readable status ('success'/'failed'/'error').
-     * @param string   $trigger_type    'manual' (Instant Indexing tab's Submit button) or 'auto' (publish/update/trash hook).
-     * @return int Inserted row id.
+     * @param string   $url             Submitted URL.
+     * @param int|null $response_code   HTTP status from the IndexNow endpoint.
+     * @param string   $response_status Short machine-readable status.
+     * @param string   $trigger_type    'manual' or 'auto'.
+     * @return int The new row's id.
      */
     public function log( string $url, ?int $response_code, string $response_status, string $trigger_type = 'manual' ): int {
-        $id = $this->insert(
+        $id = ( new ActivityLogRepository() )->insert(
             array(
-                'url'             => $url,
-                'response_code'   => $response_code,
-                'response_status' => $response_status,
-                'trigger_type'    => $trigger_type,
+                'event_type' => self::EVENT_TYPE,
+                'message'    => $url,
+                'severity'   => 'failed' === $response_status ? 'warning' : 'info',
+                'actor_type' => 'auto' === $trigger_type ? 'system' : 'user',
+                'meta'       => wp_json_encode(
+                    array(
+                        'response_code'   => $response_code,
+                        'response_status' => $response_status,
+                        'trigger_type'    => $trigger_type,
+                    )
+                ),
             )
         );
 
@@ -67,33 +66,54 @@ class IndexNowLogRepository extends AbstractRepository {
     }
 
     /**
-     * The most recent MAX_ROWS submissions, newest first — backs the
-     * Instant Indexing tab's History table directly (no pagination args
-     * needed there, the mockup shows a flat "last 100" list).
+     * Newest first, in the shape the IndexNow tab has always read:
+     * `id`, `url`, `response_code`, `response_status`, `trigger_type`, `created_at`.
      *
      * @return array<int, array<string, mixed>>
      */
     public function get_recent(): array {
-        return $this->find_all(
+        $rows = ( new ActivityLogRepository() )->find_all(
             array(
-                'per_page' => self::MAX_ROWS,
-                'orderby'  => 'id',
-                'order'    => 'desc',
+                'event_type' => self::EVENT_TYPE,
+                'per_page'   => self::MAX_ROWS,
+                'orderby'    => 'id',
+                'order'      => 'desc',
             )
         )['data'];
+
+        return array_map(
+            static function ( array $row ): array {
+                $meta = json_decode( (string) ( $row['meta'] ?? '' ), true );
+                $meta = is_array( $meta ) ? $meta : array();
+
+                return array(
+                    'id'              => (int) $row['id'],
+                    'url'             => $row['message'],
+                    'response_code'   => $meta['response_code'] ?? null,
+                    'response_status' => $meta['response_status'] ?? '',
+                    'trigger_type'    => $meta['trigger_type'] ?? 'manual',
+                    'created_at'      => $row['created_at'],
+                );
+            },
+            $rows
+        );
     }
 
     /**
+     * Keeps only the newest MAX_ROWS submissions.
+     *
      * @return void
      */
     private function trim_to_max_rows(): void {
         global $wpdb;
 
-        $table = $this->get_table();
+        $table = $wpdb->prefix . \VuloPilot\Utill::TABLES['activity_log'];
 
         $wpdb->query( // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
             $wpdb->prepare(
-                "DELETE FROM {$table} WHERE id NOT IN (SELECT id FROM (SELECT id FROM {$table} ORDER BY id DESC LIMIT %d) AS keep_ids)", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+                "DELETE FROM {$table} WHERE event_type = %s AND id NOT IN (SELECT id FROM (SELECT id FROM {$table} WHERE event_type = %s ORDER BY id DESC LIMIT %d) AS keep_ids)", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+                self::EVENT_TYPE,
+                self::EVENT_TYPE,
                 self::MAX_ROWS
             )
         );

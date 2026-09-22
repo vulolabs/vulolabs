@@ -15,7 +15,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 // WordPress core's own time-duration constants — several classes
 // (CronScanner, BrokenLinksScanner, SslMonitoringScanner,
-// RobotsTxtBotAccess, RateLimitedProvider) use these as class-const
+// RobotsTxtBotAccess, AiRequestSender) use these as class-const
 // defaults/arithmetic, which PHP resolves at class-load time, well before
 // any Brain\Monkey stub could intercept them. Defining the real values
 // here (identical to WordPress core's own wp-includes/load.php) is

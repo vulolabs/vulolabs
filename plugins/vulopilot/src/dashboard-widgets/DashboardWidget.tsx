@@ -1,9 +1,10 @@
 import React from 'react';
 import { __ } from '@wordpress/i18n';
 import { CardComponent, TooltipComponent } from '@zyra/components';
+import { ButtonInput } from '@zyra/inputs';
 
 interface DashboardWidgetProps {
-	title: string;
+	title: React.ReactNode;
 	icon: string;
 	isLoading?: boolean;
 	onHide: () => void;
@@ -63,8 +64,8 @@ const DashboardWidget: React.FC<DashboardWidgetProps> = ({
 }) => {
 	return (
 		<CardComponent
-			className="dashboard-widget"
-			titleIcon= {icon}
+			className={`dashboard-widget${isCustomizing ? ' is-customizing' : ''}`}
+			titleIcon={icon}
 			title={title}
 			isLoading={isLoading}
 			borderColor={borderColor}
@@ -72,23 +73,25 @@ const DashboardWidget: React.FC<DashboardWidgetProps> = ({
 			action={
 				isCustomizing ? (
 					<>
-					 <TooltipComponent text={__('Drag to reorder', 'catalogx-pro')}>
-						<i className="adminfont-move widget-drag-handle" />
-					</TooltipComponent>
-					<TooltipComponent text={__('Hide widget', 'catalogx-pro')}>
-						<i
-							className="adminfont-close"
-							role="button"
-							tabIndex={0}
-							onClick={onHide}
-							onKeyDown={(e) => {
-								if (e.key === 'Enter' || e.key === ' ') {
-									e.preventDefault();
-									onHide();
-								}
+						<ButtonInput
+							buttons={{
+								text: __('Hide', 'vulopilot'),
+								color: 'text-purple',
+								icon: 'eye-blocked',
+								onClick: onHide,
 							}}
 						/>
-					</TooltipComponent>
+						<TooltipComponent text={__('Drag to reorder', 'vulopilot')}>
+							{/* The whole button is the sortable handle (DashboardGrid.tsx's `handle=".widget-drag-handle"`), not just its icon, so a mouse-down on the label starts a drag too. */}
+							<span className="widget-drag-handle">
+								<ButtonInput
+									buttons={{
+										color: 'purple',
+										icon: 'move',
+									}}
+								/>
+							</span>
+						</TooltipComponent>
 					</>
 				) : (
 					headerAction ?? undefined

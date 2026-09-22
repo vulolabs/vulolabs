@@ -16,13 +16,13 @@ use VuloPilot\ValueObjects\RuleType;
 defined( 'ABSPATH' ) || exit;
 
 /**
- * Turns Scanners\Basic\GeoFaqOpportunityScanner's "no FAQ-style
+ * Turns Geo\Scanners\GeoFaqOpportunityScanner's "no FAQ-style
  * questions" Finding into a recommendation to draft one with AI — good
  * FAQ questions have to actually anticipate what a reader would ask
  * about this specific content, which needs the content itself, the same
  * reasoning SeoTitleRewriteRule/MissingMetaDescriptionRule already
  * establish for AI-required rules. Pairs with
- * AIActions\Actions\GenerateFaqAction (GEO-MODULE.md).
+ * AiCopilot\Actions\GenerateFaqAction (GEO-MODULE.md).
  *
  * @class       FaqOpportunityRule class
  * @version     1.0.0

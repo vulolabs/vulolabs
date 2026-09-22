@@ -35,9 +35,9 @@ const getRating = (score: number): string => {
 		return __('Good', 'vulopilot');
 	}
 	if (score >= 40) {
-		return __('Needs Attention', 'vulopilot');
+		return __('Needs Work', 'vulopilot');
 	}
-	return __('Poor', 'vulopilot');
+	return __('At Risk', 'vulopilot');
 };
 
 /** Same 3-tier band as `getRating()` above, as one of zyra's own `$color-palette` names — for the ring's own `COLOR_PALETTE`-resolved segment color, same convention SeoTab.tsx's own identical ring already established (`seoRating.ts`'s own `ratingColor()`). */
@@ -263,7 +263,7 @@ const CrawlerAnalyticsSection = ({
 														label: __('Score', 'vulopilot'),
 														value: analytics.crawl_health_score,
 														// Same real rating color the ring's
-														// own "Needs Attention"/"Good"/"Poor"
+														// own "Good"/"Needs Work"/"At Risk"
 														// label above already uses
 														// (`getRating()`) — resolved through
 														// `COLOR_PALETTE` for the real hex

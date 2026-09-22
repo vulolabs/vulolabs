@@ -29,7 +29,7 @@ interface ChatResponse {
 /**
  * The shape WP_REST_Server::error_to_response() gives a WP_Error — what
  * actually arrives in `error.response.data` when ContentAssistant.php
- * returns one (e.g. "No AI provider is configured…", a safety-validator
+ * returns one (e.g. "No AI connection is configured…", a safety-validator
  * rejection). Same reasoning as vulopilot-pro's OneClickFix module: raw
  * axios rather than @zyra/core's sendApiResponse() here on purpose, since
  * sendApiResponse() swallows the response body on any error and would
@@ -111,13 +111,11 @@ const PROMPT_CHIPS: PromptChip[] = [
 /**
  * "AI Content Assistant" — a real chat, `POST /content-assistant/chat`
  * (classes/RestAPI/Controllers/ContentAssistant.php), which sends the
- * conversation through the same real AI-provider chain
- * (AIProviders\Support\SafeRequestSender) AI Actions/GEO scoring already
- * use. Whichever provider is configured under Settings → AI Providers
- * (or a connected VuloCloud account, ProviderRegistry's own real fallback-
- * chain entry once `AiCreditsConnection::is_connected()`) answers for
- * real; when neither exists, `sendToAi()` below recognizes that exact
- * real "No AI provider is configured." condition and opens
+ * conversation through the same real AI request sender
+ * (AI\AiRequestSender) AI Actions/GEO scoring already use. VuloCloud answers
+ * for real once this site is connected (`AiCreditsConnection::is_connected()`,
+ * Settings → Connections); when it isn't, `sendToAi()` below recognizes that exact
+ * real "No AI connection is configured." condition and opens
  * ConnectVuloCloudPopup — the same real free "Connect to VuloCloud/Claim
  * free AI Credits" flow AiCreditsIndicator.tsx's own dropdown already
  * offers — instead of a dead-end NoticeManager error toast. Every other
@@ -146,7 +144,7 @@ const AiContentAssistantSidebar = () => {
 	// Set the moment a chip is picked; cleared once the user's next message
 	// has been folded into that chip's own build() and sent for real.
 	const [pendingChip, setPendingChip] = useState<PromptChip | null>(null);
-	/** True right after a real send failed specifically because no AI provider (BYOK or VuloCloud) is configured, OR a chip/send was blocked up front because `creditsStatus` already showed nobody's connected (see `handleChipClick()`/`handleSend()` below) — shows ConnectVuloCloudPopup, the same real free "Connect to VuloCloud"/"Claim free AI Credits" flow AiCreditsIndicator.tsx's own dropdown already offers, instead of a dead-end error notice. */
+	/** True right after a real send failed specifically because no AI service (BYOK or VuloCloud) is configured, OR a chip/send was blocked up front because `creditsStatus` already showed nobody's connected (see `handleChipClick()`/`handleSend()` below) — shows ConnectVuloCloudPopup, the same real free "Connect to VuloCloud"/"Claim free AI Credits" flow AiCreditsIndicator.tsx's own dropdown already offers, instead of a dead-end error notice. */
 	const [isCloudConnectPromptOpen, setIsCloudConnectPromptOpen] = useState(false);
 	const { status: creditsStatus } = useAiCredits();
 
@@ -172,12 +170,12 @@ const AiContentAssistantSidebar = () => {
 			.catch((error) => {
 				const message = (error?.response?.data as WpRestErrorBody | undefined)?.message;
 
-				// SafeRequestSender's own real "No AI provider is
+				// AiRequestSender's own real "No AI service is
 				// configured." (see ContentAssistant.php's own docblock)
 				// — this exact condition has a real, free fix (connect
 				// VuloCloud), so it gets its own popup instead of just
 				// another error toast.
-				if (message?.includes('No AI provider is configured') && !creditsStatus?.connected) {
+				if (message?.includes('No AI connection is configured') && !creditsStatus?.connected) {
 					setIsCloudConnectPromptOpen(true);
 					return;
 				}
@@ -219,7 +217,7 @@ const AiContentAssistantSidebar = () => {
 	 * Checked up front, before even asking the clarifying question — per
 	 * direct instruction ("when click work on description then the
 	 * connect popup show, not functionality work until the account is
-	 * connected"): picking a chip with no AI provider connected opens
+	 * connected"): picking a chip with no AI service connected opens
 	 * ConnectVuloCloudPopup immediately, rather than walking through a
 	 * question the eventual real send would just fail on anyway.
 	 */

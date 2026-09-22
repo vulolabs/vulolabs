@@ -222,7 +222,7 @@ const isCitationCheckActive = (modules: string[]): boolean =>
  *    place those 3 dimensions are shown now. "Answer Engine Coverage"
  *    (AeoCitationCoverageCard.tsx) and "Engine Testing"
  *    (AeoEngineTestingCard.tsx, NEW) are real and functional now — both
- *    real outbound calls to this site's own configured AI provider
+ *    real outbound calls to this site's own configured AI service
  *    (`GeoInsights\CitationCoverageChecker`, reusing Free's own
  *    `ai_request_sender` — the exact safety-validated call path
  *    GeoAnalysis\GeoAnalyzer already uses for GEO Score), asking it a real

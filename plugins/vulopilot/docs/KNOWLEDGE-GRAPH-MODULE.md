@@ -144,7 +144,7 @@ same pattern `BrandMonitor` already uses.
 `EntityRecommendationAnalyzer` is the one class in this phase that spends
 real AI money — same "safety-validate → fallback chain → send → sanitize"
 sequence `GeoAnalysis\GeoAnalyzer` already goes through via
-`SafeRequestSender`. Unlike GeoAnalyzer/`ContentIntelligence\ContentAnalyzer`
+`AiRequestSender`. Unlike GeoAnalyzer/`ContentIntelligence\ContentAnalyzer`
 (both Free classes, since per-post AI scoring started as a Free feature
 before its own route/UI moved to Pro), Entity Recommendations never
 existed in Free at all — it's genuinely new to Pro, so this class lives

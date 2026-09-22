@@ -12,6 +12,10 @@ import {
 	humanizeConversationExcerpt,
 } from '../../services/historyTypes';
 
+
+const escapeHtml = (text: string): string =>
+	text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+
 const SEVERITY_LABEL: Record<string, string> = {
 	critical: __('Critical', 'vulopilot'),
 	high: __('High', 'vulopilot'),
@@ -270,27 +274,10 @@ const HistoryDetailPanel: React.FC<HistoryDetailPanelProps> = ({
 			title={rowTitle(row)}
 			titleIcon="clock"
 			desc={formatWpDate(row.created_at)}
-			action={
-				<i
-					className="adminfont-close"
-					role="button"
-					tabIndex={0}
-					aria-label={__('Close', 'vulopilot')}
-					onClick={onClose}
-					onKeyDown={(e) => {
-						if ('Enter' === e.key || ' ' === e.key) {
-							e.preventDefault();
-							onClose();
-						}
-					}}
-				/>
-			}
 		>
 			<FormGroupWrapperComponent>
 			{row.scan && (
 				<>
-				<FormGroupComponent row label={__('Status', 'vulopilot')}>
-					<span className='buttons-wrapper'>
 						<BadgeComponent
 							color="green"
 							text={
@@ -303,8 +290,6 @@ const HistoryDetailPanel: React.FC<HistoryDetailPanelProps> = ({
 							color="yellow"
 							text={__('Manually triggered', 'vulopilot')}
 						/>
-					</span>
-				</FormGroupComponent>
 				<FormGroupComponent row label={__('Findings', 'vulopilot')}>
 					{row.scan.total > 0 ? (
 						<ul className="history-severity-breakdown">
@@ -313,10 +298,8 @@ const HistoryDetailPanel: React.FC<HistoryDetailPanelProps> = ({
 									<li key={severity}>
 										<BadgeComponent
 											color={`badge-${severity}`}
-											text={SEVERITY_LABEL[severity] ??
-												severity}
+											text={`${SEVERITY_LABEL[severity] ?? severity} ${Number(count)}`}
 										/>
-										{Number(count)}
 									</li>
 								)
 							)}
@@ -340,34 +323,36 @@ const HistoryDetailPanel: React.FC<HistoryDetailPanelProps> = ({
 				{row.scan.affected_pages.length > 0 && (
 					<div className="issue-detail-section">
 						<h4>{__('Pages & posts', 'vulopilot')}</h4>
-						<ul className="history-affected-pages">
-							{row.scan.affected_pages.map((page) => (
-								<li key={page.id}>
-									{page.edit_link ? (
-										<a
-											href={page.edit_link}
-											target="_blank"
-											rel="noreferrer"
-										>
-											{page.title}
-										</a>
-									) : (
-										<span>{page.title}</span>
-									)}
-									<span className="history-affected-page-count">
-										{sprintf(
-											_n(
-												'%d issue',
-												'%d issues',
-												page.count,
-												'vulopilot'
-											),
+						<ListComponent
+							className="mini-card report"
+							items={row.scan.affected_pages.map((page) => ({
+								id: String(page.id),
+								icon: 'document',
+								// `ListComponent` renders a title as HTML, so escape it. Not `link:` — its link branch drops `tags`.
+								title: escapeHtml(page.title),
+								action: page.edit_link
+									? () => window.open(page.edit_link, '_blank', 'noopener,noreferrer')
+									: undefined,
+								titleTag: (
+									<BadgeComponent
+										color="red"
+										text={sprintf(
+											_n('%d issue', '%d issues', page.count, 'vulopilot'),
 											page.count
 										)}
-									</span>
-								</li>
-							))}
-						</ul>
+									/>
+								),
+								tags: page.edit_link ? (
+									<ButtonInput
+										buttons={{
+											text: __('View', 'vulopilot'),
+											color: 'text-purple',
+											onClick: () => window.open(page.edit_link, '_blank', 'noopener,noreferrer'),
+										}}
+									/>
+								) : undefined,
+							}))}
+						/>
 					</div>
 				)}
 				{0 === row.scan.total &&
@@ -383,22 +368,27 @@ const HistoryDetailPanel: React.FC<HistoryDetailPanelProps> = ({
 									row.scan.scanned_pages.length
 								)}
 							</h4>
-							<ul className="history-affected-pages history-scanned-pages">
-								{row.scan.scanned_pages.map((page) => (
-									<li key={page.id}>
-										<a
-											href={page.edit_link}
-											target="_blank"
-											rel="noreferrer"
-										>
-											{page.title}
-										</a>
-										<span className="history-affected-page-count history-scanned-page-clean">
-											{__('Clean', 'vulopilot')}
-										</span>
-									</li>
-								))}
-							</ul>
+							<ListComponent
+								className="mini-card report"
+								items={row.scan.scanned_pages.map((page) => ({
+									id: String(page.id),
+									icon: 'document',
+									title: escapeHtml(page.title),
+									action: page.edit_link
+										? () => window.open(page.edit_link, '_blank', 'noopener,noreferrer')
+										: undefined,
+									titleTag: <BadgeComponent color="green" text={__('Clean', 'vulopilot')} />,
+									tags: page.edit_link ? (
+										<ButtonInput
+											buttons={{
+												text: __('View', 'vulopilot'),
+												color: 'text-purple',
+												onClick: () => window.open(page.edit_link, '_blank', 'noopener,noreferrer'),
+											}}
+										/>
+									) : undefined,
+								}))}
+							/>
 						</div>
 					)}
 				{row.scan.total > 0 && (

@@ -7,8 +7,8 @@
 
 namespace VuloPilot\RestAPI\Controllers;
 
-use VuloPilot\Scanners\Basic\BrokenLinksScanner;
-use VuloPilot\Scanners\Basic\BrokenImagesScanner;
+use VuloPilot\Seo\Scanners\BrokenLinksScanner;
+use VuloPilot\Seo\Scanners\BrokenImagesScanner;
 use VuloPilot\Repositories\ScanRepository;
 
 defined( 'ABSPATH' ) || exit;

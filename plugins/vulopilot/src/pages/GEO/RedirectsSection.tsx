@@ -78,9 +78,9 @@ const getRating = (score: number): string => {
 		return __('Good', 'vulopilot');
 	}
 	if (score >= 40) {
-		return __('Needs Attention', 'vulopilot');
+		return __('Needs Work', 'vulopilot');
 	}
-	return __('Poor', 'vulopilot');
+	return __('At Risk', 'vulopilot');
 };
 
 const ratingColor = (score: number): string => {

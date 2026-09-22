@@ -35,9 +35,9 @@ defined( 'ABSPATH' ) || exit;
  * (Controllers\Settings::get_items()), and a client secret/access/refresh
  * token must never reach the client the way AiProviderConfigRepository's
  * own `credentials` column never does (see
- * Controllers\AiProviders::prepare_config_for_response()). Every secret
+ * Controllers\VuloCloudAiConnection::prepare_config_for_response()). Every secret
  * value here is encrypted at rest via CredentialEncryption, same as that
- * AI-provider credential column.
+ * AI credential column.
  *
  * @class       GoogleServicesConnection class
  * @version     1.0.0

@@ -14,7 +14,7 @@ use VuloPilot\ValueObjects\ReportResult;
 defined( 'ABSPATH' ) || exit;
 
 /**
- * AI provider call volume, token usage, and estimated cost for one period —
+ * AI call volume, token usage, and estimated cost for one period —
  * reads the permanent `vulopilot_ai_history` ledger (DATABASE.md), not the
  * `vulopilot_ai_jobs` work queue, since a report is about completed calls.
  *

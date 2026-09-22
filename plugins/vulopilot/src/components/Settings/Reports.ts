@@ -5,6 +5,13 @@ import SendTestReportButton from './SendTestReportButton';
 /**
  * Settings → Reports.
  *
+ * The whole tab is a Pro feature: both fields carry `proSetting: true`
+ * (zyra's InputRenderer then shows its "Pro" tag and, on any click inside
+ * the field, opens `ShowProPopup` — the `Popup` Settings.tsx already passes
+ * it — while `appLocalizer.khali_dabba` is false), and
+ * SendTestReportButton.tsx does the same by hand for the header button,
+ * since that isn't a declarative field. With Pro active nothing is locked.
+ *
  * `default_report_format`/`default_report_period_days` are real, existing
  * settings (Utill::VULOPILOT_SETTINGS_DEFAULTS) already read by
  * Controllers\Reports::create_item() — this is a restyle of how they're
@@ -71,6 +78,7 @@ export default {
 			type: 'choice-toggle',
 			variant: 'compact',
 			defaultValue: 'pdf',
+			proSetting: true,
 			label: 'Default report format',
 			settingDescription: __(
 				'Select the file format VuloPilot will use when you download or schedule reports.',
@@ -109,6 +117,7 @@ export default {
 			key: 'default_report_period_days',
 			type: 'choice-toggle',
 			defaultValue: '30',
+			proSetting: true,
 			label: __('Default reporting period', 'vulopilot'),
 			settingDescription: __(
 				'Choose the time period VuloPilot will use by default when generating reports.',

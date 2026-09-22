@@ -2,6 +2,7 @@ import { useRef, useState } from 'react';
 import { __ } from '@wordpress/i18n';
 import { useLocation, Link } from 'react-router-dom';
 import { NavigatorComponent } from '@zyra/components';
+import { ButtonInput } from '@zyra/inputs';
 import RunScanHeaderExtra from '../../components/RunScanHeaderExtra';
 import SiteHealthTab from '../Security/SiteHealthTab';
 import BackupsTab, { BackupsTabHandle } from '../Security/BackupsTab';
@@ -157,6 +158,58 @@ const SiteHealth = () => {
 		<NavigatorComponent
 			headerIcon="active"
 			headerTitle={__('Site Health', 'vulopilot')}
+			headerCustomContent={
+				'backups' === activeTab ? (
+					// "Create Backup Now" replaces "Run scan" entirely
+					// while the Backups tab is active — a backup isn't a
+					// scan, so this tab never had a real "Run scan" action
+					// of its own to begin with (see this file's own
+					// docblock). Same icon/label/color BackupsTab.tsx's
+					// own header button already uses.
+					<ButtonInput
+						buttons={{
+							text: isCreatingBackup
+								? __('Starting…', 'vulopilot')
+								: __('Create Backup Now', 'vulopilot'),
+							icon: isCreatingBackup ? 'update' : 'cloud-upload',
+							color: 'purple-bg',
+							disabled: isCreatingBackup,
+							onClick: () => backupsTabRef.current?.createBackup(),
+						}}
+					/>
+				) : (
+					// Real category ids of every scanner SiteHealthTab.tsx's
+					// own SECTIONS cover (wordpress-health/updates/cron/
+					// database/server-health/php-warnings), so "Run Site
+					// Health Scan" only re-runs what this tab actually shows
+					// findings for, same scoped-scan pattern every other
+					// category page's own header already uses (Security.tsx's
+					// `categories={['security']}`, SeoVisibility.tsx's
+					// `categories={['geo','seo','images','schema','links']}`).
+					<RunScanHeaderExtra
+						categories={[
+							'wordpress',
+							'updates',
+							'cron',
+							'database',
+							'server',
+							'php-warnings',
+						]}
+						label={__('Run Site Health Scan', 'vulopilot')}
+						// None of these 6 scanners has a Settings tab of its
+						// own to point the gear at (all always-on, no
+						// per-scanner toggle) — same "no single matching
+						// Settings subtab" case Dashboard.tsx's own header
+						// already documents for its own site-wide scan
+						// (`settingsSubtab` ignored either way once
+						// `hideSettingsButton` is set — kept as a real,
+						// existing id anyway, same as Dashboard.tsx's own
+						// call, rather than an empty string).
+						settingsSubtab="general"
+						hideSettingsButton
+					/>
+				)
+			}
 			className="site-health-tabs"
 			settingContent={settingContent}
 			currentSetting={activeTab}

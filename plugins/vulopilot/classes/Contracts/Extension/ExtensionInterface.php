@@ -15,7 +15,7 @@ namespace VuloPilot\Contracts\Extension;
  * it calls `add_filter('vulopilot_scanner_sources', ...)` and the other
  * existing per-concern filters (SCANNERS.md, RULE-ENGINE.md, ARCHITECTURE.md's
  * "Extension system = the discovery-by-filter mechanism itself") to add its
- * own scanners/rules/automation pieces/report types/AI providers. This
+ * own scanners/rules/automation pieces/report types. This
  * interface adds exactly what those lower-level filters don't have on
  * their own: a stable identity, a version, and a declared minimum
  * VuloPilot version so ExtensionManager can gate registration on real
@@ -52,8 +52,8 @@ interface ExtensionInterface {
      * Called once, only after ExtensionManager has confirmed
      * get_minimum_vulopilot_version() is satisfied by the running core
      * version — everything this extension does (registering scanners,
-     * rules, automation triggers/actions, report types/exporters, AI
-     * providers, REST controllers, CLI commands) happens here or in
+     * rules, automation triggers/actions, report types/exporters,
+     * REST controllers, CLI commands) happens here or in
      * classes this method wires up.
      *
      * @return void

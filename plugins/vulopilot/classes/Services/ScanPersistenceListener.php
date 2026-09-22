@@ -140,6 +140,18 @@ class ScanPersistenceListener {
             )
         );
 
+        // Real auto-resolve step (see this method's own end, after the
+        // loop, for why) — every id this scanner currently has open,
+        // captured BEFORE this run touches anything, so it's a clean
+        // "what was open coming in" snapshot to diff against once the
+        // loop below finishes. A row this loop refreshes (still a real,
+        // ongoing problem) gets removed from this set as it's touched;
+        // whatever's left at the end genuinely wasn't reproduced by this
+        // run and gets marked resolved.
+        $previously_open_ids = ! in_array( $scan_result->get_scanner_id(), self::NEVER_DEDUPE_ON_RESCAN, true )
+            ? array_flip( $this->findings->get_open_finding_ids_for_scanner( $scan_result->get_scanner_id() ) )
+            : array();
+
         foreach ( $scan_result->get_findings() as $finding ) {
             $duplicate = ! in_array( $scan_result->get_scanner_id(), self::NEVER_DEDUPE_ON_RESCAN, true )
                 ? $this->findings->find_open_duplicate(
@@ -184,6 +196,7 @@ class ScanPersistenceListener {
                         'last_seen_at' => current_time( 'mysql', true ),
                     )
                 );
+                unset( $previously_open_ids[ (int) $duplicate['id'] ] );
                 continue;
             }
 
@@ -232,6 +245,33 @@ class ScanPersistenceListener {
                 $finding->get_object_type(),
                 $finding->get_object_ref()
             );
+        }
+
+        // Auto-resolve every finding this scanner previously had open that
+        // this run didn't reproduce — real, confirmed live: a stale
+        // "WordPress core update available" row (and, separately, a stale
+        // malware-scanner false positive) kept showing as open in Issues
+        // days after the real underlying problem was gone, because nothing
+        // anywhere in this codebase ever marked a finding resolved just
+        // because a later scan stopped finding it — `find_open_duplicate()`
+        // above only ever refreshes or inserts, never closes. Every real
+        // scan run here checks its whole relevant scope fresh each time
+        // (ScanRunner::run() takes no partial/subset argument), so
+        // "previously open, not reproduced this run" reliably means fixed,
+        // not "wasn't checked this time." Only runs for a genuinely
+        // completed scan — a failed run (`STATUS_FAILED`, e.g. a fatal
+        // mid-scan) didn't actually finish verifying anything, so it
+        // must never be read as "nothing's wrong anymore."
+        if ( ScanResult::STATUS_COMPLETED === $scan_result->get_status() ) {
+            foreach ( array_keys( $previously_open_ids ) as $stale_id ) {
+                $this->findings->update(
+                    $stale_id,
+                    array(
+                        'status'      => 'resolved',
+                        'resolved_at' => current_time( 'mysql', true ),
+                    )
+                );
+            }
         }
 
         $this->activity_logs->log(
@@ -352,7 +392,7 @@ class ScanPersistenceListener {
             )
         );
 
-        $channels = (array) ( $settings['critical_alert_channels'] ?? array() );
+        $channels = (array) ( $settings['alert_channels'] ?? array() );
 
         if ( in_array( 'dashboard', $channels, true ) ) {
             $this->activity_logs->log(

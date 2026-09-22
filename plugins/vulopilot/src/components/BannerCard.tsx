@@ -11,7 +11,7 @@ export interface BannerCardProps {
 	buttons?: ComponentProps<typeof ButtonInput>['buttons'];
 	/** Shows the top-right close control; the banner hides itself once clicked. */
 	dismissible?: boolean;
-	/** When set, a dismissal is remembered (localStorage, this browser) under this key, so the banner stays gone after a reload instead of returning. */
+	/** With `dismissible`, remembers the dismissal in this browser's localStorage under this key so the banner stays hidden on later visits. */
 	dismissKey?: string;
 	/** Extra class on the root, for a caller's own sizing/color rules. */
 	className?: string;
@@ -39,10 +39,12 @@ const BannerCard = ({
 	className = '',
 	image = bannerIllustration,
 }: BannerCardProps) => {
-	const storageKey = dismissKey ? `vulopilot_banner_dismissed_${dismissKey}` : null;
 	const [dismissed, setDismissedState] = useState(() => {
+		if (!dismissKey) {
+			return false;
+		}
 		try {
-			return Boolean(storageKey && window.localStorage.getItem(storageKey));
+			return '1' === window.localStorage.getItem(dismissKey);
 		} catch {
 			return false;
 		}
@@ -50,13 +52,12 @@ const BannerCard = ({
 
 	const setDismissed = (value: boolean) => {
 		setDismissedState(value);
-
-		try {
-			if (storageKey && value) {
-				window.localStorage.setItem(storageKey, '1');
+		if (dismissKey && value) {
+			try {
+				window.localStorage.setItem(dismissKey, '1');
+			} catch {
+				// Storage blocked (private mode etc.) — stays dismissed for this page load only.
 			}
-		} catch {
-			// Storage blocked — the banner still hides for this page view.
 		}
 	};
 

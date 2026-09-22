@@ -8,7 +8,7 @@
 namespace VuloPilot\ValueObjects;
 
 /**
- * An AIProviderInterface's response to an AIRequest. Immutable — sanitizing
+ * The response to an AIRequest. Immutable — sanitizing
  * the content (AISafetyValidator::sanitize_response()) produces a new
  * instance via with_content() rather than mutating this one.
  *

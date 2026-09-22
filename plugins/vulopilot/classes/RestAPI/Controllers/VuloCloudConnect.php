@@ -13,10 +13,10 @@ defined( 'ABSPATH' ) || exit;
 
 /**
  * Backs the generic "Connect to VuloCloud" button (VULOPILOT_VULOCLOUD_CONFIG)
- * — completely independent from Controllers\AiCredits/AiProviders' own
+ * — completely independent from Controllers\AiCredits/VuloCloudAiConnection's own
  * VuloCloud connection: a real `GET .../status`, a real
  * `GET .../broker-authorize-url` (the URL the Connect button itself
- * navigates the browser to — same shape AiProviders::get_broker_authorize_url()
+ * navigates the browser to — same shape VuloCloudAiConnection::get_broker_authorize_url()
  * already establishes for its own, unrelated connection), and a real
  * `POST .../disconnect`.
  *

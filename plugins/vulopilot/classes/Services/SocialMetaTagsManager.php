@@ -13,7 +13,7 @@ defined( 'ABSPATH' ) || exit;
 
 /**
  * Scanning → SEO's "Add Open Graph & Twitter Card tags" toggle — the
- * mechanical fix behind Scanners\Basic\OpenGraphScanner's and
+ * mechanical fix behind Seo\Scanners\OpenGraphScanner's and
  * TwitterCardScanner's findings, both of which only check the homepage
  * for og:title/og:description/og:image and twitter:card respectively.
  * This outputs those on every singular post/page too (not just the

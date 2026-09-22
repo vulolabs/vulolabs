@@ -9,7 +9,7 @@ namespace VuloPilot\RestAPI\Controllers;
 
 use VuloPilot\Utill;
 use VuloPilot\Repositories\ReportRepository;
-use VuloPilot\Services\EntityExtractor;
+use VuloPilot\EntityExtraction\EntityExtractor;
 use VuloPilot\Services\SchemaCoverageAnalyzer;
 use VuloPilot\Services\RobotsTxtBotAccess;
 use VuloPilot\Services\WebmasterToolsManager;
@@ -439,8 +439,8 @@ class Settings extends \WP_REST_Controller {
      * computes: Knowledge Graph's own extracted entities, the Schema
      * Coverage snapshot, and the AI-crawler-analytics robots.txt bot-group
      * parse. Deliberately scoped to real content caches only, not every
-     * transient this plugin owns — the AI-provider per-minute rate-limit
-     * counters (AIProviders\Decorators\RateLimitedProvider) and the Core
+     * transient this plugin owns — the AI per-minute rate-limit
+     * counters (AI\AiRequestSender) and the Core
      * Web Vitals beacon's own rate-limit transient aren't "stale data,"
      * clearing them would just reset a rate limit early, a different
      * (and unwanted here) effect.
@@ -517,6 +517,16 @@ class Settings extends \WP_REST_Controller {
             __( "This is a test email from VuloPilot's Notifications settings. If you received this, your notification email is configured correctly.", 'vulopilot' ),
             $headers
         );
+
+        if ( $sent ) {
+            // Same real "Last test … sent on …" persistence
+            // send_test_report() already keeps (own key, unrelated to
+            // that one) — SendTestEmailButton.tsx reads this back on
+            // mount so the line survives a page refresh instead of only
+            // showing right after a click.
+            $updated = array_merge( $this->get_stored_settings(), array( 'email_last_test_sent' => current_time( 'mysql', true ) ) );
+            update_option( Utill::VULOPILOT_SETTINGS_KEY, $updated );
+        }
 
         return rest_ensure_response(
             array(

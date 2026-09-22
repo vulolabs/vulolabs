@@ -218,7 +218,7 @@ const SeoSiteWideIssuesTable = ({
 						type: 'action',
 						actions: [
 							{
-								label: __('Resolve', 'vulopilot'),
+								label: __('Mark as Fixed', 'vulopilot'),
 								icon: 'check',
 								color: 'text-blue',
 								onClick: (row) =>
@@ -232,7 +232,7 @@ const SeoSiteWideIssuesTable = ({
 									),
 							},
 							{
-								label: __('Ignore', 'vulopilot'),
+								label: __('Ignore Issue', 'vulopilot'),
 								color: 'text-red',
 								icon: 'eye-blocked',
 								onClick: (row) =>

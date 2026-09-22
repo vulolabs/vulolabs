@@ -14,7 +14,7 @@ defined( 'ABSPATH' ) || exit;
 /**
  * Scanning → Sitemap tab's real backing — a set of real filters/toggles
  * over WordPress core's own native sitemap at /wp-sitemap.xml (since 5.5;
- * Scanners\Basic\SitemapScanner already checks for exactly this URL), not
+ * Seo\Scanners\SitemapScanner already checks for exactly this URL), not
  * a from-scratch sitemap generator: `sitemap_enabled` gates core's own
  * `wp_sitemaps_enabled`, `sitemap_links_per_page` overrides core's own
  * `wp_sitemaps_max_urls`, `sitemap_xml_post_types`/`sitemap_xml_taxonomies`

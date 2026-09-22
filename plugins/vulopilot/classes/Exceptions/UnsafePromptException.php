@@ -8,11 +8,9 @@
 namespace VuloPilot\Exceptions;
 
 /**
- * Thrown by AIProviders\Safety\AISafetyValidator::validate_prompt() when a
- * request is too long or appears to contain a credential — blocked before
- * it's ever sent to a provider. Not a provider-level failure, so this does
- * NOT extend AIProviderException (nothing about it should trigger
- * ProviderFallbackChain's fall-through-to-next-provider behavior).
+ * Thrown by AI\AISafetyValidator::validate_prompt() when a request is too long
+ * or appears to contain a credential — blocked before it's ever sent. Not a
+ * gateway failure, so this does NOT extend AiRequestException.
  *
  * @class       UnsafePromptException class
  * @version     1.0.0

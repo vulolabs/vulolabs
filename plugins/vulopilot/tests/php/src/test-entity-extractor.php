@@ -8,7 +8,7 @@
 namespace VuloPilot\Tests;
 
 use Brain\Monkey\Functions;
-use VuloPilot\Services\EntityExtractor;
+use VuloPilot\EntityExtraction\EntityExtractor;
 
 require_once __DIR__ . '/TestCase.php';
 

@@ -13,7 +13,7 @@ from "here's the input" to "here's what changed on the site," with a mandatory h
 in between and a recorded way back out.
 
 ```
-Input → Prompt Builder → (AI call, via SafeRequestSender) → Validator → Preview → Approval → Execution → Rollback → Logging
+Input → Prompt Builder → (AI call, via AiRequestSender) → Validator → Preview → Approval → Execution → Rollback → Logging
 ```
 
 Worked example (`GenerateAltAction`):
@@ -22,7 +22,7 @@ Worked example (`GenerateAltAction`):
 |---|---|
 | Input | `attachment_id` validated — must exist and be an image |
 | Prompt Builder | Filename + the post it's attached to become a chat prompt |
-| *(AI call)* | Sent through `AIProviders\Support\SafeRequestSender::send()` — safety-validates the prompt, builds a fallback chain via `AIProviders\ProviderRegistry`, sends, sanitizes the response (see [`AI-ARCHITECTURE.md`](AI-ARCHITECTURE.md)) |
+| *(AI call)* | Sent through `AI\AiRequestSender::send()` — safety-validates the prompt, checks the VuloCloud connection and request budget, sends to VuloCloud (retrying transient failures), records one history row, sanitizes the response (see [`AI-ARCHITECTURE.md`](AI-ARCHITECTURE.md)) |
 | Validator | Rejects an empty or absurdly long answer |
 | Preview | "Set alt text for photo.jpg" + before/after text |
 | Approval | A site owner clicks Approve (or Reject) — nothing has changed yet |
@@ -72,7 +72,7 @@ classes/
 |---|---|
 | 1. Input | `validate_input( array $input ): array` |
 | 2. Prompt Builder | `build_prompt( array $input ): array` |
-| — (AI call) | not on this interface — `AIActions\ActionRunner::propose()` calls it via an injected `AIProviders\Support\SafeRequestSender`, which itself resolves `AIProviderInterface::send()` through `ProviderRegistry`'s fallback chain, never re-implemented per-action |
+| — (AI call) | not on this interface — `AiCopilot\ActionRunner::propose()` calls it via an injected `AI\AiRequestSender`, which itself resolves `AIProviderInterface::send()` through `ProviderRegistry`'s fallback chain, never re-implemented per-action |
 | — (parsing) | `parse_response( AIResponse $response ): array` |
 | 3. Validator | `validate_output( array $output, array $input ): void` |
 | 4. Preview | `build_preview( array $output, array $input ): ActionPreview` |
@@ -126,12 +126,12 @@ reject( run_id )                  Stage 5's negative branch. Persists 'rejected'
 rollback( run_id )                Stage 7. Persists 'rolled_back'.
 ```
 
-`ActionRunner`'s constructor takes an `ActionRegistry` and an `AIProviders\Support\SafeRequestSender`
+`ActionRunner`'s constructor takes an `ActionRegistry` and an `AI\AiRequestSender`
 (plus optional injectable `ActionRunRepository`/`ActivityLogRepository` for tests) — `propose()`
 itself no longer inlines "safety-validate → build a fallback chain → send → sanitize"; that
-sequence was extracted into `SafeRequestSender` once [`GEO-MODULE.md`](GEO-MODULE.md)'s
+sequence was extracted into `AiRequestSender` once [`GEO-MODULE.md`](GEO-MODULE.md)'s
 `GeoAnalysis\GeoAnalyzer` needed the identical sequence for a read-only call that isn't an
-`AIAction` at all. See [`AI-ARCHITECTURE.md`](AI-ARCHITECTURE.md) for `SafeRequestSender` itself.
+`AIAction` at all. See [`AI-ARCHITECTURE.md`](AI-ARCHITECTURE.md) for `AiRequestSender` itself.
 
 Every one of the four writes a `vulopilot_activity_logs` row (stage 8) via the existing
 `ActivityLogRepository` — reused, not a second logging mechanism. `approve()` refuses to run twice
@@ -155,7 +155,7 @@ extend, each concrete tool only declaring which existing action id it wraps. All
 specifically so the approval pause this section describes can never be skipped, regardless of what
 triggered the proposal.
 
-## The built-in actions (`classes/AIActions/Actions/`)
+## The built-in actions (`modules/AiCopilot/Actions/`)
 
 The original 4 were chosen to cover every distinct kind of WordPress mutation + rollback shape, not
 to cover all 11 examples from the original spec. Every one of those examples has since been built,

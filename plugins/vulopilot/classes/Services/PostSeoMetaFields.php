@@ -7,8 +7,8 @@
 
 namespace VuloPilot\Services;
 
-use VuloPilot\AIActions\Actions\GenerateSchemaAction;
-use VuloPilot\AIActions\Actions\GenerateLandingPageAction;
+use VuloPilot\AiCopilot\Actions\GenerateSchemaAction;
+use VuloPilot\AiCopilot\Actions\GenerateLandingPageAction;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -53,7 +53,7 @@ class PostSeoMetaFields {
 
     /**
      * Post types the metabox appears on — matches
-     * AIActions\Actions\WriteMetaTitleAction/WriteMetaDescriptionAction's
+     * AiCopilot\Actions\WriteMetaTitleAction/WriteMetaDescriptionAction's
      * own post-type scope. `product` (WooCommerce) was added alongside the
      * metabox's move to a real below-content `add_meta_box()` panel
      * (Services\PostEditorAssets::register_metabox()), which references

@@ -46,7 +46,7 @@ for the mechanism.
 
 ### Free
 
-**`ReadabilityScanner`** (`classes/Scanners/Basic/ReadabilityScanner.php`, id
+**`ReadabilityScanner`** (`modules/ContentIntelligence/Scanners/ReadabilityScanner.php`, id
 `readability`, new category `content`) — the one genuinely new scanner. Real
 Flesch Reading Ease score (`206.835 - 1.015*(words/sentences) -
 84.6*(syllables/words)`, clamped 0–100), skipping posts under 100 words
@@ -56,7 +56,7 @@ Intelligence, default 50 — Flesch's own published "Fairly Difficult"
 boundary), not a hardcoded number.
 
 **Content Score** — `GET /content-intelligence/score`
-(`classes/RestAPI/Controllers/ContentIntelligence.php`) — a composite score
+(`modules/ContentIntelligence/Rest/ContentIntelligence.php`) — a composite score
 over `readability` + the 4 reused `seo` scanners + `orphan-pages`, same
 weighting formula (`100 - critical*15 - high*8 - medium*3 - low*1`) every
 other category score already uses. Also wired into the Dashboard's
@@ -107,7 +107,7 @@ active-module check.
 ### Pro
 
 **Topic Authority** — `ContentAnalyzer`
-(`classes/ContentIntelligence/ContentAnalyzer.php`, **lives in Free**,
+(`modules/ContentIntelligence/ContentAnalyzer.php`, **lives in Free**,
 mirrors `GeoAnalysis\GeoAnalyzer` exactly) produces a `ContentScore`: a
 deterministic score (% of the 5 per-post checks passing) averaged with one
 AI dimension, `topic_authority` (0–100, does the content demonstrate real

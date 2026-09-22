@@ -192,22 +192,18 @@ final class VuloPilot {
 
         $this->container['rest'] = new RestAPI\Rest();
 
-        $this->container['ai_provider_registry'] = new AIProviders\ProviderRegistry();
-        $this->container['ai_safety_validator']  = new AIProviders\Safety\AISafetyValidator();
-        $this->container['ai_request_sender']    = new AIProviders\Support\SafeRequestSender(
-            $this->container['ai_provider_registry'],
-            $this->container['ai_safety_validator']
-        );
+        $this->container['ai_safety_validator'] = new AI\AISafetyValidator();
+        $this->container['ai_request_sender']   = new AI\AiRequestSender( $this->container['ai_safety_validator'] );
 
-        $this->container['ai_action_registry'] = new AIActions\ActionRegistry();
-        $this->container['ai_action_runner']   = new AIActions\ActionRunner(
+        $this->container['ai_action_registry'] = new AiCopilot\ActionRegistry();
+        $this->container['ai_action_runner']   = new AiCopilot\ActionRunner(
             $this->container['ai_action_registry'],
             $this->container['ai_request_sender']
         );
 
         // GEO module (GEO-MODULE.md) — reuses the same ai_request_sender
         // every AIAction goes through, not a second AI-calling path.
-        $this->container['geo_analyzer'] = new GeoAnalysis\GeoAnalyzer( $this->container['ai_request_sender'] );
+        $this->container['geo_analyzer'] = new Geo\GeoAnalyzer( $this->container['ai_request_sender'] );
 
         // Content Intelligence's "Topic Authority" (CONTENT-INTELLIGENCE-MODULE.md)
         // — same shape as geo_analyzer above: reuses the same
@@ -219,7 +215,7 @@ final class VuloPilot {
         // llms.txt Generation & Management (readme.txt) — self-registers
         // its own rewrite-rule/template_redirect hooks; unconditional
         // construction, the enable_llms_txt setting only gates serving.
-        $this->container['llms_txt_generator'] = new GeoAnalysis\LlmsTxtGenerator();
+        $this->container['llms_txt_generator'] = new Geo\LlmsTxtGenerator();
 
         // AI Crawler Traffic Monitoring (readme.txt) — self-registers its
         // own template_redirect/cron hooks; unconditional construction,
@@ -264,7 +260,7 @@ final class VuloPilot {
         $this->container['gsc_oauth_callback_handler'] = new Services\GoogleSearchConsoleOAuthCallbackHandler();
         $this->container['google_analytics_tracker']   = new Services\GoogleAnalyticsTracker();
 
-        // Connections → AI Providers' own passwordless "Connect to
+        // Connections → VuloCloud AI' own passwordless "Connect to
         // VuloCloud" broker redirect handler — same unconditional-
         // construction/self-registers-its-own-admin_post-hook reasoning as
         // gsc_oauth_callback_handler immediately above (a request to
@@ -279,7 +275,7 @@ final class VuloPilot {
         $this->container['indexnow_key_file_server'] = new Services\IndexNowKeyFileServer();
         $this->container['indexnow_auto_submitter']  = new Services\IndexNowAutoSubmitter();
 
-        // Connections → AI Providers' "Site tone" field — learned
+        // Connections → VuloCloud AI' "Site tone" field — learned
         // automatically from the site's own recent content on
         // publish/update (deferred via WP-Cron, never inline with the
         // save), reusing the same ai_request_sender every AIAction/
@@ -292,7 +288,7 @@ final class VuloPilot {
         // OneClickFix\ScannerFixMap) — the mechanical (non-AI) fixes for
         // CanonicalUrlScanner/OpenGraphScanner/TwitterCardScanner just flip
         // one of these two managers' own settings on; SchemaJsonLdRenderer
-        // is what makes AIActions\Actions\GenerateSchemaAction's saved
+        // is what makes AiCopilot\Actions\GenerateSchemaAction's saved
         // JSON-LD actually reach the frontend. Same unconditional-
         // construction, settings-gate-the-output shape as the two services
         // above.

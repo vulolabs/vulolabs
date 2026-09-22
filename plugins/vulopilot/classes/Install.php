@@ -45,7 +45,7 @@ class Install {
      * same callback on 'init'.
      */
     public function __construct() {
-        $this->run_migration();
+        $this->install();
     }
 
     /**
@@ -59,7 +59,7 @@ class Install {
      *
      * @return void
      */
-    public function run_migration() {
+    public function install() {
         $this->create_database_tables();
 
         update_option( Utill::VULOPILOT_OTHER_SETTINGS['plugin_db_version'], VULOPILOT_PLUGIN_VERSION );
@@ -142,19 +142,6 @@ class Install {
             KEY `idx_category` (`category`)
         ) $collate;";
 
-        $sql_rules = "CREATE TABLE IF NOT EXISTS `{$wpdb->prefix}" . Utill::TABLES['rule'] . "` (
-            `id`             bigint(20) unsigned NOT NULL AUTO_INCREMENT,
-            `name`           varchar(191) NOT NULL,
-            `description`    text DEFAULT NULL,
-            `condition_tree` longtext NOT NULL,
-            `is_active`      tinyint(1) NOT NULL DEFAULT 1,
-            `created_by`     bigint(20) unsigned DEFAULT NULL,
-            `created_at`     timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
-            `updated_at`     timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-            PRIMARY KEY (`id`),
-            KEY `idx_active` (`is_active`)
-        ) $collate;";
-
         $sql_automations = "CREATE TABLE IF NOT EXISTS `{$wpdb->prefix}" . Utill::TABLES['automations'] . "` (
             `id`                bigint(20) unsigned NOT NULL AUTO_INCREMENT,
             `name`              varchar(191) NOT NULL,
@@ -196,27 +183,6 @@ class Install {
             KEY `idx_started` (`started_at`)
         ) $collate;";
 
-        $sql_ai_jobs = "CREATE TABLE IF NOT EXISTS `{$wpdb->prefix}" . Utill::TABLES['ai_job'] . "` (
-            `id`              bigint(20) unsigned NOT NULL AUTO_INCREMENT,
-            `job_type`        varchar(50) NOT NULL,
-            `provider`        varchar(50) NOT NULL,
-            `model`           varchar(100) DEFAULT NULL,
-            `status`          varchar(20) NOT NULL DEFAULT 'queued',
-            `priority`        tinyint(3) unsigned NOT NULL DEFAULT 5,
-            `object_type`     varchar(50) DEFAULT NULL,
-            `object_id`       bigint(20) unsigned DEFAULT NULL,
-            `request_payload` longtext NOT NULL,
-            `attempts`        tinyint(3) unsigned NOT NULL DEFAULT 0,
-            `requested_by`    bigint(20) unsigned DEFAULT NULL,
-            `created_at`      timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
-            `started_at`      datetime DEFAULT NULL,
-            `completed_at`    datetime DEFAULT NULL,
-            `error_message`   text DEFAULT NULL,
-            PRIMARY KEY (`id`),
-            KEY `idx_status_priority` (`status`, `priority`),
-            KEY `idx_object` (`object_type`, `object_id`)
-        ) $collate;";
-
         // No "IF NOT EXISTS" here (unlike every other CREATE TABLE in this
         // file) — dbDelta() itself already only ever issues a CREATE for a
         // table that doesn't exist yet, and its own column-diff/ALTER path
@@ -234,7 +200,6 @@ class Install {
         // actually apply on an upgrade, not just a fresh install.
         $sql_ai_history = "CREATE TABLE `{$wpdb->prefix}" . Utill::TABLES['ai_history'] . "` (
             `id`                bigint(20) unsigned NOT NULL AUTO_INCREMENT,
-            `job_id`            bigint(20) unsigned DEFAULT NULL,
             `provider`          varchar(50) NOT NULL,
             `model`             varchar(100) DEFAULT NULL,
             `object_type`       varchar(50) DEFAULT NULL,
@@ -255,23 +220,6 @@ class Install {
             KEY `idx_surface` (`surface`)
         ) $collate;";
 
-        $sql_ai_provider_configs = "CREATE TABLE IF NOT EXISTS `{$wpdb->prefix}" . Utill::TABLES['ai_provider_config'] . "` (
-            `id`              bigint(20) unsigned NOT NULL AUTO_INCREMENT,
-            `provider`        varchar(50) NOT NULL,
-            `label`           varchar(191) DEFAULT NULL,
-            `credentials`     longtext NOT NULL,
-            `default_model`   varchar(100) DEFAULT NULL,
-            `is_active`       tinyint(1) NOT NULL DEFAULT 1,
-            `quota_limit`     int(10) unsigned DEFAULT NULL,
-            `quota_used`      int(10) unsigned NOT NULL DEFAULT 0,
-            `quota_reset_at`  datetime DEFAULT NULL,
-            `created_at`      timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
-            `updated_at`      timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-            PRIMARY KEY (`id`),
-            UNIQUE KEY `uniq_provider` (`provider`),
-            KEY `idx_active` (`is_active`)
-        ) $collate;";
-
         $sql_reports = "CREATE TABLE IF NOT EXISTS `{$wpdb->prefix}" . Utill::TABLES['report'] . "` (
             `id`            bigint(20) unsigned NOT NULL AUTO_INCREMENT,
             `report_type`   varchar(50) NOT NULL,
@@ -289,24 +237,6 @@ class Install {
             KEY `idx_period` (`period_start`, `period_end`)
         ) $collate;";
 
-        $sql_scheduled_jobs = "CREATE TABLE IF NOT EXISTS `{$wpdb->prefix}" . Utill::TABLES['scheduled_job'] . "` (
-            `id`               bigint(20) unsigned NOT NULL AUTO_INCREMENT,
-            `job_key`          varchar(100) NOT NULL,
-            `job_type`         varchar(50) NOT NULL,
-            `schedule`         varchar(50) NOT NULL,
-            `config`           longtext DEFAULT NULL,
-            `is_enabled`       tinyint(1) NOT NULL DEFAULT 1,
-            `next_run_at`      datetime DEFAULT NULL,
-            `last_run_at`      datetime DEFAULT NULL,
-            `last_run_status`  varchar(20) DEFAULT NULL,
-            `created_at`       timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
-            `updated_at`       timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-            PRIMARY KEY (`id`),
-            UNIQUE KEY `uniq_job_key` (`job_key`),
-            KEY `idx_enabled` (`is_enabled`),
-            KEY `idx_next_run` (`next_run_at`)
-        ) $collate;";
-
         $sql_activity_logs = "CREATE TABLE IF NOT EXISTS `{$wpdb->prefix}" . Utill::TABLES['activity_log'] . "` (
             `id`          bigint(20) unsigned NOT NULL AUTO_INCREMENT,
             `event_type`  varchar(100) NOT NULL,
@@ -322,23 +252,6 @@ class Install {
             KEY `idx_event` (`event_type`),
             KEY `idx_object` (`object_type`, `object_id`),
             KEY `idx_created` (`created_at`)
-        ) $collate;";
-
-        $sql_site_health_snapshots = "CREATE TABLE IF NOT EXISTS `{$wpdb->prefix}" . Utill::TABLES['site_health_snapshot'] . "` (
-            `id`                bigint(20) unsigned NOT NULL AUTO_INCREMENT,
-            `snapshot_date`     date NOT NULL,
-            `overall_score`     tinyint(3) unsigned NOT NULL,
-            `security_score`    tinyint(3) unsigned DEFAULT NULL,
-            `performance_score` tinyint(3) unsigned DEFAULT NULL,
-            `seo_score`         tinyint(3) unsigned DEFAULT NULL,
-            `uptime_score`      tinyint(3) unsigned DEFAULT NULL,
-            `critical_count`    int(10) unsigned NOT NULL DEFAULT 0,
-            `high_count`        int(10) unsigned NOT NULL DEFAULT 0,
-            `medium_count`      int(10) unsigned NOT NULL DEFAULT 0,
-            `low_count`         int(10) unsigned NOT NULL DEFAULT 0,
-            `created_at`        timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
-            PRIMARY KEY (`id`),
-            UNIQUE KEY `uniq_snapshot_date` (`snapshot_date`)
         ) $collate;";
 
         // No "IF NOT EXISTS" here — same dbDelta()/"IF NOT EXISTS" ALTER-path
@@ -372,103 +285,23 @@ class Install {
 
         dbDelta( $sql_scans );
         dbDelta( $sql_scan_findings );
-        dbDelta( $sql_rules );
         dbDelta( $sql_automations );
         dbDelta( $sql_automations_runs );
-        dbDelta( $sql_ai_jobs );
         dbDelta( $sql_ai_history );
-        dbDelta( $sql_ai_provider_configs );
         dbDelta( $sql_reports );
-        dbDelta( $sql_scheduled_jobs );
         dbDelta( $sql_activity_logs );
-        dbDelta( $sql_site_health_snapshots );
         dbDelta( $sql_ai_action_runs );
 
+        self::create_snapshots_table();
         self::create_crawler_visits_table();
         self::create_redirect_tables();
-        self::create_indexnow_log_table();
-        self::create_geo_visibility_history_table();
-        self::create_brand_score_history_table();
-        self::create_brand_mentions_table();
-        self::create_entity_relationships_table();
-        self::create_kg_health_history_table();
-        self::create_file_baselines_table();
-        self::create_accessibility_snapshots_table();
-        self::create_store_trends_snapshots_table();
-        self::create_performance_score_snapshots_table();
-        self::create_security_score_snapshots_table();
-        self::create_performance_requests_table();
-        self::create_core_web_vitals_table();
+        self::create_performance_samples_table();
         self::create_page_speed_table();
-        self::create_login_attempts_table();
-        self::create_firewall_blocks_table();
+        self::create_security_events_table();
         self::create_backups_table();
-        self::create_backup_storage_configs_table();
         self::create_ai_conversations_table();
-        self::create_keyword_rankings_table();
     }
 
-    /**
-     * Creates `vulopilot_keyword_rankings` — SEO & Visibility → Keywords'
-     * real Search Console rank-tracking history. Own method, same shape as
-     * create_indexnow_log_table() above. Schema/creation stays owned here
-     * even though the sync service/REST controller/UI are now Pro
-     * (vulopilot-pro's own Keywords module, moved wholesale per direct
-     * instruction) — same "Free owns the table, Pro owns the only code
-     * that reads/writes it" split Utill::TABLES's own `keyword_ranking`
-     * entry documents (mirrors `brand_mention`'s identical precedent).
-     *
-     * One row per (`query`, `page`, `snapshot_date`) — NOT upserted-in-place
-     * the way `vulopilot_not_found_logs` is, deliberately: every real sync
-     * (daily cron, or a manual "Sync now") writes a fresh row for that day
-     * rather than overwriting the previous one, because "Previous"/
-     * "Change"/"Best Position" and the trend sparklines KeywordsTab.tsx
-     * shows are all computed by comparing/aggregating across these real
-     * historical rows (vulopilot-pro's own KeywordRankingRepository) —
-     * there would be nothing to compare against if only the latest value
-     * were ever kept. `synced_at` is separate from `snapshot_date` (date-only, the
-     * calendar day this row's sync ran) purely so a repeat manual sync on
-     * the same day can still be told apart in `synced_at` while still
-     * upserting into that same day's row (KeywordRankingRepository's own
-     * find-then-insert/update, same idiom NotFoundLogRepository already
-     * uses — no DB-level unique key, enforced at the application layer).
-     *
-     * `position`/`ctr` are `decimal`, not one of this codebase's usual
-     * integer-thousandths columns (`cls_thousandths` etc.) — Search
-     * Console's own `searchAnalytics.query` response already returns both
-     * as real floats (e.g. position 4.83), and there's no fixed-precision
-     * convention to round them into without losing real precision a rank
-     * tracker's own "Position" column is expected to show.
-     *
-     * @return void
-     */
-    private static function create_keyword_rankings_table() {
-        global $wpdb;
-
-        if ( ! function_exists( 'dbDelta' ) ) {
-            require_once ABSPATH . 'wp-admin/includes/upgrade.php';
-        }
-
-        $collate = $wpdb->get_charset_collate();
-
-        $sql_keyword_rankings = "CREATE TABLE IF NOT EXISTS `{$wpdb->prefix}" . Utill::TABLES['keyword_ranking'] . "` (
-            `id`             bigint(20) unsigned NOT NULL AUTO_INCREMENT,
-            `query`          varchar(255) NOT NULL,
-            `page`           varchar(500) NOT NULL DEFAULT '',
-            `clicks`         int(10) unsigned NOT NULL DEFAULT 0,
-            `impressions`    int(10) unsigned NOT NULL DEFAULT 0,
-            `ctr`            decimal(6,3) NOT NULL DEFAULT 0.000,
-            `position`       decimal(6,2) NOT NULL DEFAULT 0.00,
-            `snapshot_date`  date NOT NULL,
-            `synced_at`      datetime NOT NULL,
-            PRIMARY KEY (`id`),
-            KEY `idx_query` (`query`(191)),
-            KEY `idx_page` (`page`(191)),
-            KEY `idx_snapshot_date` (`snapshot_date`)
-        ) $collate;";
-
-        dbDelta( $sql_keyword_rankings );
-    }
 
     /**
      * Creates `vulopilot_ai_conversations` — AI Copilot's own persisted chat
@@ -624,17 +457,17 @@ class Install {
     }
 
     /**
-     * Creates `vulopilot_performance_score_snapshots` — "Performance"
-     * Overview's Speed History card. Own dedicated table rather than a
-     * reuse of `vulopilot_site_health_snapshots` (that table's other
-     * columns are Pro's AdvancedReports module data — see
-     * Services\PerformanceScoreSnapshotRecorder's own docblock for why
-     * sharing one mutable daily row is the wrong move here). Own method,
-     * same shape as create_redirect_tables() above.
+     * Creates `vulopilot_snapshots` — every feature's daily score history in
+     * one table: one row per (`snapshot_type`, `snapshot_date`), the day's
+     * values together as JSON in `data` (Repositories\SnapshotRepository).
+     * Types: `performance`, `security` (free trend cards), `site_health`,
+     * `accessibility`, `store_trends`, `brand_score`, `geo_visibility`,
+     * `kg_health` (Pro modules). Each was a date plus a few numbers, only
+     * ever read back as a time series — no reason for eight tables.
      *
      * @return void
      */
-    private static function create_performance_score_snapshots_table() {
+    private static function create_snapshots_table() {
         global $wpdb;
 
         if ( ! function_exists( 'dbDelta' ) ) {
@@ -643,32 +476,41 @@ class Install {
 
         $collate = $wpdb->get_charset_collate();
 
-        $sql = "CREATE TABLE IF NOT EXISTS `{$wpdb->prefix}" . Utill::TABLES['performance_score_snapshot'] . "` (
-            `id`                bigint(20) unsigned NOT NULL AUTO_INCREMENT,
-            `snapshot_date`     date NOT NULL,
-            `performance_score` tinyint(3) unsigned NOT NULL DEFAULT 0,
-            `created_at`        timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+        $sql = "CREATE TABLE IF NOT EXISTS `{$wpdb->prefix}" . Utill::TABLES['snapshot'] . "` (
+            `id`            bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+            `snapshot_type` varchar(30) NOT NULL,
+            `snapshot_date` date NOT NULL,
+            `data`          longtext NOT NULL,
+            `created_at`    timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
             PRIMARY KEY (`id`),
-            UNIQUE KEY `uniq_snapshot_date` (`snapshot_date`)
+            UNIQUE KEY `uniq_type_date` (`snapshot_type`, `snapshot_date`)
         ) $collate;";
 
         dbDelta( $sql );
     }
 
     /**
-     * Creates `vulopilot_security_score_snapshots` — "Security" tab's
-     * SecurityTrendCard.tsx. Same reasoning as
-     * create_performance_score_snapshots_table() just above (own dedicated
-     * table rather than a reuse of `vulopilot_site_health_snapshots` —
-     * that table's `security_score` column exists but is only ever written
-     * by Pro's AdvancedReports module, so a Free-tier trend card can't
-     * depend on it being populated) — see
-     * Services\SecurityScoreSnapshotRecorder's own docblock. Own method,
-     * same shape as create_performance_score_snapshots_table() above.
+     * Creates `vulopilot_performance_samples` — "Performance" Overview's
+     * real-time data, one row per sample, `sample_type` saying which kind:
+     *
+     * - `request` — a response-time sample per real front-end request
+     *   (Services\PerformanceRequestLogger; Real-time Monitoring card).
+     *   Deliberately no visitor-identifying column at all.
+     * - `vital` — a real-visitor Core Web Vitals report
+     *   (Services\CoreWebVitalsBeacon's public beacon). A metric the browser
+     *   couldn't measure (e.g. no interaction yet for INP) is NULL, never a
+     *   fabricated zero. `cls` is stored ×1000 as a smallint
+     *   (`cls_thousandths`), matching this codebase's preference for integer
+     *   ms/thousandths columns over floats. `page_load_ms`/`transfer_bytes`
+     *   come from the same beacon's Navigation/Resource Timing read.
+     *
+     * Both kinds are short-retention, append-only, timestamp-indexed sample
+     * logs, so they share one table; each has a thin repository that pins
+     * its own `sample_type`.
      *
      * @return void
      */
-    private static function create_security_score_snapshots_table() {
+    private static function create_performance_samples_table() {
         global $wpdb;
 
         if ( ! function_exists( 'dbDelta' ) ) {
@@ -677,88 +519,10 @@ class Install {
 
         $collate = $wpdb->get_charset_collate();
 
-        $sql = "CREATE TABLE IF NOT EXISTS `{$wpdb->prefix}" . Utill::TABLES['security_score_snapshot'] . "` (
-            `id`             bigint(20) unsigned NOT NULL AUTO_INCREMENT,
-            `snapshot_date`  date NOT NULL,
-            `security_score` tinyint(3) unsigned NOT NULL DEFAULT 0,
-            `created_at`     timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
-            PRIMARY KEY (`id`),
-            UNIQUE KEY `uniq_snapshot_date` (`snapshot_date`)
-        ) $collate;";
-
-        dbDelta( $sql );
-    }
-
-    /**
-     * Creates `vulopilot_performance_requests` — "Performance"
-     * Overview's Real-time Monitoring card. Deliberately no visitor-
-     * identifying column at all (see Services\PerformanceRequestLogger's
-     * own docblock) — just a response time sample per real front-end
-     * request. Own method, same shape as create_redirect_tables() above.
-     *
-     * @return void
-     */
-    private static function create_performance_requests_table() {
-        global $wpdb;
-
-        if ( ! function_exists( 'dbDelta' ) ) {
-            require_once ABSPATH . 'wp-admin/includes/upgrade.php';
-        }
-
-        $collate = $wpdb->get_charset_collate();
-
-        $sql = "CREATE TABLE IF NOT EXISTS `{$wpdb->prefix}" . Utill::TABLES['performance_request'] . "` (
-            `id`                bigint(20) unsigned NOT NULL AUTO_INCREMENT,
-            `response_time_ms`  smallint(5) unsigned NOT NULL,
-            `created_at`        timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
-            PRIMARY KEY (`id`),
-            KEY `idx_created` (`created_at`)
-        ) $collate;";
-
-        dbDelta( $sql );
-    }
-
-    /**
-     * Creates `vulopilot_core_web_vitals` — "Performance" Overview's real
-     * Core Web Vitals RUM (Services\CoreWebVitalsBeacon's public front-end
-     * beacon writes here). One row per real pageview that reported at
-     * least one metric; a metric the browser couldn't measure (e.g. no
-     * interaction yet for INP) is NULL, never a fabricated zero. `cls`
-     * stored ×1000 as a smallint (`cls_thousandths`), matching this
-     * codebase's own preference for integer ms/thousandths columns over
-     * float columns. `page_load_ms`/`transfer_bytes` are the same real
-     * beacon's Navigation/Resource Timing read (`window.performance`'s own
-     * `loadEventEnd`/summed `transferSize`) — real-visitor "Page Load
-     * Time"/"Bandwidth Usage", backing RealTimeMonitoringCard.tsx's own
-     * two tiles that previously had no real data source at all. Own
-     * method, same shape as create_redirect_tables() above. Adding these
-     * 2 columns to an already-installed table is safe and automatic —
-     * see this class's own docblock on why `run_migration()` re-runs
-     * `dbDelta()` unconditionally on every request.
-     *
-     * @return void
-     */
-    private static function create_core_web_vitals_table() {
-        global $wpdb;
-
-        if ( ! function_exists( 'dbDelta' ) ) {
-            require_once ABSPATH . 'wp-admin/includes/upgrade.php';
-        }
-
-        $collate = $wpdb->get_charset_collate();
-
-        // No "IF NOT EXISTS" — dbDelta() extracts the table name via
-        // `preg_match('|CREATE TABLE ([^ ]*)|', ...)`, which reads "IF" as
-        // the table name when that clause is present, so it never
-        // recognizes this as an existing table and never runs the
-        // ALTER TABLE ADD COLUMN a schema change (like `page_load_ms`/
-        // `transfer_bytes` below) needs — a real, confirmed-live dbDelta
-        // limitation (see https://developer.wordpress.org/reference/functions/dbdelta/
-        // "you must not use IF NOT EXISTS"), not a style preference.
-        // dbDelta() already checks table existence itself before deciding
-        // CREATE vs ALTER, so the SQL-level guard was always redundant.
-        $sql = "CREATE TABLE `{$wpdb->prefix}" . Utill::TABLES['core_web_vital'] . "` (
+        $sql = "CREATE TABLE IF NOT EXISTS `{$wpdb->prefix}" . Utill::TABLES['performance_sample'] . "` (
             `id`               bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+            `sample_type`      varchar(10) NOT NULL,
+            `response_time_ms` smallint(5) unsigned DEFAULT NULL,
             `lcp_ms`           smallint(5) unsigned DEFAULT NULL,
             `cls_thousandths`  smallint(5) unsigned DEFAULT NULL,
             `inp_ms`           smallint(5) unsigned DEFAULT NULL,
@@ -766,7 +530,7 @@ class Install {
             `transfer_bytes`   int(10) unsigned DEFAULT NULL,
             `created_at`       timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
             PRIMARY KEY (`id`),
-            KEY `idx_created` (`created_at`)
+            KEY `idx_type_created` (`sample_type`, `created_at`)
         ) $collate;";
 
         dbDelta( $sql );
@@ -803,7 +567,7 @@ class Install {
      * low-traffic page (a real "not enough data" case, not fabricated).
      * All eight stay NULL without a PSI key, same PSI-key-gated fallback
      * posture as `mobile_score`/`desktop_score`. Own method, same shape as
-     * create_core_web_vitals_table() above.
+     * create_performance_samples_table() above.
      *
      * @return void
      */
@@ -847,18 +611,24 @@ class Install {
     }
 
     /**
-     * Creates `vulopilot_login_attempts` — Protect My Site's "Login
-     * Protection" tile (Services\LoginProtectionGuard). One row per real
-     * login attempt (success or failure), `ip_address`+`attempted_at`
-     * indexed together since the guard's only query is "how many failures
-     * has this IP had in the last N minutes." No plaintext password/
-     * username-guessing data is ever stored here — only which login *name*
-     * was tried, same as WordPress core's own login-failure logging
-     * convention.
+     * Creates `vulopilot_security_events` — Protect My Site's IP-based event
+     * log, one row per event, `event_type` saying which kind:
+     *
+     * - `login_attempt` — a real login attempt (Services\LoginProtectionGuard):
+     *   `username_attempted` + `success`. Backs the rolling lockout check
+     *   and the Login Protection scanner.
+     * - `firewall_block` — a request the firewall rules matched
+     *   (Services\FirewallGuard): `request_uri`, `rule_matched`, `action`
+     *   (`blocked` or `logged`). Backs the Firewall scanner.
+     *
+     * Both are short, append-only, per-IP logs queried the same way (count
+     * by IP within a time window), so they share one table and one index;
+     * each has a thin repository that pins its own `event_type`. Columns
+     * the other kind doesn't use stay NULL.
      *
      * @return void
      */
-    private static function create_login_attempts_table() {
+    private static function create_security_events_table() {
         global $wpdb;
 
         if ( ! function_exists( 'dbDelta' ) ) {
@@ -867,48 +637,19 @@ class Install {
 
         $collate = $wpdb->get_charset_collate();
 
-        $sql = "CREATE TABLE IF NOT EXISTS `{$wpdb->prefix}" . Utill::TABLES['login_attempt'] . "` (
-            `id`                  bigint(20) unsigned NOT NULL AUTO_INCREMENT,
-            `ip_address`          varchar(45) NOT NULL,
-            `username_attempted`  varchar(60) NOT NULL DEFAULT '',
-            `success`             tinyint(1) unsigned NOT NULL DEFAULT 0,
-            `attempted_at`        datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+        $sql = "CREATE TABLE IF NOT EXISTS `{$wpdb->prefix}" . Utill::TABLES['security_event'] . "` (
+            `id`                 bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+            `event_type`         varchar(20) NOT NULL,
+            `ip_address`         varchar(45) NOT NULL,
+            `username_attempted` varchar(60) DEFAULT NULL,
+            `success`            tinyint(1) unsigned DEFAULT NULL,
+            `request_uri`        text DEFAULT NULL,
+            `rule_matched`       varchar(100) DEFAULT NULL,
+            `action`             varchar(10) DEFAULT NULL,
+            `created_at`         datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
             PRIMARY KEY (`id`),
-            KEY `idx_ip_time` (`ip_address`, `attempted_at`)
-        ) $collate;";
-
-        dbDelta( $sql );
-    }
-
-    /**
-     * Creates `vulopilot_firewall_blocks` — Protect My Site's "Firewall"
-     * tile (Services\FirewallGuard). One row per request that matched a
-     * known attack-pattern rule; `action` records whether it was actually
-     * blocked (`enable_firewall_blocking` on) or only logged (the default),
-     * so the same table honestly represents both modes without a schema
-     * change when a site owner later turns blocking on.
-     *
-     * @return void
-     */
-    private static function create_firewall_blocks_table() {
-        global $wpdb;
-
-        if ( ! function_exists( 'dbDelta' ) ) {
-            require_once ABSPATH . 'wp-admin/includes/upgrade.php';
-        }
-
-        $collate = $wpdb->get_charset_collate();
-
-        $sql = "CREATE TABLE IF NOT EXISTS `{$wpdb->prefix}" . Utill::TABLES['firewall_block'] . "` (
-            `id`             bigint(20) unsigned NOT NULL AUTO_INCREMENT,
-            `ip_address`     varchar(45) NOT NULL,
-            `request_uri`    text NOT NULL,
-            `rule_matched`   varchar(100) NOT NULL,
-            `action`         varchar(10) NOT NULL DEFAULT 'logged',
-            `created_at`     datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
-            PRIMARY KEY (`id`),
-            KEY `idx_ip` (`ip_address`),
-            KEY `idx_created` (`created_at`)
+            KEY `idx_type_ip_time` (`event_type`, `ip_address`, `created_at`),
+            KEY `idx_type_time` (`event_type`, `created_at`)
         ) $collate;";
 
         dbDelta( $sql );
@@ -988,45 +729,6 @@ class Install {
     }
 
     /**
-     * Creates `vulopilot_backup_storage_configs` — real, encrypted-at-rest
-     * Amazon S3/Google Drive credentials for Backups' own remote storage
-     * destination. Same shape as `vulopilot_ai_provider_configs` above (one
-     * row per provider, `credentials` always the
-     * Services\CredentialEncryption-encrypted form, `is_active` marking
-     * which single provider a backup actually uploads to right now) —
-     * intentionally NOT part of `Utill::VULOPILOT_SETTINGS_KEY`'s flat
-     * option, for the same reason `vulopilot_google_connection` isn't
-     * (GoogleServicesConnection's own docblock): that option round-trips
-     * wholesale to the browser on every `GET /settings` call, and a
-     * secret access key/OAuth client secret/refresh token must never reach
-     * the client.
-     *
-     * @return void
-     */
-    private static function create_backup_storage_configs_table() {
-        global $wpdb;
-
-        if ( ! function_exists( 'dbDelta' ) ) {
-            require_once ABSPATH . 'wp-admin/includes/upgrade.php';
-        }
-
-        $collate = $wpdb->get_charset_collate();
-
-        $sql = "CREATE TABLE IF NOT EXISTS `{$wpdb->prefix}" . Utill::TABLES['backup_storage_config'] . "` (
-            `id`           bigint(20) unsigned NOT NULL AUTO_INCREMENT,
-            `provider`     varchar(20) NOT NULL,
-            `credentials`  longtext NOT NULL,
-            `is_active`    tinyint(1) NOT NULL DEFAULT 0,
-            `created_at`   timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
-            `updated_at`   timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-            PRIMARY KEY (`id`),
-            UNIQUE KEY `uniq_provider` (`provider`)
-        ) $collate;";
-
-        dbDelta( $sql );
-    }
-
-    /**
      * Creates `vulopilot_crawler_visits` — its own method, same shape as
      * every other create_*_table() method below create_database_tables().
      * No IP address or user column, ever — readme.txt's own FAQ promises
@@ -1066,360 +768,7 @@ class Install {
         dbDelta( $sql_crawler_visits );
     }
 
-    /**
-     * Creates `vulopilot_indexnow_log` — its own method, same shape as
-     * create_crawler_visits_table()/create_redirect_tables() above. One
-     * row per real IndexNow API submission (manual or auto-submitted),
-     * trimmed to the last 100 by Repositories\IndexNowLogRepository after
-     * each insert (mockup's own "The last 100 IndexNow API requests" copy) —
-     * not upserted/deduped like `vulopilot_not_found_logs`, since repeat
-     * submissions of the same URL over time are each a distinct, meaningful
-     * API call worth its own row.
-     *
-     * @return void
-     */
-    private static function create_indexnow_log_table() {
-        global $wpdb;
 
-        if ( ! function_exists( 'dbDelta' ) ) {
-            require_once ABSPATH . 'wp-admin/includes/upgrade.php';
-        }
 
-        $collate = $wpdb->get_charset_collate();
 
-        $sql_indexnow_log = "CREATE TABLE IF NOT EXISTS `{$wpdb->prefix}" . Utill::TABLES['indexnow_log'] . "` (
-            `id`              bigint(20) unsigned NOT NULL AUTO_INCREMENT,
-            `url`             varchar(255) NOT NULL,
-            `response_code`   smallint(5) unsigned DEFAULT NULL,
-            `response_status` varchar(20) NOT NULL DEFAULT 'unknown',
-            `trigger_type`    varchar(20) NOT NULL DEFAULT 'manual',
-            `created_at`      timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
-            PRIMARY KEY (`id`),
-            KEY `idx_created` (`created_at`)
-        ) $collate;";
-
-        dbDelta( $sql_indexnow_log );
-    }
-
-    /**
-     * Creates `vulopilot_geo_visibility_history` — own method, same shape
-     * as create_indexnow_log_table() above. One row per calendar day
-     * (`snapshot_date` UNIQUE, upserted — never one row per run), the same
-     * "daily snapshot, not a per-run log" shape `vulopilot_site_health_snapshots`
-     * already uses, so a site that rebuilds its GEO visibility snapshot more
-     * than once a day still only ever has one trend point for that day.
-     * Written by vulopilot-pro's GeoInsights\VisibilitySnapshotBuilder
-     * (Free owns the schema/Repository, Pro owns the population logic —
-     * same split `vulopilot_site_health_snapshots`/AdvancedReports already
-     * establishes) — this table exists and is queryable even without Pro
-     * active, it just stays empty.
-     *
-     * @return void
-     */
-    private static function create_geo_visibility_history_table() {
-        global $wpdb;
-
-        if ( ! function_exists( 'dbDelta' ) ) {
-            require_once ABSPATH . 'wp-admin/includes/upgrade.php';
-        }
-
-        $collate = $wpdb->get_charset_collate();
-
-        $sql_geo_visibility_history = "CREATE TABLE IF NOT EXISTS `{$wpdb->prefix}" . Utill::TABLES['geo_visibility_history'] . "` (
-            `id`             bigint(20) unsigned NOT NULL AUTO_INCREMENT,
-            `snapshot_date`  date NOT NULL,
-            `sample_size`    int(10) unsigned NOT NULL DEFAULT 0,
-            `overall_score`  tinyint(3) unsigned DEFAULT NULL,
-            `ai_scores`      longtext DEFAULT NULL,
-            `sub_scores`     longtext DEFAULT NULL,
-            `created_at`     timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
-            PRIMARY KEY (`id`),
-            UNIQUE KEY `uniq_snapshot_date` (`snapshot_date`)
-        ) $collate;";
-
-        dbDelta( $sql_geo_visibility_history );
-    }
-
-    /**
-     * `vulopilot_brand_score_history` — same one-row-per-day upsert shape
-     * as `vulopilot_geo_visibility_history` above, but simpler: Brand Score
-     * is a deterministic composite computed live from
-     * `vulopilot_scan_findings` (Controllers\BrandIntelligence's own
-     * docblock), never an AI-sampled average that can come back empty, so
-     * there's no `sample_size`/nullable-score case to account for — every
-     * one of its 4 score columns is always a real 0-100 int.
-     *
-     * @return void
-     */
-    private static function create_brand_score_history_table() {
-        global $wpdb;
-
-        if ( ! function_exists( 'dbDelta' ) ) {
-            require_once ABSPATH . 'wp-admin/includes/upgrade.php';
-        }
-
-        $collate = $wpdb->get_charset_collate();
-
-        $sql_brand_score_history = "CREATE TABLE IF NOT EXISTS `{$wpdb->prefix}" . Utill::TABLES['brand_score_history'] . "` (
-            `id`               bigint(20) unsigned NOT NULL AUTO_INCREMENT,
-            `snapshot_date`    date NOT NULL,
-            `brand_score`      tinyint(3) unsigned NOT NULL,
-            `trust_score`      tinyint(3) unsigned NOT NULL,
-            `authority_score`  tinyint(3) unsigned NOT NULL,
-            `entity_score`     tinyint(3) unsigned NOT NULL,
-            `created_at`       timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
-            PRIMARY KEY (`id`),
-            UNIQUE KEY `uniq_snapshot_date` (`snapshot_date`)
-        ) $collate;";
-
-        dbDelta( $sql_brand_score_history );
-    }
-
-    /**
-     * `vulopilot_brand_mentions` — real off-site brand mentions
-     * (vulopilot-pro's BrandIntelligence\OffSiteMentionTracker, Google
-     * News RSS-sourced — see that class's own docblock for the "no paid
-     * Ahrefs Brand Radar credentials" reasoning behind that specific
-     * source). One row per real, distinct article `url` (the unique key
-     * both prevents duplicate rows across repeated daily fetches finding
-     * the same still-live article again, and is what the fetcher's own
-     * upsert-by-url logic relies on). `source_domain` is stored
-     * pre-parsed (not derived from `url` at read time) purely so the
-     * "citing domains" rollup the UI needs is a plain `GROUP BY` rather
-     * than a per-row PHP `wp_parse_url()` call over every stored mention.
-     *
-     * @return void
-     */
-    private static function create_brand_mentions_table() {
-        global $wpdb;
-
-        if ( ! function_exists( 'dbDelta' ) ) {
-            require_once ABSPATH . 'wp-admin/includes/upgrade.php';
-        }
-
-        $collate = $wpdb->get_charset_collate();
-
-        $sql_brand_mentions = "CREATE TABLE IF NOT EXISTS `{$wpdb->prefix}" . Utill::TABLES['brand_mention'] . "` (
-            `id`             bigint(20) unsigned NOT NULL AUTO_INCREMENT,
-            `title`          text NOT NULL,
-            `url`            varchar(768) NOT NULL,
-            `source_name`    varchar(255) DEFAULT NULL,
-            `source_domain`  varchar(255) NOT NULL,
-            `published_at`   datetime DEFAULT NULL,
-            `created_at`     timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
-            PRIMARY KEY (`id`),
-            UNIQUE KEY `uniq_url` (`url`(255)),
-            KEY `idx_published` (`published_at`),
-            KEY `idx_domain` (`source_domain`)
-        ) $collate;";
-
-        dbDelta( $sql_brand_mentions );
-    }
-
-    /**
-     * `vulopilot_entity_relationships` (KNOWLEDGE-GRAPH-MODULE.md) — one
-     * row per real, deterministic edge vulopilot-pro's own
-     * KnowledgeGraph\EntityRelationshipBuilder discovers between two of
-     * Free's own extracted entities (Services\EntityExtractor). Entity ids
-     * are the synthetic `{type}:{ref}` strings EntityExtractor itself
-     * builds (e.g. `person:7`), not a foreign key into any single table —
-     * no real FK constraints anywhere in this codebase's schema regardless
-     * (DATABASE.md's own stated convention). `dedupe_hash` (an md5 of
-     * from/to id + relationship_type) gets its own UNIQUE key instead of a
-     * wide composite unique index across 3 varchar columns, since building
-     * the graph is a repeatable rebuild-on-schedule operation, not a
-     * one-time insert, and re-running it must not create duplicate edges.
-     *
-     * @return void
-     */
-    private static function create_entity_relationships_table() {
-        global $wpdb;
-
-        if ( ! function_exists( 'dbDelta' ) ) {
-            require_once ABSPATH . 'wp-admin/includes/upgrade.php';
-        }
-
-        $collate = $wpdb->get_charset_collate();
-
-        $sql_entity_relationships = "CREATE TABLE IF NOT EXISTS `{$wpdb->prefix}" . Utill::TABLES['entity_relationship'] . "` (
-            `id`                bigint(20) unsigned NOT NULL AUTO_INCREMENT,
-            `from_entity_id`    varchar(64) NOT NULL,
-            `from_entity_type`  varchar(20) NOT NULL,
-            `from_entity_name`  varchar(255) NOT NULL,
-            `to_entity_id`      varchar(64) NOT NULL,
-            `to_entity_type`    varchar(20) NOT NULL,
-            `to_entity_name`    varchar(255) NOT NULL,
-            `relationship_type` varchar(50) NOT NULL,
-            `dedupe_hash`       char(32) NOT NULL,
-            `created_at`        timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
-            PRIMARY KEY (`id`),
-            UNIQUE KEY `uniq_dedupe_hash` (`dedupe_hash`),
-            KEY `idx_from_entity` (`from_entity_id`),
-            KEY `idx_to_entity` (`to_entity_id`)
-        ) $collate;";
-
-        dbDelta( $sql_entity_relationships );
-    }
-
-    /**
-     * `vulopilot_kg_health_history` (KNOWLEDGE-GRAPH-MODULE.md) — same
-     * one-row-per-day upsert shape as `vulopilot_brand_score_history`
-     * above; Knowledge Graph Health is likewise a deterministic composite
-     * (entity/relationship completeness ratios, vulopilot-pro's own
-     * KnowledgeGraphHealthMonitor), never an AI-sampled average, so every
-     * column is always a real value.
-     *
-     * @return void
-     */
-    private static function create_kg_health_history_table() {
-        global $wpdb;
-
-        if ( ! function_exists( 'dbDelta' ) ) {
-            require_once ABSPATH . 'wp-admin/includes/upgrade.php';
-        }
-
-        $collate = $wpdb->get_charset_collate();
-
-        $sql_kg_health_history = "CREATE TABLE IF NOT EXISTS `{$wpdb->prefix}" . Utill::TABLES['kg_health_history'] . "` (
-            `id`                  bigint(20) unsigned NOT NULL AUTO_INCREMENT,
-            `snapshot_date`       date NOT NULL,
-            `health_score`        tinyint(3) unsigned NOT NULL,
-            `total_entities`      int(10) unsigned NOT NULL DEFAULT 0,
-            `total_relationships` int(10) unsigned NOT NULL DEFAULT 0,
-            `created_at`          timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
-            PRIMARY KEY (`id`),
-            UNIQUE KEY `uniq_snapshot_date` (`snapshot_date`)
-        ) $collate;";
-
-        dbDelta( $sql_kg_health_history );
-    }
-
-    /**
-     * `vulopilot_file_baselines` (SECURITY-MODULE.md's "Integrity
-     * Monitoring") — one row per plugin/theme file vulopilot-pro's own
-     * IntegrityMonitoringScanner has seen, keyed by its own path so a
-     * re-scan can `UPSERT`-by-path rather than accumulating a new row per
-     * run the way `vulopilot_scan_findings` does. Free owns the
-     * schema/Repository, Pro owns the population/diff logic — same split
-     * `vulopilot_entity_relationships`/`vulopilot_geo_visibility_history`
-     * already establish; this table exists and is queryable even without
-     * Pro active, it just stays empty. `hash` is a sha256 (char(64)), not
-     * core's own md5 (CoreFileIntegrityScanner's own choice) — core files
-     * have an official published md5 baseline to diff against; these do
-     * not, so there's no reason to match core's weaker algorithm here.
-     * `path_hash` (an md5 of `path`) carries the UNIQUE key rather than
-     * `path` itself — same "wide varchar can't cheaply carry a unique
-     * index" reasoning `vulopilot_entity_relationships`' own `dedupe_hash`
-     * column already documents.
-     *
-     * @return void
-     */
-    private static function create_file_baselines_table() {
-        global $wpdb;
-
-        if ( ! function_exists( 'dbDelta' ) ) {
-            require_once ABSPATH . 'wp-admin/includes/upgrade.php';
-        }
-
-        $collate = $wpdb->get_charset_collate();
-
-        $sql_file_baselines = "CREATE TABLE IF NOT EXISTS `{$wpdb->prefix}" . Utill::TABLES['file_baseline'] . "` (
-            `id`           bigint(20) unsigned NOT NULL AUTO_INCREMENT,
-            `path`         varchar(500) NOT NULL,
-            `path_hash`    char(32) NOT NULL,
-            `scope`        varchar(20) NOT NULL,
-            `hash`         char(64) NOT NULL,
-            `file_size`    bigint(20) unsigned NOT NULL DEFAULT 0,
-            `last_seen_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
-            `created_at`   timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
-            PRIMARY KEY (`id`),
-            UNIQUE KEY `uniq_path_hash` (`path_hash`),
-            KEY `idx_scope` (`scope`)
-        ) $collate;";
-
-        dbDelta( $sql_file_baselines );
-    }
-
-    /**
-     * `vulopilot_accessibility_snapshots` (ACCESSIBILITY-MODULE.md's
-     * "Historical Tracking") — same one-row-per-day upsert shape as
-     * `vulopilot_site_health_snapshots`/`vulopilot_geo_visibility_history`
-     * above, scoped to category 'accessibility' findings specifically
-     * rather than the whole-site score those track. Free owns the
-     * schema/Repository, vulopilot-pro's AccessibilityAudits module owns
-     * the population logic (self-hooks `vulopilot_scan_completed`, same
-     * split every other *_history/*_snapshots table in this file already
-     * establishes) — this table exists and is queryable even without Pro
-     * active, it just stays empty. Severity counts are a deterministic
-     * rollup of `vulopilot_scan_findings` (FindingRepository's own
-     * get_severity_breakdown_for_category()), never an AI-sampled average,
-     * so — like `vulopilot_brand_score_history`/`vulopilot_kg_health_history`
-     * — every column is always a real value, no nullable-score case.
-     *
-     * @return void
-     */
-    private static function create_accessibility_snapshots_table() {
-        global $wpdb;
-
-        if ( ! function_exists( 'dbDelta' ) ) {
-            require_once ABSPATH . 'wp-admin/includes/upgrade.php';
-        }
-
-        $collate = $wpdb->get_charset_collate();
-
-        $sql_accessibility_snapshots = "CREATE TABLE IF NOT EXISTS `{$wpdb->prefix}" . Utill::TABLES['accessibility_snapshot'] . "` (
-            `id`             bigint(20) unsigned NOT NULL AUTO_INCREMENT,
-            `snapshot_date`  date NOT NULL,
-            `score`          tinyint(3) unsigned NOT NULL,
-            `open_count`     int(10) unsigned NOT NULL DEFAULT 0,
-            `critical_count` int(10) unsigned NOT NULL DEFAULT 0,
-            `high_count`     int(10) unsigned NOT NULL DEFAULT 0,
-            `medium_count`   int(10) unsigned NOT NULL DEFAULT 0,
-            `low_count`      int(10) unsigned NOT NULL DEFAULT 0,
-            `created_at`     timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
-            PRIMARY KEY (`id`),
-            UNIQUE KEY `uniq_snapshot_date` (`snapshot_date`)
-        ) $collate;";
-
-        dbDelta( $sql_accessibility_snapshots );
-    }
-
-    /**
-     * `vulopilot_store_trends_snapshots` (WOOCOMMERCE-INTELLIGENCE-MODULE.md's
-     * "Store Trends") — same one-row-per-day upsert shape as
-     * `vulopilot_accessibility_snapshots` above, scoped to real WooCommerce
-     * order data instead of scanner findings. Free owns the
-     * schema/Repository, vulopilot-pro's WooCommerceIntelligence module
-     * owns the population logic (its own daily wp-cron tick, not a scan
-     * hook — a store's revenue isn't scanner-derived the way a finding
-     * count is) — this table exists and is queryable even without Pro
-     * active, it just stays empty. `revenue`/`avg_order_value` are
-     * decimal(10,2), matching WooCommerce core's own `_order_total` meta
-     * precision, not float (binary float rounding error is never
-     * acceptable for a currency amount).
-     *
-     * @return void
-     */
-    private static function create_store_trends_snapshots_table() {
-        global $wpdb;
-
-        if ( ! function_exists( 'dbDelta' ) ) {
-            require_once ABSPATH . 'wp-admin/includes/upgrade.php';
-        }
-
-        $collate = $wpdb->get_charset_collate();
-
-        $sql_store_trends_snapshots = "CREATE TABLE IF NOT EXISTS `{$wpdb->prefix}" . Utill::TABLES['store_trends_snapshot'] . "` (
-            `id`               bigint(20) unsigned NOT NULL AUTO_INCREMENT,
-            `snapshot_date`    date NOT NULL,
-            `revenue`          decimal(10,2) NOT NULL DEFAULT 0.00,
-            `order_count`      int(10) unsigned NOT NULL DEFAULT 0,
-            `avg_order_value`  decimal(10,2) NOT NULL DEFAULT 0.00,
-            `created_at`       timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
-            PRIMARY KEY (`id`),
-            UNIQUE KEY `uniq_snapshot_date` (`snapshot_date`)
-        ) $collate;";
-
-        dbDelta( $sql_store_trends_snapshots );
-    }
 }

@@ -99,7 +99,7 @@ interface ContentToolPopupProps {
  * exactly (it has no `product_id` concept of its own).
  *
  * The one error this popup treats specially: `ActionRunner::propose()`'s
- * own real "No AI provider is configured." (thrown when neither a BYOK
+ * own real "No AI connection is configured." (thrown when neither a BYOK
  * key nor a connected VuloCloud account exists) shows the same real
  * "Connect to VuloCloud / Claim free AI Credits" action
  * AiCreditsIndicator.tsx's own dropdown already offers
@@ -131,11 +131,11 @@ const ContentToolPopup: React.FC<ContentToolPopupProps> = ({
 	const [isBusy, setIsBusy] = useState(false);
 
 	const hasProductPicker = 'generate-product-description' === tool?.actionId;
-	/** Same real "No AI provider is configured." condition AiContentAssistantSidebar.tsx's own sendToAi() checks for — ActionRunner::propose() throws this exact phrase (Rest.php's own docblock), so this offers the same real "Connect to VuloCloud" fix instead of a dead-end error notice. */
+	/** Same real "No AI connection is configured." condition AiContentAssistantSidebar.tsx's own sendToAi() checks for — ActionRunner::propose() throws this exact phrase (Rest.php's own docblock), so this offers the same real "Connect to VuloCloud" fix instead of a dead-end error notice. */
 	const { status: creditsStatus } = useAiCredits();
 	// Only offer "Connect" when not already connected — otherwise show the real server error.
 	const isNoProviderError =
-		errorMessage.includes('No AI provider is configured') && !creditsStatus?.connected;
+		errorMessage.includes('No AI connection is configured') && !creditsStatus?.connected;
 
 	useEffect(() => {
 		if (!tool) {

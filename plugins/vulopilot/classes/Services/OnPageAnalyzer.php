@@ -21,8 +21,8 @@ defined( 'ABSPATH' ) || exit;
  * whatever the editor currently holds — unsaved title/content/excerpt
  * edits included — every time the metabox's fields change. Where a check
  * mirrors an existing scanner's threshold (title length matches
- * Scanners\Basic\SeoScanner/AIActions\Actions\WriteMetaTitleAction; content
- * length matches Scanners\Basic\ThinContentScanner's own setting), the
+ * Seo\Scanners\SeoScanner/AiCopilot\Actions\WriteMetaTitleAction; content
+ * length matches Seo\Scanners\ThinContentScanner's own setting), the
  * same constant/setting is reused rather than a second, possibly-drifting
  * copy of the number.
  *

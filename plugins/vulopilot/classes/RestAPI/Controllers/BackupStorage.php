@@ -23,7 +23,7 @@ defined( 'ABSPATH' ) || exit;
  * credentials/connection each destination needs once selected, same "the
  * simple non-secret bit rides the flat settings option; the credentials
  * get their own encrypted, never-round-tripped storage" split
- * AiProvidersPanel.tsx/Controllers\AiProviders already established.
+ * VuloCloudAiConnectionPanel.tsx/Controllers\VuloCloudAiConnection already established.
  *
  * @class       BackupStorage controller
  * @version     1.0.0
@@ -148,7 +148,7 @@ class BackupStorage extends \WP_REST_Controller {
     /**
      * Saves real Amazon S3 credentials — never returns the Secret Access
      * Key (or even the full Access Key ID) back to the client, same
-     * posture `Controllers\AiProviders` already establishes for API keys.
+     * posture `Controllers\VuloCloudAiConnection` already establishes for API keys.
      *
      * @param \WP_REST_Request $request Full request object.
      * @return \WP_REST_Response|\WP_Error

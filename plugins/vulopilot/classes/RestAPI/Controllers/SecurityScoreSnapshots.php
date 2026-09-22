@@ -7,7 +7,7 @@
 
 namespace VuloPilot\RestAPI\Controllers;
 
-use VuloPilot\Repositories\SecurityScoreSnapshotRepository;
+use VuloPilot\Repositories\ScoreSnapshotRepository;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -66,7 +66,7 @@ class SecurityScoreSnapshots extends \WP_REST_Controller {
         $days = absint( $request->get_param( 'days' ) );
 
         return rest_ensure_response(
-            ( new SecurityScoreSnapshotRepository() )->get_recent( $days ? $days : 30 )
+            ( new ScoreSnapshotRepository( 'security' ) )->get_recent( $days ? $days : 30 )
         );
     }
 }

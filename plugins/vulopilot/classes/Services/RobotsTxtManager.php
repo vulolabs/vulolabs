@@ -17,7 +17,7 @@ defined( 'ABSPATH' ) || exit;
  * from-scratch robots.txt file generator — WordPress core already serves
  * a virtual robots.txt (`do_robots()`, filterable via `robots_txt`) at
  * every install's /robots.txt, which is exactly the URL
- * Scanners\Basic\RobotsTxtScanner already checks. Two real, independent
+ * Seo\Scanners\RobotsTxtScanner already checks. Two real, independent
  * things layer onto that same real filter:
  *   - When "Auto-generate robots.txt" is on, appends a `Sitemap:` line
  *     pointing at core's own sitemap (see SitemapManager) so crawlers

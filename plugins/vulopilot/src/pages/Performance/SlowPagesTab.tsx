@@ -132,10 +132,10 @@ const ratingFor = (score: number | null): { label: string; className: 'good' | '
 	}
 
 	if (score >= 50) {
-		return { label: __('Needs Improvement', 'vulopilot'), className: 'needs-improvement' };
+		return { label: __('Needs Work', 'vulopilot'), className: 'needs-improvement' };
 	}
 
-	return { label: __('Poor', 'vulopilot'), className: 'poor' };
+	return { label: __('At Risk', 'vulopilot'), className: 'poor' };
 };
 
 /** Real zyra palette hex (`@zyra/core`'s `COLOR_PALETTE`) — same `ratingFor()`-keyed map PerformanceScoreCard.tsx's own `RATING_COLOR` already uses for its ring tiles, reused here so this table's per-row score ring and that card's own score rings agree on what "good"/"poor" look like. */
@@ -518,7 +518,7 @@ const SlowPagesTab = () => {
 		{ value: 'slow', label: __('Slow', 'vulopilot'), count: statusCounts.slow ?? 0 },
 		{
 			value: 'needs_improvement',
-			label: __('Needs Improvement', 'vulopilot'),
+			label: __('Needs Work', 'vulopilot'),
 			count: statusCounts.needs_improvement ?? 0,
 		},
 		{ value: 'good', label: __('Good', 'vulopilot'), count: statusCounts.good ?? 0 },
@@ -1104,7 +1104,7 @@ const SlowPagesTab = () => {
 							},
 							{
 								id: 'needs-improvement',
-								title: __('Needs Improvement', 'vulopilot'),
+								title: __('Needs Work', 'vulopilot'),
 								tags: <span className="page-speed-legend-range">50 – 79</span>,
 							},
 							{

@@ -32,7 +32,7 @@ interface ConnectVuloCloudPromptContentProps {
  * `ShowProPopup` already follows there), rather than nesting two popups.
  *
  * Same real passwordless broker redirect (`useConnectVuloCloud.ts`)
- * AiCreditsIndicator.tsx's own dropdown and Settings → AI Providers'
+ * AiCreditsIndicator.tsx's own dropdown and Settings → Connections'
  * "Connect to VuloCloud" button already use. This replaces the former
  * `VuloCloudConnectPopup.tsx` (a real embedded email/password + 2FA login
  * form) everywhere that component used to render, per direct instruction

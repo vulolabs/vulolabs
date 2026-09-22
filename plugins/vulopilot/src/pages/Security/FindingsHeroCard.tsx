@@ -47,9 +47,9 @@ const getScoreRating = (score: number): Rating => {
 		return { label: __('Good', 'vulopilot'), className: 'good' };
 	}
 	if (score >= 40) {
-		return { label: __('Needs Attention', 'vulopilot'), className: 'needs-improvement' };
+		return { label: __('Needs Work', 'vulopilot'), className: 'needs-improvement' };
 	}
-	return { label: __('Poor', 'vulopilot'), className: 'poor' };
+	return { label: __('At Risk', 'vulopilot'), className: 'poor' };
 };
 
 /**
@@ -140,7 +140,7 @@ interface FindingsHeroCardProps {
  *
  * The hero gauge is now a real ring (matching `PerformanceScoreCard.tsx`'s
  * own `ChartComponent type="ring"` structure) — same real 0-100
- * weighted-severity score, same real Good/Needs Attention/Poor bands, just
+ * weighted-severity score, same real Good/Needs Work/At Risk bands, just
  * one consistent ring shape across every hero card in this plugin instead
  * of the older gauge variant this file used to render.
  */

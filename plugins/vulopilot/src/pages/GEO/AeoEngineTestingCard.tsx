@@ -70,7 +70,7 @@ const AeoEngineTestingCard = ({ isActive, pages }: AeoEngineTestingCardProps) =>
 				} else {
 					setError(
 						__(
-							'Could not test this page — make sure an AI provider is configured under AI Copilot → Settings.',
+							'Could not test this page — make sure this site is connected to VuloCloud under Settings → Connections.',
 							'vulopilot'
 						)
 					);
@@ -174,8 +174,8 @@ const AeoEngineTestingCard = ({ isActive, pages }: AeoEngineTestingCardProps) =>
 							</p>
 							<p className="desc">
 								{result.cited
-									? __('Your configured AI provider already recognizes this site for this question.', 'vulopilot')
-									: __('Your configured AI provider does not yet recognize this site for this question.', 'vulopilot')}
+									? __('Your configured AI service already recognizes this site for this question.', 'vulopilot')
+									: __('Your configured AI service does not yet recognize this site for this question.', 'vulopilot')}
 							</p>
 							{/* The real generated text the judgment above was made from —
 							shown so this doesn't read as a static verdict: every run
@@ -183,7 +183,7 @@ const AeoEngineTestingCard = ({ isActive, pages }: AeoEngineTestingCardProps) =>
 							even when the cited/not-cited outcome itself doesn't. */}
 							<p className="desc aeo-engine-testing-answer-label">
 								{sprintf(
-									/* translators: 1: AI provider id (e.g. "gemini"), 2: model id. */
+									/* translators: 1: AI service id (e.g. "gemini"), 2: model id. */
 									__('What %1$s (%2$s) actually said, live:', 'vulopilot'),
 									result.provider,
 									result.model

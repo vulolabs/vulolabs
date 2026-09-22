@@ -16,7 +16,7 @@ use VuloPilot\ValueObjects\RuleType;
 defined( 'ABSPATH' ) || exit;
 
 /**
- * Turns Scanners\Basic\RobotsTxtScanner's "robots.txt blocks every
+ * Turns Seo\Scanners\RobotsTxtScanner's "robots.txt blocks every
  * crawler" HIGH-severity Finding into a critical recommendation.
  * Deliberately NOT fixable — unlike MissingMetaDescriptionRule/
  * MissingFeaturedImageRule, automatically rewriting a site's robots.txt

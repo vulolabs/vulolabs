@@ -158,7 +158,7 @@ class AeoSchemaScanner extends AbstractBasicScanner implements TracksScannedObje
     /**
      * @param \WP_Post $post        The post missing schema.
      * @param string   $schema_type 'FAQPage' or 'HowTo'.
-     * @param string   $shape       'faq' or 'howto' — recorded in meta for AIActions\Actions\GenerateSchemaAction to read a hint from, same convention GeoTrustSignalsScanner's own meta already establishes.
+     * @param string   $shape       'faq' or 'howto' — recorded in meta for AiCopilot\Actions\GenerateSchemaAction to read a hint from, same convention GeoTrustSignalsScanner's own meta already establishes.
      * @return Finding
      */
     private function build_finding( \WP_Post $post, string $schema_type, string $shape ): Finding {

@@ -7,7 +7,7 @@
 
 namespace VuloPilot\Tests;
 
-use VuloPilot\Scanners\Basic\OrganizationSchemaScanner;
+use VuloPilot\BrandIntelligence\Scanners\OrganizationSchemaScanner;
 
 require_once __DIR__ . '/TestCase.php';
 

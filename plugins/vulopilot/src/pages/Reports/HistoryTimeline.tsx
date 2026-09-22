@@ -102,7 +102,7 @@ const HistoryTimeline = ({
 							<div
 								key={row.id}
 								id={`vulopilot-history-row-${row.id}`}
-								className={`history-row ${selectedRow?.id === row.id ? 'selected' : ''}${isPulsing ? ' vulopilot-history-row-highlight-pulse' : ''}`}
+								className={`history-row ${selectedRow?.id === row.id ? 'selected' : ''}`}
 								role="button"
 								tabIndex={0}
 								onClick={() => onSelectRow(row)}
@@ -129,7 +129,7 @@ const HistoryTimeline = ({
 											</div>
 										)}
 									</div>
-									<div className="history-row-meta">
+									<div className="history-row-issue-details">
 										{row.scan && (
 											<span className="history-row-meta-value">
 												{sprintf(
@@ -166,15 +166,29 @@ const HistoryTimeline = ({
 											/>
 										)}
 									</div>
-									<i
-										className="adminfont-arrow-right history-row-arrow"
-										role="button"
-										tabIndex={0}
-										onClick={(event) => {
-											event.stopPropagation();
-											(onArrowClick ?? onSelectRow)(row);
-										}}
-									/>
+									{/* Same "More Details" / "Viewing" toggle the issues tables use for their row action; the click still selects the row (or runs `onArrowClick`). */}
+									<span
+										className="history-row-action"
+										onClick={(event) => event.stopPropagation()}
+									>
+										<ButtonInput
+											buttons={
+												selectedRow?.id === row.id
+													? {
+															text: __('Viewing', 'vulopilot'),
+															icon: 'eye',
+															color: 'text-green',
+															onClick: () => (onArrowClick ?? onSelectRow)(row),
+														}
+													: {
+															text: __('More Details', 'vulopilot'),
+															rightIcon: 'pagination-next-arrow',
+															color: 'text-purple',
+															onClick: () => (onArrowClick ?? onSelectRow)(row),
+													}
+											}
+										/>
+									</span>
 								</div>
 							</div>
 						);
@@ -186,10 +200,11 @@ const HistoryTimeline = ({
 				<ButtonInput
 					position="center"
 					buttons={{
+						rightIcon:  'arrow-right',
 						text: isLoadingMore
 							? __('Loading…', 'vulopilot')
 							: __('Load more', 'vulopilot'),
-						color: 'purple-bg',
+						color: 'text-purple',
 						onClick: onLoadMore,
 						disabled: isLoadingMore,
 					}}

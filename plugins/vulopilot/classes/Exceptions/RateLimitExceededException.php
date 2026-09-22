@@ -8,13 +8,12 @@
 namespace VuloPilot\Exceptions;
 
 /**
- * Thrown by AIProviders\Decorators\RateLimitedProvider when its own
- * requests-per-minute budget is exhausted, before the request ever reaches
- * the wrapped provider.
+ * Thrown by AI\AiRequestSender when this site's per-minute request budget is
+ * exhausted, before the request is ever sent to VuloCloud.
  *
  * @class       RateLimitExceededException class
  * @version     1.0.0
  * @author      VuloLabs
  */
-class RateLimitExceededException extends AIProviderException {
+class RateLimitExceededException extends AiRequestException {
 }

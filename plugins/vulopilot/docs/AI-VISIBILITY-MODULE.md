@@ -61,7 +61,7 @@ FAQ shape at all; this one only fires once the shape already exists but the
 schema an answer engine would actually read doesn't.
 
 **Top Pages** — `GET /geo-analysis/top-pages`
-(`classes/RestAPI/Controllers/GeoAnalysis.php`, new file — see its own
+(`modules/Geo/Rest/GeoAnalysis.php`, new file — see its own
 docblock for why this filename is safe to reuse even though it previously
 hosted routes that moved to Pro) ranks published posts by open
 `geo`-category finding count (fewest = most AI-visibility-ready), using

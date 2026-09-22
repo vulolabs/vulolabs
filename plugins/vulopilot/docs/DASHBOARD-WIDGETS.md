@@ -188,7 +188,7 @@ space. Each tab is its own independent `useApiList` call:
 
 **Approve/Reject are real now, not placeholders.** `Controllers/AiActionRuns.php` has grown two new
 routes since this doc was first written — `POST /ai-action-runs/{id}/approve` and
-`POST /ai-action-runs/{id}/reject` — both wired straight to `AIActions\ActionRunner::approve()`/
+`POST /ai-action-runs/{id}/reject` — both wired straight to `AiCopilot\ActionRunner::approve()`/
 `reject()` (the full propose → approval → execution lifecycle `AI-ACTIONS.md` designed). The Pending
 Approval tab's rows render real Approve/Reject controls that call these routes and refetch the tab
 on success — the "no Approve/Reject buttons, because the routes don't exist" gap this doc used to

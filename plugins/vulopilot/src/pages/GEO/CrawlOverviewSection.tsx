@@ -183,6 +183,7 @@ const CrawlOverviewSection = () => {
 										'vulopilot'
 									),
 								}}
+								showMenu={false}
 								hideHeader={true}
 								format={appLocalizer.date_format_js}
 								headers={{

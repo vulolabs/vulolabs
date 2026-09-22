@@ -28,7 +28,7 @@ import { __ } from '@wordpress/i18n';
  * `/backup-storage/*` REST surface — Controllers\BackupStorage) right
  * after this tab's InputRenderer output, same "flat setting for the simple
  * bit, dedicated credential storage for the secret bit" split
- * AiProvidersPanel.tsx/Controllers\AiProviders already established.
+ * VuloCloudAiConnectionPanel.tsx/Controllers\VuloCloudAiConnection already established.
  */
 export default {
 	id: 'backups',

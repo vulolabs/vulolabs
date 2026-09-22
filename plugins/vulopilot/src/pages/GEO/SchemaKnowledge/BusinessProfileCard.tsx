@@ -95,19 +95,6 @@ const buildRows = (entities: EntitiesResponse): ProfileRow[] => {
 			confidence: '' !== entities.business_type ? 'high' : 'n/a',
 		},
 		{
-			key: 'people',
-			label: __('People', 'vulopilot'),
-			found: entities.people.length > 0,
-			value:
-				entities.people.length > 0
-					? sprintf(
-						_n('%d person', '%d people', entities.people.length, 'vulopilot'),
-						entities.people.length
-					)
-					: __('Not found', 'vulopilot'),
-			confidence: entities.people.length > 0 ? 'medium' : 'n/a',
-		},
-		{
 			key: 'services',
 			label: __('Services', 'vulopilot'),
 			found: entities.services.length > 0,
@@ -119,6 +106,32 @@ const buildRows = (entities: EntitiesResponse): ProfileRow[] => {
 					)
 					: __('Not found', 'vulopilot'),
 			confidence: entities.services.length > 0 ? 'high' : 'n/a',
+		},
+		{
+			key: 'locations',
+			label: __('Locations', 'vulopilot'),
+			found: entities.locations.length > 0,
+			value:
+				entities.locations.length > 0
+					? sprintf(
+						_n('%d location', '%d locations', entities.locations.length, 'vulopilot'),
+						entities.locations.length
+					)
+					: __('Not found', 'vulopilot'),
+			confidence: entities.locations.length > 0 ? 'high' : 'n/a',
+		},
+		{
+			key: 'people',
+			label: __('People', 'vulopilot'),
+			found: entities.people.length > 0,
+			value:
+				entities.people.length > 0
+					? sprintf(
+						_n('%d person', '%d people', entities.people.length, 'vulopilot'),
+						entities.people.length
+					)
+					: __('Not found', 'vulopilot'),
+			confidence: entities.people.length > 0 ? 'medium' : 'n/a',
 		},
 		{
 			key: 'products',
@@ -148,19 +161,6 @@ const buildRows = (entities: EntitiesResponse): ProfileRow[] => {
 					)
 					: __('Not found', 'vulopilot'),
 			confidence: entities.categories.length > 0 ? 'high' : 'n/a',
-		},
-		{
-			key: 'locations',
-			label: __('Locations', 'vulopilot'),
-			found: entities.locations.length > 0,
-			value:
-				entities.locations.length > 0
-					? sprintf(
-						_n('%d location', '%d locations', entities.locations.length, 'vulopilot'),
-						entities.locations.length
-					)
-					: __('Not found', 'vulopilot'),
-			confidence: entities.locations.length > 0 ? 'high' : 'n/a',
 		},
 		{
 			key: 'contact_details',
@@ -537,7 +537,15 @@ const BusinessProfileCard = () => {
 													icon: row.found
 														? __('eye', 'vulopilot')
 														: __('plus', 'vulopilot'),
-													color: 'text-purple',
+													// Was 'text-purple' — the only 3 rows that fall
+													// through to this default branch (Business type,
+													// Services, Locations) rendered a visibly darker
+													// blue than every other row's own explicit branch
+													// above, all of which use 'text-blue'. Confirmed
+													// live: `btn-text-purple` computed to
+													// rgb(0, 41, 145) here vs `btn-text-blue`'s
+													// rgb(2, 132, 199) elsewhere on this same list.
+													color: 'text-blue',
 													onClick: () =>
 														window.open(ENTITY_SETTINGS_URL, '_self'),
 												}}

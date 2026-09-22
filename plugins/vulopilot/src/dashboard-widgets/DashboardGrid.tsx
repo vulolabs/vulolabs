@@ -191,7 +191,7 @@ const DashboardGrid: React.FC<DashboardGridProps> = ({
 			<ColumnComponent
 				key={widget.id}
 				grid={widget.grid}
-				className="dashboard-widget-cell"
+				className={`dashboard-widget-cell${isCustomizing ? ' is-customizing' : ''}`}
 			>
 				<Widget
 					summary={summary}

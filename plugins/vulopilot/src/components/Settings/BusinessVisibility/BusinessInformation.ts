@@ -82,20 +82,10 @@ export default {
             ),
         },
         {
-            key: 'kg-health-drop-threshold-note',
-            type: 'notice',
-            noticeType: 'info',
-            label: '',
-            message: __(
-                'Knowledge Graph Health drop alerts (and their threshold) are configured under <a href="?page=vulopilot#&tab=settings&subtab=visibility-alerts">Notifications → Visibility Alerts</a>.',
-                'vulopilot'
-            ),
-        },
-        {
             key: 'general_settings',
             type: 'section',
             icon: 'person',
-            title: __('Tracked competitors', 'vulopilot'),
+            title: __('Competitors', 'vulopilot'),
             desc: __(
                 'Used to calculate Share of Voice on the Brand Visibility page.',
                 'vulopilot'
@@ -120,39 +110,6 @@ export default {
                 'vulopilot'
             ),
             moduleEnabled: 'geo',
-        },
-        {
-            key: 'brand-section-about-page',
-            type: 'section',
-            title: __('About Page', 'vulopilot'),
-            icon: 'web-page-website',
-            desc: __(
-                'Controls the Brand page\'s About Page Analysis finding — evaluated only for sites that already have an About-shaped page.',
-                'vulopilot'
-            ),
-        },
-        {
-            key: 'brand_about_page_min_words',
-            type: 'number',
-            size: 10,
-            label: __('Minimum About page word count', 'vulopilot'),
-            settingDescription: __(
-                'An About page under this word count is flagged as too thin to be a genuine trust signal.',
-                'vulopilot'
-            ),
-        },
-        {
-            // Not a real, independently-writable field here — same
-            // treatment as `kg-health-drop-threshold-note` above, scoped to
-            // `visibility_alerts.brand` instead of `.knowledge_graph`.
-            key: 'brand-drop-threshold-note',
-            type: 'notice',
-            noticeType: 'info',
-            label: '',
-            message: __(
-                'Brand score drop alerts (and their threshold) are configured under <a href="?page=vulopilot#&tab=settings&subtab=visibility-alerts">Notifications → Visibility Alerts</a>.',
-                'vulopilot'
-            ),
         },
     ],
 };

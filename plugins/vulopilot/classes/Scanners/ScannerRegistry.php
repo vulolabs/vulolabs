@@ -8,6 +8,7 @@
 namespace VuloPilot\Scanners;
 
 use VuloPilot\Contracts\Scanner\ScannerInterface;
+use VuloPilot\Geo\Scanners as GeoScanners;
 use VuloPilot\Utill;
 
 defined( 'ABSPATH' ) || exit;
@@ -173,15 +174,15 @@ class ScannerRegistry {
             Basic\FirewallScanner::class,
             Basic\BackupHealthScanner::class,
             // GEO module (GEO-MODULE.md) — 9 deterministic checks, category 'geo'.
-            Basic\GeoAuthorInfoScanner::class,
-            Basic\GeoEeatSignalsScanner::class,
-            Basic\GeoTrustSignalsScanner::class,
-            Basic\GeoCitationOpportunityScanner::class,
-            Basic\GeoSummaryBlockScanner::class,
-            Basic\GeoFaqOpportunityScanner::class,
-            Basic\GeoChunkingScanner::class,
-            Basic\GeoSemanticStructureScanner::class,
-            Basic\GeoEntityNamingConsistencyScanner::class,
+            GeoScanners\GeoAuthorInfoScanner::class,
+            GeoScanners\GeoEeatSignalsScanner::class,
+            GeoScanners\GeoTrustSignalsScanner::class,
+            GeoScanners\GeoCitationOpportunityScanner::class,
+            GeoScanners\GeoSummaryBlockScanner::class,
+            GeoScanners\GeoFaqOpportunityScanner::class,
+            GeoScanners\GeoChunkingScanner::class,
+            GeoScanners\GeoSemanticStructureScanner::class,
+            GeoScanners\GeoEntityNamingConsistencyScanner::class,
             // AEO (Answer Engine Optimization) — AI-VISIBILITY-MODULE.md's
             // one new deterministic check: FAQ/HowTo-shaped content missing
             // its matching schema.org markup. Same 'geo' category, no

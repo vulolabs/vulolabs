@@ -133,7 +133,7 @@ class LoginProtectionGuard {
                 'ip_address'         => $this->get_client_ip(),
                 'username_attempted' => sanitize_user( $username ),
                 'success'            => 0,
-                'attempted_at'       => current_time( 'mysql' ),
+                'created_at'         => current_time( 'mysql' ),
             )
         );
     }
@@ -159,7 +159,7 @@ class LoginProtectionGuard {
                 'ip_address'         => $this->get_client_ip(),
                 'username_attempted' => sanitize_user( $user_login ),
                 'success'            => 1,
-                'attempted_at'       => current_time( 'mysql' ),
+                'created_at'         => current_time( 'mysql' ),
             )
         );
     }

@@ -7,7 +7,6 @@
 
 namespace VuloPilot\Services;
 
-use VuloPilot\Repositories\BackupStorageConfigRepository;
 use VuloPilot\Services\CloudStorage\GoogleDriveClient;
 
 defined( 'ABSPATH' ) || exit;
@@ -30,12 +29,12 @@ defined( 'ABSPATH' ) || exit;
  * Drive files (via the least-privileged `drive.file` scope — files this
  * app itself creates, not full Drive access) are ever touched.
  *
- * Storage: one row in `vulopilot_backup_storage_configs` (provider
- * `'google_drive'`), the whole connection state (client id/secret, access/
+ * Storage: Services\BackupCredentialStore under provider
+ * `'google_drive'`, the whole connection state (client id/secret, access/
  * refresh tokens, the cached destination-folder id) as a single
  * Services\CredentialEncryption-encrypted JSON blob — see
- * Repositories\BackupStorageConfigRepository's own docblock for why this
- * table, not the flat settings option, holds it.
+ * Services\BackupCredentialStore's own docblock for why this
+ * store, not the flat settings option, holds it.
  *
  * @class       BackupGoogleDriveConnection class
  * @version     1.0.0
@@ -68,7 +67,7 @@ class BackupGoogleDriveConnection {
      * @return array<string, mixed>
      */
     private function get_data(): array {
-        $row = ( new BackupStorageConfigRepository() )->find_by_provider( self::PROVIDER );
+        $stored = ( new BackupCredentialStore() )->get( self::PROVIDER );
 
         $defaults = array(
             'client_id'         => '',
@@ -80,11 +79,11 @@ class BackupGoogleDriveConnection {
             'folder_id'         => '',
         );
 
-        if ( ! $row || empty( $row['credentials'] ) ) {
+        if ( null === $stored ) {
             return $defaults;
         }
 
-        $decrypted = CredentialEncryption::decrypt( (string) $row['credentials'] );
+        $decrypted = CredentialEncryption::decrypt( $stored );
         $decoded   = null !== $decrypted ? json_decode( $decrypted, true ) : null;
 
         return wp_parse_args( is_array( $decoded ) ? $decoded : array(), $defaults );
@@ -99,7 +98,7 @@ class BackupGoogleDriveConnection {
 
         $encrypted = CredentialEncryption::encrypt( (string) wp_json_encode( $data ) );
 
-        ( new BackupStorageConfigRepository() )->upsert_credentials( self::PROVIDER, $encrypted );
+        ( new BackupCredentialStore() )->save( self::PROVIDER, $encrypted );
     }
 
     /**

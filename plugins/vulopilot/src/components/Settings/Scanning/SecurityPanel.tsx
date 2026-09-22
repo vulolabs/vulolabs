@@ -7,7 +7,7 @@ import {
 	SectionComponent,
 	SettingRowComponent
 } from '@zyra/inputs';
-import { FormGroupComponent, FormGroupWrapperComponent, NoticeComponent } from '@zyra/components';
+import { FormGroupComponent, FormGroupWrapperComponent, NoticeComponent, NoticeManager } from '@zyra/components';
 import { useSetting } from '../../../contexts/SettingContext';
 
 const STATUS_LABELS = { active: __('Active', 'vulopilot'), inactive: __('Inactive', 'vulopilot') };
@@ -376,6 +376,15 @@ const SecurityPanel = () => {
 		sendApiResponse(appLocalizer, getApiLink(appLocalizer, 'settings'), {
 			setting: patch,
 			settingName: 'security-scanning',
+		}).then((response) => {
+			NoticeManager.add({
+				uniqueKey: 'vulopilot-security-panel-saved',
+				type: response ? 'success' : 'error',
+				position: 'float',
+				message: response
+					? __('Settings saved.', 'vulopilot')
+					: __('Could not save settings. Please try again.', 'vulopilot'),
+			});
 		});
 	};
 
@@ -478,6 +487,15 @@ const SecurityPanel = () => {
 									sendApiResponse(appLocalizer, getApiLink(appLocalizer, 'settings'), {
 										setting: { security_scan_frequency: next },
 										settingName: 'security-scanning',
+									}).then((response) => {
+										NoticeManager.add({
+											uniqueKey: 'vulopilot-security-panel-saved',
+											type: response ? 'success' : 'error',
+											position: 'float',
+											message: response
+												? __('Settings saved.', 'vulopilot')
+												: __('Could not save settings. Please try again.', 'vulopilot'),
+										});
 									});
 								}}
 								options={[

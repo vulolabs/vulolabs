@@ -16,11 +16,11 @@ use VuloPilot\ValueObjects\RuleType;
 defined( 'ABSPATH' ) || exit;
 
 /**
- * Turns Scanners\Basic\MetaDescriptionScanner's "no excerpt set" Finding
+ * Turns Seo\Scanners\MetaDescriptionScanner's "no excerpt set" Finding
  * into a recommendation to draft one with AI — same reasoning as
  * SeoTitleRewriteRule: a good description has to actually summarize the
  * page's content, which needs the content itself, not a fixed template.
- * Pairs with AIActions\Actions\Seo\WriteMetaDescriptionAction
+ * Pairs with AiCopilot\Actions\Seo\WriteMetaDescriptionAction
  * (SEO-MODULE.md) by the same by-convention id match AI-ACTIONS.md
  * documents for MissingAltTextRule ↔ GenerateAltAction.
  *

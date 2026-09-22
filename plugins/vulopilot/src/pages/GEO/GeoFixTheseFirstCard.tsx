@@ -104,20 +104,20 @@ const GeoFixTheseFirstCard = ({
 						title: group.label,
 						desc: group.sample?.description || '',
 						action: () => onSelectScanner(group.scanner_id),
+						titleTag: (
+							<BadgeComponent
+								color='blue'
+								text={formatAffected(group.count, group.object_type)}
+							/>
+						),
 						tags: (
-							<>
-								<BadgeComponent
-									color='blue'
-									text={formatAffected(group.count, group.object_type)}
-								/>
-								<ButtonInput
-									buttons={{
-										text: __('View', 'vulopilot'),
-										color: 'text-purple',
-										onClick: () => onSelectScanner(group.scanner_id),
-									}}
-								/>
-							</>
+							<ButtonInput
+								buttons={{
+									text: __('View', 'vulopilot'),
+									color: 'text-purple',
+									onClick: () => onSelectScanner(group.scanner_id),
+								}}
+							/>
 						),
 					}))}
 				/>

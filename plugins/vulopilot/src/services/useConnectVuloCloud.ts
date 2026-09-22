@@ -5,10 +5,10 @@ import { getApiLink, getApiResponse } from '@zyra/core';
 import { NoticeManager } from '@zyra/components';
 
 /**
- * The real "Connect to VuloCloud" redirect (`GET /ai-providers/broker-
+ * The real "Connect to VuloCloud" redirect (`GET /vulocloud-ai-connection/broker-
  * authorize-url`, AiCreditsConnection's own docblock) — same passwordless
  * broker flow AiCreditsIndicator.tsx's own dropdown and Settings → AI
- * Providers already use, extracted here so any other "no AI provider
+ * Providers already use, extracted here so any other "no AI service
  * configured" recovery UI (ConnectVuloCloudPopup.tsx, ContentToolPopup.tsx's
  * own inline error step) can offer the exact same real connect action
  * without duplicating the fetch/notice/loading-state wiring.
@@ -20,7 +20,7 @@ export const useConnectVuloCloud = () => {
 		setIsConnecting(true);
 
 		getApiResponse<{ url: string }>(
-			getApiLink(appLocalizer, 'ai-providers/broker-authorize-url'),
+			getApiLink(appLocalizer, 'vulocloud-ai-connection/broker-authorize-url'),
 			{ headers: { 'X-WP-Nonce': appLocalizer.nonce } }
 		)
 			.then((response) => {

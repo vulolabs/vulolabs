@@ -22,7 +22,7 @@ class AiHistoryRepository extends AbstractRepository {
      * The only 2 `surface` values that represent a real chat turn a human
      * had with VuloPilot (Controllers\Copilot.php/ContentAssistant.php) —
      * every other real caller of `ai_request_sender`/`request_sender`
-     * (AIActions\ActionRunner, GeoAnalysis\GeoAnalyzer,
+     * (AiCopilot\ActionRunner, GeoAnalysis\GeoAnalyzer,
      * ContentIntelligence\ContentAnalyzer) tags its own rows with its own
      * real feature label instead, so this is the whitelist
      * get_conversations() scopes to — kept in sync with AIRequest's own

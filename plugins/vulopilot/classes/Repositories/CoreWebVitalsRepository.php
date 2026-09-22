@@ -10,7 +10,7 @@ namespace VuloPilot\Repositories;
 defined( 'ABSPATH' ) || exit;
 
 /**
- * Persistence for `vulopilot_core_web_vitals` — one row per real front-end
+ * Persistence for `vulopilot_performance_samples` (type `vital`) — one row per real front-end
  * pageview that reported at least one metric, written by
  * Services\CoreWebVitalsBeacon's public REST endpoint. `get_p75_summary()`
  * computes the 75th percentile in PHP (over a bounded recent sample)
@@ -28,6 +28,11 @@ defined( 'ABSPATH' ) || exit;
 class CoreWebVitalsRepository extends AbstractRepository {
 
     /**
+     * This repository's `sample_type` in the shared `vulopilot_performance_samples` table.
+     */
+    private const SAMPLE_TYPE = 'vital';
+
+    /**
      * How many of the most recent (within the retention window) samples
      * to pull for the p75 computation — bounded so a high-traffic site's
      * PHP-side sort() stays cheap.
@@ -39,8 +44,17 @@ class CoreWebVitalsRepository extends AbstractRepository {
      *
      * @inheritDoc
      */
+    /**
+     * @inheritDoc
+     */
+    public function insert( array $data ): int {
+        $data['sample_type'] = self::SAMPLE_TYPE;
+
+        return parent::insert( $data );
+    }
+
     protected function get_table_key(): string {
-        return 'core_web_vital';
+        return 'performance_sample';
     }
 
     /**
@@ -72,7 +86,8 @@ class CoreWebVitalsRepository extends AbstractRepository {
         // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
         $rows = $wpdb->get_results(
             $wpdb->prepare(
-                "SELECT lcp_ms, cls_thousandths, inp_ms, page_load_ms, transfer_bytes FROM {$this->get_table()} ORDER BY created_at DESC LIMIT %d", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+                "SELECT lcp_ms, cls_thousandths, inp_ms, page_load_ms, transfer_bytes FROM {$this->get_table()} WHERE sample_type = %s ORDER BY created_at DESC LIMIT %d", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+                self::SAMPLE_TYPE,
                 self::MAX_SAMPLES
             ),
             ARRAY_A
@@ -129,7 +144,8 @@ class CoreWebVitalsRepository extends AbstractRepository {
 
         $wpdb->query( // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
             $wpdb->prepare(
-                "DELETE FROM {$this->get_table()} WHERE created_at < %s", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+                "DELETE FROM {$this->get_table()} WHERE sample_type = %s AND created_at < %s", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+                self::SAMPLE_TYPE,
                 gmdate( 'Y-m-d H:i:s', time() - $days * DAY_IN_SECONDS )
             )
         );
