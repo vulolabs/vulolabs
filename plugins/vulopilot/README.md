@@ -1,7 +1,7 @@
 # VuloPilot – AI SEO, Website Optimization, Site Health & Performance for WordPress #
 
-**Contributors:** [dualcube](https://profiles.wordpress.org/dualcube/)  
-**Tags:** seo, website optimization, site health, performance, woocommerce  
+**Contributors:** [Vulolabs](https://profiles.wordpress.org/vulolabs/)  
+**Tags:** seo, website optimization, site health, performance, security  
 **Requires at least:** 6.5  
 **Tested up to:** 6.9  
 **Requires PHP:** 8.1  
@@ -9,19 +9,16 @@
 **License:** GPLv2 or later  
 **License URI:** https://www.gnu.org/licenses/gpl-2.0.html  
 
-**All-in-one AI website optimization platform:** SEO, Site Health, Performance, Accessibility, WooCommerce & AI Visibility monitoring for WordPress.  
+**All-in-one AI website optimization platform:** AI SEO, Site Health, Performance, Accessibility, Security for WordPress
 
 ## Description ##
 
-**VuloPilot is the AI Website Operations Platform for WordPress** - one intelligent dashboard that continuously monitors, audits, and improves every layer of your site, instead of asking you to run and configure five separate tools.
+**VuloPilot is an AI SEO, security, and website optimization plugin for WordPress that brings technical audits, performance monitoring, Core Web Vitals, accessibility, and site health into one dashboard.**
+Improve search visibility with **SEO titles, meta descriptions, schema markup, XML sitemaps, internal linking, redirects, and Google Search Console** integration. Analyze **AI search readiness (AEO/GEO), manage llms.txt, and monitor AI crawler traffic**.
+Identify security issues, SSL problems, outdated plugins, broken links, and database health concerns. Detect slow pages, large images, cache issues, and speed bottlenecks while reviewing **WCAG-aligned** accessibility findings.
+Generate content with AI and track website activity through reports. 
 
-Most WordPress site owners end up assembling their own patchwork: an SEO plugin, a performance plugin, an accessibility checker, a separate maintenance/monitoring service, and a standalone AI writing tool - each with its own dashboard and no shared view of how the site is doing. VuloPilot replaces that patchwork with a single platform built around one idea: **Website Optimization** is one ongoing discipline, not five unrelated jobs. SEO, Site Health, Performance, Accessibility, WooCommerce, and AI Visibility are all scanned, scored, and tracked from the same dashboard.
-
-VuloPilot is built for business websites, WooCommerce stores, blogs, membership sites, LMS platforms, agencies, and developers who want real **Website Monitoring** and **Website Maintenance** without stitching it together by hand. It runs full **SEO Optimization** and **WordPress Optimization** scans, **Performance Optimization** checks aligned to **Core Web Vitals**, a full **Accessibility** audit, and a live **Site Health** score that tracks updates, broken links, and database health over time.
-
-What sets VuloPilot apart is that it doesn't stop at Google. As AI assistants like ChatGPT, Claude, Gemini, and Perplexity increasingly answer questions directly instead of linking out, VuloPilot also scores your **AI Visibility** - how discoverable, understandable, and citable your content is for **AI Search** - so your website is optimized for how people find information today, not just how they found it five years ago.
-
-### Why VuloPilot?
+### What is VuloPilot?
 
 * AI-powered website optimization
 * Website Health Dashboard
@@ -31,7 +28,6 @@ What sets VuloPilot apart is that it doesn't stop at Google. As AI assistants li
 * SEO Analysis
 * Performance Monitoring
 * Accessibility Scanner
-* WooCommerce Optimization
 * AI Content Assistant
 * Website Maintenance
 * Reports & Activity Timeline
@@ -47,7 +43,7 @@ Every category above is normally its own plugin - meaning its own settings scree
 With VuloPilot, you get one intelligent platform instead:
 
 * **One dashboard** instead of switching between an SEO plugin, a performance plugin, an accessibility checker, a monitoring service, and a separate AI writing tool.
-* **One scoring system** - Website Health, SEO, Performance, Accessibility, WooCommerce, and AI Visibility are all measured the same way, so you can see at a glance what actually needs attention.
+* **One scoring system** - Website Health, SEO, Performance, Accessibility, and AI Visibility are all measured the same way, so you can see at a glance what actually needs attention.
 * **One set of updates** to keep current, instead of five-plus plugins that can quietly conflict with each other.
 * **One connected view** of how a change in one area affects another - for example, optimizing images improves Performance and Accessibility at the same time.
 * **Built-in AI**, using your own API key, instead of paying for a separate AI content subscription.
@@ -56,7 +52,7 @@ The result is a lighter, more coherent WordPress Dashboard - and a website that'
 
 ---
 
-## Replace Multiple Plugins
+## Specifically, here’s what that replaces
 
 VuloPilot is designed to reduce plugin bloat, not add to it. It combines the functionality commonly split across:
 
@@ -67,7 +63,6 @@ VuloPilot is designed to reduce plugin bloat, not add to it. It combines the fun
 * **Maintenance Plugins** - update monitoring, broken link detection, and Database Optimization insight
 * **AI Plugins** - AI-generated content, recommendations, and optimization suggestions
 * **Monitoring Plugins** - Website Analytics, activity logs, and AI crawler traffic monitoring
-* **WooCommerce Optimization Plugins** - Product SEO, inventory health, and Store Performance
 
 Instead of eight separate tools competing for server resources and admin-menu space, VuloPilot gives you one platform doing all eight jobs, from one codebase, with one shared understanding of your site.
 
@@ -237,22 +232,6 @@ VuloPilot's continuous **Accessibility Analysis** flags issues as they appear, i
 
 ---
 
-## WooCommerce Optimization
-
-**Store Optimization** for WooCommerce: improve **Product Visibility**, **Product SEO**, and overall **Store Performance** without a separate WooCommerce-specific plugin.
-
-Analyze:
-
-* Product SEO
-* Product Images
-* Missing Product Attributes
-* Product Descriptions (Product Content quality)
-* Duplicate Products
-* Inventory Issues (Inventory Health)
-* Product Schema
-
----
-
 ## AI Content Assistant
 
 Create better content with AI - every item below is generated on request through your own connected AI provider; nothing is generated or published automatically without your review.
@@ -296,7 +275,6 @@ Generate reports for:
 * Brand Visibility Reports
 * Performance Reports
 * Accessibility Reports
-* WooCommerce Reports
 * Update Reports
 
 ---
