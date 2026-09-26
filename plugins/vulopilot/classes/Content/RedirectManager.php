@@ -58,9 +58,10 @@ class RedirectManager {
             return;
         }
 
-        $requested_uri = isset( $_SERVER['REQUEST_URI'] ) ? sanitize_text_field( wp_unslash( $_SERVER['REQUEST_URI'] ) ) : '';
-        $path          = wp_parse_url( $requested_uri, PHP_URL_PATH ) ?? '/';
-        $source_path   = RedirectRepository::normalize_path( $path );
+        global $wp;
+
+        $path        = wp_parse_url( home_url( $wp->request ), PHP_URL_PATH ) ?? '/';
+        $source_path = RedirectRepository::normalize_path( $path );
 
         $repository = new RedirectRepository();
         $redirect   = $repository->find_by_source_path( $source_path );

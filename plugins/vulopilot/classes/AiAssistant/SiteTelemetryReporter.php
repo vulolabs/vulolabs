@@ -1,6 +1,8 @@
 <?php
 namespace VuloPilot\AiAssistant;
 
+use VuloPilot\Utill\ServerRequest;
+
 defined( 'ABSPATH' ) || exit;
 
 /**
@@ -105,7 +107,7 @@ class SiteTelemetryReporter {
 			'Multisite'      => is_multisite(),
 			'File Location'  => ABSPATH,
 			'Email'          => get_bloginfo( 'admin_email' ),
-			'Server'         => isset( $_SERVER['SERVER_SOFTWARE'] ) ? sanitize_text_field( wp_unslash( $_SERVER['SERVER_SOFTWARE'] ) ) : '',
+			'Server'         => ServerRequest::get( 'SERVER_SOFTWARE' ),
 			'Text Direction' => is_rtl() ? 'rtl' : 'ltr',
 			'Plugin'         => VULOPILOT_PLUGIN_NAME,
 			'Version'        => VULOPILOT_PLUGIN_VERSION,

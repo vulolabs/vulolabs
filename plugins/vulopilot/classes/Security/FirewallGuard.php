@@ -3,6 +3,7 @@ namespace VuloPilot\Security;
 
 use VuloPilot\Security\FirewallBlockRepository;
 use VuloPilot\Utill;
+use VuloPilot\Utill\ServerRequest;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -60,20 +61,6 @@ class FirewallGuard {
     }
 
     /**
-     * Real client IP, `$_SERVER['REMOTE_ADDR']` only - same reasoning as
-     * LoginProtectionGuard::get_client_ip().
-     *
-     * @return string
-     */
-    private function get_client_ip(): string {
-        $raw = isset( $_SERVER['REMOTE_ADDR'] ) ? sanitize_text_field( wp_unslash( $_SERVER['REMOTE_ADDR'] ) ) : '';
-
-        $valid = filter_var( $raw, FILTER_VALIDATE_IP );
-
-        return $valid ? $valid : '0.0.0.0';
-    }
-
-    /**
      * `init` callback (priority 1) - checked on every real front-end/admin
      * request.
      *
@@ -86,7 +73,7 @@ class FirewallGuard {
             return;
         }
 
-        $request_uri = isset( $_SERVER['REQUEST_URI'] ) ? sanitize_text_field( wp_unslash( $_SERVER['REQUEST_URI'] ) ) : '';
+        $request_uri = ServerRequest::get( 'REQUEST_URI' );
 
         if ( '' === $request_uri ) {
             return;
@@ -103,7 +90,7 @@ class FirewallGuard {
 
             ( new FirewallBlockRepository() )->insert(
                 array(
-                    'ip_address'   => $this->get_client_ip(),
+                    'ip_address'   => ServerRequest::client_ip(),
                     'request_uri'  => $request_uri,
                     'rule_matched' => $rule_name,
                     'action'       => $blocking_on ? 'blocked' : 'logged',

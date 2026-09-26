@@ -117,8 +117,9 @@ class NotFoundLogger {
             return;
         }
 
-        $requested_uri  = isset( $_SERVER['REQUEST_URI'] ) ? sanitize_text_field( wp_unslash( $_SERVER['REQUEST_URI'] ) ) : '';
-        $path           = wp_parse_url( $requested_uri, PHP_URL_PATH ) ?? '/';
+        global $wp;
+
+        $path           = wp_parse_url( home_url( $wp->request ), PHP_URL_PATH ) ?? '/';
         $requested_path = RedirectRepository::normalize_path( $path );
         $referrer       = wp_get_referer();
 

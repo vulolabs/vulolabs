@@ -3,6 +3,7 @@ namespace VuloPilot\Security;
 
 use VuloPilot\Security\LoginAttemptRepository;
 use VuloPilot\Utill;
+use VuloPilot\Utill\ServerRequest;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -24,7 +25,7 @@ defined( 'ABSPATH' ) || exit;
  * - `wp_login_failed` - records one real `success=0` row.
  * - `wp_login` - records one real `success=1` row.
  *
- * IP is read from `$_SERVER['REMOTE_ADDR']` only - never a client-supplied
+ * IP is read from the connecting address (REMOTE_ADDR) only - never a client-supplied
  * `X-Forwarded-For`-style header, which is trivially spoofable and would
  * let an attacker blame (or exempt) an arbitrary IP.
  *
@@ -41,20 +42,6 @@ class LoginProtectionGuard {
         add_filter( 'authenticate', array( $this, 'block_if_locked_out' ), 30, 3 );
         add_action( 'wp_login_failed', array( $this, 'record_failure' ), 10, 2 );
         add_action( 'wp_login', array( $this, 'record_success' ), 10, 2 );
-    }
-
-    /**
-     * Real client IP, `$_SERVER['REMOTE_ADDR']` only - see class docblock
-     * for why a forwarded-for header is never trusted here.
-     *
-     * @return string Real IP, or '0.0.0.0' if genuinely unavailable (e.g. CLI context).
-     */
-    private function get_client_ip(): string {
-        $raw = isset( $_SERVER['REMOTE_ADDR'] ) ? sanitize_text_field( wp_unslash( $_SERVER['REMOTE_ADDR'] ) ) : '';
-
-        $valid = filter_var( $raw, FILTER_VALIDATE_IP );
-
-        return $valid ? $valid : '0.0.0.0';
     }
 
     /**
@@ -92,7 +79,7 @@ class LoginProtectionGuard {
         $lockout_minutes = max( 1, absint( $settings['login_lockout_minutes'] ) ?: 15 );
 
         $repository = new LoginAttemptRepository();
-        $ip_address = $this->get_client_ip();
+        $ip_address = ServerRequest::client_ip();
 
         if ( $repository->count_recent_failures( $ip_address, $lockout_minutes ) < $max_attempts ) {
             return $user;
@@ -124,7 +111,7 @@ class LoginProtectionGuard {
 
         ( new LoginAttemptRepository() )->insert(
             array(
-                'ip_address'         => $this->get_client_ip(),
+                'ip_address'         => ServerRequest::client_ip(),
                 'username_attempted' => sanitize_user( $username ),
                 'success'            => 0,
                 'created_at'         => current_time( 'mysql' ),
@@ -150,7 +137,7 @@ class LoginProtectionGuard {
 
         ( new LoginAttemptRepository() )->insert(
             array(
-                'ip_address'         => $this->get_client_ip(),
+                'ip_address'         => ServerRequest::client_ip(),
                 'username_attempted' => sanitize_user( $user_login ),
                 'success'            => 1,
                 'created_at'         => current_time( 'mysql' ),

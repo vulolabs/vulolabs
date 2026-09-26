@@ -22,7 +22,7 @@ defined( 'ABSPATH' ) || exit;
  * honestly relabeled "Page Views (Last 5 Min)", a plain unique-free count.
  *
  * Hooked on `shutdown` (not `template_redirect`, which fires before the
- * template even renders) so `microtime(true) - $_SERVER['REQUEST_TIME_FLOAT']`
+ * template even renders) so `timer_float()`
  * captures the full real request lifecycle. Requests served by a
  * full-page-cache plugin's early (pre-WP-bootstrap) drop-in never reach
  * this hook at all, so the resulting average reflects "server time for
@@ -66,11 +66,8 @@ class PerformanceRequestLogger {
             return;
         }
 
-        if ( empty( $_SERVER['REQUEST_TIME_FLOAT'] ) ) {
-            return;
-        }
-
-        $response_time_ms = (int) round( ( microtime( true ) - (float) $_SERVER['REQUEST_TIME_FLOAT'] ) * 1000 );
+        // Core's own "seconds since the PHP script started" (WP 5.8+).
+        $response_time_ms = (int) round( timer_float() * 1000 );
 
         if ( $response_time_ms <= 0 || $response_time_ms > 65535 ) {
             // Out of the column's smallint unsigned range, or clearly

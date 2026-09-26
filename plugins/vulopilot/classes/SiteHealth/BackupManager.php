@@ -1,8 +1,13 @@
 <?php
+/**
+ * BackupManager class file.
+ *
+ * @package VuloPilot
+ */
+
 namespace VuloPilot\SiteHealth;
 
 use VuloPilot\Dashboard\ActivityLogRepository;
-use VuloPilot\SiteHealth\BackupRepository;
 use VuloPilot\Utill;
 
 defined( 'ABSPATH' ) || exit;
@@ -73,6 +78,27 @@ class BackupManager {
     private const DB_CHUNK_SIZE = 500;
 
     /**
+     * Access-protection stubs planted in the backups directory, filename => contents.
+     * Apache and IIS are covered here; nginx needs a server-level rule instead.
+     */
+    private const PROTECTION_FILES = array(
+        'index.php'  => "<?php\n// Silence is golden.\n",
+        '.htaccess'  => "<IfModule mod_authz_core.c>\nRequire all denied\n</IfModule>\n<IfModule !mod_authz_core.c>\nOrder deny,allow\nDeny from all\n</IfModule>\n",
+        'web.config' => "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<configuration><system.webServer><authorization><deny users=\"*\" /></authorization></system.webServer></configuration>\n",
+    );
+
+    /**
+     * Backslash escapes a dumped string value can carry, escape letter =>
+     * character. Any other escaped character stands for itself (`\\`, `\'`, `\"`).
+     */
+    private const SQL_ESCAPES = array(
+        'n' => "\n",
+        'r' => "\r",
+        '0' => "\0",
+        'Z' => "\x1a",
+    );
+
+    /**
      * BackupManager constructor.
      */
     public function __construct() {
@@ -80,7 +106,9 @@ class BackupManager {
     }
 
     /**
-     * @return string Absolute path of the directory holding all installed plugins.
+     * Directory holding all installed plugins.
+     *
+     * @return string Absolute path.
      */
     private function get_plugins_dir(): string {
         return dirname( untrailingslashit( VuloPilot()->plugin_path ) );
@@ -94,36 +122,19 @@ class BackupManager {
      */
     public function get_backup_dir(): string {
         $upload_dir = wp_upload_dir();
-        $dir        = trailingslashit( $upload_dir['basedir'] ) . 'vulopilot-backups';
+        $dir        = trailingslashit( trailingslashit( $upload_dir['basedir'] ) . 'vulopilot-backups' );
 
-        if ( ! is_dir( $dir ) ) {
-            wp_mkdir_p( $dir );
+        wp_mkdir_p( $dir );
+
+        // Block direct HTTP access to the backup archives and temp .sql dumps.
+        foreach ( self::PROTECTION_FILES as $name => $contents ) {
+            if ( ! file_exists( $dir . $name ) ) {
+                // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_file_put_contents -- writing fixed access-protection stubs into VuloPilot's own backups directory, not arbitrary user input.
+                file_put_contents( $dir . $name, $contents );
+            }
         }
 
-        $index_file = trailingslashit( $dir ) . 'index.php';
-
-        if ( ! file_exists( $index_file ) ) {
-            // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_file_put_contents -- writing a plain index-protection stub into VuloPilot's own controlled backups directory, not arbitrary user input.
-            file_put_contents( $index_file, "<?php\n// Silence is golden.\n" );
-        }
-
-        // Block direct HTTP access to the backup archives and temp .sql dumps
-        // (Apache and IIS; nginx needs a server-level rule instead).
-        $htaccess_file = trailingslashit( $dir ) . '.htaccess';
-
-        if ( ! file_exists( $htaccess_file ) ) {
-            // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_file_put_contents -- access-protection rules inside VuloPilot's own backups directory.
-            file_put_contents( $htaccess_file, "<IfModule mod_authz_core.c>\nRequire all denied\n</IfModule>\n<IfModule !mod_authz_core.c>\nOrder deny,allow\nDeny from all\n</IfModule>\n" );
-        }
-
-        $web_config_file = trailingslashit( $dir ) . 'web.config';
-
-        if ( ! file_exists( $web_config_file ) ) {
-            // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_file_put_contents -- access-protection rules inside VuloPilot's own backups directory.
-            file_put_contents( $web_config_file, "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<configuration><system.webServer><authorization><deny users=\"*\" /></authorization></system.webServer></configuration>\n" );
-        }
-
-        return trailingslashit( $dir );
+        return $dir;
     }
 
     /**
@@ -149,12 +160,7 @@ class BackupManager {
      * @return int Real new `vulopilot_backups` row id.
      */
     public function start_backup( string $trigger_type ): int {
-        $backup_dir = $this->get_backup_dir();
-        $timestamp  = time();
-        $filename   = 'backup-' . gmdate( 'Y-m-d-His', $timestamp ) . '-' . wp_generate_password( 6, false, false ) . '.zip';
-        $zip_path   = $backup_dir . $filename;
-        // Kept in the system temp dir, not the web-accessible uploads folder: it holds a raw SQL dump until it is folded into the (protected) zip.
-        $sql_path   = trailingslashit( get_temp_dir() ) . 'vulopilot-tmp-' . wp_generate_password( 16, false, false ) . '.sql';
+        $zip_path = $this->get_backup_dir() . 'backup-' . gmdate( 'Y-m-d-His' ) . '-' . wp_generate_password( 6, false, false ) . '.zip';
 
         $repository = new BackupRepository();
         $backup_id  = $repository->insert(
@@ -170,7 +176,8 @@ class BackupManager {
             array(
                 'backup_id' => $backup_id,
                 'zip_path'  => $zip_path,
-                'sql_path'  => $sql_path,
+                // Kept in the system temp dir, not the web-accessible uploads folder: it holds a raw SQL dump until it is folded into the (protected) zip.
+                'sql_path'  => trailingslashit( get_temp_dir() ) . 'vulopilot-tmp-' . wp_generate_password( 16, false, false ) . '.sql',
                 'steps'     => $this->build_steps(),
                 'started'   => false,
             ),
@@ -196,7 +203,7 @@ class BackupManager {
 
         $steps = array();
 
-        $tables = $wpdb->get_col( $wpdb->prepare( 'SHOW TABLES LIKE %s', $wpdb->esc_like( $wpdb->prefix ) . '%' ) );  // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching  -- {$this->get_table()}/$table-style variables here are always this plugin's own hardcoded table name(s), never user input; dynamic placeholder counts (IN (...) lists, optional WHERE fragments) are sized correctly at runtime, just not statically visible to this sniff.
+        $tables = $wpdb->get_col( $wpdb->prepare( 'SHOW TABLES LIKE %s', $wpdb->esc_like( $wpdb->prefix ) . '%' ) );  // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- read-only introspection of this site's own table names.
 
         foreach ( (array) $tables as $table ) {
             $steps[] = array(
@@ -210,35 +217,28 @@ class BackupManager {
         $upload_dir = wp_upload_dir();
 
         if ( ! empty( $upload_dir['basedir'] ) && is_dir( $upload_dir['basedir'] ) ) {
-            $steps = array_merge(
+            $this->enumerate_directory(
                 $steps,
-                $this->enumerate_directory(
-                    $upload_dir['basedir'],
-                    'files/uploads',
-                    $remaining_budget,
-                    trailingslashit( $upload_dir['basedir'] ) . 'vulopilot-backups'
-                )
+                $upload_dir['basedir'],
+                'files/uploads',
+                $remaining_budget,
+                trailingslashit( $upload_dir['basedir'] ) . 'vulopilot-backups'
             );
         }
 
         $theme_dir = get_stylesheet_directory();
 
         if ( is_dir( $theme_dir ) ) {
-            $steps = array_merge(
-                $steps,
-                $this->enumerate_directory( $theme_dir, 'files/theme/' . get_stylesheet(), $remaining_budget )
-            );
+            $this->enumerate_directory( $steps, $theme_dir, 'files/theme/' . get_stylesheet(), $remaining_budget );
         }
+
+        $plugins_dir = trailingslashit( $this->get_plugins_dir() );
 
         foreach ( (array) get_option( 'active_plugins', array() ) as $plugin_file ) {
             $plugin_slug = strtok( (string) $plugin_file, '/' );
-            $plugin_dir  = trailingslashit( $this->get_plugins_dir() ) . $plugin_slug;
 
-            if ( $plugin_slug && is_dir( $plugin_dir ) ) {
-                $steps = array_merge(
-                    $steps,
-                    $this->enumerate_directory( $plugin_dir, 'files/plugins/' . $plugin_slug, $remaining_budget )
-                );
+            if ( $plugin_slug && is_dir( $plugins_dir . $plugin_slug ) ) {
+                $this->enumerate_directory( $steps, $plugins_dir . $plugin_slug, 'files/plugins/' . $plugin_slug, $remaining_budget );
             }
         }
 
@@ -246,33 +246,30 @@ class BackupManager {
     }
 
     /**
-     * Real files under `$directory`, turned into `file` steps, bounded by
-     * `$remaining_budget` (decremented by reference so multiple calls share
-     * one overall budget).
+     * Appends a `file` step for every real file under `$directory`, bounded
+     * by `$remaining_budget` (decremented by reference so multiple calls
+     * share one overall budget).
      *
-     * @param string      $directory         Real absolute directory path.
-     * @param string      $entry_prefix       Zip entry path prefix for this directory's own files.
-     * @param int         $remaining_budget   Real remaining file budget, by reference.
-     * @param string|null $exclude_dir_prefix Real absolute path prefix to skip (this plugin's own backups directory).
-     * @return array<int, array<string, mixed>>
+     * @param array<int, array<string, mixed>> $steps              Step list to append to, by reference.
+     * @param string                           $directory          Real absolute directory path.
+     * @param string                           $entry_prefix       Zip entry path prefix for this directory's own files.
+     * @param int                              $remaining_budget   Real remaining file budget, by reference.
+     * @param string|null                      $exclude_dir_prefix Real absolute path prefix to skip (this plugin's own backups directory).
+     * @return void
      */
-    private function enumerate_directory( string $directory, string $entry_prefix, int &$remaining_budget, ?string $exclude_dir_prefix = null ): array {
-        $steps = array();
-
+    private function enumerate_directory( array &$steps, string $directory, string $entry_prefix, int &$remaining_budget, ?string $exclude_dir_prefix = null ): void {
         if ( $remaining_budget <= 0 ) {
-            return $steps;
+            return;
         }
 
-        try {
-            $iterator = new \RecursiveIteratorIterator(
-                new \RecursiveDirectoryIterator( $directory, \FilesystemIterator::SKIP_DOTS ),
-                \RecursiveIteratorIterator::LEAVES_ONLY
-            );
-        } catch ( \Exception $exception ) {
-            return $steps;
+        $iterator = $this->get_file_iterator( $directory, \RecursiveIteratorIterator::LEAVES_ONLY );
+
+        if ( null === $iterator ) {
+            return;
         }
 
-        $base = trailingslashit( $directory );
+        // Paths are compared and stored with forward slashes so this also works on Windows hosts.
+        $exclude = $exclude_dir_prefix ? trailingslashit( wp_normalize_path( $exclude_dir_prefix ) ) : '';
 
         foreach ( $iterator as $file ) {
             if ( $remaining_budget <= 0 ) {
@@ -285,22 +282,36 @@ class BackupManager {
 
             $real_path = $file->getPathname();
 
-            if ( $exclude_dir_prefix && 0 === strpos( $real_path, trailingslashit( $exclude_dir_prefix ) ) ) {
+            if ( '' !== $exclude && 0 === strpos( wp_normalize_path( $real_path ), $exclude ) ) {
                 continue;
             }
-
-            $relative = ltrim( str_replace( $base, '', $real_path ), '/' );
 
             $steps[] = array(
                 'type'   => 'file',
                 'source' => $real_path,
-                'entry'  => $entry_prefix . '/' . $relative,
+                'entry'  => $entry_prefix . '/' . wp_normalize_path( $iterator->getSubPathname() ),
             );
 
             --$remaining_budget;
         }
+    }
 
-        return $steps;
+    /**
+     * Recursive iterator over a directory's contents.
+     *
+     * @param string $directory Real absolute directory path.
+     * @param int    $mode      A `RecursiveIteratorIterator` mode constant.
+     * @return \RecursiveIteratorIterator|null Null when the directory can't be read.
+     */
+    private function get_file_iterator( string $directory, int $mode ): ?\RecursiveIteratorIterator {
+        try {
+            return new \RecursiveIteratorIterator(
+                new \RecursiveDirectoryIterator( $directory, \FilesystemIterator::SKIP_DOTS ),
+                $mode
+            );
+        } catch ( \Exception $exception ) {
+            return null;
+        }
     }
 
     /**
@@ -333,37 +344,37 @@ class BackupManager {
             $queue['started'] = true;
         }
 
+        // Steps are walked by index and the queue is cut once afterwards -
+        // shifting them off the front one at a time would re-index the whole
+        // remaining list on every step.
+        $steps = ! empty( $queue['steps'] ) ? $queue['steps'] : array();
+        $total = count( $steps );
+        $next  = 0;
+
         try {
             $zip = new \ZipArchive();
 
             if ( true !== $zip->open( $queue['zip_path'], \ZipArchive::CREATE ) ) {
-                throw new \RuntimeException( 'Could not open backup archive for writing.' );
+                $this->fail_backup( $repository, $backup_id, 'Could not open backup archive for writing.' );
+                return;
             }
 
             $started_at = microtime( true );
 
-            while ( ! empty( $queue['steps'] ) && ( microtime( true ) - $started_at ) < self::BATCH_SECONDS_BUDGET ) {
-                $step = array_shift( $queue['steps'] );
-                $this->process_step( $step, $zip, $queue['sql_path'] );
+            while ( $next < $total && ( microtime( true ) - $started_at ) < self::BATCH_SECONDS_BUDGET ) {
+                $this->process_step( $steps[ $next ], $zip, $queue['sql_path'] );
+                ++$next;
             }
 
             $zip->close();
         } catch ( \Throwable $exception ) {
-            delete_option( self::QUEUE_OPTION );
-
-            $repository->update(
-                $backup_id,
-                array(
-                    'status'        => 'failed',
-                    'finished_at'   => current_time( 'mysql', true ),
-                    'error_message' => $exception->getMessage(),
-                )
-            );
-
+            $this->fail_backup( $repository, $backup_id, $exception->getMessage() );
             return;
         }
 
-        if ( ! empty( $queue['steps'] ) ) {
+        if ( $next < $total ) {
+            $queue['steps'] = array_slice( $steps, $next );
+
             update_option( self::QUEUE_OPTION, $queue, false );
             wp_schedule_single_event( time() + 5, self::BATCH_HOOK );
             return;
@@ -373,12 +384,34 @@ class BackupManager {
     }
 
     /**
+     * Abandons the current job: drops its queue and marks its row failed.
+     *
+     * @param BackupRepository $repository Backups table repository.
+     * @param int              $backup_id  Real `vulopilot_backups` row id.
+     * @param string           $message    Why the job failed.
+     * @return void
+     */
+    private function fail_backup( BackupRepository $repository, int $backup_id, string $message ): void {
+        delete_option( self::QUEUE_OPTION );
+
+        $repository->update(
+            $backup_id,
+            array(
+                'status'        => 'failed',
+                'finished_at'   => current_time( 'mysql', true ),
+                'error_message' => $message,
+            )
+        );
+    }
+
+    /**
      * Executes one real step against the open archive.
      *
      * @param array<string, mixed> $step     One entry from the queue's own step list.
-     * @param \ZipArchive           $zip      Currently-open archive.
-     * @param string                $sql_path Real path to this backup's shared temp `.sql` file.
+     * @param \ZipArchive          $zip      Currently-open archive.
+     * @param string               $sql_path Real path to this backup's shared temp `.sql` file.
      * @return void
+     * @throws \RuntimeException When a table dump can't be written.
      */
     private function process_step( array $step, \ZipArchive $zip, string $sql_path ): void {
         if ( 'db_table' === $step['type'] ) {
@@ -399,63 +432,65 @@ class BackupManager {
      * @param string $table    Real, already-known table name (from `SHOW TABLES`, never client input).
      * @param string $sql_path Real path to this backup's shared temp `.sql` file.
      * @return void
+     * @throws \RuntimeException When the temp file can't be opened.
      */
     private function dump_table_to_sql( string $table, string $sql_path ): void {
         global $wpdb;
 
-        // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fopen -- appending to VuloPilot's own controlled temp backup file, not arbitrary user input.
+        // The dump is streamed to a plain temp file in bounded chunks, which WP_Filesystem can't append to - so the native stream functions are used here.
+        // phpcs:disable WordPress.WP.AlternativeFunctions.file_system_operations_fopen, WordPress.WP.AlternativeFunctions.file_system_operations_fwrite, WordPress.WP.AlternativeFunctions.file_system_operations_fclose
         $handle = fopen( $sql_path, 'a' );
 
         if ( ! $handle ) {
             throw new \RuntimeException( 'Could not open temporary SQL file for writing.' );
         }
 
-        $create_row = $wpdb->get_row( $wpdb->prepare( 'SHOW CREATE TABLE %i', $table ), ARRAY_N ); // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.DirectDatabaseQuery.SchemaChange -- $table is always a real name read from SHOW TABLES above, never client input; SHOW CREATE TABLE is read-only introspection for this backup export, not an actual schema mutation.
+        $create_row = $wpdb->get_row( $wpdb->prepare( 'SHOW CREATE TABLE %i', $table ), ARRAY_N ); // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.DirectDatabaseQuery.SchemaChange -- $table is always a real name read from SHOW TABLES, never client input; SHOW CREATE TABLE is read-only introspection for this backup export, not a schema change.
 
-        // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fwrite
-        fwrite( $handle, "\n-- Table: {$table}\n" );
-        // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fwrite
-        fwrite( $handle, "DROP TABLE IF EXISTS `{$table}`;\n" );
+        $header = "\n-- Table: {$table}\nDROP TABLE IF EXISTS `{$table}`;\n";
 
         if ( $create_row && isset( $create_row[1] ) ) {
-            // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fwrite
-            fwrite( $handle, $create_row[1] . ";\n\n" );
+            $header .= $create_row[1] . ";\n\n";
         }
 
-        $offset = 0;
+        fwrite( $handle, $header );
 
-        while ( true ) {
-            $rows = $wpdb->get_results( $wpdb->prepare( 'SELECT * FROM %i LIMIT %d, %d', $table, $offset, self::DB_CHUNK_SIZE ), ARRAY_A ); // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- $table is always a real name read from SHOW TABLES above; $offset/DB_CHUNK_SIZE are internal ints, never client input.
+        $columns = '';
+        $offset  = 0;
 
-            if ( empty( $rows ) ) {
+        do {
+            $rows = $wpdb->get_results( $wpdb->prepare( 'SELECT * FROM %i LIMIT %d, %d', $table, $offset, self::DB_CHUNK_SIZE ), ARRAY_A ); // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- $table is always a real name read from SHOW TABLES; $offset/DB_CHUNK_SIZE are internal ints, never client input.
+
+            $fetched = is_array( $rows ) ? count( $rows ) : 0;
+
+            if ( 0 === $fetched ) {
                 break;
             }
+
+            $statements = '';
 
             foreach ( $rows as $row ) {
-                $columns = implode( ', ', array_map( static fn( $column ) => "`{$column}`", array_keys( $row ) ) );
-                $values  = implode(
-                    ', ',
-                    array_map(
-                        static function ( $value ) use ( $wpdb ) {
-                            return null === $value ? 'NULL' : "'" . $wpdb->remove_placeholder_escape( $wpdb->_real_escape( $value ) ) . "'";
-                        },
-                        array_values( $row )
-                    )
-                );
+                // Every row of a table has the same columns, so they are listed once.
+                if ( '' === $columns ) {
+                    $columns = '`' . implode( '`, `', array_keys( $row ) ) . '`';
+                }
 
-                // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fwrite
-                fwrite( $handle, "INSERT INTO `{$table}` ({$columns}) VALUES ({$values});\n" );
+                $values = array();
+
+                foreach ( $row as $value ) {
+                    $values[] = null === $value ? 'NULL' : "'" . $wpdb->remove_placeholder_escape( $wpdb->_real_escape( $value ) ) . "'";
+                }
+
+                $statements .= "INSERT INTO `{$table}` ({$columns}) VALUES (" . implode( ', ', $values ) . ");\n";
             }
+
+            fwrite( $handle, $statements );
 
             $offset += self::DB_CHUNK_SIZE;
+        } while ( $fetched >= self::DB_CHUNK_SIZE );
 
-            if ( count( $rows ) < self::DB_CHUNK_SIZE ) {
-                break;
-            }
-        }
-
-        // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fclose
         fclose( $handle );
+        // phpcs:enable WordPress.WP.AlternativeFunctions.file_system_operations_fopen, WordPress.WP.AlternativeFunctions.file_system_operations_fwrite, WordPress.WP.AlternativeFunctions.file_system_operations_fclose
     }
 
     /**
@@ -463,34 +498,32 @@ class BackupManager {
      * marks the row `completed` with its real file size, and applies
      * retention cleanup.
      *
-     * @param int                   $backup_id Real `vulopilot_backups` row id.
-     * @param array<string, mixed>  $queue     The now-drained queue option's own array.
+     * @param int                  $backup_id Real `vulopilot_backups` row id.
+     * @param array<string, mixed> $queue     The now-drained queue option's own array.
      * @return void
      */
     private function finalize_backup( int $backup_id, array $queue ): void {
-        $zip = new \ZipArchive();
+        $has_sql = file_exists( $queue['sql_path'] );
+        $zip     = new \ZipArchive();
 
         if ( true === $zip->open( $queue['zip_path'], \ZipArchive::CREATE ) ) {
-            if ( file_exists( $queue['sql_path'] ) ) {
+            if ( $has_sql ) {
                 $zip->addFile( $queue['sql_path'], 'database.sql' );
             }
 
             $zip->close();
         }
 
-        if ( file_exists( $queue['sql_path'] ) ) {
-            // phpcs:ignore WordPress.WP.AlternativeFunctions.unlink_unlink -- deleting VuloPilot's own controlled temp backup file, not arbitrary user input.
-            unlink( $queue['sql_path'] );
+        if ( $has_sql ) {
+            wp_delete_file( $queue['sql_path'] );
         }
-
-        $file_size = file_exists( $queue['zip_path'] ) ? filesize( $queue['zip_path'] ) : 0; // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_filesize -- reading the size of VuloPilot's own controlled backup file.
 
         ( new BackupRepository() )->update(
             $backup_id,
             array(
                 'status'      => 'completed',
                 'file_path'   => basename( $queue['zip_path'] ),
-                'file_size'   => $file_size,
+                'file_size'   => wp_filesize( $queue['zip_path'] ),
                 'finished_at' => current_time( 'mysql', true ),
             )
         );
@@ -540,8 +573,6 @@ class BackupManager {
      * @return true|\WP_Error
      */
     public function restore( int $backup_id ) {
-        global $wpdb;
-
         $repository = new BackupRepository();
         $backup     = $repository->find( $backup_id );
 
@@ -574,11 +605,16 @@ class BackupManager {
         $sql_file = $tmp_dir . 'database.sql';
 
         if ( file_exists( $sql_file ) ) {
-            // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_file_get_contents -- reading VuloPilot's own just-extracted backup file, not arbitrary user input.
-            $sql        = (string) file_get_contents( $sql_file );
-            $statements = array_filter( array_map( 'trim', explode( ";\n", $sql ) ) );
+            // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents -- reading VuloPilot's own just-extracted backup file, not arbitrary user input.
+            $sql = (string) file_get_contents( $sql_file );
 
-            foreach ( $statements as $statement ) {
+            foreach ( explode( ";\n", $sql ) as $statement ) {
+                $statement = trim( $statement );
+
+                if ( '' === $statement ) {
+                    continue;
+                }
+
                 $result = $this->restore_sql_statement( $statement );
 
                 if ( is_wp_error( $result ) ) {
@@ -657,33 +693,46 @@ class BackupManager {
      * @return void
      */
     private function copy_directory_recursive( string $source, string $destination ): void {
-        if ( ! is_dir( $destination ) ) {
-            wp_mkdir_p( $destination );
-        }
+        wp_mkdir_p( $destination );
 
-        try {
-            $iterator = new \RecursiveIteratorIterator(
-                new \RecursiveDirectoryIterator( $source, \FilesystemIterator::SKIP_DOTS ),
-                \RecursiveIteratorIterator::LEAVES_ONLY
-            );
-        } catch ( \Exception $exception ) {
+        $iterator = $this->get_file_iterator( $source, \RecursiveIteratorIterator::LEAVES_ONLY );
+
+        if ( null === $iterator ) {
             return;
         }
 
-        $base = trailingslashit( $source );
+        $destination = trailingslashit( $destination );
+        $made_dir    = '';
 
         foreach ( $iterator as $file ) {
             if ( ! $file->isFile() ) {
                 continue;
             }
 
-            $relative        = ltrim( str_replace( $base, '', $file->getPathname() ), '/' );
-            $destination_path = trailingslashit( $destination ) . $relative;
+            $destination_path = $destination . wp_normalize_path( $iterator->getSubPathname() );
+            $destination_dir  = dirname( $destination_path );
 
-            wp_mkdir_p( dirname( $destination_path ) );
+            // Files come directory by directory, so a folder is only created when it changes.
+            if ( $destination_dir !== $made_dir ) {
+                wp_mkdir_p( $destination_dir );
+                $made_dir = $destination_dir;
+            }
+
             // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_copy -- restoring VuloPilot's own just-extracted, plugin-controlled backup archive contents back into place.
             copy( $file->getPathname(), $destination_path );
         }
+    }
+
+    /**
+     * Whether a dumped table belongs to this site, i.e. carries its own prefix.
+     *
+     * @param string $table Table name from the dump.
+     * @return bool
+     */
+    private function is_site_table( string $table ): bool {
+        global $wpdb;
+
+        return 0 === strpos( $table, $wpdb->prefix );
     }
 
     /**
@@ -707,7 +756,7 @@ class BackupManager {
         }
 
         if ( preg_match( '/^DROP TABLE IF EXISTS `([A-Za-z0-9_]+)`$/', $statement, $matches ) ) {
-            if ( 0 !== strpos( $matches[1], $wpdb->prefix ) ) {
+            if ( ! $this->is_site_table( $matches[1] ) ) {
                 return new \WP_Error( 'vulopilot_restore_foreign_table', __( 'The backup refers to a table outside this site.', 'vulopilot' ) );
             }
 
@@ -717,7 +766,7 @@ class BackupManager {
         }
 
         if ( preg_match( '/^CREATE TABLE `([A-Za-z0-9_]+)`/', $statement, $matches ) ) {
-            if ( 0 !== strpos( $matches[1], $wpdb->prefix ) ) {
+            if ( ! $this->is_site_table( $matches[1] ) ) {
                 return new \WP_Error( 'vulopilot_restore_foreign_table', __( 'The backup refers to a table outside this site.', 'vulopilot' ) );
             }
 
@@ -727,11 +776,15 @@ class BackupManager {
 
             $exists = $wpdb->get_var( $wpdb->prepare( 'SHOW TABLES LIKE %s', $wpdb->esc_like( $matches[1] ) ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- checking the table was created.
 
-            return $exists ? true : new \WP_Error( 'vulopilot_restore_create_failed', $wpdb->last_error ? $wpdb->last_error : $matches[1] );
+            if ( $exists ) {
+                return true;
+            }
+
+            return new \WP_Error( 'vulopilot_restore_create_failed', $wpdb->last_error ? $wpdb->last_error : $matches[1] );
         }
 
         if ( preg_match( '/^INSERT INTO `([A-Za-z0-9_]+)` \((.+?)\) VALUES \((.*)\)$/s', $statement, $matches ) ) {
-            if ( 0 !== strpos( $matches[1], $wpdb->prefix ) ) {
+            if ( ! $this->is_site_table( $matches[1] ) ) {
                 return new \WP_Error( 'vulopilot_restore_foreign_table', __( 'The backup refers to a table outside this site.', 'vulopilot' ) );
             }
 
@@ -754,37 +807,40 @@ class BackupManager {
      * Reads the value list of one dumped `INSERT` - `NULL` or a single-quoted
      * string with backslash escapes, separated by commas - back into an array.
      *
-     * @param string $list The text between `VALUES (` and the closing `)`.
+     * @param string $value_list The text between `VALUES (` and the closing `)`.
      * @return array<int, string|null>|null Null when the text is not in that format.
      */
-    private function parse_sql_values( string $list ): ?array {
-        $escapes = array(
-            'n' => "\n",
-            'r' => "\r",
-            '0' => "\0",
-            'Z' => "\x1a",
-        );
-        $values  = array();
-        $length  = strlen( $list );
-        $i       = 0;
+    private function parse_sql_values( string $value_list ): ?array {
+        $values = array();
+        $length = strlen( $value_list );
+        $i      = 0;
 
         while ( $i < $length ) {
-            if ( 'NULL' === substr( $list, $i, 4 ) ) {
+            if ( 'NULL' === substr( $value_list, $i, 4 ) ) {
                 $values[] = null;
                 $i       += 4;
-            } elseif ( "'" === $list[ $i ] ) {
+            } elseif ( "'" === $value_list[ $i ] ) {
                 $value = '';
                 ++$i;
 
-                while ( $i < $length && "'" !== $list[ $i ] ) {
-                    if ( '\\' === $list[ $i ] && $i + 1 < $length ) {
-                        ++$i;
-                        $value .= $escapes[ $list[ $i ] ] ?? $list[ $i ];
-                    } else {
-                        $value .= $list[ $i ];
-                    }
+                while ( $i < $length && "'" !== $value_list[ $i ] ) {
+                    // Plain text is copied up to the next quote or backslash in one step
+                    // instead of a character at a time - post content can be megabytes.
+                    $run = strcspn( $value_list, "'\\", $i );
 
-                    ++$i;
+                    if ( $run > 0 ) {
+                        $value .= substr( $value_list, $i, $run );
+                        $i     += $run;
+                    } elseif ( $i + 1 < $length ) {
+                        // A backslash escape.
+                        ++$i;
+                        $value .= self::SQL_ESCAPES[ $value_list[ $i ] ] ?? $value_list[ $i ];
+                        ++$i;
+                    } else {
+                        // A lone backslash at the very end.
+                        $value .= $value_list[ $i ];
+                        ++$i;
+                    }
                 }
 
                 if ( $i >= $length ) {
@@ -798,7 +854,7 @@ class BackupManager {
             }
 
             if ( $i < $length ) {
-                if ( ', ' !== substr( $list, $i, 2 ) ) {
+                if ( ', ' !== substr( $value_list, $i, 2 ) ) {
                     return null;
                 }
 
@@ -822,22 +878,23 @@ class BackupManager {
             return;
         }
 
-        try {
-            $iterator = new \RecursiveIteratorIterator(
-                new \RecursiveDirectoryIterator( $directory, \FilesystemIterator::SKIP_DOTS ),
-                \RecursiveIteratorIterator::CHILD_FIRST
-            );
-        } catch ( \Exception $exception ) {
+        $iterator = $this->get_file_iterator( $directory, \RecursiveIteratorIterator::CHILD_FIRST );
+
+        if ( null === $iterator ) {
             return;
         }
 
+        // phpcs:disable WordPress.WP.AlternativeFunctions.file_system_operations_rmdir -- cleaning up VuloPilot's own plugin-controlled temp restore directory, not arbitrary user input.
         foreach ( $iterator as $file ) {
-            // phpcs:ignore WordPress.WP.AlternativeFunctions.unlink_unlink, WordPress.WP.AlternativeFunctions.file_system_operations_rmdir -- cleaning up VuloPilot's own plugin-controlled temp restore directory, not arbitrary user input.
-            $file->isDir() ? rmdir( $file->getPathname() ) : unlink( $file->getPathname() );
+            if ( $file->isDir() ) {
+                rmdir( $file->getPathname() );
+            } else {
+                wp_delete_file( $file->getPathname() );
+            }
         }
 
-        // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_rmdir
         rmdir( $directory );
+        // phpcs:enable WordPress.WP.AlternativeFunctions.file_system_operations_rmdir
     }
 
     /**
@@ -848,18 +905,24 @@ class BackupManager {
      */
     private function apply_retention(): void {
         $settings = wp_parse_args( get_option( Utill::VULOPILOT_SETTINGS_KEY, array() ), Utill::VULOPILOT_SETTINGS_DEFAULTS );
-        $keep     = max( 1, absint( $settings['backup_retention_count'] ) ?: 5 );
+        $keep     = absint( $settings['backup_retention_count'] );
+
+        if ( $keep < 1 ) {
+            $keep = 5;
+        }
 
         $repository = new BackupRepository();
+        $expired    = $repository->get_completed_beyond_retention( $keep );
 
-        foreach ( $repository->get_completed_beyond_retention( $keep ) as $row ) {
+        if ( ! $expired ) {
+            return;
+        }
+
+        $storage = VuloPilot()->backup_storage_manager;
+
+        foreach ( $expired as $row ) {
             if ( ! empty( $row['file_path'] ) ) {
-                $path = $this->resolve_file_path( (string) $row['file_path'] );
-
-                if ( file_exists( $path ) ) {
-                    // phpcs:ignore WordPress.WP.AlternativeFunctions.unlink_unlink -- deleting VuloPilot's own controlled backup file, not arbitrary user input.
-                    unlink( $path );
-                }
+                wp_delete_file( $this->resolve_file_path( (string) $row['file_path'] ) );
             }
 
             // Real remote-copy cleanup (S3/Google Drive) - same real
@@ -867,7 +930,7 @@ class BackupManager {
             // Controllers\Backups::delete_item() already uses. See
             // Services\BackupStorageManager::delete_remote_copy()'s own
             // docblock.
-            VuloPilot()->backup_storage_manager->delete_remote_copy( $row );
+            $storage->delete_remote_copy( $row );
 
             $repository->delete( (int) $row['id'] );
         }
