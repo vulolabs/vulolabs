@@ -251,7 +251,7 @@ final class VuloPilot {
         $this->container['schema_json_ld_renderer']  = new \VuloPilot\SeoVisibility\SchemaJsonLdRenderer();
         $this->container['homepage_schema_renderer'] = new \VuloPilot\SeoVisibility\HomepageSchemaRenderer();
 
-        // Post-editor SEO metabox: Advanced tab's noindex/nofollow output (PostRobotsMetaManager)
+        // Post-editor SEO metabox: General tab's noindex/nofollow output (PostRobotsMetaManager)
         // and the Block Editor sidebar's asset loader (PostEditorAssets).
         // Both unconditional construction, same shape as every Services\*
         // above - nothing to gate behind a setting, only per-post data.

@@ -156,7 +156,7 @@ class OnPageAnalyzer {
                     $count,
                     $threshold
                 ),
-                'improve-readability'
+                'expand-content'
             );
         }
 
@@ -261,7 +261,7 @@ class OnPageAnalyzer {
     private function check_links( string $content_html ): array {
         return (bool) preg_match( '/<a\s[^>]*href=/i', $content_html )
             ? $this->result( 'has_links', 'additional', 'pass', __( 'Content contains at least one link.', 'vulopilot' ) )
-            : $this->result( 'has_links', 'additional', 'warning', __( 'Content has no links - linking to related content or sources helps both readers and search engines.', 'vulopilot' ) );
+            : $this->result( 'has_links', 'additional', 'warning', __( 'Content has no links - linking to related content or sources helps both readers and search engines.', 'vulopilot' ), 'suggest-internal-links' );
     }
 
     /**

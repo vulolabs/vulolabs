@@ -35,7 +35,7 @@ class CanonicalUrlManager {
     public function __construct() {
         add_action( 'wp_head', array( $this, 'maybe_output_canonical' ), 5 );
 
-        // The post-editor metabox's Advanced tab canonical override - this
+        // The post-editor metabox's General tab canonical override - this
         // filters WP core's OWN wp_get_canonical_url()/rel_canonical()
         // output directly, so a per-post override always takes effect
         // regardless of the canonical_url_enabled setting above (that

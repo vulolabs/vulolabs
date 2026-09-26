@@ -224,7 +224,7 @@
 			color: #cc1818;
 		}
 
-		// A real "go fix this" click target - General/Advanced/Social/
+		// A real "go fix this" click target - General/Social/
 		// Schema, whichever tab actually has the field this check reads
 		// (PageAnalysisTab.tsx's own `editorTargetForCheck()`). Not every
 		// row gets this - Featured Image/Broken Links/Orphan Page/
@@ -264,7 +264,7 @@
 
 /**
  * "All SEO Issues" table's "Fix with AI" deep link - scroll target lands
- * here (Checklist.tsx's `<li>` rows, AdvancedTab.tsx/SocialTab.tsx's field
+ * here (Checklist.tsx's `<li>` rows, GeneralTab.tsx/SocialTab.tsx's field
  * wrappers), same "draw the eye to it, then let it fade" idiom zyra's own
  * ModuleGridComponent.tsx already established elsewhere in this codebase.
  * `border-radius` on the checklist `<li>` case relies on the item also

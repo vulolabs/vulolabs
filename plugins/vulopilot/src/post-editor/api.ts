@@ -42,6 +42,8 @@ export interface FixResponse {
 		title: string;
 		excerpt: string;
 		content_changed: boolean;
+		/** The saved post_content after a content-mutating action (empty otherwise). */
+		content?: string;
 		schema_json: string;
 	};
 }
@@ -143,6 +145,11 @@ export function analyzePost(
 /** Same real `GET vulopilot/v1/seo/analyze-page?post_id=` `GEO/PageAnalysisPanel.tsx` already calls - this bundle's own `apiUrl`/nonce just point at the same `vulopilot/v1` namespace under a different localized script (see this file's own top docblock). */
 export function analyzePage( postId: number ): Promise< PageAnalysisResponse > {
 	return request( `seo/analyze-page?post_id=${ postId }`, { method: 'GET' } );
+}
+
+/** Same real `POST /findings/{id}/fix` the dashboard's own "Fix with AI" buttons call (vulopilot-pro's OneClickFix `FindingFixRest`) - resolves the fix from the finding's own scanner, so this needs no action id. */
+export function fixFinding( findingId: number ): Promise< FixResponse > {
+	return request( `findings/${ findingId }/fix`, { method: 'POST' } );
 }
 
 export function fixWithAi( postId: number, actionId: string ): Promise< FixResponse > {

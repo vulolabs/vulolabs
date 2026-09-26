@@ -1,16 +1,18 @@
 /* global vulopilotAppLocalizer */
 import { useState } from 'react';
+import type { ComponentType } from 'react';
 import { __ } from '@wordpress/i18n';
-import { CardComponent, ListComponent, NoticeManager, PopupComponent } from '@zyra/components';
+import { CardComponent, ListComponent, PopupComponent } from '@zyra/components';
 import { ButtonInput } from '@zyra/inputs';
 import ContentToolPopup from './ContentToolPopup';
 import { ContentTool } from './ContentToolsGrid';
 import ShowProPopup from '../../components/Popup/Popup';
 import { useAiCredits } from '../../services/useAiCredits';
 import { useContentToolsEnabled } from '../../services/useContentToolsEnabled';
+import { useFilterSlot } from '../../services/useFilterSlot';
 
 /**
- * Content page's "Quick Actions" card - 4 rows, 3 of them real, standalone
+ * Content page's "Quick Actions" card - 4 rows: 3 standalone
  * AI actions (the same real propose→preview→approve/reject flow
  * ContentToolsGrid.tsx's own 12 tiles use, via the same shared
  * ContentToolPopup) rather than the plain in-page scroll/navigation
@@ -86,21 +88,20 @@ const QuickActionsCard = () => {
 		document.getElementById(id)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
 	};
 
-	const notifyComingSoon = () => {
-		if (creditsStatus && !creditsStatus.connected) {
-			setIsCloudConnectPromptOpen(true);
+	// Content Planner ships in Pro (ContentOptimization's `ContentPlannerPopup`,
+	// registered on this slot); without it the row is a Pro-tagged upsell.
+	const PlannerPopup = useFilterSlot<
+		ComponentType<{ open: boolean; onClose: () => void }>
+	>('vulopilot_content_planner');
+	const [isPlannerOpen, setIsPlannerOpen] = useState(false);
+
+	const openPlanner = () => {
+		if (PlannerPopup) {
+			setIsPlannerOpen(true);
 			return;
 		}
 
-		NoticeManager.add({
-			uniqueKey: 'vulopilot-content-planner-coming-soon',
-			type: 'info',
-			position: 'float',
-			message: __(
-				'Content Planner is not available yet - check back in a future update.',
-				'vulopilot'
-			),
-		});
+		setIsProLocked(true);
 	};
 
 	const handleToolClick = (tool: ContentTool) => {
@@ -153,12 +154,15 @@ const QuickActionsCard = () => {
 						className: 'icon-blue',
 						title: __('Content Planner', 'vulopilot'),
 						desc: __('Plan and schedule content', 'vulopilot'),
-						tags: (
-							<span className="admin-badge blue">
-								{__('Coming soon', 'vulopilot')}
+						tags: PlannerPopup ? (
+							<i className="adminfont-arrow-right" />
+						) : (
+							<span className="admin-tag pro-tag pro-tag-inline">
+								<i className="adminfont-pro-tag" />
+								{__('Pro', 'vulopilot')}
 							</span>
 						),
-						action: notifyComingSoon,
+						action: openPlanner,
 					},
 				]}
 			/>
@@ -172,6 +176,9 @@ const QuickActionsCard = () => {
 				}}
 			/>
 			<ContentToolPopup tool={activeTool} onClose={() => setActiveTool(null)} />
+			{PlannerPopup && (
+				<PlannerPopup open={isPlannerOpen} onClose={() => setIsPlannerOpen(false)} />
+			)}
 			<PopupComponent
 				open={isCloudConnectPromptOpen}
 				onClose={() => setIsCloudConnectPromptOpen(false)}
