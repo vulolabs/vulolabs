@@ -2,7 +2,7 @@ import { __, sprintf } from '@wordpress/i18n';
 import { COLOR_PALETTE } from '@zyra/core';
 import { AnalyticsComponent, CardComponent, ChartComponent, IconComponent, ListComponent, TypographyComponent } from '@zyra/components';
 import type { FindingGroup } from '../../components/Issues/issuesTypes';
-import type { TrendChange } from './GeoTrendCompactCard';
+import type { TrendChange } from './geoTrendChange';
 
 /**
  * Same real severity-weighted 0-100 formula `Controllers\Seo::calculate_score()`/

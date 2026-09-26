@@ -84,30 +84,3 @@ export const useEfficiencyChecks = () => {
 
 	return { data, isLoading, refetch };
 };
-
-/** DOM id the "Things to review" section is scrolled to from the hero's own aggregate "Review N Improvements" button (a real "jump to the whole list" action - there's no single check it's about). */
-export const THINGS_TO_REVIEW_ID = 'protect-my-site-efficiency-review';
-
-/**
- * Real DOM id for one check's own row inside EfficiencySectionsList.tsx
- * (Page Delivery/WordPress Data Efficiency/Server Processing) - what
- * "Things to review"'s own per-row "Open" badge scrolls back to.
- *
- * @param {string} checkId Real `EfficiencyCheck.id`, e.g. 'page-caching'.
- */
-export const efficiencyCheckRowId = (checkId: string): string =>
-	`efficiency-check-${checkId}`;
-
-/**
- * Real, per-check className on that check's own row inside
- * EfficiencyThingsToReview.tsx's `ListComponent` - a real querySelector
- * target, not a DOM id, since `ListComponent` doesn't forward `item.id`
- * onto the row element it renders (confirmed reading its source). What a
- * section's own inline "Review →" button scrolls to instead of every
- * check funneling into the same generic `THINGS_TO_REVIEW_ID` top-of-list
- * spot regardless of which one was actually clicked.
- *
- * @param {string} checkId Real `EfficiencyCheck.id`, e.g. 'page-caching'.
- */
-export const efficiencyReviewItemClass = (checkId: string): string =>
-	`efficiency-review-item-${checkId}`;

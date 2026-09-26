@@ -51,14 +51,11 @@ defined( 'ABSPATH' ) || exit;
  */
 class SitemapManager {
 
-    private const BING_PING_URL = 'https://www.bing.com/ping';
-
     /**
      * SitemapManager constructor.
      */
     public function __construct() {
         add_filter( 'wp_sitemaps_enabled', array( $this, 'filter_sitemaps_enabled' ) );
-        add_action( 'save_post', array( $this, 'maybe_ping_search_engines' ), 10, 2 );
 
         add_filter( 'wp_sitemaps_max_urls', array( $this, 'filter_max_urls' ) );
         add_filter( 'wp_sitemaps_post_types', array( $this, 'filter_post_types' ) );
@@ -188,34 +185,5 @@ class SitemapManager {
         }
 
         return $enabled;
-    }
-
-    /**
-     * @param int      $post_id Post being saved.
-     * @param \WP_Post $post    The post object.
-     * @return void
-     */
-    public function maybe_ping_search_engines( $post_id, $post ): void {
-        if ( wp_is_post_revision( $post_id ) || wp_is_post_autosave( $post_id ) ) {
-            return;
-        }
-
-        if ( 'publish' !== $post->post_status ) {
-            return;
-        }
-
-        $settings = wp_parse_args( get_option( Utill::VULOPILOT_SETTINGS_KEY, array() ), Utill::VULOPILOT_SETTINGS_DEFAULTS );
-
-        if ( empty( $settings['sitemap_enabled'] ) ) {
-            return;
-        }
-
-        wp_remote_get(
-            self::BING_PING_URL . '?sitemap=' . rawurlencode( home_url( '/wp-sitemap.xml' ) ),
-            array(
-                'timeout'  => 5,
-                'blocking' => false,
-            )
-        );
     }
 }

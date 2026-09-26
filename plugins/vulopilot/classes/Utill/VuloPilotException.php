@@ -195,13 +195,6 @@ class VuloPilotException extends \Exception {
 	}
 
 	/**
-	 * @return array<string, mixed>
-	 */
-	public function get_context(): array {
-		return $this->context;
-	}
-
-	/**
 	 * TYPE_INSUFFICIENT_CREDITS convenience getter - see that constant's
 	 * own docblock. Credits are fractional.
 	 *

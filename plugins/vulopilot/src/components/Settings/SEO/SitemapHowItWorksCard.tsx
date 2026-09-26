@@ -25,12 +25,7 @@ import './SitemapHowItWorksCard.scss';
  * 2. Same real `/sitemap.xml` URL this tab's own "Enable sitemap" field
  *    and "Active & up to date" notice already reference (RobotsSitemap.php's
  *    own real `/wp-sitemap.xml` → `/sitemap.xml` discovery-order fallback).
- * 3. `maybe_ping_search_engines()` fires on WordPress's own `save_post`
- *    hook - covers publish AND update, not delete (no `delete_post`/
- *    `trashed_post` hook exists), so this step says "publish or update"
- *    rather than the mockup's own wording where that might imply delete -
- *    this mockup's own copy already only says "publish or update", so no
- *    change needed here.
+ * 3. Covers publish AND update, not delete.
  * 4. A general, true statement about sitemap discoverability - not a
  *    specific metric this plugin measures, so "indexing is not
  *    guaranteed" is kept rather than promising a result this plugin can't
@@ -60,8 +55,8 @@ const SITEMAP_STEPS: Array<{ icon: string; color: string; title: string; desc: s
 	{
 		icon: 'search',
 		color: 'green',
-		title: __('Search engines are notified', 'vulopilot'),
-		desc: __('We notify search engines automatically when you publish or update content.', 'vulopilot'),
+		title: __('Search engines can find it', 'vulopilot'),
+		desc: __('Search engines read your sitemap to find new and updated content. Turn on Instant Indexing to tell them right away.', 'vulopilot'),
 	},
 	{
 		icon: 'bar-chart',

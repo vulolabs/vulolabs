@@ -116,16 +116,9 @@ class SnapshotRepository extends RepositoryUtil {
     }
 
     /**
-     * @return array<string, mixed>|null The row before the newest, or null.
-     */
-    public function get_previous(): ?array {
-        return $this->query_rows( 'previous', array() )[0] ?? null;
-    }
-
-    /**
      * Runs one of this class's own fixed snapshot queries and flattens each row.
      *
-     * @param string            $query One of 'latest', 'previous', 'recent', 'between'.
+     * @param string            $query One of 'latest', 'recent', 'between'.
      * @param array<int, mixed> $args  Values for that query's date placeholders.
      * @return array<int, array<string, mixed>>
      */
@@ -138,9 +131,6 @@ class SnapshotRepository extends RepositoryUtil {
         switch ( $query ) {
             case 'latest':
                 $sql = $wpdb->prepare( 'SELECT id, snapshot_date, data, created_at FROM %i WHERE snapshot_type = %s ORDER BY snapshot_date DESC LIMIT 1', $table, $type );
-                break;
-            case 'previous':
-                $sql = $wpdb->prepare( 'SELECT id, snapshot_date, data, created_at FROM %i WHERE snapshot_type = %s ORDER BY snapshot_date DESC LIMIT 1 OFFSET 1', $table, $type );
                 break;
             case 'recent':
                 $sql = $wpdb->prepare( 'SELECT id, snapshot_date, data, created_at FROM %i WHERE snapshot_type = %s AND snapshot_date >= %s ORDER BY snapshot_date ASC', $table, $type, $args[0] );

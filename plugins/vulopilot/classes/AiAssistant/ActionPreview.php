@@ -61,20 +61,6 @@ final class ActionPreview {
     }
 
     /**
-     * @return string|null
-     */
-    public function get_before(): ?string {
-        return $this->before;
-    }
-
-    /**
-     * @return string
-     */
-    public function get_after(): string {
-        return $this->after;
-    }
-
-    /**
      * @return string
      */
     public function get_format(): string {

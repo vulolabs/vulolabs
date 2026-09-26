@@ -14,8 +14,6 @@ export const PRODUCT_SCANNER_IDS = [
 	'product-seo',
 ];
 
-export const INVENTORY_SCANNER_IDS = ['product-inventory-health'];
-
 /** The 4 new "Checkout & Payments"/"Orders" scanners (WooCommerceCheckoutScanner + its 3 order-health siblings). */
 export const CHECKOUT_SCANNER_IDS = [
 	'woocommerce-checkout',
@@ -26,10 +24,3 @@ export const CHECKOUT_SCANNER_IDS = [
 
 /** General store setup (the original WooCommerceScanner) + the new template-compatibility check. */
 export const STORE_SCANNER_IDS = ['woocommerce', 'woocommerce-compatibility'];
-
-export const ALL_MAPPED_SCANNER_IDS = [
-	...PRODUCT_SCANNER_IDS,
-	...INVENTORY_SCANNER_IDS,
-	...CHECKOUT_SCANNER_IDS,
-	...STORE_SCANNER_IDS,
-];

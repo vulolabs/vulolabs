@@ -139,9 +139,3 @@ export const ACCESSIBILITY_CHECKS: AccessibilityCheck[] = [
 		),
 	},
 ];
-
-/** Which tile a given finding's scanner_id belongs to, for its icon/color. */
-export const checkForScannerId = (
-	scannerId: string
-): AccessibilityCheck | undefined =>
-	ACCESSIBILITY_CHECKS.find((check) => check.scannerIds.includes(scannerId));
