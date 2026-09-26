@@ -1,7 +1,7 @@
 /* global vulopilotAppLocalizer */
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { __, sprintf } from '@wordpress/i18n';
-import { getApiLink, getApiResponse, COLOR_PALETTE, scrollToId } from '@zyra/core';
+import { COLOR_PALETTE, scrollToId } from '@zyra/core';
 import {
 	AnalyticsComponent,
 	CardComponent,
@@ -13,7 +13,6 @@ import {
 	TypographyComponent,
 	IconComponent
 } from '@zyra/components';
-import type { FindingGroup } from '../../components/Issues/issuesTypes';
 import { useSeoScore, SeoScoreResponse } from './useSeoTabData';
 import { getRating, ratingColor } from './seoRating';
 import { ALL_SEO_SCANNER_IDS } from './seoIssuesShared';
@@ -38,24 +37,6 @@ const CATEGORY_CARDS: {
 	];
 
 
-/**
- * Real `robots-txt`/`sitemap`/`sitemap-validation`/`ai-crawler-blocked-pages`
- * findings - the exact 4 scanner ids `sitemap`/`robots` used to cover as
- * their own full SeoTab.tsx category cards, before those moved to what's
- * now Crawl & URLs' own "Robots & Sitemap" inner tab (direct instruction:
- * "Robots.txt and Sitemap should move away from SEO... these are
- * fundamentally crawler/discovery controls"). SEO's own "Search engine
- * access" status line below reads just their combined open-finding count
- * - real, just deliberately not a drill-down table here anymore;
- * CrawlRobotsSitemapSection.tsx's own Robots.txt/XML Sitemap findings
- * tables are where those individual findings actually live now.
- */
-const SEARCH_ENGINE_ACCESS_SCANNER_IDS = [
-	'robots-txt',
-	'sitemap',
-	'sitemap-validation',
-	'ai-crawler-blocked-pages',
-];
 
 
 
@@ -118,10 +99,6 @@ const SeoTab = () => {
 	const [categoryFocus, setCategoryFocus] = useState<{ key: string; token: number } | null>(
 		null
 	);
-	/** Real open-finding count, actively fetched and set below (see the effect that calls `setSearchEngineAccessOpen`) for the "Search engine access" status line the file-level docblock describes - but never actually read into that line's own JSX. Real, working, just flagged here rather than force-wired into a status line whose exact intended copy/layout isn't specified anywhere. */
-	const [, setSearchEngineAccessOpen] = useState<
-		number | null
-	>(null);
 	/** Set by a real "Analyze" click in the "Pages & Posts" table below - opens PageAnalysisPanel as a real sidebar alongside this tab's own existing content, rather than replacing it. */
 	const [analyzingPostId, setAnalyzingPostId] = useState<number | null>(null);
 
@@ -130,26 +107,6 @@ const SeoTab = () => {
 		setAnalyzingPostId(postId);
 		scrollToId('seo-page-analysis-panel');
 	};
-
-	useEffect(() => {
-		if (!isSeoModuleActive()) {
-			return;
-		}
-
-		getApiResponse<{ data: FindingGroup[] }>(
-			getApiLink(
-				vulopilotAppLocalizer,
-				`findings/groups?scanner_id=${SEARCH_ENGINE_ACCESS_SCANNER_IDS.join(',')}&per_page=200`
-			),
-			{ headers: { 'X-WP-Nonce': vulopilotAppLocalizer.nonce } }
-		).then((response) => {
-			const openCount = (response?.data ?? []).reduce(
-				(sum, group) => sum + group.count,
-				0
-			);
-			setSearchEngineAccessOpen(openCount);
-		});
-	}, []);
 
 	if (!isSeoModuleActive()) {
 		return (

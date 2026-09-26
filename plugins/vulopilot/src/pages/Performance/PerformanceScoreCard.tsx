@@ -123,7 +123,6 @@ const TEXT_COLOR: Record<Rating['className'], string> = {
  */
 const PerformanceScoreCard = ({ onViewDetails }: PerformanceScoreCardProps) => {
 	const [dashboard, setDashboard] = useState<DashboardSummary | null>(null);
-	const [, setVitals] = useState<CoreWebVitalsSummary | null>(null);
 	const [isLoading, setIsLoading] = useState(true);
 	const [hasError, setHasError] = useState(false);
 	/** Drives SpeedHistoryCard's own real `days` param below - same `PERIOD_OPTIONS`/`ToggleInput` shape SecurityTrendCard.tsx's own card action already uses. RealTimeMonitoringCard isn't affected - its own metrics are real-time, not a day-range trend. */
@@ -169,7 +168,6 @@ const PerformanceScoreCard = ({ onViewDetails }: PerformanceScoreCardProps) => {
 				}
 
 				setDashboard(dashboardResponse);
-				setVitals(vitalsResponse);
 			})
 			.catch(() => setHasError(true))
 			.finally(() => setIsLoading(false));

@@ -110,7 +110,6 @@ const AccessibilityHeroCard = ({
 	onReviewIssues,
 }: AccessibilityHeroCardProps) => {
 	const [score, setScore] = useState<number | null>(null);
-	const [, setPreviousScore] = useState<number | null>(null);
 
 	useEffect(() => {
 		getApiResponse<DashboardSummary>(
@@ -119,7 +118,6 @@ const AccessibilityHeroCard = ({
 		).then((response) => {
 			if (response) {
 				setScore(response.category_scores.accessibility);
-				setPreviousScore(response.category_scores_7d_ago.accessibility);
 			}
 		});
 	}, []);

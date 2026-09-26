@@ -59,7 +59,6 @@ const formatBytes = (bytes: number): string => {
 const RealTimeMonitoringCard = () => {
 	const [stats, setStats] = useState<RealtimeStats | null>(null);
 	const [vitals, setVitals] = useState<CoreWebVitalsSummary | null>(null);
-	const [, setIsLoading] = useState(true);
 
 	useEffect(() => {
 		Promise.all([
@@ -71,16 +70,14 @@ const RealTimeMonitoringCard = () => {
 				getApiLink(vulopilotAppLocalizer, 'core-web-vitals'),
 				{ headers: { 'X-WP-Nonce': vulopilotAppLocalizer.nonce } }
 			),
-		])
-			.then(([statsResponse, vitalsResponse]) => {
-				if (statsResponse) {
-					setStats(statsResponse);
-				}
-				if (vitalsResponse) {
-					setVitals(vitalsResponse);
-				}
-			})
-			.finally(() => setIsLoading(false));
+		]).then(([statsResponse, vitalsResponse]) => {
+			if (statsResponse) {
+				setStats(statsResponse);
+			}
+			if (vitalsResponse) {
+				setVitals(vitalsResponse);
+			}
+		});
 	}, []);
 
 	const hasEnoughSamples = (vitals?.sample_count ?? 0) >= MIN_SAMPLES;

@@ -67,7 +67,6 @@ const IndexNowPanel = () => {
 	const [isLoadingHistory, setIsLoadingHistory] = useState(true);
 	const [urlsText, setUrlsText] = useState('');
 	const [isSubmitting, setIsSubmitting] = useState(false);
-	const [, setSubmitResults] = useState<SubmitResult[]>([]);
 	const [showResponseHelp, setShowResponseHelp] = useState(false);
 
 	const loadHistory = () => {
@@ -125,7 +124,6 @@ const IndexNowPanel = () => {
 					?.results;
 
 				if (results) {
-					setSubmitResults(results);
 					setUrlsText('');
 					loadHistory();
 				} else {

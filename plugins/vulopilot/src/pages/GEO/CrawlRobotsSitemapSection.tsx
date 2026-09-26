@@ -266,15 +266,9 @@ const CrawlRobotsSitemapSection = () => {
 	 * count, so these two glance stats fetch that real number directly
 	 * rather than reusing (and overcounting from) the table's own total.
 	 */
-	const [, setRobotsOpenCount] = useState(0);
 	const [blockedPagesOpenCount, setBlockedPagesOpenCount] = useState(0);
 
 	const loadOpenCounts = () => {
-		getApiResponse<{ total: number }>(
-			getApiLink(vulopilotAppLocalizer, 'findings?scanner_id=robots-txt&status=open&per_page=1'),
-			nonceHeaders
-		).then((response) => setRobotsOpenCount(response?.total ?? 0));
-
 		getApiResponse<{ total: number }>(
 			getApiLink(vulopilotAppLocalizer, 'findings?scanner_id=ai-crawler-blocked-pages&status=open&per_page=1'),
 			nonceHeaders
@@ -340,16 +334,11 @@ const CrawlRobotsSitemapSection = () => {
 	 * it instead of an explicit Save button.
 	 */
 	const [robotsEditContent, setRobotsEditContent] = useState('');
-	const [, setRobotsSaveState] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle');
 	const robotsSaveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
 	const persistRobotsContent = (content: string, notify = false) => {
-		setRobotsSaveState('saving');
-
 		sendApiResponse(vulopilotAppLocalizer, getApiLink(vulopilotAppLocalizer, 'robots-sitemap/robots'), { content })
 			.then((response) => {
-				setRobotsSaveState(response ? 'saved' : 'error');
-
 				if (notify) {
 					NoticeManager.add({
 						uniqueKey: 'robots-sitemap-save',
@@ -411,7 +400,6 @@ const CrawlRobotsSitemapSection = () => {
 	const [isLlmsTxtEnabled, setIsLlmsTxtEnabled] = useState(false);
 	const [isLoadingLlmsTxt, setIsLoadingLlmsTxt] = useState(true);
 	const [isRegeneratingLlmsTxt, setIsRegeneratingLlmsTxt] = useState(false);
-	const [, setLlmsTxtSaveState] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle');
 	const llmsTxtSaveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
 	const loadLlmsTxt = () => {
@@ -435,11 +423,9 @@ const CrawlRobotsSitemapSection = () => {
 	};
 
 	const persistLlmsTxtContent = (content: string, notify = false) => {
-		setLlmsTxtSaveState('saving');
 		sendApiResponse(vulopilotAppLocalizer, getApiLink(vulopilotAppLocalizer, 'settings'), {
 			setting: { llms_txt_content: content },
 		}).then((response) => {
-			setLlmsTxtSaveState(response ? 'saved' : 'error');
 			if (notify) {
 				NoticeManager.add({
 					uniqueKey: 'llms-txt-regenerated',

@@ -42,11 +42,6 @@ const IssuesSection = () => {
 
 	const [data, setData] = useState<FindingGroup[]>([]);
 	const [total, setTotal] = useState(0);
-	const [, setPriorityCounts] = useState({
-		high: 0,
-		medium: 0,
-		low: 0,
-	});
 	const [isLoading, setIsLoading] = useState(true);
 	const [error, setError] = useState<string | null>(null);
 	const [reloadToken, setReloadToken] = useState(0);
@@ -94,9 +89,6 @@ const IssuesSection = () => {
 
 				setData(response.data ?? []);
 				setTotal(response.total ?? 0);
-				setPriorityCounts(
-					response.priority_counts ?? { high: 0, medium: 0, low: 0 }
-				);
 
 				setSelectedGroup((current) => {
 					if (

@@ -79,7 +79,6 @@ const isEntityExtractionModuleActive = () =>
  * Defaults to the "Organization" tab so that panel never starts blank.
  */
 const KnowledgeGraphSection = () => {
-	const [, setEntities] = useState<EntitiesResponse | null>(null);
 	const [error, setError] = useState<string | null>(null);
 
 	const EntityRecommendationsCard = useFilterSlot(
@@ -99,9 +98,7 @@ const KnowledgeGraphSection = () => {
 		getApiResponse<EntitiesResponse>(getApiLink(vulopilotAppLocalizer, 'entities'), {
 			headers: { 'X-WP-Nonce': vulopilotAppLocalizer.nonce },
 		}).then((response) => {
-			if (response) {
-				setEntities(response);
-			} else {
+			if (!response) {
 				setError(
 					__('Could not load extracted entities.', 'vulopilot')
 				);

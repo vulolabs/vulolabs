@@ -76,23 +76,19 @@ const VuloPilotActivityWidget: React.FC<WidgetProps> = ({
 	const [healthTimelineDays, setHealthTimelineDays] = useState<PeriodDays>('30');
 	const [crawlerAnalytics, setCrawlerAnalytics] =
 		useState<CrawlerAnalyticsResponse | null>(null);
-	const [, setIsCrawlerLoading] = useState(true);
 
 	useEffect(() => {
-		setIsCrawlerLoading(true);
 		getApiResponse<CrawlerAnalyticsResponse>(
 			getApiLink(
 				vulopilotAppLocalizer,
 				`crawler-traffic/analytics?days=${healthTimelineDays}`
 			),
 			{ headers: { 'X-WP-Nonce': vulopilotAppLocalizer.nonce } }
-		)
-			.then((response) => {
-				if (response) {
-					setCrawlerAnalytics(response);
-				}
-			})
-			.finally(() => setIsCrawlerLoading(false));
+		).then((response) => {
+			if (response) {
+				setCrawlerAnalytics(response);
+			}
+		});
 	}, [healthTimelineDays]);
 
 
