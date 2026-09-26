@@ -20,10 +20,8 @@ defined( 'ABSPATH' ) || exit;
  * from location.hash (see src/app.tsx) - same mechanism the free
  * vulolabs plugin's admin screen already uses.
  *
- * Also grafts a grouped/collapsible look onto that same native
- * `#toplevel_page_vulopilot` menu itself (public/js, public/styles) rather
- * than a custom in-content React sidebar - see enqueue_menu_grouping_assets()'s
- * own docblock for why, and for the constraints that choice comes with.
+ * Also groups the native `#toplevel_page_vulopilot` submenu into collapsible
+ * sections (see enqueue_menu_grouping_assets()).
  *
  * @class       Admin class
  * @version     1.0.0
@@ -64,12 +62,8 @@ class Admin {
      * public/js/admin-menu-groups.js reads it (via the
      * tabToGroup map enqueue_menu_grouping_assets() localizes) to decide
      * which already-rendered `<li>` belongs under which collapsible
-     * group header. Priorities are deliberately assigned so every group's
-     * members sort contiguously - the grouping script only inserts a
-     * header before a run's first member and shows/hides the run in
-     * place, it never re-parents `<li>` elements (see that file's own
-     * docblock for why), so non-contiguous members of the same group
-     * would render as two separate broken-up sections instead of one.
+     * group header. Priorities are assigned so every group's members sort
+     * contiguously.
      *
      * @return void
      */
@@ -234,8 +228,7 @@ class Admin {
     }
 
     /**
-     * Enqueues and localizes the admin script bundle on VuloPilot's own
-     * admin screen only.
+     * Loads the admin app on VuloPilot's own admin screen only.
      *
      * @return void
      */
@@ -309,25 +302,8 @@ class Admin {
      * unconditionally here rather than gated to one screen the way
      * enqueue_admin_script() is.
      *
-     * The public/js/admin-menu-groups.js file (and its
-     * public/styles/admin-menu-groups.scss sibling) is hand-written
-     * vanilla JS/CSS rather than a webpack entry - it only ever touches
-     * plain DOM (no JSX/TS, no React, no dependency on the admin bundle
-     * even being loaded on the current screen), so routing it through
-     * wp-scripts/webpack would add a bundling step for zero benefit. It's
-     * still minified though (tools/scripts/minify.mjs's own `public/js`+
-     * `public/styles` asset-folder handling, terser/sass, no webpack) into
-     * assets/js/public/ and assets/styles/public/ - the paths enqueued
-     * below - so the release zip ships the same minified shape as every
-     * wp-scripts-built asset, not raw source.
-     *
-     * The script only ever *shows/hides* and *inserts a header before*
-     * the `<li>` elements WordPress itself already rendered from
-     * add_menus()'s $submenus list - it never re-parents them out of the
-     * submenu `<ul>`, specifically so this file's
-     * `#toplevel_page_vulopilot > ul > li > a` selector in src/app.tsx
-     * (used to toggle the 'current' class as the hash tab changes) keeps
-     * matching every item regardless of which group it's in.
+     * Loads the submenu grouping on every wp-admin screen, since the menu
+     * is rendered by WordPress on all of them.
      *
      * @return void
      */

@@ -10,7 +10,7 @@ import {
 import { ToggleInput } from '@zyra/inputs';
 import { useApiList } from '../../services/useApiList';
 import { formatWpDate } from '../../services/formatWpDate';
-import { ADVANCED_REPORTS_MODULE_ID, useReportsOverview } from '../Reports/reportsOverview';
+import { useReportsOverview } from '../Reports/reportsOverview';
 
 interface SecurityScoreSnapshot {
 	snapshot_date: string;
@@ -41,11 +41,9 @@ const SecurityTrendCard = () => {
 	// Fixed / new / still-open counts for the same selected period - the
 	// Reports Overview's own real `security_summary`, so these tiles move
 	// with the 7D/30D/90D toggle like the SEO progress card's do.
-	// The overview endpoint belongs to the Advanced Reports add-on; without it
-	// the request would 404, so the counts are only fetched and shown when it is on.
-	const hasOverview = (vulopilotAppLocalizer.active_modules ?? []).includes(
-		ADVANCED_REPORTS_MODULE_ID
-	);
+	// The overview endpoint comes with Pro; without it the request would 404,
+	// so the counts are only fetched and shown when Pro is active.
+	const hasOverview = Boolean(vulopilotAppLocalizer.khali_dabba);
 	const { data: overview, isLoading: isLoadingSummary } = useReportsOverview(
 		Number(period),
 		hasOverview

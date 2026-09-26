@@ -16,7 +16,7 @@ defined( 'ABSPATH' ) || exit;
  *   disabled it (the exact condition LazyLoadingScanner flags).
  * - `vulopilot_preload_critical_resources` - when set, outputs real
  *   `<link rel="preload">` tags on `wp_head` for the site's custom logo
- *   and its first enqueued front-end stylesheet.
+ *   and its first enqueued front-end CSS file.
  *
  * @class       PerformanceOptimizations class
  * @version     1.0.0
@@ -36,7 +36,7 @@ class PerformanceOptimizations {
     }
 
     /**
-     * Adds the site logo and the first queued stylesheet to the resources
+     * Adds the site logo and the first queued CSS file to the resources
      * WordPress preloads in the page head (core prints the tags itself).
      *
      * @param array<int, array<string, mixed>> $preload_resources Resources core is already going to preload.

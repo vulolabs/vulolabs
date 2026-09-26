@@ -26,7 +26,6 @@ const PERIOD_OPTIONS: { key: StatsPeriod; value: StatsPeriod; label: string }[] 
 
 const toYmd = (date: Date): string => date.toISOString().slice(0, 10);
 
-/** Real `date_from`/`date_to` (Y-m-d) for the selected period - same client-side computation style HistoryTab.tsx's own `resolveDateFrom()` already uses, and the same real 7/30/90-day trio every other period toggle in this app now uses (e.g. GeoScoreSection.tsx's own `PERIOD_OPTIONS`). */
 const resolvePeriod = (period: StatsPeriod): { dateFrom: string; dateTo: string } => {
 	const now = new Date();
 	const from = new Date(now);
@@ -35,7 +34,6 @@ const resolvePeriod = (period: StatsPeriod): { dateFrom: string; dateTo: string 
 	return { dateFrom: toYmd(from), dateTo: toYmd(now) };
 };
 
-/** "128.6K" past 1,000, plain otherwise - same abbreviated style the mockup's own "Words Generated" tile uses. */
 const formatAbbreviated = (count: number): string =>
 	count >= 1000
 		? `${(count / 1000).toFixed(1)}K`

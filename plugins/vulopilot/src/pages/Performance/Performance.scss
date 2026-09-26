@@ -1,30 +1,9 @@
 @use '../../components/config' as *;
 
-// style start
-
-
-
-
-
-
-
-
-// style end
-
-
-
-// Real zyra palette hex (green/orange/red/critical - same values
-// `@zyra/core`'s `COLOR_PALETTE` exports for PerformanceScoreCard.tsx's
-// own `RATING_COLOR`, matching zyra's real `$color-palette` in
-// packages/theme/src/global.scss) - was `#d97706` for
-// needs-improvement, a locally-invented orange that drifted from
-// zyra's own real `#e67a2e`.
 $vulopilot-rating-good: #16a34a;
 $vulopilot-rating-needs-improvement: #e67a2e;
 $vulopilot-rating-poor: #dc2626;
-// "Very Slow" - a real sub-band within "Poor" (score < PageSpeedRepository::SCORE_VERY_SLOW),
-// a darker red so it reads as more severe than plain "Poor" at a glance -
-// same value zyra's own new "critical" palette color now ships too.
+
 $vulopilot-rating-very-poor: #991b1b;
 
 @mixin vulopilot-rating-colors {
@@ -106,9 +85,6 @@ $vulopilot-rating-very-poor: #991b1b;
 	cursor: pointer;
 }
 
-// Small independent "status row" ring gauges - zyra's own ChartComponent
-// Storybook `RingRow` story (per-metric ring, custom color, no shared
-// axis) - replacing what used to be 3 stacked label+value+bar rows.
 .core-web-vitals-ring-row {
 	display: flex;
 	flex-wrap: wrap;
@@ -159,20 +135,6 @@ $vulopilot-rating-very-poor: #991b1b;
 	color: $sub-text-color;
 }
 
-// `.performance-metrics-grid`/`.performance-metric-tile`'s own icon/
-// title/badge/footer-button shell now comes from the real
-// `<MetricTileComponent>` (@zyra/components, MetricTileComponent.scss) -
-// its own `badge.onClick` (real click target replacing the removed "View"
-// button, per direct instruction) ships its own
-// `.metric-tile-badge-clickable` pointer/hover affordance now too, so
-// nothing page-specific is left to declare here.
-
-// The grid/tile/label/value box model used to be declared here - removed
-// now that the 4 stats render through a real Zyra `<AnalyticsComponent
-// cols={2}>` (RealTimeMonitoringCard.tsx), which already provides its own
-// tile grid, number, and label styling. Only the one thing
-// AnalyticsComponent has no built-in equivalent for - the small "Not
-// tracked yet" note on the 2 still-unbacked stats - stays declared here.
 .realtime-monitoring-tile-untracked {
 	display: inline-block;
 	margin-top: 0.375rem;
@@ -221,25 +183,6 @@ $vulopilot-rating-very-poor: #991b1b;
 	margin: 0 0 1rem;
 }
 
-// The 4-tile summary grid's own box/icon/value/label/sublabel rules used to
-// live here - removed now that it's a real Zyra `<TrendStatComponent
-// cols={4}>` (SlowPagesTab.tsx), which already provides its own tile grid,
-// icon, value, label, and badge styling; the real per-tile severity colors
-// (good/needs-improvement/poor/very-poor) now come through as real
-// `admin-badge` color modifiers (`Item.badge.color`) instead of this file's
-// own `$vulopilot-rating-*` hex values.
-
-// `.page-speed-info-banner`/`.page-speed-info-banner-link`'s own icon/text/
-// link banner CSS used to live here - removed now that this is a real Zyra
-// `<NoticeComponent type="info" displayPosition="inline-notice">`
-// (SlowPagesTab.tsx), which supplies its own icon/message/action-link
-// styling.
-
-// Status filter pills, search box, and Export/Scan Again now render through
-// TableCard's own `categoryCounts`/`search`/`buttonActions` (SlowPagesTab.tsx)
-// - that row's chrome comes from Table.scss, not this file. Only the
-// trend-days select + last-scanned caption stay outside TableCard (they
-// drive the AnalyticsComponent trend tile above, not the table's own rows).
 .page-speed-trend-toolbar {
 	display: flex;
 	align-items: center;
@@ -254,21 +197,6 @@ $vulopilot-rating-very-poor: #991b1b;
 	white-space: nowrap;
 }
 
-// `.page-speed-table-wrap`/`.page-speed-table`'s own raw <table> CSS used to
-// live here - removed now that this is a real Zyra `<TableCard>`
-// (SlowPagesTab.tsx), which supplies its own table chrome/row-hover/borders.
-// `.page-speed-main-issue`/`.page-speed-page-link`'s own cell CSS used to
-// live here too - the "Page" column is now a real
-// `<InformationItemComponent>` (title+link, page-type badge, main-issue
-// desc), which supplies its own link/badge/description styling.
-
-// `.page-speed-score-pill`'s own flat-badge CSS used to live here - the
-// Score/Mobile Score/Desktop Score cells now render a real
-// `<ChartComponent type="ring">` (ScorePill in SlowPagesTab.tsx, same
-// "ring-row" ring+centered-value pattern PerformanceScoreCard.tsx's own
-// ScoreTile/VitalRow already use), whose ring color comes straight from
-// RATING_RING_COLOR - only the centered value's own text color is styled
-// here now.
 .page-speed-score-ring-value {
 	font-weight: 700;
 	font-size: 0.8125rem;
@@ -290,10 +218,6 @@ $vulopilot-rating-very-poor: #991b1b;
 	}
 }
 
-// CoreWebVitalsDots - real Chrome UX Report field-data ratings
-// (FAST/AVERAGE/SLOW, SlowPagesTab.tsx's own CWV_DOT_CLASS), one dot per
-// LCP/INP/CLS metric; gray "unknown" when CrUX has no real field data for
-// that URL+metric.
 .page-speed-cwv-dots {
 	display: flex;
 	align-items: center;
@@ -342,25 +266,10 @@ $vulopilot-rating-very-poor: #991b1b;
 	margin: 0 0 0.75rem;
 }
 
-// `.page-speed-sidebar-list`'s own <ul>/<li>/strong/span CSS used to live
-// here - removed now that both sidebar lists are a real Zyra
-// `<ListComponent className="mini-card report">` (SlowPagesTab.tsx), same
-// title+desc row shape already used elsewhere on this page's own
-// WooCommerce-tab siblings.
-
-// `.page-speed-legend`/`.page-speed-legend-dot`'s own <ul>/dot CSS used to
-// live here - removed now that this is a real Zyra `<ListComponent
-// className="list">` (SlowPagesTab.tsx), whose own `item.numberColor` renders
-// each rating's colored dot. `.page-speed-legend-range` (still a real `tags`
-// node on each of that list's items) is the one piece kept.
 .page-speed-legend-range {
 	color: $sub-text-color;
 }
 
-// Slow Pages tab's own "Slow Pages Score" ring + real per-metric list -
-// each row's own right-aligned value/subtext block (`ListComponent`'s
-// `tags` slot), the real "Improving"/"Declining" arrow only real where a
-// real trend delta exists (Performance Trend row).
 .page-speed-summary-row-value {
 	text-align: right;
 
@@ -385,14 +294,3 @@ $vulopilot-rating-very-poor: #991b1b;
 		}
 	}
 }
-
-// `.page-speed-disclaimer`'s own plain-text CSS used to live here - removed
-// now that this is a real Zyra `<NoticeComponent type="info"
-// displayPosition="inline-notice">` (SlowPagesTab.tsx), which supplies its
-// own icon/message box styling.
-
-// `.page-speed-detail`/`.page-speed-detail-row`'s own label/value row CSS
-// used to live here - removed now that the details popup is a real Zyra
-// `<FormGroupWrapperComponent>` of `<FormGroupComponent row>`s
-// (SlowPagesTab.tsx), which already provides this exact label-left/
-// value-right row layout.

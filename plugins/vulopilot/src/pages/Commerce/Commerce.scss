@@ -1,6 +1,5 @@
 @use '../../components/config' as *;
 
-
 .ai-sales-optimize {
 	display: inline-flex;
 	align-items: center;
@@ -49,21 +48,6 @@
 	margin-top: 1rem;
 }
 
-// "Store Readiness" used to be its own list-styled card here
-// (StoreReadinessCard.tsx, since removed) - it's now the first card
-// inside .woocommerce-category-grid instead, reusing that grid's own
-// .woocommerce-category-row/.value-good/.value-warning styling below
-// rather than needing its own separate rule set.
-
-// `.woocommerce-category-grid`/`.woocommerce-category-card`'s own icon/
-// title/badge/footer-button shell now comes from the real
-// `<MetricTileComponent>` (@zyra/components, MetricTileComponent.scss -
-// the now-deleted local `components/MetricTile/MetricTile.tsx` used to
-// wrap that same real component behind an extra layer); only this card's
-// own divergent row/highlight body content (passed through that
-// component's own `desc` slot, which takes arbitrary content) is still
-// declared locally below.
-
 .woocommerce-category-rows {
 	margin-top: 0.625rem;
 }
@@ -95,14 +79,6 @@
 	margin-top: 0.5rem;
 }
 
-
-// `.admin-badge`'s own base pill shape comes from zyra at runtime, but its
-// color modifiers don't (same gap CreateContent.scss's own comment
-// documents for `.badge-{severity}`) - every red/orange/green/blue/purple/
-// indigo `admin-badge` in this WooCommerce tab tree (CommerceCategoryGrid,
-// StoreHealthBanner, TopIssuesToWorkOn) was rendering untinted before this,
-// so this scopes and declares the color vocabulary once here rather than
-// per file.
 .metric-tile-grid--woocommerce,
 .woocommerce-top-issues,
 .store-health-banner,
@@ -140,16 +116,6 @@
 	}
 }
 
-// "VuloPilot noticed" row list (StoreIntelligenceSummaryCard.tsx's
-// active-data state) - a real Zyra `<ListComponent className="mini-card
-// report">` (row layout/divider all come from zyra itself; same
-// "mini-card report" shape TopIssuesToWorkOn.tsx's own issue list and
-// NeedsAttentionWidget.tsx's own Quick fixes/Open issues lists already
-// use). Each row's trailing action is a `ButtonInput` (`color:
-// 'text-purple'`) in the `tags` slot, not zyra's own `.read-more` span
-// style anymore. The one thing left to declare locally is each row's
-// own icon tint - `Item.className: 'is-{color}'` below, since ListComponent
-// has no built-in per-row icon color of its own.
 .store-intelligence-summary-card .item-list {
 	.item.is-orange .item-icon {
 		color: #ea580c;
@@ -168,16 +134,6 @@
 	}
 }
 
-// "Products to look at" (ProductsToLookAtCard.tsx) - one real example
-// product per risk category, now a real Zyra `<ListComponent
-// className="mini-card report">` (same shape the "VuloPilot noticed" list
-// above uses) rather than bespoke row markup; a colored status pill
-// (`.admin-badge`, color vocabulary declared above) and a per-row "View
-// product →" `<ButtonInput>` sit in each row's own `tags`. Only each row's
-// icon chip tone (light/grey/dark, matching this card's own mockup) is
-// still declared locally - same `Item.className: 'is-{tone}'` convention
-// the "VuloPilot noticed" list above uses for its own per-row icon color,
-// just with a background chip here instead of a plain tinted glyph.
 .products-to-look-at .item-list {
 	.item.is-light .item-icon,
 	.item.is-grey .item-icon,
@@ -235,10 +191,7 @@
 
 .commerce-locked-preview {
 	display: grid;
-	// Matches the real, unlocked CommerceCategoryGrid.tsx's own
-	// `minTileWidth={16}` (rem) so this preview reads at the same visual
-	// density as the real page instead of a handful of small tiles lost
-	// in a mostly-empty column.
+
 	grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr));
 	gap: 1rem;
 	filter: blur(2px);
@@ -272,8 +225,6 @@
 	cursor: pointer;
 }
 
-// CommerceProDummies.tsx - inert form-field stand-ins in the fabricated
-// "Bulk AI optimization" preview.
 .commerce-dummy-field {
 	padding: 0.625rem 0.75rem;
 	margin-bottom: 0.625rem;

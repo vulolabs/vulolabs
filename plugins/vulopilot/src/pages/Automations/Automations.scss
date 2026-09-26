@@ -1,6 +1,5 @@
 @use '../../components/config' as *;
 
-// AutomationAttentionCard.tsx - "Needs your attention"
 .automation-attention-count {
 	display: inline-flex;
 	align-items: center;
@@ -112,68 +111,12 @@
 	}
 }
 
-// AutomationPeriodStatsCard.tsx - "This month"
 .automation-period-stats-compare {
 	color: $sub-text-color;
 	font-size: 0.75rem;
 	margin: 0.75rem 0 0;
 }
 
-// AutomationsActivityCard.tsx - "Recent automation activity". A hand-rolled
-// connected-dot timeline (not zyra's ListComponent/ActivityListComponent -
-// neither has this vertical-line-with-dots look), per direct instruction.
-// .activity-log {
-// 	.activity {
-// 		padding: 0 4.5rem 1.45rem 1.313rem;
-// 		position: relative;
-// 		border-left: 0.063rem solid $theme-color;
-// 		display: flex;
-// 		flex-direction: column;
-// 		gap: 0.5rem;
-
-// 		span {
-// 			position: absolute;
-// 			right: 0;
-// 			top: 0;
-// 			color: $sub-text-color;
-// 			font-weight: 500;
-// 		}
-
-// 		.title {
-// 			font-size: 1.063rem;
-// 			line-height: 1rem;
-// 			display: flex;
-// 			align-items: center;
-// 			gap: 0.5rem;
-// 		}
-
-// 		.activity-outcome {
-// 			margin: 0;
-// 			color: $sub-text-color;
-// 			font-size: 0.8125rem;
-// 		}
-
-// 		&::before {
-// 			position: absolute;
-// 			content: "";
-// 			width: 0.813rem;
-// 			height: 0.813rem;
-// 			border-radius: 50%;
-// 			background: $theme-color;
-// 			top: 0;
-// 			left: -0.4rem;
-// 			outline: 0.313rem solid $background-white;
-// 		}
-// 	}
-
-// 	.activity:last-child {
-// 		border-left: 0.063rem solid #fff;
-// 	}
-// }
-
-// AutomationStatsRow.tsx's own hero header - "Your website is being
-// watched," merged with the real 4-tile stat row directly below it (one
-// card, no second fetch - see that file's own docblock).
 .automation-watch-card {
 	padding: 1.25rem;
 	border: $border-light-small;
@@ -278,16 +221,6 @@
 	}
 }
 
-// This page's own real AnalyticsComponent `variant="dashboard"` tile
-// cards (`AutomationPeriodStatsCard.tsx`'s "This month" - `AutomationStatsRow.tsx`
-// used to have one of these too before its own 4-tile row was folded into
-// the hero card directly above it). That component's own `iconClass` prop
-// lands on `.analytics-icon i` (confirmed against its own compiled source),
-// not the icon's own colored-square background the mockup shows - these 4
-// modifiers add that background/border-radius/icon color as one unit, same
-// color-mix() tinting technique as the `.admin-badge` block above. Not
-// scoped to one card's own wrapper class since more than one card on this
-// page now renders this same tile shape.
 .automation-stats-row {
 	margin-bottom: 1rem;
 }
@@ -298,10 +231,6 @@
 	align-items: center;
 	justify-content: center;
 
-	// `iconClass` lands on the `<i>` itself (`adminfont-active is-good`),
-	// not this wrapping div - `:has()` reaches up from the child class to
-	// tint the box, while the plain descendant selector below tints the
-	// glyph itself.
 	&:has(i.is-good) {
 		background: color-mix(in srgb, #16a34a 14%, transparent);
 	}
@@ -335,28 +264,12 @@
 	}
 }
 
-// ManageAutomationsSection.tsx's restyled table, now 2 columns (hideHeader):
-// column 1 (icon + name + "what it does"/"runs" description + real category
-// badge) is TableCard's own built-in `type: 'info'` cell now
-// (InformationItemComponent, styled by zyra's own Table.scss, not here - no
-// `.automations-name-cell`/`-icon`/`-text` of this page's own any more).
-// Column 2 (enable/disable toggle + Run now + Open) is still this page's own
-// custom `header.render(row)` cell (confirmed against TableCard's compiled
-// source). The former "LAST RUN" 3rd column (`.automations-last-run*`) was
-// removed per direct instruction.
-
-// Run now/Open are zyra's own `TableRowActions` now (its `.table-action`/
-// `.inline-actions` markup, styled by Table.scss) - no `.automations-run-now`/
-// `.automations-open` button styling of this page's own left to keep.
 .automations-status-actions {
 	display: flex;
 	align-items: center;
 	gap: 0.75rem;
 }
 
-// Real category badges (`category` column - monitoring/security/content/
-// commerce/reporting/custom, CATEGORY_LABELS in automationLabels.ts) - same
-// tinted-pill technique as the `.admin-badge` blocks above.
 .admin-badge {
 	&.category-monitoring {
 		color: #2563eb;
@@ -431,8 +344,6 @@
 	}
 }
 
-// AutomationWizard.tsx - the real 5-step builder popup (Trigger →
-// Conditions → Actions → Notifications → Review & Activate).
 .automation-wizard {
 	display: flex;
 	flex-direction: column;
@@ -572,7 +483,6 @@
 	font-size: 0.875rem;
 }
 
-// AutomationGenerate.tsx - "Build with AI"
 .automation-generate {
 	display: flex;
 	flex-direction: column;
@@ -594,10 +504,6 @@
 	resize: vertical;
 }
 
-// AutomationTemplatesCard.tsx's "Create new automation" list - reuses
-// .mini-card.report's existing row styling (NeedsAttentionCard.tsx), just
-// scoped so it can pick up its own icon-tint if ever needed without
-// affecting other .mini-card.report lists elsewhere.
 .automation-templates-list {
 	margin-top: 0.75rem;
 }
@@ -640,8 +546,6 @@
 	cursor: pointer;
 }
 
-// BuiltinAutomationCards.tsx - Free's own exactly-2 fixed automations
-// ("Automation → Choose frequency → Save").
 .builtin-automation-cards {
 	display: grid;
 	grid-template-columns: repeat(auto-fit, minmax(18rem, 1fr));
@@ -654,23 +558,12 @@
 	color: $sub-text-color;
 }
 
-// BuiltinAutomationCards.tsx's own scroll-to-and-flash - the real target
-// of AI Copilot's "Create new automation" card's 2 free rows
-// (AutomationsTemplatesCard.tsx's own `automation_template=<id>` deep
-// link), briefly highlighted so the click's own real landing spot is
-// obvious, not just a bare, unhighlighted Automations tab. Fades back to
-// normal after BuiltinAutomationCards.tsx's own HIGHLIGHT_DURATION_MS via
-// the transition below, not an abrupt class removal.
 .builtin-automation-card-highlighted {
 	border-radius: $border-radius-small;
 	box-shadow: 0 0 0 0.125rem $theme-color;
 	transition: box-shadow 0.4s ease;
 }
 
-
-
-// Redesigned Automations page - schedule cards (BuiltinAutomationCards.tsx),
-// "Automation status" tiles (AutomationsStatusCard.tsx).
 .builtin-automation-cards {
 	display: grid;
 	grid-template-columns: repeat(2, minmax(0, 1fr));

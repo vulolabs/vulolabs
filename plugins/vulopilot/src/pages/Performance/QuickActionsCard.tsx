@@ -32,27 +32,6 @@ const QUICK_ACTIONS: QuickAction[] = [
 	{ id: 'browser-caching', icon: 'global-community', label: __('Enable Browser Caching', 'vulopilot') },
 ];
 
-/**
- * "Quick Actions" - each of the 8 buttons is a real
- * `POST /performance-actions/{id}` call (`classes/RestAPI/Controllers/
- * PerformanceActions.php`): cache flush, DB cleanup, image cleanup, and the
- * three toggles (lazy loading, preload, browser caching) always genuinely
- * happen; image optimization regenerates real thumbnails; minify and
- * browser-caching are the two actions that honestly report "nothing to
- * do"/failure (no minification plugin active; `.htaccess` not writable)
- * rather than pretending to have succeeded. The result notice always shows
- * the backend's own real, specific message - rendered inline in this card
- * (`position: 'notice'` + `NoticeReceiverComponent`, the same boxed style
- * `NoticeComponent`'s own default `displayPosition="notice"` uses
- * elsewhere) per direct instruction, not as a floating toast. A finite
- * validity (`5000`) is passed explicitly since `NoticeManager.add()` only
- * auto-expires `position: 'float'` items by default - anything else is
- * `'lifetime'`, and a plain-string message here renders no close icon
- * (`renderNoticeContent()` only adds one for an array `message`), so
- * without an explicit validity the notice would never go away, and a
- * second click of the same action would silently no-op (`add()` skips a
- * still-queued `uniqueKey`).
- */
 const QuickActionsCard = () => {
 	const [runningActionId, setRunningActionId] = useState<string | null>(null);
 

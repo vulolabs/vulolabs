@@ -1,29 +1,17 @@
 @use '../../config' as *;
 
-// Layout, form fields, and status pills are all real zyra components now
-// (CardComponent/ContainerComponent/ColumnComponent/ListComponent/
-// FormGroupComponent/BadgeComponent) - this file only styles the bits
-// those components leave to the caller: overall page spacing, the Live
-// Title Preview rows' own 3-line url/title/description block, and the
-// Available Variables list's monospace token + click-to-copy cue.
 .site-identity-title-formats {
 	display: flex;
 	flex-direction: column;
 	gap: 1rem;
 }
 
-// Sits just above the collapsed context-row list, marking which row's own
-// edit panel (right column) is the one currently open.
 .site-identity-showing-badge {
 	display: flex;
 	justify-content: flex-end;
 	margin-bottom: 0.5rem;
 }
 
-// "Title & Description Format Templates" card's own header `action` - a
-// real `<label>` beside the Separator `SelectInput`, since CardComponent's
-// `action` slot has no label of its own the way a `FormGroupComponent` row
-// does.
 .site-identity-separator-action {
 	display: flex;
 	align-items: center;
@@ -36,9 +24,6 @@
 	}
 }
 
-// ListComponent's own `.item` row (icon + details{title/desc} + tags) -
-// this only adds spacing between the Live Title Preview's own BadgeComponent
-// pills and its "View" button inside that row's `tags` slot.
 .site-identity-preview-list {
 	.tags {
 		display: flex;
@@ -78,9 +63,6 @@
 	margin-top: 0.125rem;
 }
 
-// Available Variables - ListComponent's own `item.action` already makes
-// each row clickable (copy-to-clipboard); this just gives the token its
-// monospace treatment and a hover cue.
 .site-identity-variables-list {
 	.item {
 		cursor: pointer;

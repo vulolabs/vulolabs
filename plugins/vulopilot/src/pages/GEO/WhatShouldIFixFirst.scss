@@ -1,14 +1,5 @@
 @use '../../components/config' as *;
 
-// "What should I fix first?" (WhatShouldIFixFirstCard.tsx) and "Pages that
-// need attention" (PagesNeedingAttentionTable.tsx) - two new, additive
-// sections above SEO's existing filter-tabs/severity cards/Site-wide
-// Issues/Pages & Posts, which stay completely untouched. Reuses the exact
-// same severity color language (#16a34a/#b45309/#dc2626) SeoVisibility.scss's
-// own `.seo-health-stat`/`.seo-area-tile-pill` already establish, so a
-// "Critical"/"High"/"Low" number here reads the same color as it does in the
-// "SEO Health Score" card right above it.
-
 .fix-first-layout {
 	display: flex;
 	gap: 2rem;
@@ -29,10 +20,6 @@
 .fix-first-severity-stat {
 	text-align: center;
 
-	// Real per-tier hex, matching each `.typography-h3` modifier below - a
-	// lighter tint of the same color behind the icon, same
-	// `color-mix(... transparent)` badge-tint convention
-	// `.fix-first-ranked-count`/`.fix-first-ranked-icon` already use here.
 	--fix-first-severity-color: #{$sub-text-color};
 
 	&.is-poor {

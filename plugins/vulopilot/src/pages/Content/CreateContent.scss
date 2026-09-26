@@ -1,6 +1,5 @@
 @use '../../components/config' as *;
 
-// start
 .content-quality-overview-wrapper{
 	display: flex;
 	gap: 1rem;
@@ -9,18 +8,7 @@
 		width: 50%;
 	}
 }
-// end
 
-// "Content Stats" (ContentStatsCard.tsx) - real GET /content-intelligence/stats
-// Content Created/Words Generated counts for the selected real period,
-// alongside 2 honest "Not tracked yet" tiles (no historical score/
-// time-saved data exists to compute a real delta from - see that
-// component's own docblock).
-// Real Content Created/Words Generated tiles, rendered via zyra's own
-// AnalyticsComponent (variant="small") - no custom grid/tile CSS needed,
-// just the 2 pieces of content this card injects into that component's
-// `number`/`text` ReactNode slots (AnalyticsComponent's own SCSS handles
-// the tile layout).
 .analytics-container .analytics-item.is-untracked .details .number {
 	color: $sub-text-color;
 }
@@ -49,15 +37,6 @@
 	color: $sub-text-color;
 }
 
-// "Content Quality" (ContentQualityCard.tsx) - real, per-selected-post
-// readability/completeness/structure from GET /content-intelligence/quality.
-// The ring/tiles/assessment-list layout below all plot the same 3 real
-// dimensions that component's own docblock already explains (no fabricated
-// 4th metric) - only the visual shape changed, not what's real underneath.
-// The picker (`action`, top-right of the card) - a real label above the
-// dropdown ("Page being analyzed") plus a real hint line below it
-// ("Changing the page updates all results below."), matching the
-// reference mockup rather than a bare, unlabeled `<SelectInput>`.
 .content-quality-picker {
 	display: flex;
 	gap: 0.375rem;
@@ -80,10 +59,6 @@
 	}
 }
 
-// The "Showing analysis for: {page}" banner between the card's own
-// title/picker and the real ring/tiles/checks below - same light-purple
-// tint `.content-quality-overview` already uses, so the two visually
-// belong to the same real "this is the page you're looking at" idea.
 .content-quality-analyzing-banner {
 	display: flex;
 	align-items: center;
@@ -120,9 +95,6 @@
 	font-weight: 600;
 }
 
-// The "Analyzed page: {page}" caption under the ring's own headline text -
-// same real selected-page reference the banner above already shows, just
-// repeated at the point of the score itself.
 .content-quality-overview-analyzed-page {
 	display: flex;
 	align-items: center;
@@ -198,12 +170,6 @@
 	width: 50%;
 }
 
-// Each row is now a real `ListComponent` item (CheckRow, ContentQualityCard.tsx)
-// rather than a `<NoticeComponent displayPosition="inline-notice">` -
-// `ListComponent` has no built-in per-status tint the way that component's
-// own `type-*` CSS did, so this card restores the same real green/orange/
-// red background itself, keyed off the same `item.className`
-// (`content-quality-check-item is-{green|orange|red}`) CheckRow sets.
 .content-quality-check-item {
 	border-radius: $border-radius-small;
 
@@ -219,7 +185,6 @@
 		background: color-mix(in srgb, #dc2626 8%, transparent);
 	}
 }
-
 
 .content-quality-structure-header {
 	display: flex;
@@ -239,11 +204,6 @@
 	color: var(--color-primary, #7c3aed);
 }
 
-// "Recent Content" (RecentContentCard.tsx) - real posts/pages/products,
-// categorized into Blog Post/Landing Page/Product Description/Other, each
-// grouped with its own real content-quality findings (broken-links-checker
-// style: a source-page row expands via chevron to reveal the individual
-// issues found on it) instead of a separate "Content Quality Issues" card.
 .recent-content-card {
 	.recent-content-header {
 		display: flex;
@@ -283,14 +243,6 @@
 	gap: 0.625rem;
 }
 
-// The "Show ignored" toggle - RecentContentCard.tsx renders its own plain
-// text label here rather than zyra MultiCheckboxInput's own `option.label`
-// (see SHOW_IGNORED_OPTION's own docblock: the "toggle" look's switch pill
-// is styled via CSS on the very `<label>` that text would render into,
-// swallowing it). `.tooltip-wrapper`'s own `display: inline-flex` already
-// lays this span + the switch out side by side; only a gap and stopping
-// the switch's own inner label/header from claiming 47% width (zyra's
-// default, sized for an unrelated 2-column settings list) are needed here.
 .recent-content-show-ignored {
 	gap: 0.375rem;
 	white-space: nowrap;
@@ -306,11 +258,6 @@
 	cursor: pointer;
 }
 
-
-// A real expanded `<tr>` (TableCard's `expandable`, wired via each row's
-// own `expandedContent` - RecentContentCard.tsx) sitting in normal table
-// flow under its parent row, not a floating popover anchored off the
-// "Issues" badge the way this used to be positioned.
 .recent-content-table-findings {
 	padding: 0.75rem 1rem;
 	background: $theme-background-color;
@@ -331,12 +278,9 @@
 		}
 	}
 }
-// The real propose → preview → approve/reject flow (ContentToolPopup.tsx)
-// every Content Tools/Quick Start tile opens.
+
 .content-tool-popup {
-	// PopupComponent's own body has no padding of its own (zyra ships no
-	// CSS at all), so this owns its full layout - header, scrollable
-	// body, sticky footer - rather than one flat stack of elements.
+
 	display: flex;
 	flex-direction: column;
 	max-height: 80vh;
@@ -421,9 +365,6 @@
 	}
 }
 
-// The real WooCommerce product picker (Product Descriptions only) - set
-// visually apart (tinted background) since it's a convenience that
-// prefills the two real fields below it, not itself a submitted value.
 .content-tool-product-picker {
 	padding: 0.875rem;
 	border-radius: 0.625rem;
@@ -460,9 +401,6 @@
 	}
 }
 
-// "AI Content Assistant" (AiContentAssistantSidebar.tsx) - the "Thinking…"
-// bubble shown while a real POST /content-assistant/chat request is in
-// flight, same rotation keyframe as content-tool-spin above.
 .content-assistant-spinner {
 	display: inline-block;
 	animation: content-tool-spin 1s linear infinite;
@@ -509,7 +447,6 @@
 	}
 }
 
-// QuickActionsCard.tsx
 .quick-actions-coming-soon {
 	font-size: 0.6875rem;
 	font-weight: 600;

@@ -6,7 +6,6 @@
 	}
 }
 
-/** Small uppercase section headings above each block ("Preview"/"Focus Keyword"). */
 .vulopilot-seo-section-label {
 	font-size: 11px;
 	font-weight: 600;
@@ -37,11 +36,6 @@
 	margin-top: 0;
 }
 
-/**
- * The focus-keyword "pill" - a single, removable tag rather than a plain
- * text field. Only ever holds the one `_vulopilot_focus_keyword` value
- * (see GeneralTab.tsx for why this isn't a multi-keyword input).
- */
 .vulopilot-seo-focus-keyword {
 	display: flex;
 	flex-wrap: wrap;
@@ -224,12 +218,6 @@
 			color: #cc1818;
 		}
 
-		// A real "go fix this" click target - General/Social/
-		// Schema, whichever tab actually has the field this check reads
-		// (PageAnalysisTab.tsx's own `editorTargetForCheck()`). Not every
-		// row gets this - Featured Image/Broken Links/Orphan Page/
-		// Indexability have no real editor-sidebar field anywhere in this
-		// codebase, so those stay plain, unclickable rows.
 		&--clickable {
 			cursor: pointer;
 			border-radius: 4px;
@@ -262,15 +250,6 @@
 	}
 }
 
-/**
- * "All SEO Issues" table's "Fix with AI" deep link - scroll target lands
- * here (Checklist.tsx's `<li>` rows, GeneralTab.tsx/SocialTab.tsx's field
- * wrappers), same "draw the eye to it, then let it fade" idiom zyra's own
- * ModuleGridComponent.tsx already established elsewhere in this codebase.
- * `border-radius` on the checklist `<li>` case relies on the item also
- * getting `display: flex` from `.vulopilot-seo-checklist__item` above, so
- * the outline hugs the row rather than the full-width block default.
- */
 @keyframes vulopilot-seo-highlight-pulse {
 	0%,
 	100% {

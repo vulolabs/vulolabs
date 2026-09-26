@@ -1,11 +1,5 @@
 @use './config' as *;
 
-// CardHeader.tsx - the common left-icon/center-details/right-action card
-// header shared across Settings → Connections (GoogleServicesPanel.tsx,
-// SiteVerificationPanel.tsx, PageSpeedStatusPanel.tsx
-// - same minimal-supporting-CSS posture as the `.gsc-*`/`.backup-storage-*`
-// rules elsewhere). Not feature-scoped on purpose - `.common-card*`, not
-// `.ai-provider-card*`, since the component itself isn't AI-provider-specific.
 .common-card {
 	border-bottom: $border-light-small;
 	display: flex;
@@ -24,12 +18,8 @@
 		.common-card-header,
 		.ai-provider-card-body,
 		.common-card-action {
-			// width: 30%;
-		}
 
-		// .buttons-wrapper {
-		// 	width: 100%;
-		// }
+		}
 
 		.common-card-header {
 			width: 50%;
@@ -82,8 +72,6 @@
 	}
 }
 
-// Sits inside `<strong>{title}</strong>` (CardHeader.tsx), right after the
-// title text itself rather than as a separate right-aligned column.
 .common-card-action {
 	display: inline-flex;
 	align-items: center;
@@ -91,9 +79,6 @@
 	vertical-align: middle;
 }
 
-// A bare header used as a section's left column (Settings → Connections'
-// SectionRow, ConnectionsPanel.tsx) - full width of that column, no row
-// divider/padding of its own (the section group already draws those).
 .settings-left-section .common-card.compact {
 	border-bottom: 0;
 	padding: 0;

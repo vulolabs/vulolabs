@@ -99,7 +99,6 @@ const AccessibilityChecksGrid = ({ onReview }: AccessibilityChecksGridProps) => 
 					tags: (
 						<TypographyComponent
 							variant="desc"
-							// style={{ color: check.color }}
 						>
 							{sprintf(
 								/* translators: %d: real number of open issues or findings. */

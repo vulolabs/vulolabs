@@ -48,8 +48,7 @@ const MODULE_CATALOG_BY_ID = new Map(
  * Resolves a real module id to the SAME name Settings → Modules shows for
  * it - used to render `Activate {name}` below. Falls back to a plain
  * Title-Cased-from-kebab guess only for the handful of real, backend
- * modules that have no card on that page at all ('advanced-reports',
- * 'one-click-fix' - see Modules/index.ts's own docblock for why), since
+ * modules that have no card on that page at all ('one-click-fix' - see Modules/index.ts's own docblock for why), since
  * there's no human-authored name anywhere in this catalog to look up for
  * those. Fixes a real mismatch this popup used to always have: every
  * moduleName call site with a real card (`automation`, `accessibility-
@@ -75,7 +74,6 @@ export const resolveModuleDisplayName = (moduleId: string): string =>
  * link at.
  */
 const CARDLESS_MODULE_ICONS: Record<string, string> = {
-	'advanced-reports': 'report',
 	'one-click-fix': 'tools',
 	'copilot-chat': 'ai',
 };
@@ -108,7 +106,7 @@ const proPopupContent = {
 				des: module.popupDesc ?? '',
 			})),
 		{
-			icon: resolveModuleIcon('advanced-reports'),
+			icon: 'report',
 			text: `${__('See What’s Actually Improving', 'vulopilot')} · ${__('Advanced Reports', 'vulopilot')}`,
 			des: __('Bring your results together to track progress, spot changes, and share clear reports with your team or clients.', 'vulopilot'),
 		},

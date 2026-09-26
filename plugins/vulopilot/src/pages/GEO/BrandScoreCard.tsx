@@ -46,13 +46,6 @@ const ratingColor = (score: number): string => {
 	return 'red';
 };
 
-/**
- * The same 3 `ratingColor()` names, as the real hex value zyra's own
- * `$color-palette` maps each one to (`packages/theme/src/global.scss`) -
- * `MetricTileComponent`'s own icon tint (`iconColor`, an inline style) and
- * its ring (a `ChartComponent` stroke via `chart.color`) both need a
- * literal CSS color rather than a class name to color themselves.
- */
 const RING_COLOR: Record<string, string> = {
 	green: '#16a34a',
 	yellow: '#b7791f',

@@ -249,22 +249,6 @@ const LockTag = ({ onOpen }: { onOpen: () => void }) => (
 	</span>
 );
 
-/**
- * Settings → Scanning → Security.
- *
- * Full real replacement for InputRenderer on this tab (Security.ts's own
- * `PanelComponent`) - every field it renders is a genuinely real,
- * already-working setting with its own real PHP consumer; this is a pure
- * UI reshape into the mockup's card style, not new backend work. Three
- * groups:
- *
- * Unlike `ExpandablePanelInput`'s/`SettingRowComponent`'s own usual
- * declarative usage (one field key → one nested settings object or one
- * shared array), every row on this tab is wired by hand (`useSetting()`
- * directly via `handleChange`) because these are independent flat
- * settings, not one nested object or array - see Security.ts's own
- * docblock for why they aren't migrated into a nested shape.
- */
 const SecurityPanel = () => {
 	const { setting, updateSetting } = useSetting();
 	const { modules } = useModules();

@@ -95,7 +95,7 @@ class WebmasterToolsManager {
     /**
      * Rebuilds `webmaster_custom_tags` from scratch as safe `<meta ...>`
      * tags only - never echoes the admin's raw input string. Any other
-     * element (script, style, a stray </head>, etc.) is silently dropped
+     * element (anything but a meta tag) is silently dropped
      * rather than passed through, matching the mockup's own "Only <meta>
      * tags are allowed" copy exactly (not just documented, actually
      * enforced).

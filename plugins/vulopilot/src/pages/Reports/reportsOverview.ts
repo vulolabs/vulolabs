@@ -6,7 +6,6 @@ import { getApiLink, getApiResponse } from '@zyra/core';
 /** Same 3-preset shape WebsiteProgressChart.tsx already established for this page - no arbitrary calendar range picker. */
 export const DAY_OPTIONS = [7, 30, 90] as const;
 
-export const ADVANCED_REPORTS_MODULE_ID = 'advanced-reports';
 
 /**
  * Fabricated "Recent Reports"/"Report History" rows - same "obviously

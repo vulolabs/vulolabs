@@ -40,8 +40,6 @@ const PERIOD_OPTIONS = [
 /** Same real day-range options the old `BadgeComponent` toggle used, now expressed as the real `PeriodDays` string values `ToggleInput` needs. */
 const HEALTH_TIMELINE_DAY_OPTIONS: PeriodDays[] = ['7', '30', '90'];
 
-const HEALTH_TIMELINE_MODULE_ID = 'advanced-reports';
-
 /** Fabricated 7-day score trend - same "obviously fake, never mistaken for a real scan result" reasoning Accessibility.tsx's own `DUMMY_ACCESSIBILITY_HISTORY` documents; no real fetch behind this, ever. */
 const DUMMY_HEALTH_TIMELINE = [
 	{ day: __('Day 1', 'vulopilot'), score: 58 },
@@ -118,8 +116,7 @@ const VuloPilotActivityWidget: React.FC<WidgetProps> = ({
 		undefined,
 		Boolean(vulopilotAppLocalizer.khali_dabba)
 	);
-	const isHealthTimelineModuleActive =
-		vulopilotAppLocalizer.active_modules.includes(HEALTH_TIMELINE_MODULE_ID);
+	const isHealthTimelineModuleActive = Boolean(vulopilotAppLocalizer.khali_dabba);
 	const [isHealthTimelineProPopupOpen, setIsHealthTimelineProPopupOpen] = useState(false);
 
 	const crawlerCurrent = crawlerAnalytics?.current_total ?? 0;
@@ -237,7 +234,7 @@ const VuloPilotActivityWidget: React.FC<WidgetProps> = ({
 				position="lightbox"
 			>
 				{vulopilotAppLocalizer.khali_dabba ? (
-					<ShowProPopup moduleName={HEALTH_TIMELINE_MODULE_ID} />
+					<ShowProPopup />
 				) : (
 					<ShowProPopup />
 				)}

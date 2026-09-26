@@ -1,24 +1,10 @@
 @use '../../components/config' as *;
 
-
-
-
-
-
-
-
-
-
-
 .chat-prompts-label {
 	font-weight: 600;
 	margin: 1.25rem 0 0.75rem;
 }
 
-// AIAssistant.tsx's own title-bar info icon - replaces the old "How it
-// works" popup button with a hover tooltip on the title itself
-// (TooltipComponent, `headerTitle` cast through JSX since
-// NavigatorHeaderComponent's own type only declares it as `string`).
 .ai-copilot-title-info {
 	margin-left: 0.375rem;
 	font-size: 1rem;
@@ -27,16 +13,10 @@
 	vertical-align: middle;
 }
 
-// AIAssistant.tsx's own "Chat with VuloPilot" card - the icon-badge title
-// treatment and pill-shaped/chevron chip-grid are now shared by every
-// ChatComposerCard (`.ai-card` in ChatComposerCard.scss); only this one
-// Copilot-specific whitespace tweak stays local.
 .ai-copilot-main-chat .ai-copilot-chat-history-action {
 	white-space: nowrap;
 }
 
-// AIAssistant.tsx's own "Issues" section heading, above the Issues table now
-// appended inline below the composer (former standalone "Issues" nav tab).
 .ai-copilot-inline-section-heading {
 	display: flex;
 	align-items: center;
@@ -51,10 +31,6 @@
 	}
 }
 
-// RecommendedActionsCard.tsx - one tinted mini-card per finding bucket
-// (security/performance/ai-visibility). Tint colors match NeedsAttentionCard.tsx's
-// own TONE_COLOR red/orange (`#dc2626`/`#e67a2e`); teal is new here, used only
-// for the ai-visibility bucket.
 .recommended-actions-grid {
 	display: flex;
 	flex-wrap: wrap;
@@ -75,7 +51,6 @@
 		flex-direction: column;
 		border: 0.063rem solid var(--recommended-bg);
 		border-radius: 0.313rem;
-
 
 		&.tone-red {
 			--recommended-bg: #{rgba(#dc2626, 0.08)};
@@ -100,7 +75,7 @@
 		font-size: 0.938rem;
 		font-weight: 600;
 		margin-bottom: 0.45rem;
-		
+
 		.recommended-actions-card-icon {
 			font-size: 1.5rem;
 			padding-right: 0.5rem;
@@ -136,9 +111,6 @@
 	}
 }
 
-// RecentConversationsSection.tsx - the inline "Recent conversations" row
-// below the chat window, distinct from RecentConversationsCard.tsx's own
-// vertical list (still used in the composer's history popup).
 .recent-conversations-grid {
 	display: flex;
 	flex-wrap: wrap;
@@ -244,7 +216,7 @@
 .ai-copilot-row-arrow {
 	font-size: 1.25rem;
 	cursor: pointer;
-	
+
 }
 
 .zyra-chart.zyra-chart-pie--side .zyra-chart-pie-legend{
@@ -254,8 +226,7 @@
 .item-list.chip-grid .item {
 	display: flex !important;
 }
-// "Issues" (SuggestedActionsTab.tsx/SuggestedActionsList.tsx) - the mockup's
-// plain page header above the stat cards/tabs/table.
+
 .issues-page-title {
 	font-size: 1.5rem;
 	font-weight: 700;
@@ -267,133 +238,6 @@
 	margin: 0 0 1rem;
 }
 
-// The 4 stat tiles (IssuesSummaryCards.tsx, built on zyra's own
-// TrendStatComponent). That component only exposes a `color` prop for its
-// (unused here - no historical trend data exists) sparkline, not the tile's
-// own icon/value, so the mockup's red/orange/blue icon tint per tile needs
-// this targeted nth-child styling - real severity colors, same values
-// FindingRepository::get_priority_counts() buckets already use everywhere
-// else in this file (`.attention-priority-pills` below).
-// IssuesSummaryCards.tsx renders these via zyra's `AnalyticsComponent`
-// (real classes confirmed against its own compiled source:
-// `.analytics-item`/`.analytics-icon`/`.details`), not `TrendStatComponent`
-// (`.trend-stat-tile`/`.trend-stat-label`) - every selector below targeted
-// the wrong component's classes and silently matched nothing (confirmed:
-// `.trend-stat-tile` doesn't exist anywhere in this card's real DOM), so
-// none of this cursor/hover/icon-tint/active-highlight styling ever
-// applied despite every tile already being a real, working priority
-// filter (IssuesSummaryCards.tsx's own `handleClick` - fixed alongside
-// this, see that file's docblock for the matching click-handling bug).
-// .issues-summary-cards {
-// 	margin-bottom: 1rem;
-
-// 	// `AnalyticsComponent` already renders a real `<button>` (not a div)
-// 	// whenever `item.onClick` is set, and adds its own "clickable" class -
-// 	// this just adds the hover/transition polish a plain button lacks.
-// 	.analytics-item.clickable {
-// 		border: 1px solid transparent;
-// 		transition: border-color 0.15s ease, background-color 0.15s ease;
-
-// 		&:hover {
-// 			background: $theme-background-color;
-// 		}
-// 	}
-
-// 	// Shifted down one slot each (was 2/3/4) now that the "All Issues"
-// 	// tile (formerly slot 1) is gone - High/Medium/Low are the only tiles
-// 	// left, in slots 1/2/3.
-// 	.analytics-item:nth-child(1) .analytics-icon i {
-// 		color: #dc2626;
-// 	}
-
-// 	.analytics-item:nth-child(2) .analytics-icon i {
-// 		color: #b45309;
-// 	}
-
-// 	.analytics-item:nth-child(3) .analytics-icon i {
-// 		color: #5baab3;
-// 	}
-
-// 	&.active-priority-high .analytics-item:nth-child(1),
-// 	&.active-priority-medium .analytics-item:nth-child(2),
-// 	&.active-priority-low .analytics-item:nth-child(3) {
-// 		border-color: $theme-color;
-// 		background: $color-primary-background;
-// 	}
-// }
-
-// Category tab bar - same local pattern as Content's own
-// .recent-content-tabs/.recent-content-tab (CreateContent.scss), scoped
-// here since it's this page's own concern.
-// .issues-category-tabs {
-// 	display: flex;
-// 	flex-wrap: wrap;
-// 	gap: 0.5rem;
-// 	margin-bottom: 1rem;
-
-// 	.issues-category-tab {
-// 		display: inline-flex;
-// 		align-items: center;
-// 		gap: 0.375rem;
-// 		font-size: 0.85rem;
-// 		font-weight: 500;
-// 		color: #667085;
-// 		padding: 0.375rem 0.75rem;
-// 		border-radius: 999px;
-// 		cursor: pointer;
-
-// 		&:hover {
-// 			color: $theme-color;
-// 		}
-
-// 		&.active {
-// 			color: $theme-color;
-// 			background: $color-primary-background;
-// 		}
-// 	}
-
-// 	.issues-category-tab-count {
-// 		font-size: 0.75rem;
-// 		color: inherit;
-// 		opacity: 0.7;
-// 	}
-// }
-
-
-// severity badge on the Issues table's own "Priority" column - same 5
-// hex values .attention-priority-pills below already uses, so a group's
-// badge here always agrees with its own priority-pill color elsewhere.
-// .issues-table {
-// 	.badge-critical,
-// 	.badge-high,
-// 	.badge-medium,
-// 	.badge-low,
-// 	.badge-info {
-// 		padding: 0.25rem 0.625rem;
-// 		border-radius: 0.313rem;
-// 		font-size: 0.75rem;
-// 		font-weight: 700;
-// 		text-transform: uppercase;
-// 		white-space: nowrap;
-// 	}
-
-// 	$severities: (
-// 		'critical': #dc2626,
-// 		'high': #d88c5c,
-// 		'medium': #b45309,
-// 		'low': #5baab3,
-// 		'info': #6b7280,
-// 	);
-
-// 	@each $name, $color in $severities {
-// 		.badge-#{$name} {
-// 			color: #{$color};
-// 			background: color-mix(in srgb, #{$color} 14%, transparent);
-// 		}
-// 	}
-// }
-
-// The detail side panel (IssueDetailPanel.tsx).
 .issue-detail-panel {
 	.issue-detail-title {
 		font-size: 1.125rem;
@@ -447,15 +291,6 @@
 		}
 	}
 
-	// "Affected accounts/pages/etc." rows - zyra's own `.mini-card .item
-	// .details` (ListComponent.scss) stacks the title and desc as separate
-	// flex-column blocks, forcing "Site-wide • Detected …" onto its own
-	// line below the title even when there'd be room beside it. `display:
-	// inline` (not a flex row - the title here is a full sentence that
-	// still needs to wrap normally) lets the two flow together like text,
-	// only breaking onto the next line when they don't both fit. Scoped
-	// under .issue-detail-panel specifically - `.mini-card.report` itself
-	// is reused by many unrelated cards elsewhere in this app.
 	.mini-card.report .item .details {
 		display: block;
 
@@ -471,9 +306,6 @@
 	}
 }
 
-// The panel's own close (x) button - CardComponent's `action` slot, same
-// cursor/hover treatment as .issue-detail-copy-btn above rather than
-// leaving it bare (zyra ships no CSS of its own for `.adminfont-close`).
 .issue-detail-panel .adminfont-close {
 	cursor: pointer;
 	color: $sub-text-color;
@@ -483,25 +315,12 @@
 	}
 }
 
-// "Site Overview" card (NeedsAttentionCard.tsx) - a real health-score
-// breakdown read from `GET /dashboard`: zyra's own real, shared
-// `ScoreRingComponent` for `overall_score` (its own "Overall Health"/
-// rating text now inside the ring's own `label` slot, not a separate text
-// column beside it - matching the same ring structure GeoVisibilitySummaryCard.tsx
-// and friends already use), the 4 real category_scores as plain
-// icon+label+score rows, and a footer count + "View all issues" link.
-// Same green/orange/red 3 split (getScoreTone()) colors both the ring's
-// own rating text and each row's score number, so a row's color never
-// disagrees with the headline rating it rolls up into.
 .site-overview-health {
 	display: flex;
 	justify-content: center;
 	margin-bottom: 1rem;
 }
 
-// `label` (ScoreRingComponent.tsx) renders inside one real `.score-ring-label`
-// span - these 2 stack inside it as their own block-level lines rather
-// than running together inline.
 .site-overview-health-title,
 .site-overview-health-rating {
 	display: block;
@@ -517,9 +336,6 @@
 	font-weight: 600;
 }
 
-// The rows themselves are zyra's own `ListComponent` "mini-card report"
-// variant (icon left, `tags` slot pinned right) - only the `tags` slot's
-// own colored score content needs styling here.
 .site-overview-score-row-value {
 	font-weight: 700;
 }
@@ -530,8 +346,6 @@
 	margin-left: 0.125rem;
 }
 
-// Same 3 hex values TONE_COLOR (NeedsAttentionCard.tsx) uses for the
-// ring itself, so a row's text color always matches its own slice color.
 .site-overview-health-rating,
 .site-overview-score-row-value {
 	&.tone-green {
@@ -574,10 +388,6 @@
 	}
 }
 
-// History tab (HistoryTab.tsx) - a real, day-grouped activity timeline.
-// Reuses .issues-category-tab(s) for the filter pills (same pill look the
-// Issues tab already established) rather than a second near-identical set
-// of pill styles.
 .history-page-header {
 	margin-bottom: 1rem;
 }
@@ -596,52 +406,6 @@
 	margin-bottom: 1rem;
 }
 
-// The detail panel's real per-severity findings breakdown (HistoryDetailPanel.tsx)
-// - same 5 severity badge colors .issues-table's own badges use (that
-// map is scoped inside .issues-table's own selector, so it doesn't reach
-// here - duplicated rather than shared, same as .attention-priority-pills'
-// own separate color map above).
-// .history-severity-breakdown {
-// 	list-style: none;
-// 	margin: 0;
-// 	padding: 0;
-// 	display: flex;
-// 	flex-direction: column;
-// 	gap: 0.5rem;
-
-// 	li {
-// 		display: flex;
-// 		align-items: center;
-// 		gap: 0.5rem;
-// 	}
-
-// 	.admin-badge {
-// 		padding: 0.25rem 0.625rem;
-// 		border-radius: 0.313rem;
-// 		font-size: 0.75rem;
-// 		font-weight: 700;
-// 		text-transform: uppercase;
-// 		white-space: nowrap;
-// 	}
-
-// 	$severities: (
-// 		'critical': #dc2626,
-// 		'high': #d88c5c,
-// 		'medium': #b45309,
-// 		'low': #5baab3,
-// 		'info': #6b7280,
-// 	);
-
-// 	@each $name, $color in $severities {
-// 		.badge-#{$name} {
-// 			color: #{$color};
-// 			background: color-mix(in srgb, #{$color} 14%, transparent);
-// 		}
-// 	}
-// }
-
-// HistoryDetailPanel.tsx's "Pages & posts" list (scan rows) - real per-page
-// finding counts.
 .history-affected-pages {
 	list-style: none;
 	margin: 0;
@@ -674,36 +438,22 @@
 	white-space: nowrap;
 }
 
-// HistoryDetailPanel.tsx's "Pages & posts scanned" list - a 0-finding
-// scan's real considered-pages record, .history-scanned-page-clean reusing
-// .history-affected-page-count's layout with a positive tint instead of a
-// count, since there's nothing to count.
 .history-scanned-page-clean {
 	color: $color-success;
 }
 
-// HistoryDetailPanel.tsx's Status line - real disclosure for a change run
-// Automate Work's Auto-fix mode approved itself (ActionRunner::approve()'s
-// own 'auto' $method), so this never implies a human clicked Approve on
-// something they didn't.
 .history-auto-approved-note {
 	color: $sub-text-color;
 	font-size: 0.8125rem;
 	font-style: italic;
 }
 
-// HistoryDetailPanel.tsx's "Related actions (from this conversation)" list
-// - now a real `ListComponent` (its own `.item-list`/`.item` own the
-// row layout/hover/focus styling), this only styles the per-row `tags`
-// slot's timestamp.
 .history-related-action-time {
 	color: $sub-text-color;
 	font-size: 0.75rem;
 	white-space: nowrap;
 }
 
-// AIAssistant.tsx's "Thinking…" bubble, shown while a real POST /copilot/chat
-// request is in flight.
 .chat-thinking-spinner {
 	display: inline-block;
 	animation: chat-thinking-spin 1s linear infinite;
@@ -715,9 +465,6 @@
 	}
 }
 
-// The composer's real "Attach"/"Add context" picks (AIAssistant.tsx) - a chip
-// row above ChatInput, and the two toggleable picker panels
-// (file upload / finding-group+automation list) that fill it.
 .chat-composer-chips {
 	display: flex;
 	flex-wrap: wrap;
@@ -746,10 +493,6 @@
 	}
 }
 
-// A sent user turn's own attachments (AIAssistant.tsx's renderTurn) - shown
-// inside the chat bubble itself, since the composer's own chip row
-// (.chat-composer-chips above) clears on send and would otherwise be the
-// only record that anything was attached at all.
 .chat-message-attachments {
 	display: flex;
 	flex-wrap: wrap;
@@ -813,12 +556,6 @@
 	}
 }
 
-// CopilotTurnBubble.tsx's real "View/Edit …" link, shown when a chat
-// message actually created and saved a new post (generate-blog/
-// generate-landing-page/generate-product-description) - shared by every
-// real `CopilotTurnBubble` consumer (AIAssistant.tsx, GEO's own composer,
-// AiContentAssistantSidebar.tsx), so this is the only place these rules
-// need to live.
 .copilot-created-link {
 	margin-top: 0.5rem;
 }
@@ -831,9 +568,6 @@
 	text-decoration: underline;
 }
 
-// The real inline "Undo" next to the link above - same rollback endpoint
-// HistoryDetailPanel.tsx's own Undo button calls, just reachable right
-// next to what it undoes.
 .copilot-created-undo {
 	display: inline-flex;
 	align-items: center;
@@ -853,15 +587,6 @@
 	}
 }
 
-// Recent Conversations now renders as a narrow sidebar next to the composer
-// (AIAssistant.tsx), not the wide row it used to be - zyra's default
-// `.mini-card.report .item .tags` is `position: absolute` (fine on a wide
-// row, where it has room to sit at the far right of a single-line title),
-// which instead overlaps a wrapped 2-line title once the column is this
-// narrow. Returning it to normal flow lets it sit on its own line below
-// the title, same "scoped to this one card, not `.mini-card.report`
-// globally" reasoning IssueDetailPanel.tsx's own equivalent override
-// above already documents.
 .recent-conversations-card .mini-card.report .item .tags {
 	position: static;
 	width: 100%;

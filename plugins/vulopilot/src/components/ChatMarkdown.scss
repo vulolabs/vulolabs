@@ -1,9 +1,5 @@
 @use './config' as *;
 
-// ChatMarkdown.tsx - co-located so every chat surface that renders it
-// (AI Copilot, Grow My Traffic's composer, Create Content's AI Content
-// Assistant) gets the same spacing regardless of which page's own SCSS
-// entry happens to load, without duplicating these few rules three times.
 .chat-markdown-paragraph {
 	margin: 0 0 0.5rem;
 
@@ -30,7 +26,7 @@
 }
 
 .chat-message-content code {
-	// background: $theme-background-color;
+
 	border-radius: 0.25rem;
 	padding: 0.1rem 0.35rem;
 	font-size: 0.85em;

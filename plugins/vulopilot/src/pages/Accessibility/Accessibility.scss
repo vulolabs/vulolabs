@@ -18,11 +18,6 @@
 	flex-shrink: 0;
 }
 
-// AccessibilityHistoryDummy (Accessibility.tsx) - fabricated, inert chart;
-// `.recharts-wrapper` is `pointer-events: none` so a click always reaches
-// the wrapping `.accessibility-history-dummy` overlay (the real click
-// target), same convention BrandVisibilityProDummies.tsx's own
-// `.brand-authority-trends-dummy` uses.
 .accessibility-history-dummy {
 	cursor: pointer;
 

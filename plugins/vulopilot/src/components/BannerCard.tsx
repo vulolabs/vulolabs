@@ -19,12 +19,6 @@ export interface BannerCardProps {
 	image?: string | null;
 }
 
-/**
- * The shared purple promotional banner (`dashboard-banner.jpg` background,
- * title/desc/buttons on the left, illustration on the right) - was
- * Dashboard/GettingStartedCard.tsx's own hand-built markup, now generic so
- * any page can reuse it. Styles are `.getting-started-banner*` (common.scss).
- */
 const BannerCard = ({
 	title,
 	desc,

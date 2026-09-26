@@ -1,14 +1,13 @@
 @use '../config' as *;
 
 .popup-content:has(.top-section) {
-	overflow: hidden !important; // for overwrite zyra style
+	overflow: hidden !important;
 	width: 40rem !important;
 	height: 75% !important;
 }
 
 .popup-wrapper {
 
-	// module popup
 	.popup-header {
 		height: 12rem;
 		display: flex;

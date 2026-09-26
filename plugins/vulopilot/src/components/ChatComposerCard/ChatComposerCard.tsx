@@ -62,23 +62,6 @@ export interface ChatComposerCardProps<TTurn = unknown> {
 	note?: ReactNode;
 }
 
-/**
- * The shared low-level skeleton behind every "AI chat composer" card in
- * this plugin - CardComponent/AiCopilotGuard/welcome-or-emptyState+turns/
- * "Thinking…"/composer/prompts ordering. Genuinely bare on purpose: this
- * is the primitive `AiChatCard` (this folder's own opinionated wrapper -
- * card header + `ai.png` empty state + chip-grid prompts, the "Chat with
- * VuloPilot" look every real composer here now shares) is built on top
- * of; reach for this one directly only for a composer that deliberately
- * doesn't want that shared look (there are none today, but the primitive
- * stays available rather than folding everything into one component).
- *
- * `ChatMessage`/`ChatInput` (this folder's other files) used to be zyra's
- * own ChatMessageComponent/ChatInputComponent (@zyra/components) - every
- * real consumer of either lived in this plugin alone, so both moved here
- * (styles included, ChatComposerCard.scss) instead of staying in the
- * shared design system.
- */
 const ChatComposerCard = <TTurn,>({
 	cardTitle,
 	cardTitleIcon,

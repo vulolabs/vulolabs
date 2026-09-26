@@ -8,7 +8,7 @@ defined( 'ABSPATH' ) || exit;
 /**
  * Shared homepage-asset-inspection helpers for CssOptimizationScanner and
  * JavaScriptOptimizationScanner - both need the exact same "fetch the
- * homepage, find same-host `<link>`/`<script>` tags, check for a known
+ * homepage, find same-host asset tags, check for a known
  * minification plugin" logic, differing only in which HTML tag/attribute
  * they look for and their own finding copy. Factored out here rather than
  * duplicated twice (unlike this folder's other scanners, which are small
@@ -75,24 +75,33 @@ abstract class AbstractAssetOptimizationScanner extends ScannerUtil {
     }
 
     /**
-     * Extracts same-host asset URLs matching a regex (one capture group for
-     * the URL) that don't already look minified (no `.min.` in the path) -
-     * a cheap filename heuristic rather than fetching every asset's own
-     * bytes to check.
+     * Extracts same-host asset URLs from one kind of tag (read with
+     * WP_HTML_Tag_Processor) that don't already look minified (no `.min.` in
+     * the path) - a cheap filename heuristic rather than fetching every
+     * asset's own bytes to check.
      *
-     * @param string $html  Homepage HTML.
-     * @param string $regex Must contain exactly one capture group for the URL.
+     * @param string      $html      Homepage HTML.
+     * @param string      $tag       Tag name to read.
+     * @param string      $attribute Attribute holding the asset URL.
+     * @param string|null $rel       When set, only tags whose `rel` attribute equals this value.
      * @return string[] Un-minified same-host asset URLs.
      */
-    protected function find_unminified_same_host_assets( string $html, string $regex ): array {
-        if ( 0 === preg_match_all( $regex, $html, $matches ) ) {
-            return array();
-        }
-
+    protected function find_unminified_same_host_assets( string $html, string $tag, string $attribute, ?string $rel = null ): array {
+        $processor = new \WP_HTML_Tag_Processor( $html );
         $site_host = wp_parse_url( home_url( '/' ), PHP_URL_HOST );
         $found     = array();
 
-        foreach ( $matches[1] as $url ) {
+        while ( $processor->next_tag( $tag ) ) {
+            if ( null !== $rel && $rel !== strtolower( (string) $processor->get_attribute( 'rel' ) ) ) {
+                continue;
+            }
+
+            $url = $processor->get_attribute( $attribute );
+
+            if ( ! is_string( $url ) || '' === $url ) {
+                continue;
+            }
+
             $url_host = wp_parse_url( $url, PHP_URL_HOST );
 
             // Relative URLs (no host) belong to this site.

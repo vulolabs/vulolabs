@@ -53,19 +53,6 @@ const DEFAULT_PER_PAGE = 10;
 /** Real HEAD-check cadence - Controllers/Redirects.php's own `HEALTH_CACHE_SECONDS` (an hour); kept in sync so the "Recheck in ~Xm" line here reflects the same real cache window the backend actually enforces, not a guess. */
 const HEALTH_CACHE_SECONDS = 60 * 60;
 
-/**
- * Real per-type badge color for the "From" column's own type badge (301
- * green/302 yellow/307 purple - 307 gets its own color rather than
- * reusing 302's, since it's a genuinely distinct HTTP status a visitor's
- * browser treats differently; redirect_type is real, never fabricated -
- * Controllers/Redirects.php only ever persists 301/302/307), as one of
- * zyra's own real `BadgeComponent.scss` semantic classes instead of a raw
- * palette name - that stylesheet has no `badge-green`/`badge-yellow`/
- * `badge-purple` classes by color name, only status-word classes that
- * happen to resolve to those colors (`badge-active` → green,
- * `badge-pending` → yellow, `badge-locked` → purple), so this maps to the
- * real classes rather than inventing unstyled ones.
- */
 const TYPE_BADGE_CLASS: Record<number, string> = {
 	301: 'badge-active',
 	302: 'badge-pending',

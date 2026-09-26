@@ -134,7 +134,7 @@ class AiRequestSender {
     }
 
     /**
-     * Strips any HTML/script content out of an AI response before it's
+     * Strips any HTML out of an AI response before it's
      * used anywhere - a plain-text/markdown answer is what every job
      * handler here expects, and an AI response should never be trusted
      * as safe-to-render HTML just because it came back successfully.

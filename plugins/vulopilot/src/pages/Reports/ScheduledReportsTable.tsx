@@ -6,7 +6,6 @@ import { BadgeComponent, CardComponent, PopupComponent } from '@zyra/components'
 import ShowProPopup from '../../components/Popup/Popup';
 import { BlurredProContent } from '../../components/UpgradeToProOverlay';
 import DummyDataNotice from '../../components/DummyDataNotice';
-import { ADVANCED_REPORTS_MODULE_ID } from './reportsOverview';
 import { useFilterSlot } from '../../services/useFilterSlot';
 
 /**
@@ -92,7 +91,7 @@ const ScheduledReportsTable = ({ refreshSignal }: ScheduledReportsTableProps) =>
 						height="auto"
 					>
 						{isProInstalled ? (
-							<ShowProPopup moduleName={ADVANCED_REPORTS_MODULE_ID} />
+							<ShowProPopup />
 						) : (
 							<ShowProPopup />
 						)}

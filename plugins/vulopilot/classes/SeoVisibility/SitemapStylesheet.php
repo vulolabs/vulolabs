@@ -9,7 +9,7 @@ defined( 'ABSPATH' ) || exit;
  * (`WP_Sitemaps_Stylesheet`, wp-includes/sitemaps) to match the reference
  * mockup - a purple banner header (this plugin's own real brand color,
  * `#7c3aed`, the same `var(--color-primary, #7c3aed)` fallback already
- * used throughout this plugin's own admin styles) instead of core's plain
+ * used throughout this plugin's own admin UI) instead of core's plain
  * white header, and a real "Last Modified" column on the sitemap INDEX
  * page's own table.
  *
@@ -47,8 +47,7 @@ defined( 'ABSPATH' ) || exit;
 class SitemapStylesheet {
 
     /**
-     * Built stylesheet, relative to the plugin folder (source:
-     * public/styles/sitemap-stylesheet.scss).
+     * Compiled file, relative to the plugin folder.
      *
      * @var string
      */
@@ -67,10 +66,10 @@ class SitemapStylesheet {
      * structure (`#sitemap__header`/`#sitemap__table`) unchanged, so this
      * alone can't break core's own XSL templating on either the index or
      * any child sitemap page. Core prints this filter's result itself, so it
-     * is the one place the stylesheet's rules are handed to core as text; the
+     * is the one place the CSS rules are handed to core as text; the
      * rules come from the same file the index page links to.
      *
-     * @param string $css Core's own default CSS for the sitemap stylesheet.
+     * @param string $css Core's own default CSS for the sitemap.
      * @return string
      */
     public function filter_stylesheet_css( $css ) {
@@ -85,9 +84,8 @@ class SitemapStylesheet {
     }
 
     /**
-     * Address of the built stylesheet for the index page's <link> tag, taken
-     * from a registered style so it carries the plugin version like any other
-     * enqueued stylesheet. Empty when the file has not been built.
+     * Address of the compiled file for the index page, with the plugin
+     * version appended. Empty when the file has not been built.
      *
      * @return string
      */

@@ -32,8 +32,7 @@ const HealthTimelineWidget: React.FC<WidgetProps> = ({
 		isLoading,
 	} = useApiList<HealthSnapshot>('site-health-snapshots', { days: 30 });
 
-	const isModuleActive =
-		vulopilotAppLocalizer.active_modules.includes('advanced-reports');
+	const isModuleActive = Boolean(vulopilotAppLocalizer.khali_dabba);
 
 	return (
 		<DashboardWidget
@@ -45,7 +44,7 @@ const HealthTimelineWidget: React.FC<WidgetProps> = ({
 			isCustomizing={isCustomizing}
 		>
 			{!isModuleActive ? (
-				<ProLockedCard moduleName="advanced-reports" />
+				<ProLockedCard />
 			) : snapshots.length === 0 ? (
 				<ModuleGuardComponent
 					icon="analytics"

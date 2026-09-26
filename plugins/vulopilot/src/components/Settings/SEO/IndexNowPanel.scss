@@ -1,7 +1,5 @@
 @use '../../config' as *;
 
-// IndexNowPanel.tsx's own "IndexNow is connected"/"IndexNow needs a key"
-// status card - the "Site verification" row inside it.
 .indexnow-verification-row {
 	display: flex;
 	align-items: flex-start;

@@ -8,7 +8,6 @@ import { ButtonInput } from '@zyra/inputs';
 import { BlurredProContent } from '../../components/UpgradeToProOverlay';
 import DummyDataNotice from '../../components/DummyDataNotice';
 import ShowProPopup from '../../components/Popup/Popup';
-import { ADVANCED_REPORTS_MODULE_ID } from './reportsOverview';
 import ReportsDummyRows from './ReportsDummyRows';
 import { useFilterSlot } from '../../services/useFilterSlot';
 
@@ -59,7 +58,7 @@ const RecentReportsCard = ({ days, refreshSignal }: RecentReportsCardProps) => {
 						position="lightbox"
 					>
 						{isProInstalled ? (
-							<ShowProPopup moduleName={ADVANCED_REPORTS_MODULE_ID} />
+							<ShowProPopup />
 						) : (
 							<ShowProPopup />
 						)}
