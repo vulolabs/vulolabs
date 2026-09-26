@@ -20,7 +20,6 @@ import getTemplateData from '../../services/templateService';
 import ModulesPanel from '../../components/Settings/ModulesPanel';
 import DeveloperToolsPanel from '../../components/Settings/DeveloperToolsPanel';
 import IndexNowPanel from '../../components/Settings/SEO/IndexNowPanel';
-import SitemapPingWatcher from '../../components/Settings/SEO/SitemapPingWatcher';
 import ShowProPopup from '../../components/Popup/Popup';
 import { CLOUD_STORAGE_LOCKED_METHODS } from '../../components/Settings/Backups';
 import { useFilterSlot } from '../../services/useFilterSlot';
@@ -263,15 +262,6 @@ const Settings = () => {
 								<ShowProPopup />
 							</PopupComponent>
 						)}
-						{/* SitemapPingWatcher.tsx - same unconditional-append
-						 * escape hatch as BackupStoragePanel above, needed for
-						 * the same reason: Sitemap.ts's own `settingAction`
-						 * would never actually render (NavigatorComponent's
-						 * `renderSettingHeaderInfo()` bails out whenever
-						 * `hideSettingHeader` is set, which every GetStarted
-						 * sub-tab, including this one, sets). See that
-						 * component's own docblock. */}
-						{'sitemap' === currentTab && <SitemapPingWatcher />}
 						{/* AI Crawler Alerts' own "Send Test Alert" button
 						 * (CrawlerAlertTestPanel.tsx) is NOT appended here
 						 * - unlike Backups above, it's wired straight into

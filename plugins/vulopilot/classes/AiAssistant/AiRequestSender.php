@@ -117,24 +117,24 @@ class AiRequestSender {
         $combined = implode( "\n", array_column( $messages, 'content' ) );
 
         if ( mb_strlen( $combined ) > self::MAX_PROMPT_LENGTH ) {
-            throw new VuloPilotException(
+            VuloPilotException::raise(
                 sprintf(
                     /* translators: %d is the maximum allowed prompt length in characters. */
                     esc_html__( 'This request is too long to send to the AI service (limit: %d characters).', 'vulopilot' ),
                     absint( self::MAX_PROMPT_LENGTH )
-                ), VuloPilotException::TYPE_UNSAFE_PROMPT );  // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- false positive: flags the VuloPilotException::TYPE_* constant token itself, not unescaped output; the message argument is already esc_html()-wrapped.
+                ), VuloPilotException::TYPE_UNSAFE_PROMPT );
         }
 
         foreach ( self::SECRET_PATTERNS as $pattern ) {
             if ( preg_match( $pattern, $combined ) ) {
-                throw new VuloPilotException(
-                    esc_html__( 'This request appears to contain a credential and was blocked before sending.', 'vulopilot' ), VuloPilotException::TYPE_UNSAFE_PROMPT );  // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- false positive: flags the VuloPilotException::TYPE_* constant token itself, not unescaped output; the message argument is already esc_html()-wrapped.
+                VuloPilotException::raise(
+                    esc_html__( 'This request appears to contain a credential and was blocked before sending.', 'vulopilot' ), VuloPilotException::TYPE_UNSAFE_PROMPT );
             }
         }
     }
 
     /**
-     * Strips any HTML/script content out of an AI response before it's
+     * Strips any HTML out of an AI response before it's
      * used anywhere - a plain-text/markdown answer is what every job
      * handler here expects, and an AI response should never be trusted
      * as safe-to-render HTML just because it came back successfully.
@@ -199,12 +199,12 @@ class AiRequestSender {
         $count         = (int) get_transient( $transient_key );
 
         if ( $count >= self::MAX_REQUESTS_PER_MINUTE ) {
-            throw new VuloPilotException(
+            VuloPilotException::raise(
                 sprintf(
                     /* translators: %d: requests-per-minute limit. */
                     esc_html__( 'AI rate limit reached (%d requests/minute).', 'vulopilot' ),
                     absint( self::MAX_REQUESTS_PER_MINUTE )
-                ), VuloPilotException::TYPE_RATE_LIMIT_EXCEEDED );  // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- false positive: flags the VuloPilotException::TYPE_* constant token itself, not unescaped output; the message argument is already esc_html()-wrapped.
+                ), VuloPilotException::TYPE_RATE_LIMIT_EXCEEDED );
         }
 
         set_transient( $transient_key, $count + 1, MINUTE_IN_SECONDS );
@@ -246,18 +246,18 @@ class AiRequestSender {
                     'buy_credits_url'   => esc_url_raw( (string) ( $data['buy_credits_url'] ?? '' ) ),
                 );
 
-                throw new VuloPilotException( esc_html( $result->get_error_message() ), VuloPilotException::TYPE_INSUFFICIENT_CREDITS, $credit_context );  // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- false positive: the message argument is already esc_html()-wrapped; the other arguments are not output.
+                VuloPilotException::raise( esc_html( $result->get_error_message() ), VuloPilotException::TYPE_INSUFFICIENT_CREDITS, $credit_context );
             }
 
             if ( 'vulopilot_vulocloud_ai_not_configured' === $code ) {
-                throw new VuloPilotException( esc_html( $result->get_error_message() ), VuloPilotException::TYPE_VULOCLOUD_AI_NOT_CONFIGURED );  // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- false positive: flags the VuloPilotException::TYPE_* constant token itself, not unescaped output; the message argument is already esc_html()-wrapped.
+                VuloPilotException::raise( esc_html( $result->get_error_message() ), VuloPilotException::TYPE_VULOCLOUD_AI_NOT_CONFIGURED );
             }
 
             if ( in_array( $code, array( 'vulopilot_vulocloud_ai_unreachable', 'vulopilot_vulocloud_ai_busy' ), true ) ) {
-                throw new VuloPilotException( esc_html( $result->get_error_message() ), VuloPilotException::TYPE_TRANSIENT_GATEWAY );  // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- false positive: the message argument is already esc_html()-wrapped; the other arguments are not output.
+                VuloPilotException::raise( esc_html( $result->get_error_message() ), VuloPilotException::TYPE_TRANSIENT_GATEWAY );
             }
 
-            throw new VuloPilotException( esc_html( $result->get_error_message() ), VuloPilotException::TYPE_GATEWAY_REQUEST );  // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- false positive: flags the VuloPilotException::TYPE_* constant token itself, not unescaped output; the message argument is already esc_html()-wrapped.
+            VuloPilotException::raise( esc_html( $result->get_error_message() ), VuloPilotException::TYPE_GATEWAY_REQUEST );
         }
 
         return new AIResponse( $result['response'], (float) $result['credits_used'], $result['request_id'] );

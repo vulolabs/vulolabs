@@ -1,6 +1,5 @@
 @use '../../components/config' as *;
 
-// GoogleServicesPanel.tsx.
 .gsc-site-picker {
 	margin-bottom: 1rem;
 }
@@ -111,10 +110,6 @@
 	margin-left: 1.5rem;
 }
 
-// CrawlerAlertTestPanel.tsx (Settings → Notifications → AI Crawler
-// Alerts' own "Send Test Alert" row) - minimal supporting CSS; the panel's
-// own result/status text is a real `NoticeComponent` now, styled by
-// NoticeComponent.scss.
 .crawler-alert-test-panel {
 	display: flex;
 	align-items: center;
@@ -123,14 +118,8 @@
 	margin-top: 1rem;
 }
 
-// CardHeader.tsx's own `.common-card*` rules moved to its co-located
-// CardHeader.scss (imported directly by CardHeader.tsx) - see that file.
-
-// GoogleServicesPanel.tsx/PageSpeedStatusPanel.tsx/
-// SiteVerificationPanel.tsx's own shared card-body shell.
 .ai-provider-card-body {
-	// padding: 0 1rem 1rem;
-	// padding-top: 1rem;
+
 	box-sizing: border-box;
 }
 
@@ -167,7 +156,6 @@
 	}
 }
 
-
 .ai-provider-inline-action {
 	background: none;
 	border: none;
@@ -182,11 +170,6 @@
 	}
 }
 
-// Connections/GoogleServicesPanel.tsx (Settings → Connections → Google
-// Services' own Search Console/Analytics/AdSense summary cards) - reuses
-// the `.ai-provider-card*` shapes above (same visual language), adding
-// only what's genuinely new here: the body's info/actions split and the
-// ⋮ menu.
 .gsc-service-body {
 	display: flex;
 	flex-wrap: wrap;
@@ -260,10 +243,6 @@
 	border-radius: 0 0 0.5rem 0.5rem;
 }
 
-// Connections/PageSpeedStatusPanel.tsx (Settings → Connections →
-// PageSpeed Insights' own Connection Status pill/Daily API Usage bar/Test
-// Connection button) - reuses the same `.common-card*`/`.gsc-*` shapes
-// above; only the usage bar itself is genuinely new here.
 .psi-usage {
 	width: 100%;
 }
@@ -293,20 +272,12 @@
 	margin-top: 0.75rem;
 }
 
-// Connections/SiteVerificationPanel.tsx (Settings → Connections → Site
-// Verification's own Google/Bing/Pinterest/Other rows) - reuses the same
-// `.ai-provider-card*`/`.gsc-*` shapes above; only the code field's own
-// flex sizing is genuinely new here.
 .site-verification-code-field {
 	flex: 1;
 	min-width: 16rem;
 	margin-bottom: 0;
 }
 
-// The code `TextInput` + its "Verify" `ButtonInput`, side by side right
-// after the field - moved out of CardHeader's own `action` slot (which
-// rendered it pinned to the far right of the whole row, away from the
-// field it actually acts on) per direct instruction.
 .site-verification-code-row {
 	display: flex;
 	align-items: center;
@@ -319,10 +290,6 @@
 	gap: 0.5rem;
 }
 
-// DeveloperToolsPanel.tsx - "Keep VuloPilot data after uninstall" split out
-// into its own visually-separated Danger Zone section below the regular
-// `FormGroupWrapperComponent`, since its "Delete everything" option is the
-// one genuinely destructive setting on this tab.
 .danger-zone {
 	border: 1px solid #dc2626;
 	border-radius: $border-radius-small;

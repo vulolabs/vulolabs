@@ -3,6 +3,7 @@ namespace VuloPilot\SeoVisibility;
 
 use VuloPilot\SeoVisibility\CrawlerVisitRepository;
 use VuloPilot\Utill;
+use VuloPilot\Utill\ServerRequest;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -75,7 +76,7 @@ class CrawlerTrafficLogger {
             return;
         }
 
-        $user_agent = isset( $_SERVER['HTTP_USER_AGENT'] ) ? sanitize_text_field( wp_unslash( $_SERVER['HTTP_USER_AGENT'] ) ) : '';
+        $user_agent = ServerRequest::get( 'HTTP_USER_AGENT' );
 
         if ( '' === $user_agent ) {
             return;
@@ -86,7 +87,7 @@ class CrawlerTrafficLogger {
                 continue;
             }
 
-            $requested_url = isset( $_SERVER['REQUEST_URI'] ) ? sanitize_text_field( wp_unslash( $_SERVER['REQUEST_URI'] ) ) : '';
+            $requested_url = ServerRequest::get( 'REQUEST_URI' );
 
             // is_404() is already reliable here - `template_redirect` fires
             // after WP has resolved the main query, so this is the request's

@@ -1,21 +1,3 @@
-/*
- * Deliberately no color/background/font rules here - every link inserted
- * or touched by admin-menu-groups.js lands inside the same
- * #adminmenu .wp-submenu context as WordPress's own real submenu links,
- * so it already inherits the current admin color scheme's text/hover/
- * background styling from core's own CSS. This file only adds the
- * layout/behavior WP's markup doesn't already have: flex rows for
- * icons, chevron rotation, indentation for grouped children, and the
- * collapsed/hidden state.
- */
-
-/*
- * Applied unconditionally (not scoped to :has(.vulopilot-menu-item-icon))
- * to avoid depending on that pseudo-class's support in older browsers -
- * flex layout on an <a> with only a text node looks identical to the
- * default block layout, so this is a no-op for any item that ends up
- * without an icon (e.g. a third-party item added outside tabToIcon).
- */
 #adminmenu .wp-submenu li > a {
 	display: flex;
 	align-items: center;
@@ -52,14 +34,6 @@
 	display: none;
 }
 
-/*
- * A translucent rule rather than a scheme-color-matched one: admin color
- * schemes (Fresh, Light, Coffee, Midnight, …) each set their own submenu
- * background, and this file otherwise avoids hardcoding colors for that
- * exact reason (see the top-of-file comment). rgba(240,246,252,.15) reads
- * as a subtle light line on the dark submenu background every scheme
- * actually uses, without fighting any of them.
- */
 #adminmenu .wp-submenu .vulopilot-menu-divider-before {
 	margin-top: 8px;
 	border-top: 1px solid rgba(240, 246, 252, 0.15);

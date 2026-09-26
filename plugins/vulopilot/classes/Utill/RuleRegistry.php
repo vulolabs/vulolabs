@@ -95,14 +95,4 @@ class RuleRegistry {
 		return $this->rules;
 	}
 
-	/**
-	 * @param string $category e.g. 'seo', 'images'.
-	 * @return array<string, RuleInterface>
-	 */
-	public function get_rules_by_category( string $category ): array {
-		return array_filter(
-			$this->rules,
-			static fn( RuleInterface $rule ) => in_array( $category, $rule->get_categories(), true )
-		);
-	}
 }

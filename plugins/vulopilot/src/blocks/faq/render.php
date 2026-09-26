@@ -12,4 +12,5 @@
 
 defined( 'ABSPATH' ) || exit;
 
-echo \VuloPilot\Content\FaqRenderer::render( $attributes ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- escaped internally by FaqRenderer.
+echo wp_kses_post( \VuloPilot\Content\FaqRenderer::render( $attributes ) );
+\VuloPilot\Content\FaqRenderer::print_schema( $attributes );

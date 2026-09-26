@@ -108,13 +108,7 @@ class BlockRegistrar {
     }
 
     /**
-     * Same `public/*.scss` → `assets/styles/public/vulopilot-*.min.css`
-     * pipeline (`tools/scripts/minify.mjs`, part of `build:project:bundle`)
-     * already used for e.g. `admin-menu-groups.scss` - deliberately NOT a
-     * webpack-bundled block.json `style`/`editorStyle` field, since that
-     * mechanism's actual frontend wiring couldn't be confirmed anywhere in
-     * this monorepo's existing block (vulocart's own `checkout.scss` has
-     * no matching `wp_enqueue_style()`/`block.json` field found anywhere).
+     * Enqueues the blocks' compiled CSS, when it exists.
      *
      * @param string $handle Real registered handle for this enqueue call.
      * @return void

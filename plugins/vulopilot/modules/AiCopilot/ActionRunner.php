@@ -175,7 +175,7 @@ class ActionRunner {
         $result = $this->credit_gateway->execute( $feature_id, $credit_action, $context );
 
         if ( $result instanceof \WP_Error ) {
-            throw new VuloPilotException( esc_html( $result->get_error_message() ), VuloPilotException::TYPE_GATEWAY_REQUEST );  // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- false positive: the message argument is already esc_html()-wrapped; the other arguments are not output.
+            VuloPilotException::raise( esc_html( $result->get_error_message() ), VuloPilotException::TYPE_GATEWAY_REQUEST );
         }
 
         if ( empty( $result['success'] ) ) {
@@ -186,7 +186,7 @@ class ActionRunner {
                 'buy_credits_url'   => esc_url_raw( (string) ( $result['buy_credits_url'] ?? '' ) ),
             );
 
-            throw new VuloPilotException( esc_html__( 'You don’t have enough credits to complete this request.', 'vulopilot' ), VuloPilotException::TYPE_INSUFFICIENT_CREDITS, $credit_context );  // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- false positive: the message argument is already esc_html()-wrapped; the other arguments are not output.
+            VuloPilotException::raise( esc_html__( 'You don’t have enough credits to complete this request.', 'vulopilot' ), VuloPilotException::TYPE_INSUFFICIENT_CREDITS, $credit_context );
         }
 
         return new AIResponse( $result['response'], (float) ( $result['credits_used'] ?? 0 ), $result['request_id'] ?? null );

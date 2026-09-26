@@ -1,13 +1,3 @@
-/**
- * Thin fetch wrapper for the post-editor metabox's own endpoints -
- * `vulopilotPostSeo` (Services\PostEditorAssets::enqueue_assets()) rather
- * than `vulopilotAppLocalizer`, since the Block Editor screen doesn't guarantee the
- * dashboard's own localized script has run. Native `fetch()` with a manual
- * `X-WP-Nonce` header, the same "raw call + manual nonce" pattern
- * react-frontend.md documents for direct WP/WC REST calls elsewhere in
- * this codebase - chosen over pulling zyra's axios-based helpers into this
- * small, separate Block Editor bundle.
- */
 
 export interface AnalysisResult {
 	id: string;
@@ -142,7 +132,6 @@ export function analyzePost(
 	} );
 }
 
-/** Same real `GET vulopilot/v1/seo/analyze-page?post_id=` `GEO/PageAnalysisPanel.tsx` already calls - this bundle's own `apiUrl`/nonce just point at the same `vulopilot/v1` namespace under a different localized script (see this file's own top docblock). */
 export function analyzePage( postId: number ): Promise< PageAnalysisResponse > {
 	return request( `seo/analyze-page?post_id=${ postId }`, { method: 'GET' } );
 }

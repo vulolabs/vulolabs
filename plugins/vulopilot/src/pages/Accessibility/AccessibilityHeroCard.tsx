@@ -3,7 +3,6 @@ import { useEffect, useState } from 'react';
 import { __, sprintf } from '@wordpress/i18n';
 import { getApiLink, getApiResponse, COLOR_PALETTE } from '@zyra/core';
 import {
-	AnalyticsComponent,
 	CardComponent,
 	ChartComponent,
 	TypographyComponent,
@@ -111,7 +110,6 @@ const AccessibilityHeroCard = ({
 	onReviewIssues,
 }: AccessibilityHeroCardProps) => {
 	const [score, setScore] = useState<number | null>(null);
-	const [previousScore, setPreviousScore] = useState<number | null>(null);
 
 	useEffect(() => {
 		getApiResponse<DashboardSummary>(
@@ -120,7 +118,6 @@ const AccessibilityHeroCard = ({
 		).then((response) => {
 			if (response) {
 				setScore(response.category_scores.accessibility);
-				setPreviousScore(response.category_scores_7d_ago.accessibility);
 			}
 		});
 	}, []);
@@ -130,12 +127,8 @@ const AccessibilityHeroCard = ({
 	// (Dashboard.php's own snapshot-based 7-days-ago score), just not
 	// previously surfaced here. `null` when the delta is genuinely zero or
 	// either score hasn't loaded yet, so no "+0" noise shows.
-	const scoreDelta =
-		null !== score && null !== previousScore && score !== previousScore
-			? score - previousScore
-			: null;
 
-	const { data, total, isLoading } = useApiList<AccessibilityFinding>(
+	const { total, isLoading } = useApiList<AccessibilityFinding>(
 		'findings',
 		{
 			scanner_id: ACCESSIBILITY_SCANNER_IDS.join(','),
@@ -148,12 +141,6 @@ const AccessibilityHeroCard = ({
 		}
 	);
 
-	const highCount = data.filter(
-		(row) => row.severity === 'critical' || row.severity === 'high'
-	).length;
-	const pagesAffected = new Set(
-		data.map((row) => row.page).filter(Boolean)
-	).size;
 
 	const isReady = !isLoading && score !== null;
 	const overallScore = (score as number) ?? 0;

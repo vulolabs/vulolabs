@@ -9,7 +9,7 @@ defined( 'ABSPATH' ) || exit;
 
 /**
  * Flags a site with no detectable CDN/asset-offloading - checks whether
- * any same-page asset (`<link href>`/`<script src>`/`<img src>`) resolves
+ * any same-page asset URL resolves
  * to a host other than the site's own (a real signal that assets are
  * already being served from a CDN or offload service), and falls back to
  * a known-plugin check (same is_plugin_active() shape

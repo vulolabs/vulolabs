@@ -1,11 +1,5 @@
 @use './config' as *;
 
-// RunScanHeaderExtra.tsx - the "Run scan" + gear-icon button row, with a
-// real "Last scan: …" caption stacked below it (per reference mockup).
-// Rendered as NavigatorHeaderComponent's own `headerCustomContent`, whose
-// only real layout rule (NavigatorComponent.scss's `.title-custom-section`)
-// is `display: flex; align-items: center;` - this wrapper owns its own
-// column stacking on top of that.
 .run-scan-header-extra {
 	display: flex;
 	flex-direction: column;

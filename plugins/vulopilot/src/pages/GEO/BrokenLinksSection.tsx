@@ -21,7 +21,6 @@ import { ButtonInput, SelectInput, TextInput } from '@zyra/inputs';
 import { TableCard } from '@zyra/table';
 import { Finding } from '../../services/useFindingsTable';
 import { formatWpDate } from '../../services/formatWpDate';
-import { useRunScan } from '../../services/useRunScan';
 import ShowProPopup from '../../components/Popup/Popup';
 import './SeoVisibility.scss';
 
@@ -281,25 +280,6 @@ const statusKeyLabel = (key: string): string => {
 const statusKeyColor = (key: string): string =>
 	/^\d+$/.test(key) || 'dns' === key ? 'red' : 'yellow';
 
-/**
- * mm:ss (or hh:mm:ss past an hour) - real `vulopilot_scans.duration_ms` for
- * a "Last scan completed" banner this docblock's own history describes as
- * "added alongside this pass", but no such banner is actually rendered
- * anywhere below - same "real, working, just no longer reachable from the
- * UI" status the row-actions `action` column's own docblock documents for
- * `openRedirectPopup()`/`handleResolve()`/`handleSnooze()` (kept rather
- * than deleted for the same reason: removing a real feature wasn't asked
- * for, just flagging it here as unused).
- */
-const formatDurationMs = (ms: number): string => {
-	const totalSeconds = Math.max(0, Math.round(ms / 1000));
-	const hours = Math.floor(totalSeconds / 3600);
-	const minutes = Math.floor((totalSeconds % 3600) / 60);
-	const seconds = totalSeconds % 60;
-	const pad = (value: number) => String(value).padStart(2, '0');
-
-	return `${pad(hours)}:${pad(minutes)}:${pad(seconds)}`;
-};
 
 /**
  * Real, client-side CSV built straight from whatever findings currently
@@ -521,7 +501,7 @@ const BrokenLinksSection = () => {
 	const [perPage, setPerPage] = useState(DEFAULT_PER_PAGE);
 	const [redirectFinding, setRedirectFinding] =
 		useState<BrokenLinkFinding | null>(null);
-	const [redirectSourcePath, setRedirectSourcePath] = useState('');
+	const [redirectSourcePath] = useState('');
 	const [redirectTargetUrl, setRedirectTargetUrl] = useState('');
 	const [redirectType, setRedirectType] = useState('301');
 	/** "Fix" popup - a real search-and-replace: swaps this exact broken `href`/`src` for a real new URL the user types in, straight in the source page's own real `post_content` (`POST /broken-links/replace-url`, added alongside this). */
@@ -565,14 +545,6 @@ const BrokenLinksSection = () => {
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, []);
 
-	/** "Run scan again" on the "Last scan completed" card - same real `POST /scans` call SeoTab.tsx's own header "Run Complete Audit" fires, scoped to `['seo']` since these are both SEO module scanners; refetches both real data sources this section reads (findings + stats) once the new scan completes. Real, working, just no longer reachable from the UI - same standing status `formatDurationMs()`'s own docblock above and the row-actions `action` column's own docblock document for their unreachable pieces. */
-	const { isScanning, runScan } = useRunScan({
-		categories: ['seo'],
-		onSuccess: () => {
-			loadFindings();
-			loadStats();
-		},
-	});
 
 	// Any filter/search change can shrink the result set below the
 	// currently-viewed page - reset to page 1 rather than showing an
@@ -611,12 +583,6 @@ const BrokenLinksSection = () => {
 		});
 	};
 
-	const handleResolve = (finding: BrokenLinkFinding) =>
-		handleSetStatus(
-			finding,
-			'resolved',
-			__('Finding marked as resolved.', 'vulopilot')
-		);
 
 	const handleIgnore = (finding: BrokenLinkFinding) =>
 		handleSetStatus(finding, 'ignored', __('Finding ignored.', 'vulopilot'));
@@ -624,31 +590,6 @@ const BrokenLinksSection = () => {
 	const handleReopen = (finding: BrokenLinkFinding) =>
 		handleSetStatus(finding, 'open', __('Finding reopened.', 'vulopilot'));
 
-	const handleSnooze = (finding: BrokenLinkFinding) => {
-		sendApiResponse(
-			vulopilotAppLocalizer,
-			getApiLink(vulopilotAppLocalizer, `findings/${finding.id}/actions/snooze-finding`),
-			{}
-		).then(
-			(response: { success?: boolean; message?: string } | undefined) => {
-				NoticeManager.add({
-					uniqueKey: `broken-link-snooze-${finding.id}`,
-					type: response?.success ? 'success' : 'error',
-					position: 'float',
-					message:
-						response?.message ||
-						__(
-							'Could not snooze this finding. Please try again.',
-							'vulopilot'
-						),
-				});
-
-				if (response?.success) {
-					loadFindings();
-				}
-			}
-		);
-	};
 
 	const openFixPopup = (finding: BrokenLinkFinding) => {
 		if ('function' !== typeof getBrokenLinkFixHandler()) {
@@ -728,28 +669,6 @@ const BrokenLinksSection = () => {
 			.finally(() => setIsSavingFixUrl(false));
 	};
 
-	const openRedirectPopup = (finding: BrokenLinkFinding) => {
-		const brokenUrl = getBrokenUrl(finding);
-		const sourcePath = deriveSourcePath(brokenUrl);
-
-		if (!sourcePath) {
-			NoticeManager.add({
-				uniqueKey: `broken-link-external-${finding.id}`,
-				type: 'error',
-				position: 'float',
-				message: __(
-					'This broken URL points to a different site - a redirect can only be created for a path on this site.',
-					'vulopilot'
-				),
-			});
-			return;
-		}
-
-		setRedirectFinding(finding);
-		setRedirectSourcePath(sourcePath);
-		setRedirectTargetUrl('');
-		setRedirectType('301');
-	};
 
 	const closeRedirectPopup = () => setRedirectFinding(null);
 

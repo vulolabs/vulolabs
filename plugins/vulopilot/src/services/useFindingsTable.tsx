@@ -528,18 +528,7 @@ export const useFindingsTable = ({
 						: 'error',
 				compactTitleIconColor: getSeverityColor(row.severity),
 				compactTitleBadges: [
-					// Plain, uncolored - zyra's `admin-badge` base style
-					// alone (no color modifier class exists for a neutral
-					// tag), same idea as the section card's own
-					// already-plain title, just repeated per row for the
-					// mockup's category tag.
 					{ text: humanizeCategory(row.category), color: '' },
-					// `badge-{severity}` is a real zyra-defined modifier
-					// (badge-critical/high/medium/low/info - confirmed in
-					// its shipped styles), the same one TableCard's own
-					// Severity column already renders via `statusClass` in
-					// the default layout - kept identical here for a
-					// compact row's severity badge to color the same way.
 					{ text: row.severity, color: `badge-${row.severity}` },
 				],
 			};

@@ -1,7 +1,5 @@
 /* global vulopilotAppLocalizer */
-import { useRef, useState } from '@wordpress/element';
-import { getApiLink, getApiResponse, useOutsideClick } from '@zyra/core';
-import { TooltipComponent } from '@zyra/components';
+import { getApiLink, getApiResponse } from '@zyra/core';
 import { SEO_SECTIONS } from './seoSections';
 
 /**
@@ -70,9 +68,6 @@ export const worstFinding = (findings: RawFinding[]): RawFinding =>
 		findings[0]
 	);
 
-export const worstSeverity = (findings: RawFinding[]): FindingSeverity =>
-	worstFinding(findings).severity;
-
 /**
  * `GET /findings` is hard-capped at 100 rows/request server-side
  * (AbstractRepository::find_all()) - loops on the response's own `total`
@@ -118,10 +113,6 @@ export const fetchOpenFindingsFor = async (
 
 	return all;
 };
-
-/** Thin SEO-scoped wrapper - SeoTab.tsx's own default IssuesSection usage, unchanged behavior. */
-export const fetchAllOpenSeoFindings = (): Promise<RawFinding[]> =>
-	fetchOpenFindingsFor(ALL_SEO_SCANNER_IDS);
 
 /**
  * Repeated scans create a new "open" Finding row instead of superseding the
@@ -320,76 +311,3 @@ export const fetchPagesByIds = async (
 
 export const buildEditLink = (postId: number): string =>
 	`${vulopilotAppLocalizer.site_url}/wp-admin/post.php?post=${postId}&action=edit`;
-
-export interface RowAction {
-	label: string;
-	icon: string;
-	onClick: () => void;
-}
-
-/**
- * Same kebab-dropdown Action-column look "Content → Recent Content" uses
- * (`RecentContentCard.tsx`, via zyra `TableCard`'s own `type: 'action'` +
- * `TableRowActions`) - reimplemented locally, matching that component's
- * real markup/classes 1:1 (`table-action`/`inline-actions`/`action-icons`/
- * `action-dropdown`/`tooltip-name`, already globally styled by zyra's own
- * CSS, same as Recent Content's), rather than reused directly:
- * `TableRowActions` isn't exported from `@zyra/table`'s public API, and
- * `SeoIssuesByPageTable.tsx`'s own inline finding sub-rows need a `render`-
- * driven action column anyway (zyra `Table.tsx`'s variation-row rendering
- * path has no special case for `header.type === 'action'`, only the
- * parent-row path does) - so both tables use this same local component for
- * a consistent look either way.
- */
-export const RowActionsMenu = ({ actions }: { actions: RowAction[] }) => {
-	const [open, setOpen] = useState(false);
-	const containerRef = useRef<HTMLDivElement>(null);
-
-	useOutsideClick(containerRef, () => {
-		if (open) {
-			setOpen(false);
-		}
-	});
-
-	const showInline = actions.length <= 2;
-
-	return (
-		<div className="table-action" ref={containerRef}>
-			{showInline ? (
-				<div className="inline-actions">
-					{actions.map((action) => (
-						<TooltipComponent key={action.label} text={action.label}>
-							<i
-								onClick={action.onClick}
-								className={`adminfont-${action.icon}`}
-							/>
-						</TooltipComponent>
-					))}
-				</div>
-			) : (
-				<div className="action-icons">
-					<i
-						className="adminfont-more-vertical"
-						onClick={() => setOpen((current) => !current)}
-					/>
-					<div className={`action-dropdown ${open ? 'show' : 'hover'}`}>
-						<ul>
-							{actions.map((action) => (
-								<li
-									key={action.label}
-									onClick={() => {
-										action.onClick();
-										setOpen(false);
-									}}
-								>
-									<i className={`adminfont-${action.icon}`} />
-									<span className="tooltip-name">{action.label}</span>
-								</li>
-							))}
-						</ul>
-					</div>
-				</div>
-			)}
-		</div>
-	);
-};

@@ -42,17 +42,17 @@ class ConnectBrokerCallbackHandler {
 		$redirect_base = admin_url( 'admin.php?page=vulopilot#&tab=settings&subtab=integrations' );
 		$connection    = new AiCreditsConnection();
 
-		$state = isset( $_GET['state'] ) ? sanitize_text_field( wp_unslash( $_GET['state'] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- this IS the real CSRF guard, verified explicitly below via verify_broker_state().
-		$error = isset( $_GET['error'] ) ? sanitize_text_field( wp_unslash( $_GET['error'] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- this is the broker's own redirect back to us, not a form submission; `state` (verified below) is this flow's real CSRF guard.
-
-		if ( '' !== $error ) {
+		// `state` is the nonce this flow put on the authorize URL; nothing else in
+		// the request is read until it checks out.
+		if ( ! wp_verify_nonce( sanitize_text_field( (string) filter_input( INPUT_GET, 'state' ) ), 'vulopilot_connect_broker' ) ) {
 			wp_safe_redirect( $redirect_base . '&connect_status=error' );
 			exit;
 		}
 
-		$code = isset( $_GET['code'] ) ? sanitize_text_field( wp_unslash( $_GET['code'] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- this whole request only carries a `code` because it came from a `state`-nonced authorize URL we generated ourselves; verified below via verify_broker_state().
+		$error = sanitize_text_field( (string) filter_input( INPUT_GET, 'error' ) );
+		$code  = sanitize_text_field( (string) filter_input( INPUT_GET, 'code' ) );
 
-		if ( '' === $code || ! $connection->verify_broker_state( $state ) ) {
+		if ( '' !== $error || '' === $code ) {
 			wp_safe_redirect( $redirect_base . '&connect_status=error' );
 			exit;
 		}

@@ -50,7 +50,3 @@ export const formatCredits = (value: number | null | undefined): string =>
 		minimumFractionDigits: 3,
 		maximumFractionDigits: 3,
 	});
-
-/** Where "Buy Credits" goes: the AI Credits page when known. */
-export const buyCreditsUrl = (status: Pick<AiCreditsStatus, 'buy_credits_url'> | null): string =>
-	status?.buy_credits_url || appLocalizer.shop_url;

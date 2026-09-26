@@ -108,35 +108,6 @@ const PROMPT_CHIPS: PromptChip[] = [
 	},
 ];
 
-/**
- * "AI Content Assistant" - a real chat, `POST /content-assistant/chat`
- * (classes/RestAPI/Controllers/ContentAssistant.php), which sends the
- * conversation through the same real AI request sender
- * (AI\AiRequestSender) AI Actions/GEO scoring already use. It answers for real
- * once this site is connected (`AiCreditsConnection::is_connected()`,
- * Settings → Connections); when it isn't, `sendToAi()` below recognizes that exact
- * real "No AI connection is configured." condition and opens the connect popup -
- * the same real free "Claim free AI Credits" flow AiCreditsIndicator.tsx's own
- * dropdown already
- * offers - instead of a dead-end NoticeManager error toast. Every other
- * real error (a safety-validator rejection, a provider's own failure)
- * still shows as that toast. The running conversation (`turns`) is kept
- * client-side and
- * sent back as `history` on every call - there's no conversation entity
- * in this codebase to persist it against; every real call is still
- * recorded to `vulopilot_ai_history` server-side regardless (Reports'
- * own AI Usage report already reads that table). Prompt chips prefill
- * the composer only, same harmless pattern as AI Copilot's ChatTab.tsx.
- *
- * A "write a blog"/"create a landing page"/"create a product description"
- * style message doesn't come back as raw generated text: the controller
- * runs the real AIAction (generate-blog/generate-landing-page/
- * generate-product-description - the same ones ContentToolsGrid.tsx's own
- * tiles run), actually creates and saves the WordPress draft, and this
- * response's `link` carries the real edit URL, rendered below as a real
- * clickable `<a>` - never markdown-in-text, since ChatMessage
- * renders `content` as plain text.
- */
 const AiContentAssistantSidebar = () => {
 	const [message, setMessage] = useState('');
 	const [turns, setTurns] = useState<ChatTurn[]>([]);

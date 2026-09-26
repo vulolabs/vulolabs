@@ -1,8 +1,7 @@
 import React from 'react';
 import { useState } from '@wordpress/element';
 import { __, _n, sprintf } from '@wordpress/i18n';
-import { CardComponent, ChartComponent, ContainerComponent, InformationItemComponent, ModuleGuardComponent, NoticeManager, SectionComponent } from '@zyra/components';
-import { ButtonInput } from '@zyra/inputs';
+import { CardComponent, ChartComponent, ContainerComponent, InformationItemComponent, ModuleGuardComponent, SectionComponent } from '@zyra/components';
 import { TableCard } from '@zyra/table';
 import { SEO_ISSUE_QUERY_PARAM, FINDING_ID_QUERY_PARAM, getEditorTargetForScanner } from '../../services/seoIssueEditorTarget';
 import { formatWpDate } from '../../services/formatWpDate';
@@ -14,7 +13,6 @@ import {
 	PageRow,
 	RawFinding,
 	VisibilityCell,
-	worstFinding,
 } from './seoIssuesShared';
 
 /**
@@ -308,49 +306,6 @@ const SeoIssuesByPageTable = ({
 		rows.filter((row) => rowMatchesFilter(row) && rowMatchesSearch(row))
 	);
 
-	/**
-	 * Restored - real, needed action for `IssuesSection.tsx`'s own
-	 * AeoTab.tsx/GeoTab.tsx callers, which have no `PageAnalysisPanel`
-	 * equivalent to move this into the way SeoTab.tsx's own SEO usage does
-	 * (`PageAnalysisPanel.tsx`'s own header actions). "Move Edit/View/Fix
-	 * with AI to Page Analysis" only ever made sense for SEO's own flow;
-	 * stripping them from this shared table left AEO's/GEO's own tables
-	 * with an empty Action column on every row (no `onAnalyze` there means
-	 * "Analyze" - the one action left - was always `hidden`, and it was
-	 * the only entry).
-	 *
-	 * Confirmed still unreachable below: this function itself is real and
-	 * correct, but the `action.actions` array further down only has
-	 * "More Details"/"Showing" and "Delete" entries - no "Fix with AI"
-	 * button was ever added back to call it. Same "real, working, just
-	 * flagged here rather than deleted" status BrokenLinksSection.tsx's
-	 * own docblocks document for their own unwired pieces.
-	 */
-	const handleFixWithAi = (row: PageRow) => {
-		const rowFindings = getRowFindings(row);
-		const scannerIds = Array.from(new Set(rowFindings.map((finding) => finding.scanner_id)));
-		const primary = 1 === scannerIds.length ? rowFindings[0] : worstFinding(rowFindings);
-
-		if (scannerIds.length > 1) {
-			NoticeManager.add({
-				uniqueKey: `seo-issues-fix-${row.id}`,
-				type: 'info',
-				position: 'float',
-				message: sprintf(
-					/* translators: %d: number of other open issues on this page. */
-					_n(
-						'Opening the highest-priority issue first - %d other issue on this page also needs attention.',
-						'Opening the highest-priority issue first - %d other issues on this page also need attention.',
-						scannerIds.length - 1,
-						'vulopilot'
-					),
-					scannerIds.length - 1
-				),
-			});
-		}
-
-		window.location.href = buildFixWithAiLink(row.editLink, primary);
-	};
 
 	if (hasError) {
 		return (

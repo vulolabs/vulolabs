@@ -1,27 +1,9 @@
-// Mounted via zyra's own HeaderComponent `beforeSearch` prop (app.tsx) -
-// that prop renders its content directly inside the header's real
-// `.right-section` flex row, immediately before the search box
-// (HeaderComponent.tsx's own docblock names this exact "live credit-count
-// indicator" case as what it's for), so this no longer needs the
-// fixed/absolute-positioned offset it previously used to fake that same
-// position from outside the header entirely - position:relative here is
-// only what PopupComponent's own `position="menu-dropdown"` absolute-
-// positions its dropdown against.
 .ai-credits-indicator {
 	position: relative;
 	display: flex;
 	align-items: center;
 }
 
-// The trigger's `⚡ …` label is now one plain string on a real
-// `ButtonInput` (`className: 'ai-credits-indicator-trigger'`, added
-// alongside its own `admin-btn` base class) rather than a hand-rolled
-// `<button>` wrapping separate bolt/count `<span>`s - no more nested
-// elements for those two former rules (`.ai-credits-indicator-bolt`/
-// `.ai-credits-indicator-count`) to target, so they're gone; this rule
-// only needs `white-space` now; `admin-btn`'s own base styling covers
-// padding/border/radius/color/hover, this just keeps the label from
-// wrapping.
 .ai-credits-indicator-trigger {
 	white-space: nowrap;
 }
@@ -92,11 +74,6 @@
 	margin-bottom: 16px;
 }
 
-// Both the exhausted-state `NoticeComponent` (`.ui-notice`) and this
-// has-credits tip share the same rounded-box/full-width slot, so this
-// only needs its own icon+two-line layout - background/border/radius
-// come from the shared `.ai-credits-balance-panel-tip` rule below, same
-// visual weight as `.ui-notice.type-warning` gets from zyra's own styles.
 .ai-credits-balance-panel-tip {
 	display: flex;
 	align-items: flex-start;
@@ -146,9 +123,6 @@
 	margin-top: 8px;
 }
 
-// Fully self-owned styling, not zyra's `.admin-btn` - confirmed live
-// (screenshot) that class alone renders as unstyled text in this context,
-// not the filled button Popup.tsx's own usage implied it would be.
 .ai-credits-balance-panel-primary-link,
 .ai-credits-balance-panel-secondary-link {
 	display: flex;
@@ -165,9 +139,6 @@
 		font-size: 15px;
 	}
 
-	// Trailing arrow - pushed to the far right rather than sitting next to
-	// the label, same "icon left, label centered, arrow right" row the
-	// mockup's own two buttons both use.
 	i:last-child {
 		margin-left: auto;
 		font-size: 13px;

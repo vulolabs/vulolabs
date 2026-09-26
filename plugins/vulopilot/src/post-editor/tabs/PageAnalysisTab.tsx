@@ -297,7 +297,6 @@ interface IssueSectionProps {
 	showSummary?: boolean;
 }
 
-/** One headed section (SEO / GEO Issues / AEO Issues) - a real heading using this bundle's own existing `vulopilot-seo-checklist__header`/`__title` look (already shipped in style.scss), then that section's own real row list, loading state, error, or "nothing open" message. */
 function IssueSection( { heading, idPrefix, rows, isLoading, error, emptyMessage, pulsingId, onNavigate, fixControls, showSummary }: IssueSectionProps ) {
 	const summary = rows.some( ( row ) => 'fail' === row.status ) ? 'bad' : rows.some( ( row ) => 'warn' === row.status ) ? 'ok' : 'good';
 	const summaryLabel = { good: __( 'All Good', 'vulopilot' ), ok: __( 'Could Be Better', 'vulopilot' ), bad: __( 'Needs Improvement', 'vulopilot' ) }[ summary ];

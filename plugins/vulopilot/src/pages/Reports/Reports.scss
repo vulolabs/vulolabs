@@ -1,19 +1,5 @@
 @use '../../components/config' as *;
 
-// The green/orange/red used throughout this file for "good"/"attention"/
-// "down" states (#16a34a/#e67a2e/#dc2626) are literal mirrors of zyra's own
-// real global color palette (`$color-palette`'s `green`/`orange`/`red`
-// entries, theme/src/global.scss) - not invented one-off values. They stay
-// as plain hex rather than a Sass variable reference because that palette
-// map is zyra's own internal source; `@multivendorx/zyra`'s published
-// package ships only compiled build output (no .scss source, see its own
-// package.json `files`), so this plugin's SCSS has no `@use`-able map or
-// CSS custom property to point at instead - same reasoning documented
-// where CreateContent.scss's own is-green/is-orange/is-red rules mirror the
-// same 3 values. ($color-success, config.scss's own attempt at a reusable
-// token here, resolves to `var(--color-success)` - a custom property zyra
-// never actually defines anywhere, so it renders as nothing; not used here
-// for that reason.)
 .ai-analyst-execute {
 	display: inline-flex;
 	align-items: center;
@@ -35,8 +21,6 @@
 	}
 }
 
-// ReportTab.tsx - the report-type selector that used to be built but never
-// rendered on the normal (non-error) path.
 .reports-generate-toolbar {
 	display: flex;
 	align-items: center;
@@ -116,7 +100,6 @@
 	margin: 0.375rem 0 0;
 }
 
-// ReportsOverviewHeader.tsx.
 .reports-overview-header {
 	display: flex;
 	align-items: center;
@@ -170,8 +153,6 @@
 	cursor: not-allowed;
 }
 
-// ReportsOverviewHeader.tsx's own "Default report format: Both" popup -
-// a plain 2-button PDF/CSV choice.
 .reports-download-format-choice {
 	display: flex;
 	gap: 0.625rem;
@@ -181,7 +162,6 @@
 	}
 }
 
-// ReportsHeroCard.tsx.
 .reports-hero-icon {
 	display: flex;
 	align-items: center;
@@ -302,7 +282,6 @@
 	}
 }
 
-// ReportsCategoryStatusGrid.tsx.
 .reports-category-grid-wrap {
 	margin-top: 1rem;
 }
@@ -394,8 +373,6 @@
 	}
 }
 
-// ReportsInsightPanels.tsx/ReportsCategoryPanels.tsx - the two 3-column
-// rows.
 .reports-panel-row {
 	display: grid;
 	grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr));
@@ -570,7 +547,6 @@
 	}
 }
 
-// WhatHappenedThisMonth.tsx.
 .reports-timeline-card {
 	margin-top: 1rem;
 }
@@ -613,7 +589,6 @@
 	flex-grow: 1;
 }
 
-// NextPrioritiesList.tsx.
 .reports-priorities-card {
 	margin-top: 1rem;
 }
@@ -676,13 +651,6 @@
 	color: $theme-color;
 }
 
-// ScheduleReportBanner.tsx now renders through zyra's own NoticeComponent
-// (`type="banner"` + `displayPosition="inline"`, NoticeComponent.scss's own
-// `.type-banner`/`.display-inline` rules) - no local styling needed here
-// anymore.
-
-// OverviewTab.tsx's own kept-but-not-in-the-mockup legacy section (see
-// that file's own docblock).
 .reports-legacy-row {
 	display: grid;
 	grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr));
@@ -690,9 +658,6 @@
 	margin-top: 1rem;
 }
 
-// ReportTab.tsx's merged "Scheduled Reports" section (formerly its own
-// standalone tab/file, ScheduledReportsTab.tsx - merged in per direct
-// instruction).
 .reports-schedules-section {
 	margin-top: 2rem;
 	padding-top: 1.5rem;
@@ -709,19 +674,12 @@
 	color: $sub-text-color;
 }
 
-// ReportsOverviewHeader.tsx's own real date-range note below the title/
-// desc/action row.
 .reports-overview-range-note {
 	margin: 0.5rem 0 0;
 	font-size: 0.8125rem;
 	color: $sub-text-color;
 }
 
-// RecentReportsCard.tsx - the "Name" column's own icon+title+subtitle+badges
-// cell is now a real TableCard `type: 'info'` column (InformationItemComponent),
-// so the hand-rolled `.recent-reports-row-name`/`-title`/`-desc` markup that
-// used to back it is gone - only the "Period" column's own real stacked
-// label/value block (per direct instruction) still needs a scoped rule here.
 .recent-reports-row-period-label {
 	margin: 0;
 	font-size: 0.6875rem;
@@ -736,7 +694,6 @@
 	font-size: 0.8125rem;
 }
 
-// ScheduledReportsTable.tsx.
 .reports-schedules-list {
 	display: flex;
 	flex-direction: column;
@@ -761,9 +718,6 @@
 	}
 }
 
-// Send Now/Edit/Pause-Resume/View Reports/Delete - 5 real row actions,
-// wrapping rather than a fixed-width `auto` grid column (`.reports-schedules-row`
-// above) since they no longer fit one action button's worth of space.
 .reports-schedules-row-actions {
 	display: flex;
 	flex-wrap: wrap;
@@ -789,13 +743,6 @@
 	white-space: nowrap;
 }
 
-// ReportsDummyRows.tsx (RecentReportsCard.tsx/ReportHistoryTable.tsx) and
-// ScheduledReportsTable.tsx's own inline `DUMMY_SCHEDULE_ROWS` markup -
-// fabricated, non-interactive preview rows shown behind `BlurredProContent`
-// (UpgradeToProOverlay.scss's own `.blur-wrapper-content` already applies
-// the blur itself; this only lays the rows out). Loosely mirrors
-// `.reports-schedules-row`'s own grid rhythm rather than sharing it exactly
-// - these rows have one fewer column (no real per-row action buttons).
 .reports-dummy-content {
 	pointer-events: none;
 }
@@ -846,12 +793,6 @@
 	color: $sub-text-color;
 }
 
-// HistoryTab.tsx's own search/date-range/Export row - same real one-row
-// toolbar shape CreateContent.scss's own `.recent-content-toolbar` already
-// establishes, given its own class here rather than reusing that one
-// directly since this row's real content (a date-range `SelectInput`, not
-// a severity/resource pair + "Show ignored" toggle) doesn't match closely
-// enough to share it outright.
 .history-toolbar {
 	display: flex;
 	flex-wrap: wrap;
@@ -865,10 +806,6 @@
 	margin-bottom: 1rem;
 }
 
-// CreateReportModal.tsx's own progress/success stages - PopupComponent's
-// own `children` slot has no built-in shape for either, so both are plain
-// markup styled here, same "zyra has no component for this exact shape"
-// posture `.reports-schedules-row` above already established.
 .create-report-progress-title {
 	margin: 0 0 0.875rem;
 	font-weight: 700;
@@ -943,22 +880,6 @@
 	text-align: right;
 }
 
-// Real bug in zyra's own PopupComponent.scss, worked around here rather
-// than patched at the source (real @multivendorx/zyra source lives
-// outside this repo - zyra-local-source.md): its `[data-position="lightbox"]`
-// rule's own `.popup-footer` is `position: fixed` with no equivalent
-// bottom-space reservation the `[data-position^="slide-"]` variant already
-// gets (`&:has(.popup-footer) { .popup-body { margin-bottom: 4.5rem; } }`).
-// Once a lightbox popup's own content grows tall enough, its last field(s)
-// render underneath that fixed, opaque footer bar - real in the DOM, just
-// visually covered. Confirmed live via getBoundingClientRect():
-// ScheduleReportModal.tsx's own real footer (Cancel/Schedule Report) is
-// ~96px tall, taller than the slide-* variant's own 4.5rem (72px)
-// reservation - that 72px was tried first here and still left the
-// "Recipients" field's own input overlapping the footer's top ~30px, so
-// this uses 7rem instead, comfortably clearing a two-button footer's real
-// height with margin to spare. Scoped to just these two modals rather than
-// every lightbox popup in the admin.
 .create-report-popup,
 .schedule-report-popup {
 	.popup-content[data-position="lightbox"] .popup-body {

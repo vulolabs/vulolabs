@@ -44,8 +44,7 @@ class FrontendScripts {
     }
 
     /**
-     * Registers the admin script and style bundles (built by wp-scripts;
-     * see webpack.config.js / package.json).
+     * Registers the admin assets.
      *
      * @return void
      */
@@ -55,17 +54,7 @@ class FrontendScripts {
     }
 
     /**
-     * Registers every admin script handle - both the app entry
-     * ('vulopilot-admin-script', from index.js) and the shared-dependency
-     * chunk webpack's splitChunks config emits alongside it
-     * ('vulopilot-vendor-script', from vendors.js - see
-     * tools/webpack/create-config.js's `optimization.splitChunks.cacheGroups.vendors`).
-     * index.js's own webpack runtime expects vendors.js's module registry
-     * to already be on the page; registering only the admin script and
-     * never the vendor one (a bug this method used to have) means
-     * index.js loads with nothing to resolve its own chunk references
-     * against and the React app silently never mounts - a blank content
-     * area with working WP-admin chrome around it, not a fatal error.
+     * Registers the admin app and its shared-dependency chunk.
      *
      * @return void
      */
@@ -106,7 +95,7 @@ class FrontendScripts {
     }
 
     /**
-     * Registers every admin style handle.
+     * Registers the admin app's CSS.
      *
      * @return void
      */
@@ -120,9 +109,9 @@ class FrontendScripts {
     }
 
     /**
-     * Enqueues a previously registered script handle.
+     * Enqueues a previously registered handle.
      *
-     * @param string $handle Script handle.
+     * @param string $handle Registered handle.
      * @return void
      */
     public static function enqueue_script( $handle ) {
@@ -130,9 +119,9 @@ class FrontendScripts {
     }
 
     /**
-     * Enqueues a previously registered style handle.
+     * Enqueues a previously registered CSS handle.
      *
-     * @param string $handle Style handle.
+     * @param string $handle Registered handle.
      * @return void
      */
     public static function enqueue_style( $handle ) {
@@ -140,10 +129,9 @@ class FrontendScripts {
     }
 
     /**
-     * Localizes the admin script with everything the React app needs to
-     * boot and call the REST API.
+     * Passes the React app what it needs to boot and call the REST API.
      *
-     * @param string $handle Script handle to attach the localized data to.
+     * @param string $handle Handle to attach the data to.
      * @return void
      */
     public static function localize_scripts( $handle ) {

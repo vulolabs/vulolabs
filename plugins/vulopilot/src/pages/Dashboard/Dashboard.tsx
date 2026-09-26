@@ -15,7 +15,6 @@ import {
 import RunScanHeaderExtra from '../../components/RunScanHeaderExtra';
 import DashboardGrid from '../../dashboard-widgets/DashboardGrid';
 import GettingStartedCard from './GettingStartedCard';
-import SiteSnapshotWidget from '../../dashboard-widgets/SiteSnapshotWidget';
 
 import type { DashboardSummary } from '../../dashboard-widgets/types';
 

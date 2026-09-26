@@ -1,6 +1,5 @@
 /* global vulopilotAppLocalizer */
 import { useEffect, useState } from 'react';
-import type { ReactNode } from 'react';
 import { __ } from '@wordpress/i18n';
 import { getApiLink, getApiResponse, sendApiResponse } from '@zyra/core';
 import {
@@ -45,30 +44,6 @@ const POST_TYPE_OPTIONS = [
 	{ value: 'mega_menu', label: __('Mega Menu', 'vulopilot') },
 ];
 
-const RESPONSE_CODE_HELP: { code: string; type: string; desc: string }[] = [
-	{ code: '200 OK', type: 'good', desc: __('URL received.', 'vulopilot') },
-	{
-		code: '202 Accepted',
-		type: 'good',
-		desc: __('URL received; key not yet validated.', 'vulopilot'),
-	},
-	{ code: '400 Bad Request', type: 'warn', desc: __('Invalid format.', 'vulopilot') },
-	{
-		code: '403 Forbidden',
-		type: 'crit',
-		desc: __("Key not found or doesn't match.", 'vulopilot'),
-	},
-	{
-		code: '422 Unprocessable Entity',
-		type: 'crit',
-		desc: __("URL doesn't belong to this site.", 'vulopilot'),
-	},
-	{
-		code: '429 Too Many Requests',
-		type: 'crit',
-		desc: __('Rate limited, try again later.', 'vulopilot'),
-	},
-];
 
 /**
  * Hand-built rather than InputRenderer-driven - same escape hatch
@@ -92,9 +67,7 @@ const IndexNowPanel = () => {
 	const [isLoadingHistory, setIsLoadingHistory] = useState(true);
 	const [urlsText, setUrlsText] = useState('');
 	const [isSubmitting, setIsSubmitting] = useState(false);
-	const [submitResults, setSubmitResults] = useState<SubmitResult[]>([]);
 	const [showResponseHelp, setShowResponseHelp] = useState(false);
-	const [isChangingKey, setIsChangingKey] = useState(false);
 
 	const loadHistory = () => {
 		setIsLoadingHistory(true);
@@ -130,32 +103,6 @@ const IndexNowPanel = () => {
 		});
 	};
 
-	const handleChangeKey = () => {
-		setIsChangingKey(true);
-
-		const bytes = new Uint8Array(16);
-		window.crypto.getRandomValues(bytes);
-		const newKey = Array.from(bytes)
-			.map((byte) => byte.toString(16).padStart(2, '0'))
-			.join('');
-
-		updateSetting('indexnow_api_key', newKey);
-
-		sendApiResponse(vulopilotAppLocalizer, getApiLink(vulopilotAppLocalizer, 'settings'), {
-			setting: { indexnow_api_key: newKey },
-		})
-			.then((response) => {
-				NoticeManager.add({
-					uniqueKey: 'vulopilot-indexnow-key-changed',
-					type: response ? 'success' : 'error',
-					position: 'float',
-					message: response
-						? __('IndexNow API key changed.', 'vulopilot')
-						: __('Could not change the key. Please try again.', 'vulopilot'),
-				});
-			})
-			.finally(() => setIsChangingKey(false));
-	};
 
 	const handleSubmitUrls = () => {
 		const urls = urlsText
@@ -177,7 +124,6 @@ const IndexNowPanel = () => {
 					?.results;
 
 				if (results) {
-					setSubmitResults(results);
 					setUrlsText('');
 					loadHistory();
 				} else {

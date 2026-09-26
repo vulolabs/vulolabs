@@ -18,8 +18,6 @@ import { ButtonInput } from '@zyra/inputs';
 import { TableCard, TableRow } from '@zyra/table';
 import TypographyComponent from '../../components/TypographyComponent';
 import { useFindingsTable } from '../../services/useFindingsTable';
-import { useLastScanTime } from '../../services/useLastScanTime';
-import { useGoogleServicesConnection } from '../../services/useGoogleServicesConnection';
 import ShowProPopup from '../../components/Popup/Popup';
 import './SeoVisibility.scss';
 
@@ -260,8 +258,6 @@ const CrawlRobotsSitemapSection = () => {
 	const [sitemap, setSitemap] = useState<SitemapResponse | null>(null);
 	const [isLoadingSitemap, setIsLoadingSitemap] = useState(true);
 
-	const { lastScanAt } = useLastScanTime(['robots-txt', 'sitemap', 'sitemap-validation']);
-	const { status: gscStatus } = useGoogleServicesConnection('settings');
 
 	/**
 	 * `useFindingsTable`'s own `tableCardProps.totalRows` counts every
@@ -270,15 +266,9 @@ const CrawlRobotsSitemapSection = () => {
 	 * count, so these two glance stats fetch that real number directly
 	 * rather than reusing (and overcounting from) the table's own total.
 	 */
-	const [robotsOpenCount, setRobotsOpenCount] = useState(0);
 	const [blockedPagesOpenCount, setBlockedPagesOpenCount] = useState(0);
 
 	const loadOpenCounts = () => {
-		getApiResponse<{ total: number }>(
-			getApiLink(vulopilotAppLocalizer, 'findings?scanner_id=robots-txt&status=open&per_page=1'),
-			nonceHeaders
-		).then((response) => setRobotsOpenCount(response?.total ?? 0));
-
 		getApiResponse<{ total: number }>(
 			getApiLink(vulopilotAppLocalizer, 'findings?scanner_id=ai-crawler-blocked-pages&status=open&per_page=1'),
 			nonceHeaders
@@ -344,16 +334,11 @@ const CrawlRobotsSitemapSection = () => {
 	 * it instead of an explicit Save button.
 	 */
 	const [robotsEditContent, setRobotsEditContent] = useState('');
-	const [robotsSaveState, setRobotsSaveState] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle');
 	const robotsSaveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
 	const persistRobotsContent = (content: string, notify = false) => {
-		setRobotsSaveState('saving');
-
 		sendApiResponse(vulopilotAppLocalizer, getApiLink(vulopilotAppLocalizer, 'robots-sitemap/robots'), { content })
 			.then((response) => {
-				setRobotsSaveState(response ? 'saved' : 'error');
-
 				if (notify) {
 					NoticeManager.add({
 						uniqueKey: 'robots-sitemap-save',
@@ -415,7 +400,6 @@ const CrawlRobotsSitemapSection = () => {
 	const [isLlmsTxtEnabled, setIsLlmsTxtEnabled] = useState(false);
 	const [isLoadingLlmsTxt, setIsLoadingLlmsTxt] = useState(true);
 	const [isRegeneratingLlmsTxt, setIsRegeneratingLlmsTxt] = useState(false);
-	const [llmsTxtSaveState, setLlmsTxtSaveState] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle');
 	const llmsTxtSaveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
 	const loadLlmsTxt = () => {
@@ -439,11 +423,9 @@ const CrawlRobotsSitemapSection = () => {
 	};
 
 	const persistLlmsTxtContent = (content: string, notify = false) => {
-		setLlmsTxtSaveState('saving');
 		sendApiResponse(vulopilotAppLocalizer, getApiLink(vulopilotAppLocalizer, 'settings'), {
 			setting: { llms_txt_content: content },
 		}).then((response) => {
-			setLlmsTxtSaveState(response ? 'saved' : 'error');
 			if (notify) {
 				NoticeManager.add({
 					uniqueKey: 'llms-txt-regenerated',
@@ -534,50 +516,14 @@ const CrawlRobotsSitemapSection = () => {
 		scannerIds: ['sitemap', 'sitemap-validation'],
 	});
 
-	const handleResubmitSitemap = () => {
-		if (!sitemap?.index_url) {
-			return;
-		}
 
-		sendApiResponse(vulopilotAppLocalizer, getApiLink(vulopilotAppLocalizer, 'indexnow/submit'), {
-			urls: [sitemap.index_url],
-		}).then((response: { success?: boolean; message?: string } | undefined) => {
-			NoticeManager.add({
-				uniqueKey: 'robots-sitemap-resubmit',
-				type: response?.success ? 'success' : 'error',
-				position: 'float',
-				message:
-					response?.message ||
-					(response?.success
-						? __('Sitemap submitted to IndexNow.', 'vulopilot')
-						: __(
-							'Could not submit the sitemap - check the IndexNow API key under Settings → Instant Indexing.',
-							'vulopilot'
-						)),
-			});
-		});
-	};
-
-	const searchConsoleUrl = gscStatus?.search_console_site
-		? `https://search.google.com/search-console?resource_id=${encodeURIComponent(gscStatus.search_console_site)}`
-		: `${vulopilotAppLocalizer.site_url}/wp-admin/admin.php?page=vulopilot#&tab=settings&subtab=integrations`;
 
 	const sitemapRows: SitemapRow[] = (sitemap?.sitemaps ?? []).map((child, index) => ({
 		id: `${index}-${child.loc}`,
 		...child,
 	}));
 
-	const robotsStatus: 'valid' | 'attention' | 'unreachable' = !robots?.reachable
-		? 'unreachable'
-		: robotsOpenCount > 0
-			? 'attention'
-			: 'valid';
 
-	const sitemapStatus: 'valid' | 'attention' | 'unreachable' = !sitemap?.reachable || !sitemap?.valid
-		? 'unreachable'
-		: sitemap.total_sitemaps === 0
-			? 'attention'
-			: 'valid';
 
 	if (!isSeoModuleActive()) {
 		return (

@@ -85,15 +85,17 @@ class SchemaCoverageAnalyzer {
             array(
                 'post_type'      => array( 'post', 'page', 'product' ),
                 'post_status'    => 'publish',
-                'posts_per_page' => self::SAMPLE_SIZE,
-                // A static front page (Settings → Reading) is the homepage, which is
-                // added separately below - keep it out so it isn't listed twice.
-                'post__not_in'   => array( (int) get_option( 'page_on_front' ) ),
+                // One extra, because the static front page may be dropped below.
+                'posts_per_page' => self::SAMPLE_SIZE + 1,
                 'orderby'        => 'modified',
                 'order'          => 'DESC',
                 'fields'         => 'ids',
             )
         );
+
+        // A static front page (Settings → Reading) is the homepage, which is
+        // added separately below - keep it out so it isn't listed twice.
+        $post_ids = array_slice( array_values( array_diff( $post_ids, array( (int) get_option( 'page_on_front' ) ) ) ), 0, self::SAMPLE_SIZE );
 
         $type_counts = array();
         // Real, specific pages behind each type's `found_on` count -

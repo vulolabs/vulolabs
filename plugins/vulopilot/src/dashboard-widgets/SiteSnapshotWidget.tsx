@@ -2,13 +2,10 @@
 import React, { useEffect, useState } from 'react';
 import { __, sprintf } from '@wordpress/i18n';
 import { getApiLink, getApiResponse } from '@zyra/core';
-import { AnalyticsComponent, ListComponent, SectionComponent, CardComponent, TypographyComponent } from '@zyra/components';
-import { ButtonInput } from '@zyra/inputs';
+import { AnalyticsComponent, ListComponent, CardComponent, TypographyComponent } from '@zyra/components';
 import DashboardWidget from './DashboardWidget';
 import AutomationStatusWidget from './AutomationStatusWidget';
 import { useGeoScore } from '../pages/GEO/useGeoScore';
-import { useLastScanTime } from '../services/useLastScanTime';
-import { formatWpDate } from '../services/formatWpDate';
 import type { EntitiesResponse, Entity } from '../pages/GEO/SchemaKnowledge/KnowledgeGraphSection';
 import { WidgetProps } from './types';
 
@@ -110,12 +107,6 @@ const SiteSnapshotWidget: React.FC<WidgetProps> = ({
 	}, []);
 
 	const { score: geoScore } = useGeoScore();
-
-	// Real most recent completed scan, site-wide (same source
-	// RunScanHeaderExtra's own "Last scan" caption already reads) - the
-	// "Last updated" badge in the mockup header, not a fabricated
-	// page-generation timestamp this payload has no field for.
-	const { lastScanAt } = useLastScanTime();
 
 	const brandName = entities?.organizations[0]?.name || NOT_SET;
 	const entityType = entities?.business_type || NOT_SET;

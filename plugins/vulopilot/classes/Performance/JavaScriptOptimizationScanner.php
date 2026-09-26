@@ -18,8 +18,6 @@ defined( 'ABSPATH' ) || exit;
  */
 class JavaScriptOptimizationScanner extends AbstractAssetOptimizationScanner {
 
-    private const SCRIPT_PATTERN = '/<script[^>]+src=["\']([^"\']+)["\']/i';
-
     /**
      * @inheritDoc
      */
@@ -55,7 +53,7 @@ class JavaScriptOptimizationScanner extends AbstractAssetOptimizationScanner {
             return array();
         }
 
-        $unminified = $this->find_unminified_same_host_assets( $html, self::SCRIPT_PATTERN );
+        $unminified = $this->find_unminified_same_host_assets( $html, 'script', 'src' );
 
         if ( empty( $unminified ) ) {
             return array();

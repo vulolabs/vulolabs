@@ -422,34 +422,6 @@ const SeoTitlesPanel = () => {
 		[contexts, templateValues, separator]
 	);
 
-	const handleValidate = () => {
-		const counts = previewRows.reduce(
-			(acc, row) => {
-				acc[row.titleScore.cls] += 1;
-				acc[row.descriptionScore.cls] += 1;
-				return acc;
-			},
-			{ green: 0, info: 0, red: 0 } as Record<BadgeClass, number>
-		);
-
-		const needsAttention = counts.red + counts.info;
-		const totalChecked = previewRows.length * 2;
-
-		NoticeManager.add({
-			uniqueKey: 'vulopilot-title-formats-validate',
-			type: counts.red > 0 ? 'error' : counts.info > 0 ? 'info' : 'success',
-			position: 'float',
-			message:
-				needsAttention > 0
-					? sprintf(
-						/* translators: 1: number of titles/descriptions that could use improvement, 2: total number of titles and descriptions previewed. */
-						__('%1$d of %2$d titles/descriptions could use improvement - check the highlighted rows below.', 'vulopilot'),
-						needsAttention,
-						totalChecked
-					)
-					: __('All title and description formats look good.', 'vulopilot'),
-		});
-	};
 
 	const editingRow = previewRows.find((row) => row.key === editingKey) ?? null;
 

@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react';
 import { __ } from '@wordpress/i18n';
-import { SectionComponent, FormGroupComponent } from '@zyra/components';
+import { SectionComponent } from '@zyra/components';
 import VuloCloudAiConnectionPanel from './VuloCloudAiConnectionPanel';
 import GoogleServicesPanel from './GoogleServicesPanel';
 import SiteVerificationPanel from './SiteVerificationPanel';

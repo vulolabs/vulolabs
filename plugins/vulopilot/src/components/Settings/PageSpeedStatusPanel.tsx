@@ -1,11 +1,10 @@
 /* global vulopilotAppLocalizer */
 import { useEffect, useRef, useState } from 'react';
-import { __, sprintf } from '@wordpress/i18n';
+import { __ } from '@wordpress/i18n';
 import { getApiLink, getApiResponse, sendApiResponse } from '@zyra/core';
 import { ButtonInput, TextInput } from '@zyra/inputs';
 import { FormGroupComponent, FormGroupWrapperComponent, NoticeComponent, NoticeManager } from '@zyra/components';
 import CardHeader from '../CardHeader';
-import { formatWpDate } from '../../services/formatWpDate';
 import { useSetting } from '../../contexts/SettingContext';
 
 interface PsiStatus {
@@ -59,7 +58,6 @@ const PageSpeedStatusPanel = () => {
 	const [status, setStatus] = useState<PsiStatus | null>(null);
 	const [isTesting, setIsTesting] = useState(false);
 	const [apiKey, setApiKey] = useState((setting.psi_api_key as string) || '');
-	const [dailyLimit, setDailyLimit] = useState((setting.psi_daily_limit as string) || '');
 	const saveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
 	const scheduleSave = (key: string, value: string) => {
@@ -79,10 +77,6 @@ const PageSpeedStatusPanel = () => {
 		scheduleSave('psi_api_key', value);
 	};
 
-	const handleDailyLimitChange = (value: string) => {
-		setDailyLimit(value);
-		scheduleSave('psi_daily_limit', value);
-	};
 
 	const loadStatus = () => {
 		getApiResponse<PsiStatus>(getApiLink(vulopilotAppLocalizer, 'settings/test-pagespeed'), nonceHeaders).then(
@@ -124,10 +118,6 @@ const PageSpeedStatusPanel = () => {
 			.finally(() => setIsTesting(false));
 	};
 
-	const usagePercent =
-		status && status.daily_limit > 0
-			? Math.min(100, Math.round((status.requests_today / status.daily_limit) * 100))
-			: 0;
 
 	return (
 		<FormGroupWrapperComponent>

@@ -19,27 +19,12 @@
         border-radius: 0.5rem;
         cursor: pointer;
 
-
-        // The real, currently-selected row (HistoryTimeline.tsx's own
-        // `selectedRow?.id === row.id` check) - previously computed but
-        // never actually styled anywhere in this codebase (confirmed via a
-        // full grep for `.history-row` + `.selected`), so a click here or a
-        // "Recent activity" deep link from RecentActivityWidget.tsx/
-        // RecentActivityCard.tsx/AutomationsActivityCard.tsx picked the
-        // right row in HistoryDetailPanel.tsx's own side panel with no
-        // visible sign of *which* row in this list that was.
         &.selected {
             .history-details {
                 background: $theme-background-color
             }
         }
 
-        // A row just landed on via a real deep link (RecentActivityWidget.tsx's
-        // "Recent activity" arrow → `?vulopilot_history_id=`, HistoryTab.tsx's
-        // own `pendingSelectId`) - same real "scroll to it, then let a brief
-        // pulse fade" idiom this codebase's own `vulopilot-seo-highlight-pulse`
-        // (post-editor bundle) already establishes, duplicated here since
-        // that one lives in a separate webpack entry this bundle doesn't share.
         &.vulopilot-history-row-highlight-pulse {
             animation: vulopilot-history-row-highlight-pulse 1.3s ease-in-out 4;
         }
@@ -58,9 +43,7 @@
         }
 
         .history-row-title-wrapper {
-            // display: flex;
-            // gap: 0.625rem;
-            // align-items: center;
+
             font-size: 1.125rem;
             line-height: 1.063rem;
 
@@ -152,12 +135,6 @@
     margin: 0 !important;
 }
 
-// BrokenLinksSection.tsx's own "Last scan completed" / "Why fix broken
-// links?" card pair - real `CardComponent`s side by side (`ColumnComponent
-// grid={6}` each), not one card split into bespoke `.left`/`.right` divs
-// like this used to be, so the "Run scan again" button can be a real
-// `CardComponent` header `action` and the two stat tiles a real
-// `AnalyticsComponent variant="progress"` row.
 .broken-link-scan-summary-card {
     .analytics-container {
         margin-top: 0.875rem;
@@ -166,11 +143,6 @@
 
 .broken-link-why-fix-card {
 
-    // Real zyra `<ListComponent className="checklist">` (icon + title +
-    // `desc`), styled as the reference mockup's own 3-column grid instead
-    // of that component's default vertical list - same "target the
-    // component's own classes, don't reinvent its markup" approach
-    // `.crawler-checklist-row.item-list` above already establishes.
     .checklist.item-list {
         display: flex;
         flex-wrap: wrap;
@@ -208,7 +180,6 @@
     }
 }
 
-
 .best-for-wrapper {
     max-width: 10rem;
     padding: 0.625rem;
@@ -230,8 +201,6 @@
     }
 }
 
-
-// issue table filter 
 .issues-summary-cards {
     display: flex;
     gap: 1rem;
@@ -250,19 +219,9 @@
     }
 }
 
-
-// seo start
 .seo-health-score-category-list {
     .item {
 
-        // #dc2626 is a literal mirror of zyra's own real global color
-        // palette ($color-palette's "red" entry, theme/src/global.scss) -
-        // not an invented value. Plain hex rather than a Sass variable
-        // reference since that palette map is zyra's own internal source;
-        // `@multivendorx/zyra`'s published package ships only compiled
-        // build output (no .scss source), so this plugin's SCSS has no
-        // `@use`-able map or CSS custom property to point at instead -
-        // same reasoning documented in Reports.scss's own top comment.
         .details .typography-desc {
             color: #dc2626;
         }
@@ -292,18 +251,13 @@
     gap: 1.5rem;
 }
 
-// robots.txt code editor (CrawlRobotsSitemapSection.tsx's own RobotsTxtEditor)
-// - a real line-numbered gutter + syntax-highlighted overlay over a plain
-// `<textarea>`, not a screenshot-only mock: the `<pre>` and `<textarea>`
-// below share this exact same font/line-height/padding so the highlighted
-// text lines up pixel-for-pixel under what's actually being typed.
 .rt-editor-wrap {
     position: relative;
 }
 
 .rt-editor {
     display: flex;
-    align-items: flex-start; // keep children at their real content height so overflow (not stretch-to-fit) is what triggers the scrollbar below
+    align-items: flex-start;
     height: 16rem;
     border: 0.063rem solid color-mix(in srgb, var(--color-primary) 30%, white);
     border-radius: 0.5rem;
@@ -383,10 +337,6 @@
     font-style: italic;
 }
 
-// Read-only usage (InspectorSection.tsx's own JSON-LD blocks, via
-// RobotsTxtEditor's own `readOnly` prop) - no `<textarea>` overlay to
-// size against, so the gutter/box only ever needs to be as tall as its
-// own real content, unlike the fixed 16rem editable `.rt-editor` above.
 .rt-editor-readonly {
     height: auto;
     max-height: 24rem;
@@ -404,8 +354,6 @@
     margin-top: 1rem;
 }
 
-
-// dashboard start
 .overall-score-wrapper {
     display: flex;
     gap: 0.625rem;
@@ -430,7 +378,6 @@
     }
 }
 
-
 .overall-score-summary {
     display: flex;
     flex-direction: column;
@@ -447,11 +394,6 @@
     white-space: nowrap;
 }
 
-
-// GettingStartedCard.tsx's own "finish setup" banner - real
-// `dashboard-banner.jpg` illustration as a right-anchored background image
-// on a purple gradient, matching the mockup's own full-width banner
-// (no CardComponent border/header here, so the layout is hand-built).
 .getting-started-banner {
     position: relative;
     border-radius: 0.75rem;
@@ -508,17 +450,12 @@
     flex-wrap: wrap;
 }
 
-// dashboard end
-
-
 .file-size-wrapper {
     display: flex;
     flex-direction: column;
     gap: 0.25rem;
 }
 
-
-// ai copilot
 .site-overview-intro {
 
     .analytics-container {
@@ -534,7 +471,6 @@
     align-items: flex-start;
     margin-bottom: 1rem;
 
-    // Homepage thumbnail - a plain image, cropped to fit, nothing scrollable.
     .site-overview-preview {
         position: relative;
         flex: 0 0 14rem;
@@ -574,19 +510,16 @@
 
 .site-overview-groups {
 
-    // Group card headers ("Content", "Organization", …) get a tinted bar.
     .site-snapshot-group-card .divider-section,
     .site-snapshot-group-card .card-header {
         border-radius: $border-radius-small;
         padding: 0.625rem 0.875rem;
         border-bottom: 0;
         margin-bottom: 0.5rem;
-        // Fallback tint; each card overrides it below.
+
         background: $theme-background-color;
     }
 
-    // A different tint per group (header bar + its icon), matched to that
-    // group's row icon colours.
     .site-snapshot-group-card.is-content .divider-section,
     .site-snapshot-group-card.is-content .card-header {
         background: #eaf3ff;
@@ -616,7 +549,6 @@
     .site-snapshot-group-card.is-technology .card-header {
         background: #e3f6fa;
     }
-
 
     .group {
         display: flex;
@@ -654,7 +586,6 @@
     }
 }
 
-// settings start
 .api-key-form {
     .settings-input-content {
         display: flex;
@@ -688,8 +619,6 @@
     gap: 0.5rem;
 }
 
-// settings end
-
 .robots-overview-wrapper {
     display: flex;
     gap: 1rem;
@@ -708,7 +637,6 @@
      }
 }
 
-// AutomationStatusWidget.tsx's "Unlock more automations" banner.
 .automation-upgrade-banner {
     display: flex;
     align-items: center;
@@ -743,7 +671,6 @@
         margin-bottom: 0.25rem;
     }
 }
-
 
 .settings-input-content:has(.repeater-field-wrapper){
     width: 100% !important;

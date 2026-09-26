@@ -14,11 +14,6 @@
 	}
 }
 
-// Covers the whole `.content-gate` box (tag + dummy content) so a click
-// anywhere within it opens the popup - a real `<button disabled>` inside
-// `dummyContent` never dispatches a click at all (native browser
-// behavior), so relying on bubbling from inside the section wouldn't
-// reliably catch a click landing exactly on one of those.
 .content-gate-click-overlay {
 	position: absolute;
 	inset: 0;
@@ -45,4 +40,3 @@
 	pointer-events: none;
 	user-select: none;
 }
-

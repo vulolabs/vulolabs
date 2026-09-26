@@ -21,7 +21,6 @@
 		min-height: 35rem;
 		max-height: 35rem;
 
-		// chat body start
 		.chat-message{
 			padding: 0.625rem 1rem;
 
@@ -29,7 +28,6 @@
 				background: #fff;
 			}
 		}
-
 
 		.attachment-icon{
 			font-size: 1.813rem;
@@ -42,7 +40,6 @@
 			box-sizing: border-box;
 			bottom: 0;
 			background: #fff;
-
 
 			.chat-input-row {
 				display: flex;
@@ -67,20 +64,6 @@
 	}
 }
 
-
-
-
-
-
-
-// Ported from zyra's own ChatMessageComponent.scss/ChatInputComponent.scss
-// (@zyra/components) - every real consumer of those two components lived in
-// this plugin alone, so their styles moved here with the components rather
-// than staying in the shared design system.
-
-// Same "orange" entry zyra's own $color-palette carried (packages/theme/src/global.scss)
-// - inlined here since this plugin's local config.scss doesn't define the
-// full palette map, only the single-color tokens it actually uses elsewhere.
 $chat-message-bubble-bg: #fff9f4;
 $chat-message-avatar-bg: #e67a2e;
 
@@ -132,15 +115,6 @@ $chat-message-avatar-bg: #e67a2e;
 		background: $chat-message-bubble-bg;
 	}
 }
-
-// .chat-input {
-// 	border: $border-light-small;
-// 	border-radius: 0.313rem;
-// 	padding: 0.625rem 0.75rem;
-// 	background: #ffffff82;
-// }
-
-
 
 .chat-input-textarea {
 	flex: 1 1 10rem;
@@ -205,11 +179,6 @@ $chat-message-avatar-bg: #e67a2e;
 	color: $sub-text-color;
 }
 
-// ChatComposerCard's `emptyState` - a centered "nothing sent yet" hero
-// (icon + heading + subtitle) shown in place of `welcome`/`turns` while the
-// conversation is empty, instead of the plain `ChatMessage` bubble every
-// other composer here uses. Bare/generic on purpose: page-specific touches
-// (AI Copilot's own icon treatment) stay in that page's own SCSS.
 .chat-empty-state {
 	display: flex;
 	flex-direction: column;
@@ -238,56 +207,3 @@ $chat-message-avatar-bg: #e67a2e;
 		max-width: 28rem;
 	}
 }
-
-// Every ChatComposerCard's own CardComponent carries this class
-// unconditionally (see index.tsx's `className={`${cardClassName} ai-card`}`)
-// - scoping the title-icon badge + pill-shaped/chevron chip-grid here (keyed
-// off it, not a per-page class) is what makes this one shared look instead
-// of AI Copilot's Chat tab being the only composer with it. `chip-grid`
-// itself has no other consumer in this plugin outside a ChatComposerCard's
-// own `prompts`, so `.ai-card` is really just belt-and-suspenders against a
-// future unrelated `CardComponent`/`chip-grid` picking this up by accident.
-// .ai-card {
-// 	.card-header .left .typography-title>i {
-// 		display: inline-flex;
-// 		align-items: center;
-// 		justify-content: center;
-// 		width: 1.75rem;
-// 		height: 1.75rem;
-// 		border-radius: $border-radius-small;
-// 		background: $theme-color;
-// 		color: $color-white;
-// 		font-size: 1rem;
-// 		margin-right: 0.25rem;
-// 	}
-
-// 	.chip-grid {
-// 		.item {
-// 			border-radius: 1.5rem;
-// 			justify-content: space-between;
-
-// 			.item-icon {
-// 				display: inline-flex;
-// 				align-items: center;
-// 				justify-content: center;
-// 				width: 1.75rem;
-// 				height: 1.75rem;
-// 				border-radius: 50%;
-// 				background: $theme-background-color;
-// 				flex-shrink: 0;
-// 			}
-
-// 			.details {
-// 				flex: 1;
-// 				min-width: 0;
-// 			}
-
-// 			.tags {
-// 				display: flex;
-// 				align-items: center;
-// 				flex-shrink: 0;
-// 				color: $sub-text-color;
-// 			}
-// 		}
-// 	}
-// }

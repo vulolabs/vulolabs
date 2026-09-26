@@ -6,7 +6,7 @@ import { ButtonInput } from '@zyra/inputs';
 import ShowProPopup from './Popup/Popup';
 
 interface ProLockedCardProps {
-	moduleName: string;
+	moduleName?: string;
 	buttonText?: string;
 }
 
@@ -29,7 +29,7 @@ const ProLockedCard = ({ moduleName, buttonText }: ProLockedCardProps) => {
 				height="auto"
 				position="lightbox"
 			>
-				{vulopilotAppLocalizer.khali_dabba ? (
+				{vulopilotAppLocalizer.khali_dabba && moduleName ? (
 					<ShowProPopup moduleName={moduleName} />
 				) : (
 					<ShowProPopup />

@@ -7,13 +7,9 @@ defined( 'ABSPATH' ) || exit;
 
 /**
  * Scanning → SEO & Content → Tag Manager card's real backing - outputs
- * Google Tag Manager's own real two-part snippet: the script (enqueued
- * inline via `wp_add_inline_script()`, printed in `<head>`) and the `<noscript><iframe>` fallback immediately after the
- * opening `<body>` tag via `wp_body_open` (the real hook WordPress core
- * itself has shipped since 5.2 specifically for this purpose - no theme
- * template edit needed), same unconditional-construction/settings-gate-
- * output shape as WebmasterToolsManager/CanonicalUrlManager elsewhere in
- * this namespace.
+ * Google Tag Manager's two-part snippet: the loader enqueued through the
+ * WordPress asset API, and the fallback printed right after the opening
+ * `<body>` tag via `wp_body_open`.
  *
  * Self-registers its own hooks in the constructor (php-wordpress.md) and is
  * constructed unconditionally in VuloPilot::init_classes().

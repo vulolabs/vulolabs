@@ -58,21 +58,23 @@ class GoogleSearchConsoleOAuthCallbackHandler {
 
         $connection = new GoogleServicesConnection();
 
-        $state         = isset( $_GET['state'] ) ? sanitize_text_field( wp_unslash( $_GET['state'] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- the nonce inside `state` (verified explicitly below via verify_state()) IS this flow's real CSRF guard; `return_to` is read from this same value regardless of nonce validity, but is itself just an allow-listed plain string (see get_return_to_from_state()'s own docblock), not something that needs the nonce check.
-        $redirect_base = 'keywords' === $connection->get_return_to_from_state( $state )
+        // `state` carries the nonce this flow put on the authorize URL; nothing else
+        // in the request is read until it checks out.
+        $state          = sanitize_text_field( (string) filter_input( INPUT_GET, 'state' ) );
+        $state_is_valid = wp_verify_nonce( $connection->get_state_nonce( $state ), 'vulopilot_gsc_oauth' );
+        $redirect_base  = 'keywords' === $connection->get_return_to_from_state( $state )
             ? admin_url( 'admin.php?page=vulopilot#&tab=seo-visibility&subtab=keywords' )
             : admin_url( 'admin.php?page=vulopilot#&tab=settings&subtab=google-services' );
 
-        $error = isset( $_GET['error'] ) ? sanitize_text_field( wp_unslash( $_GET['error'] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- this is Google's own redirect back to us, not a form submission; the `state` param (verified below) is this flow's real CSRF guard.
-
-        if ( '' !== $error ) {
+        if ( ! $state_is_valid ) {
             wp_safe_redirect( $redirect_base . '&gsc_status=error' );
             exit;
         }
 
-        $code = isset( $_GET['code'] ) ? sanitize_text_field( wp_unslash( $_GET['code'] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- this whole request only carries a `code` because it came from a `state`-nonced authorize URL we generated ourselves; verified below via verify_state().
+        $error = sanitize_text_field( (string) filter_input( INPUT_GET, 'error' ) );
+        $code  = sanitize_text_field( (string) filter_input( INPUT_GET, 'code' ) );
 
-        if ( '' === $code || ! $connection->verify_state( $state ) ) {
+        if ( '' !== $error || '' === $code ) {
             wp_safe_redirect( $redirect_base . '&gsc_status=error' );
             exit;
         }

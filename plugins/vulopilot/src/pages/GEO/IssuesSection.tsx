@@ -4,11 +4,10 @@ import { useEffect, useRef, useState } from '@wordpress/element';
 import { __, sprintf } from '@wordpress/i18n';
 import { getApiLink, getApiResponse } from '@zyra/core';
 import { TabsComponent, CardComponent } from '@zyra/components';
-import { ButtonInput, MultiCheckboxInput, SelectInput, TextInput } from '@zyra/inputs';
-import IssuesSummaryCards, { Priority } from '../../components/Issues/IssuesSummaryCards';
+import { ButtonInput, SelectInput, TextInput } from '@zyra/inputs';
+import { Priority } from '../../components/Issues/IssuesSummaryCards';
 import {
 	FindingSeverity,
-	PRIORITY_SEVERITIES,
 	PageRow,
 	RawFinding,
 	bucketFindingsByPage,
@@ -233,7 +232,7 @@ const IssuesSection = ({
 	const [activePriority, setActivePriority] = useState<Priority>('all');
 	const [isLoading, setIsLoading] = useState(true);
 	const [hasError, setHasError] = useState(false);
-	const [reloadToken, setReloadToken] = useState(0);
+	const [reloadToken] = useState(0);
 	const sectionRef = useRef<HTMLDivElement>(null);
 	/** Guards the auto-open effect below so it only ever fires once per mount, not every time `rows` gets a new array reference (e.g. after a refetch) - otherwise re-opening the panel would silently undo a real "close" click. */
 	const hasAutoOpenedRef = useRef(false);

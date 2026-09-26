@@ -259,12 +259,6 @@ const IssuesList: React.FC<IssuesListProps> = ({
 							hideHeader={true}
 							categoryCounts={tableCategoryCounts}
 							activeCategory={activeTabId}
-							// Highlights the row whose details are showing in
-							// the side panel (zyra's own `is-selected` row
-							// style, see @zyra/table's TableCard/Table) -
-							// kept in sync with the action cell's own
-							// row-is-active check below rather than a
-							// separate piece of state.
 							activeRowId={selectedGroup?.scanner_id}
 							// Same toggle the action cell's own "More
 							// Details"/"Showing" button already does - a

@@ -224,28 +224,6 @@ class Modules {
     }
 
     /**
-     * @return array Every discovered module's id.
-     */
-    public function get_all_modules_ids() {
-        return array_keys( $this->get_all_modules() );
-    }
-
-    /**
-     * @return array Ids of every discovered module that's currently available (file exists, is_compatible() passes).
-     */
-    public function get_available_modules(): array {
-        $available = array();
-
-        foreach ( $this->get_all_modules() as $id => $module ) {
-            if ( $this->is_module_available( $module ) ) {
-                $available[] = $id;
-            }
-        }
-
-        return $available;
-    }
-
-    /**
      * @param array $modules Module ids to add to the active list.
      * @return array The full, updated active-module id list.
      */
@@ -285,14 +263,6 @@ class Modules {
         );
 
         return $this->active_modules;
-    }
-
-    /**
-     * @param string $module_id A module's id.
-     * @return bool
-     */
-    public function is_available( $module_id ) {
-        return in_array( $module_id, $this->get_available_modules(), true );
     }
 
     /**

@@ -41,8 +41,12 @@ const SecurityTrendCard = () => {
 	// Fixed / new / still-open counts for the same selected period - the
 	// Reports Overview's own real `security_summary`, so these tiles move
 	// with the 7D/30D/90D toggle like the SEO progress card's do.
+	// The overview endpoint comes with Pro; without it the request would 404,
+	// so the counts are only fetched and shown when Pro is active.
+	const hasOverview = Boolean(vulopilotAppLocalizer.khali_dabba);
 	const { data: overview, isLoading: isLoadingSummary } = useReportsOverview(
-		Number(period)
+		Number(period),
+		hasOverview
 	);
 	const summary = overview?.security_summary;
 
@@ -89,6 +93,7 @@ const SecurityTrendCard = () => {
 					yDomain={[0, 100]}
 				/>
 			)}
+			{hasOverview && (
 			<AnalyticsComponent
 				variant="background-color"
 				cols={3}
@@ -111,6 +116,7 @@ const SecurityTrendCard = () => {
 					},
 				]}
 			/>
+			)}
 		</CardComponent>
 	);
 };

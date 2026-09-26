@@ -149,6 +149,24 @@ class VuloPilotException extends \Exception {
 	}
 
 	/**
+	 * Throws an exception with an already-escaped message - the one place
+	 * VuloPilot builds and throws these, so every call site passes its
+	 * message through `esc_html()`/`esc_html__()` and this method never
+	 * returns.
+	 *
+	 * @param string               $message Escaped exception message.
+	 * @param string               $type    One of the TYPE_* constants above.
+	 * @param array<string, mixed> $context Extra, type-specific data - see each TYPE_*'s own docblock.
+	 * @return void
+	 * @throws self Always.
+	 */
+	public static function raise( string $message, string $type = self::TYPE_AI_REQUEST, array $context = array() ): void {
+		$exception = new self( $message, $type, $context );
+
+		throw $exception;
+	}
+
+	/**
 	 * @return string One of the TYPE_* constants above.
 	 */
 	public function get_type(): string {
@@ -174,13 +192,6 @@ class VuloPilotException extends \Exception {
 	 */
 	public function get_context_value( string $key, $default = null ) {
 		return $this->context[ $key ] ?? $default;
-	}
-
-	/**
-	 * @return array<string, mixed>
-	 */
-	public function get_context(): array {
-		return $this->context;
 	}
 
 	/**

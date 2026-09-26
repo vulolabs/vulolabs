@@ -1,4 +1,3 @@
-/* global vulopilotAppLocalizer */
 import { useState } from 'react';
 import type { ComponentType } from 'react';
 import { __ } from '@wordpress/i18n';
@@ -6,7 +5,6 @@ import { CardComponent, PopupComponent } from '@zyra/components';
 import { BlurredProContent } from '../../components/UpgradeToProOverlay';
 import DummyDataNotice from '../../components/DummyDataNotice';
 import ShowProPopup from '../../components/Popup/Popup';
-import { ADVANCED_REPORTS_MODULE_ID } from './reportsOverview';
 import ReportsDummyRows from './ReportsDummyRows';
 import { useFilterSlot } from '../../services/useFilterSlot';
 
@@ -19,7 +17,6 @@ const ReportHistoryTable = ({ refreshSignal }: ReportHistoryTableProps) => {
 	const RealPanel = useFilterSlot<
 		ComponentType<{ refreshSignal?: number }>
 	>('vulopilot_report_history_panel');
-	const isProInstalled = Boolean(vulopilotAppLocalizer.khali_dabba);
 
 	return (
 		<CardComponent
@@ -46,11 +43,7 @@ const ReportHistoryTable = ({ refreshSignal }: ReportHistoryTableProps) => {
 						height="auto"
 						position="lightbox"
 					>
-						{isProInstalled ? (
-							<ShowProPopup moduleName={ADVANCED_REPORTS_MODULE_ID} />
-						) : (
-							<ShowProPopup />
-						)}
+						<ShowProPopup />
 					</PopupComponent>
 				</>
 			)}

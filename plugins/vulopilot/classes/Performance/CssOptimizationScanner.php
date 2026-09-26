@@ -18,8 +18,6 @@ defined( 'ABSPATH' ) || exit;
  */
 class CssOptimizationScanner extends AbstractAssetOptimizationScanner {
 
-    private const STYLESHEET_PATTERN = '/<link[^>]+rel=["\']stylesheet["\'][^>]+href=["\']([^"\']+)["\']/i';
-
     /**
      * @inheritDoc
      */
@@ -55,7 +53,7 @@ class CssOptimizationScanner extends AbstractAssetOptimizationScanner {
             return array();
         }
 
-        $unminified = $this->find_unminified_same_host_assets( $html, self::STYLESHEET_PATTERN );
+        $unminified = $this->find_unminified_same_host_assets( $html, 'link', 'href', 'stylesheet' );
 
         if ( empty( $unminified ) ) {
             return array();

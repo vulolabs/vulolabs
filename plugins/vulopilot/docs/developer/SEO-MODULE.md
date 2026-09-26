@@ -67,7 +67,7 @@ A scanner id must be listed in `seoSections.ts` to appear in the SEO tab; a scan
 | `SeoImagesScanner` | `modules/TechnicalSeo/Scanners/SeoImagesScanner.php` | Flags published posts/pages with no featured image set. |
 | `SeoScanner` | `modules/TechnicalSeo/Scanners/SeoScanner.php` | Flags published post/page titles outside the length search engines reliably display in full (roughly 10-60 characters) - a title with no dedicated meta-description field can't be checked generically (that field's meta key varies b |
 | `SitemapScanner` | `modules/TechnicalSeo/Scanners/SitemapScanner.php` | Flags a site with no reachable XML sitemap. |
-| `StructuredDataValidationScanner` | `modules/TechnicalSeo/Scanners/StructuredDataValidationScanner.php` | Extracts every `<script type="application/ld+json">` block on the homepage and flags any that fail to parse as valid JSON. |
+| `StructuredDataValidationScanner` | `modules/TechnicalSeo/Scanners/StructuredDataValidationScanner.php` | Extracts every JSON-LD script block on the homepage and flags any that fail to parse as valid JSON. |
 | `ThinContentScanner` | `modules/TechnicalSeo/Scanners/ThinContentScanner.php` | Flags published posts/pages under a minimum word count. |
 | `TwitterCardScanner` | `modules/TechnicalSeo/Scanners/TwitterCardScanner.php` | Fetches the homepage and flags a missing `twitter:card` meta tag - without it, X/Twitter falls back to a plain link with no preview image or summary when this site's pages are shared there, independent of whether Open Graph tags ( |
 

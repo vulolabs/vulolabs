@@ -56,25 +56,25 @@ class PerformanceRequestRepository extends RepositoryUtil {
 
         $table = $this->get_table();
 
-        $avg_response_time_ms = $wpdb->get_var( // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, PluginCheck.Security.DirectDB.UnescapedDBParameter
+        $avg_response_time_ms = $wpdb->get_var( // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
             $wpdb->prepare(
-                "SELECT AVG(response_time_ms) FROM {$table} WHERE sample_type = %s AND created_at >= %s", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+                "SELECT AVG(response_time_ms) FROM %i WHERE sample_type = %s AND created_at >= %s", $table, // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
                 self::SAMPLE_TYPE,
                 gmdate( 'Y-m-d H:i:s', time() - HOUR_IN_SECONDS )
             )
         );
 
-        $page_views_last_5_min = (int) $wpdb->get_var( // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, PluginCheck.Security.DirectDB.UnescapedDBParameter
+        $page_views_last_5_min = (int) $wpdb->get_var( // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
             $wpdb->prepare(
-                "SELECT COUNT(*) FROM {$table} WHERE sample_type = %s AND created_at >= %s", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+                "SELECT COUNT(*) FROM %i WHERE sample_type = %s AND created_at >= %s", $table, // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
                 self::SAMPLE_TYPE,
                 gmdate( 'Y-m-d H:i:s', time() - 5 * MINUTE_IN_SECONDS )
             )
         );
 
-        $samples_last_hour = (int) $wpdb->get_var( // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, PluginCheck.Security.DirectDB.UnescapedDBParameter
+        $samples_last_hour = (int) $wpdb->get_var( // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
             $wpdb->prepare(
-                "SELECT COUNT(*) FROM {$table} WHERE sample_type = %s AND created_at >= %s", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+                "SELECT COUNT(*) FROM %i WHERE sample_type = %s AND created_at >= %s", $table, // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
                 self::SAMPLE_TYPE,
                 gmdate( 'Y-m-d H:i:s', time() - HOUR_IN_SECONDS )
             )
@@ -97,9 +97,9 @@ class PerformanceRequestRepository extends RepositoryUtil {
     public function delete_older_than( int $days ): void {
         global $wpdb;
 
-        $wpdb->query( // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, PluginCheck.Security.DirectDB.UnescapedDBParameter
+        $wpdb->query( // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
             $wpdb->prepare(
-                "DELETE FROM {$this->get_table()} WHERE sample_type = %s AND created_at < %s", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+                "DELETE FROM %i WHERE sample_type = %s AND created_at < %s", $this->get_table(), // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
                 self::SAMPLE_TYPE,
                 gmdate( 'Y-m-d H:i:s', time() - $days * DAY_IN_SECONDS )
             )

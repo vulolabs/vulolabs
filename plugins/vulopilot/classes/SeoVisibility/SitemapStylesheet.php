@@ -9,7 +9,7 @@ defined( 'ABSPATH' ) || exit;
  * (`WP_Sitemaps_Stylesheet`, wp-includes/sitemaps) to match the reference
  * mockup - a purple banner header (this plugin's own real brand color,
  * `#7c3aed`, the same `var(--color-primary, #7c3aed)` fallback already
- * used throughout this plugin's own admin styles) instead of core's plain
+ * used throughout this plugin's own admin UI) instead of core's plain
  * white header, and a real "Last Modified" column on the sitemap INDEX
  * page's own table.
  *
@@ -47,25 +47,11 @@ defined( 'ABSPATH' ) || exit;
 class SitemapStylesheet {
 
     /**
-     * This plugin's own real brand purple - the same `#7c3aed` fallback
-     * `var(--color-primary, #7c3aed)` already resolves to throughout this
-     * plugin's own admin CSS (assets/styles/index.css,
-     * src/pages/Content/CreateContent.scss), reused here rather than
-     * Rank Math's own unrelated blue so this page matches the rest of
-     * this plugin's own real brand identity.
+     * Compiled file, relative to the plugin folder.
      *
      * @var string
      */
-    private const BRAND_COLOR = '#7c3aed';
-
-    /**
-     * Light tint of BRAND_COLOR - same real paired `background:
-     * var(--background-primary, #ece2f9f1)` this plugin's own admin CSS
-     * already uses alongside the solid brand purple.
-     *
-     * @var string
-     */
-    private const BRAND_TINT = '#ece2f9';
+    private const STYLE_FILE = 'assets/styles/public/vulopilot-sitemap-stylesheet.min.css';
 
     /**
      * SitemapStylesheet constructor.
@@ -79,75 +65,45 @@ class SitemapStylesheet {
      * Real CSS-only restyle - applies to core's own existing markup
      * structure (`#sitemap__header`/`#sitemap__table`) unchanged, so this
      * alone can't break core's own XSL templating on either the index or
-     * any child sitemap page.
+     * any child sitemap page. Core prints this filter's result itself, so it
+     * is the one place the CSS rules are handed to core as text; the
+     * rules come from the same file the index page links to.
      *
-     * @param string $css Core's own default CSS for the sitemap stylesheet.
+     * @param string $css Core's own default CSS for the sitemap.
      * @return string
      */
     public function filter_stylesheet_css( $css ) {
-        $brand = self::BRAND_COLOR;
-        $tint  = self::BRAND_TINT;
+        $path = VuloPilot()->plugin_path . self::STYLE_FILE;
 
-        return $css . "
-			body {
-				font-family: -apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, Oxygen-Sans, Ubuntu, Cantarell, \"Helvetica Neue\", sans-serif;
-				background: #fff;
-				color: #444;
-				margin: 0;
-			}
+        if ( ! file_exists( $path ) ) {
+            return $css;
+        }
 
-			#sitemap {
-				max-width: 100%;
-			}
+        // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents -- reads this plugin's own built stylesheet, not user input.
+        return $css . (string) file_get_contents( $path );
+    }
 
-			#sitemap__header {
-				background: {$brand};
-				color: #fff;
-				padding: 2rem 2.5rem;
-				margin: 0;
-			}
+    /**
+     * Address of the compiled file for the index page, with the plugin
+     * version appended. Empty when the file has not been built.
+     *
+     * @return string
+     */
+    private function get_stylesheet_url(): string {
+        if ( ! file_exists( VuloPilot()->plugin_path . self::STYLE_FILE ) ) {
+            return '';
+        }
 
-			#sitemap__header h1 {
-				margin: 0 0 0.5rem;
-				font-size: 1.75rem;
-			}
+        wp_register_style(
+            'vulopilot-sitemap-stylesheet',
+            VuloPilot()->plugin_url . self::STYLE_FILE,
+            array(),
+            VuloPilot()->version
+        );
 
-			#sitemap__header p {
-				margin: 0.25rem 0;
-				color: rgba(255, 255, 255, 0.85);
-			}
+        $style = wp_styles()->registered['vulopilot-sitemap-stylesheet'];
 
-			#sitemap__header a {
-				color: #fff;
-				text-decoration: underline;
-			}
-
-			#sitemap__content {
-				max-width: 980px;
-				margin: 0 auto;
-				padding: 1.5rem 2.5rem 2.5rem;
-			}
-
-			#sitemap__table {
-				border: solid 1px {$tint};
-				border-radius: 0.375rem;
-				overflow: hidden;
-				width: 100%;
-			}
-
-			#sitemap__table tr th {
-				background: {$brand};
-				color: #fff;
-				font-weight: 600;
-				padding: 0.625rem;
-			}
-			#sitemap__table tr td{padding: 0.625rem;}
-			#sitemap__table tr:nth-child(odd) td {
-				background-color: {$tint};
-			}
-			#sitemap__table tr a{text-decoration: none;}
-
-";
+        return add_query_arg( 'ver', $style->ver, $style->src );
     }
 
     /**
@@ -179,7 +135,10 @@ class SitemapStylesheet {
         $lang    = get_language_attributes( 'html' );
         $url     = esc_xml( __( 'Sitemap', 'vulopilot' ) );
         $lastmod = esc_xml( __( 'Last Modified', 'vulopilot' ) );
-        $css     = $this->filter_stylesheet_css( '' );
+        $css_url = $this->get_stylesheet_url();
+        $link    = '' !== $css_url
+            ? '<xsl:element name="link"><xsl:attribute name="rel">stylesheet</xsl:attribute><xsl:attribute name="href">' . esc_xml( esc_url( $css_url ) ) . '</xsl:attribute></xsl:element>'
+            : '';
 
         return "<?xml version=\"1.0\" encoding=\"UTF-8\"?>
 <xsl:stylesheet
@@ -195,9 +154,7 @@ class SitemapStylesheet {
 		<html {$lang}>
 			<head>
 				<title>{$title}</title>
-				<style>
-					{$css}
-				</style>
+				{$link}
 			</head>
 			<body>
 				<div id=\"sitemap\">

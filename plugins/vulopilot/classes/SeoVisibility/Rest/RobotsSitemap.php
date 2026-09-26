@@ -33,14 +33,6 @@ class RobotsSitemap extends \WP_REST_Controller {
 
     private const REQUEST_TIMEOUT_SECONDS = 8;
 
-    /**
-     * Real bound on how many child sitemaps get their own real HEAD-count
-     * request - same "don't turn one page load into unbounded serial HTTP
-     * requests" reasoning BrokenLinksScanner (MAX_LINKS_PER_RUN) and
-     * Controllers\Redirects::get_health() (MAX_HEALTH_CHECKS) already
-     * apply for the same real reason.
-     */
-    private const MAX_CHILD_SITEMAPS = 12;
 
     /**
      * @inheritDoc
@@ -341,26 +333,6 @@ class RobotsSitemap extends \WP_REST_Controller {
     }
 
     /**
-     * @param string $url Real child sitemap URL.
-     * @return int|null Real `<url>` count, or null when the request/parse failed (rendered as this row's own real "error" status, never a fabricated 0).
-     */
-    private function count_sitemap_urls( string $url ): ?int {
-        $response = wp_remote_get( $url, array( 'timeout' => self::REQUEST_TIMEOUT_SECONDS, 'sslverify' => false ) );
-
-        if ( is_wp_error( $response ) || 200 !== wp_remote_retrieve_response_code( $response ) ) {
-            return null;
-        }
-
-        $xml = $this->parse_xml( (string) wp_remote_retrieve_body( $response ) );
-
-        if ( false === $xml ) {
-            return null;
-        }
-
-        return count( $xml->xpath( '//*[local-name()="url"]' ) ?: array() );
-    }
-
-    /**
      * @param string $body Raw XML body.
      * @return \SimpleXMLElement|false
      */
@@ -373,34 +345,4 @@ class RobotsSitemap extends \WP_REST_Controller {
         return $xml;
     }
 
-    /**
-     * A real, honest categorization derived from the sitemap's own real
-     * filename - never a guess about content that wasn't actually
-     * fetched, just a readable label for a real URL already shown in
-     * full right next to it.
-     *
-     * @param string $url Real sitemap URL.
-     * @return string
-     */
-    private function infer_sitemap_type( string $url ): string {
-        $lower = strtolower( $url );
-
-        if ( false !== strpos( $lower, 'post' ) ) {
-            return __( 'Posts', 'vulopilot' );
-        }
-        if ( false !== strpos( $lower, 'page' ) ) {
-            return __( 'Pages', 'vulopilot' );
-        }
-        if ( false !== strpos( $lower, 'product' ) ) {
-            return __( 'Products', 'vulopilot' );
-        }
-        if ( false !== strpos( $lower, 'categor' ) || false !== strpos( $lower, 'tax' ) ) {
-            return __( 'Categories', 'vulopilot' );
-        }
-        if ( false !== strpos( $lower, 'author' ) || false !== strpos( $lower, 'user' ) ) {
-            return __( 'Authors', 'vulopilot' );
-        }
-
-        return __( 'General', 'vulopilot' );
-    }
 }

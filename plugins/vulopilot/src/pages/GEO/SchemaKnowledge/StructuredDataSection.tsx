@@ -4,7 +4,6 @@ import { scrollToId } from '@zyra/core';
 import {
 	CardComponent,
 	ColumnComponent,
-	ContainerComponent,
 	ModuleGuardComponent,
 	BadgeComponent,
 	ListComponent,

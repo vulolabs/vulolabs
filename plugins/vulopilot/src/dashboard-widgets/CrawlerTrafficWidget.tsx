@@ -4,7 +4,6 @@ import { __, sprintf } from '@wordpress/i18n';
 import { getApiLink, getApiResponse } from '@zyra/core';
 import { BadgeComponent, ListComponent } from '@zyra/components';
 import DashboardWidget from './DashboardWidget';
-import DummyDataNotice from '../components/DummyDataNotice';
 import { formatWpDate } from '../services/formatWpDate';
 import { WidgetProps } from './types';
 

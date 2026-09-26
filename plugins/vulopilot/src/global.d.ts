@@ -51,13 +51,6 @@ declare global {
 
 	var vulopilotAppLocalizer: AppLocalizer;
 
-	/**
-	 * Shape of the `vulopilotPostSeo` object localized by
-	 * Services\PostEditorAssets::enqueue_assets() - the post-editor SEO
-	 * metabox's own script handle, separate from `vulopilotAppLocalizer` since the
-	 * Block Editor screen doesn't guarantee the dashboard's own localized
-	 * script has run.
-	 */
 	interface VuloPilotPostSeoLocalizer {
 		apiUrl: string;
 		nonce: string;

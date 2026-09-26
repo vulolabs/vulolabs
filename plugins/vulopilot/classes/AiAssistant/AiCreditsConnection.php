@@ -14,7 +14,6 @@ class AiCreditsConnection {
 
     private const OPTION_KEY = 'vulopilot_ai_credits_connection';
 
-    private const PLUGIN_SLUG = 'vulopilot';
 
     /**
      * The stored connection, merged with defaults for any field never yet saved.
@@ -191,14 +190,6 @@ class AiCreditsConnection {
         }
 
         return untrailingslashit( $browser_url ) . '/plugin/connect/authorize?' . http_build_query( $params );
-    }
-
-    /**
-     * @param string $state The `state` query param the broker's redirect carried back.
-     * @return bool
-     */
-    public function verify_broker_state( string $state ): bool {
-        return false !== wp_verify_nonce( $state, 'vulopilot_connect_broker' );
     }
 
     /**

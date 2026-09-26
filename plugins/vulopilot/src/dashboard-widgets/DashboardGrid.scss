@@ -1,20 +1,5 @@
 @use '../components/config' as *;
 
-// Column span/responsive breakpoints now come from ColumnComponent's own
-// `data-cols` grid (ContainerComponent.scss) - `.dashboard-widget-cell` is
-// only a marker class for react-sortablejs's drag-state styling below, not
-// a layout driver.
-// .dashboard-widget-cell {
-// 	// react-sortablejs's placeholder element while dragging.
-// 	&.sortable-ghost {
-// 		opacity: 0.4;
-// 	}
-
-// 	&.sortable-chosen .dashboard-widget {
-// 		box-shadow: 0 0.125rem 0.75rem rgb(0 0 0 / 15%);
-// 	}
-// }
-
 .dashboard-trend-chart {
 	width: 100%;
 	height: 18.75rem;
@@ -133,19 +118,11 @@
 	font-weight: 700;
 }
 
-// Divider below the "Needs work" hero block, now that it sits on its own
-// full-width row above the donut + score-cards row (rather than beside the
-// donut) - separates the header from the row below it. Reuses the same red
-// already used by the hero's own "N new issues" badge (zyra's
-// $color-palette "red" token, common.scss), not a new arbitrary color.
 .overall-score-summary--divider {
 	padding-bottom: 1rem;
 	border-bottom: 0.125rem solid #dc2626;
 }
 
-// Vital Pulse's real "N issues found · M critical" line, under the rating
-// summary sentence - mirrors the mockup's own small-text row beneath the
-// ring.
 .vital-pulse-issue-counts {
 	display: flex;
 	align-items: center;
@@ -167,9 +144,6 @@
 	}
 }
 
-
-// "VuloPilot activity" - 5 real tiles in one row (VuloPilotActivityWidget.tsx),
-// separated by a hairline rather than individual card borders per tile.
 .vulopilot-activity-row {
 	display: flex;
 	flex-wrap: wrap;
@@ -254,12 +228,6 @@
 	color: $sub-text-color;
 	font-size: 0.75rem;
 }
-
-// .todays-task-time {
-// 	color: $sub-text-color;
-// 	font-size: 0.70625rem;
-// 	white-space: nowrap;
-// }
 
 .score-cards-row {
 	display: grid;
@@ -376,12 +344,6 @@ $score-card-colors: (
 	color: $sub-text-color;
 }
 
-// "Vital Pulse"'s own real per-bucket row list (`OverallScoreWidget.tsx`,
-// converted to match `SeoTab.tsx`'s own "SEO Health" row shape) - same
-// class names that component's own `SeoVisibility.scss` defines, not
-// reachable from this widget's own bundle, so duplicated locally per this
-// codebase's own "duplicate small per-file logic" convention rather than
-// importing that page-scoped stylesheet wholesale here.
 .seo-health-score-row-delta {
 	display: inline-flex;
 	align-items: center;
@@ -414,11 +376,6 @@ $score-card-colors: (
 	white-space: nowrap;
 }
 
-// VuloPilotActivityWidget.tsx's own "Health timeline" dummy chart - fabricated,
-// inert; `.recharts-wrapper` is `pointer-events: none` so a click always
-// reaches the wrapping `.health-timeline-dummy` overlay (the real click
-// target), same convention Accessibility.scss's own
-// `.accessibility-history-dummy` uses.
 .health-timeline-dummy {
 	cursor: pointer;
 

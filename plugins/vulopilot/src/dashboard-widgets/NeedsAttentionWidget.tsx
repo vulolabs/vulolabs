@@ -12,7 +12,6 @@ import {
 import DashboardWidget from './DashboardWidget';
 import { useApiList } from '../services/useApiList';
 import { formatWpDate } from '../services/formatWpDate';
-import { getSeverityClass } from '../services/getSeverityClass';
 import { getCategoryTabLink } from '../services/getCategoryTabLink';
 import { formatAffected } from '../components/Issues/issuesTypes';
 import type { FindingGroup } from '../components/Issues/issuesTypes';

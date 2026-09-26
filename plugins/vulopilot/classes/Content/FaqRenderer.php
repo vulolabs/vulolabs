@@ -25,7 +25,7 @@ class FaqRenderer {
 
     /**
      * @param array<string, mixed> $attributes Real block attributes - `questions: array<{question,answer}>`.
-     * @return string Real HTML (visible <details> UI + a real <script type="application/ld+json"> FAQPage block), or '' if every row was blank.
+     * @return string Visible HTML (<details> UI, safe to pass through `wp_kses_post()`), or '' if every row was blank. The FAQPage JSON-LD is printed separately by print_schema().
      */
     public static function render( array $attributes ): string {
         $questions = self::sanitize_questions( $attributes['questions'] ?? array() );
@@ -46,9 +46,23 @@ class FaqRenderer {
         }
 
         $html .= '</div>';
-        $html .= self::render_schema( $questions );
 
         return $html;
+    }
+
+    /**
+     * Prints the FAQPage JSON-LD for the same rows render() shows - nothing when
+     * every row was blank.
+     *
+     * @param array<string, mixed> $attributes Real block attributes - `questions: array<{question,answer}>`.
+     * @return void
+     */
+    public static function print_schema( array $attributes ): void {
+        $questions = self::sanitize_questions( $attributes['questions'] ?? array() );
+
+        if ( ! empty( $questions ) ) {
+            self::print_schema_tag( $questions );
+        }
     }
 
     /**
@@ -89,9 +103,9 @@ class FaqRenderer {
 
     /**
      * @param array<int, array{question: string, answer: string}> $questions Already sanitized, never empty.
-     * @return string
+     * @return void
      */
-    private static function render_schema( array $questions ): string {
+    private static function print_schema_tag( array $questions ): void {
         $entities = array();
 
         foreach ( $questions as $item ) {
@@ -111,6 +125,6 @@ class FaqRenderer {
             'mainEntity' => $entities,
         );
 
-        return wp_get_inline_script_tag( (string) wp_json_encode( $schema, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE ), array( 'type' => 'application/ld+json' ) );
+        wp_print_inline_script_tag( (string) wp_json_encode( $schema, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE ), array( 'type' => 'application/ld+json' ) );
     }
 }

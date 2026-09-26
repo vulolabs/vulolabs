@@ -94,13 +94,6 @@ final class ContentScore {
     /**
      * @return int
      */
-    public function get_topic_authority(): int {
-        return $this->topic_authority;
-    }
-
-    /**
-     * @return int
-     */
     public function get_overall_score(): int {
         return $this->overall_score;
     }

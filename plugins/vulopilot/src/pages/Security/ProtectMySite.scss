@@ -1,17 +1,10 @@
 @use '../../components/config' as *;
 
-// `.security-metrics-grid`/`.security-metric-tile`'s own icon/title/
-// badge/footer-button shell now comes from the shared
-// `<MetricTile variant="security">` (MetricTile.scss) - only this
-// tile's own divergent "last scan" line is still declared locally.
 .security-metric-last-scan {
 	font-size: 0.75rem;
 	color: $sub-text-color;
 }
 
-// VulnerabilityHeroCard.tsx's Free fallback - matches the mockup's own
-// hero card layout (icon + headline, then a High/Medium/Low/Total stat
-// row, then the two action buttons).
 .vulnerability-hero-top {
 	display: flex;
 	align-items: flex-start;
@@ -45,13 +38,6 @@
 	font-size: 0.8125rem;
 }
 
-// The 4 High/Medium/Low/Total tiles are now a real Zyra
-// `<AnalyticsComponent>` (VulnerabilityHeroCard.tsx) - its own
-// `.analytics-container`/`.analytics-item`/`.number`/`.text` classes supply
-// the tile chrome; `colorClass` (`is-high`/`is-medium`/`is-low`/`is-total`)
-// lands on each `.analytics-item`, so only the per-severity number tint
-// needs to be declared locally here, same convention AutomateWork.scss's
-// own `.automation-overview-grid .admin-badge` color-modifier block uses.
 .vulnerability-hero-stats {
 	margin-top: 1rem;
 
@@ -124,28 +110,10 @@
 	}
 }
 
-// AccessibilityHeroCard.tsx - one stacked column: a small donut pinned
-// to the top-left, then the headline, description, stat row, and
-// buttons below it in normal block flow - unlike VulnerabilityHeroCard/
-// SecurityMockupHeader's own side-by-side donut+text row, this reference
-// mockup's own hero card stacks everything in one narrow column instead.
 .accessibility-hero-score {
-	// Constrains the pie's own ResponsiveContainer to a small square
-	// rather than the full card width it'd otherwise stretch to fill as
-	// a block-level element with no explicit width of its own.
+
 	width: 6.5rem;
 
-	// zyra's own ChartComponent always renders a "Score 72 / Remaining
-	// 28"-style legend row below a pie chart with no prop to opt out -
-	// the reference mockup shows only the ring + centered number, so
-	// it's hidden here rather than left showing raw data-series labels
-	// that don't mean anything to a reader on their own. `!important`
-	// because zyra's own base `.zyra-chart-pie-legend` rule is injected
-	// into a runtime `<style>` tag (styleInject) rather than this
-	// stylesheet - same selector specificity, but it lands later in the
-	// cascade than any statically-compiled CSS, so it wins on source
-	// order alone without this; zyra's own `--side` variant hides this
-	// same element the identical way, for the identical reason.
 	.zyra-chart-pie-legend {
 		display: none !important;
 	}
@@ -157,10 +125,6 @@
 	font-size: 1.0625rem;
 }
 
-// Real week-over-week score delta (AccessibilityHeroCard.tsx's own
-// `category_scores_7d_ago` reuse) - green for an improved score, red for
-// a decline, same semantic-color-separate-from-accent convention this
-// codebase's other trend indicators already follow.
 .accessibility-hero-delta {
 	display: inline-flex;
 	align-items: center;
@@ -186,9 +150,6 @@
 	max-width: 40rem;
 }
 
-// Same real Zyra `<AnalyticsComponent>` conversion as `.vulnerability-hero-stats`
-// above - see that block's own comment for why only the per-stat number
-// tint is declared locally here.
 .accessibility-hero-stats {
 	margin-top: 1rem;
 
@@ -208,15 +169,6 @@
 	margin-top: 0.875rem;
 }
 
-// AccessibilityChecksGrid.tsx - icon/title/footer-button shell now comes
-// from the real `<MetricTileComponent>` (@zyra/components,
-// MetricTileComponent.scss) - the now-deleted local
-// `components/MetricTile/MetricTile.tsx` used to wrap that same real
-// component behind an extra layer. Only this tile's own divergent `desc`
-// content (the colored open-issues count) still needs a scoped rule here
-// - the "pages affected" line reuses that shared component's own
-// `.metric-tile-stat` styling directly now instead of a near-identical
-// local copy.
 .accessibility-check-count {
 	font-weight: 700;
 	font-size: 0.9375rem;
@@ -227,16 +179,6 @@
 	font-size: 0.8125rem;
 }
 
-// AccessibilityPriorityList.tsx's "What should I fix first?" rows - a real
-// TableCard now (check icon/title/page/description via
-// InformationItemComponent, Review button), so only the priority badge's
-// own color scheme still needs a scoped rule here. Deliberately its own
-// class rather than zyra's generic `badge-high`/`badge-low`/etc - those
-// are wired to unrelated status semantics (`badge-high` = green
-// "published", `badge-low` = red "rejected"), not a red/amber/blue risk
-// scale, so reusing them here would color HIGH-risk findings green and
-// LOW-risk ones red (see SeoVisibility.scss's own docblock for the same
-// trap).
 .accessibility-priority-badge {
 	font-size: 0.6875rem;
 	font-weight: 700;
@@ -261,11 +203,6 @@
 	}
 }
 
-// AccessibilityManualTestingPanel.tsx.
-// AccessibilityManualTestingPanel.tsx's 3 checks are now a real Zyra
-// `<ListComponent>` - its own `.item-list`/`.item`/`.item-icon`/
-// `.item-title`/`.desc` classes replace the old hand-rolled `<ul>`/`<li>`
-// ones (`li`/`.accessibility-manual-check-title`/`.accessibility-manual-check-desc`).
 .accessibility-manual-checks {
 	gap: 0.875rem;
 
@@ -292,9 +229,6 @@
 	}
 }
 
-// SecurityMetricsGrid.tsx's own `ListComponent` - its 7 rows' `desc` reads
-// smaller here (mockup-sized) than the default `.item-list .desc` size,
-// same scoped-override technique `.accessibility-manual-checks` above uses.
 #security-metrics-grid-card {
 	.desc {
 		font-size: 0.75rem;
@@ -313,14 +247,6 @@
 	}
 }
 
-// AccessibilityWcagNotice.tsx now renders through zyra's own
-// NoticeComponent (`type="banner"` + `displayPosition="inline"`,
-// NoticeComponent.scss's own `.type-banner`/`.display-inline` rules) - no
-// local styling needed here anymore.
-
-// PerformanceTab.tsx and its children (EfficiencyHeroCard/
-// EfficiencySectionsList/EfficiencyThingsToReview/EfficiencyOverviewChart/
-// EfficiencySpeedInsightsBanner) - the mockup's own "Performance" tab.
 .efficiency-page-header {
 	margin-bottom: 1rem;
 }
@@ -571,20 +497,11 @@
 	}
 }
 
-// Sizing only - dot/label/value chrome itself is zyra's own
-// `LegendComponent` (LegendComponent.scss's `.zyra-legend-vertical`).
-// Originally EfficiencyOverviewChart.tsx's own (now deleted, per direct
-// instruction - see OverviewTab.tsx's own docblock); still real, reused
-// as-is by FindingsHeroCard.tsx's own severity-breakdown donut legend.
 .efficiency-overview-legend {
 	flex-grow: 1;
 	min-width: 14rem;
 }
 
-// PerformanceTab.tsx's own real cross-linked speed-score trend
-// (SpeedHistoryCard.tsx, reused from pages/Performance/) - the label just
-// makes clear it's a related-but-distinct page's own real metric, not
-// this tab's own efficiency-check data.
 .efficiency-related-speed {
 	margin-top: 1rem;
 }
@@ -598,18 +515,6 @@
 	color: $sub-text-color;
 }
 
-// EfficiencySpeedInsightsBanner.tsx - closing cross-link to the separate
-// "Improve My Speed" page.
-// `.efficiency-speed-banner`/`-body`/`-title`/`-desc`'s own icon/text/button
-// banner CSS used to live here - removed now that this is a real Zyra
-// `<NoticeComponent type="info" displayPosition="inline-notice">`
-// (EfficiencySpeedInsightsBanner.tsx), which supplies its own icon/title/
-// message/action-link box styling.
-
-// FindingsHeroCard.tsx - shared by SiteHealthTab.tsx/FilesPluginsTab.tsx,
-// same "icon + headline" top row .vulnerability-hero-top/-icon already
-// establish, plus a real severity-breakdown donut
-// (.findings-hero-chart-row) neither tab had before.
 .findings-hero-top {
 	display: flex;
 	align-items: flex-start;
@@ -669,10 +574,6 @@
 	flex-shrink: 0;
 	width: 10rem;
 
-	// zyra's own pie legend is turned off at the source now
-	// (`<ChartComponent legendPosition="none">`) - this row reuses the
-	// same `LegendComponent` `.efficiency-overview-legend` sizing
-	// EfficiencyOverviewChart.tsx's own comment above documents.
 }
 
 .findings-hero-chart-number {
@@ -692,20 +593,10 @@
 	margin-top: 1rem;
 }
 
-// One real, unified findings table with a category tab bar on top -
-// SectionedIssuesTable.tsx, replacing the "N separate per-section
-// FindingsTable cards" shape this page (and Site Health/Files & Plugins/
-// Accessibility, via the same component) used to stack. Identical shape/
-// values to WooCommerce's own "All WooCommerce Issues"
-// (WooCommerceIssuesTable.tsx, plugins/vulopilot/src/pages/WooCommerce/
-// SellMore.scss) - same merge pattern, ported here rather than sharing one
-// stylesheet across two unrelated page trees.
 .sectioned-issues-table {
 	margin-top: 1.5rem;
 }
 
-// SectionedIssuesTable.tsx's own real "Show ignored" toggle + "Export
-// CSV" row, above the table's own native search/filter bar.
 .sectioned-issues-toolbar {
 	display: flex;
 	align-items: center;
@@ -722,9 +613,6 @@
 	font-size: 0.875rem;
 	color: $sub-text-color;
 
-	// A plain, real checkbox styled as an on/off pill switch - same
-	// standard technique every other real toggle switch in this codebase
-	// uses, not a fabricated third-party control.
 	.toggle-switch-input {
 		position: absolute;
 		opacity: 0;
@@ -778,70 +666,12 @@
 	align-items: center;
 	gap: 0.5rem;
 
-	// `.admin-badge`'s own base pill shape comes from zyra at runtime, but
-	// its color modifiers don't (same gap this whole codebase's other
-	// per-page `.admin-badge` scoping comments already document) - only
-	// `.purple` is needed here, for this title's own count badge.
 	.admin-badge.purple {
 		color: #7c3aed;
 		background: color-mix(in srgb, #7c3aed 14%, transparent);
 	}
 }
 
-// `.sectioned-issues-tabs`'s own tab-bar/underline/active-state CSS used to
-// live here - removed now that the tab bar is a real Zyra
-// `<TabsComponent>` (SectionedIssuesTable.tsx), which already ships this
-// exact underline-on-active-tab look itself (NavigatorComponent.scss's own
-// `.tabs-item .tab.active-tab` rule, global, not scoped to any one
-// component) - nothing left for this page to declare.
-
-// The table's own "Category" column badge (`.admin-badge.blue`) and
-// "Priority" column badge (`.admin-badge.badge-{severity}`, TableCard's
-// own `type: 'status'` rendering convention - same as `.badge-open` above)
-// - same 5-value severity palette getSeverityColor.ts's own docblock
-// documents as canonical across the app, so a group's priority here reads
-// the same color as everywhere else that shows one.
-
-
-// The 4 priority stat tiles (IssuesSummaryCards.tsx, reused as-is from AI
-// Copilot's own Issues tab) - same real classes confirmed against zyra's
-// compiled AnalyticsComponent source (AICopilot.scss's own docblock), same
-// severity palette as the table's own Priority badges above.
-// .issues-summary-cards {
-// 	margin-bottom: 1rem;
-
-// 	.analytics-item.clickable {
-// 		border: 1px solid transparent;
-// 		transition: border-color 0.15s ease, background-color 0.15s ease;
-
-// 		&:hover {
-// 			background: $theme-background-color;
-// 		}
-// 	}
-
-// 	.analytics-item:nth-child(2) .analytics-icon i {
-// 		color: #dc2626;
-// 	}
-
-// 	.analytics-item:nth-child(3) .analytics-icon i {
-// 		color: #b45309;
-// 	}
-
-// 	.analytics-item:nth-child(4) .analytics-icon i {
-// 		color: #5baab3;
-// 	}
-
-// 	&.active-priority-all .analytics-item:nth-child(1),
-// 	&.active-priority-high .analytics-item:nth-child(2),
-// 	&.active-priority-medium .analytics-item:nth-child(3),
-// 	&.active-priority-low .analytics-item:nth-child(4) {
-// 		border-color: $theme-color;
-// 		background: $color-primary-background;
-// 	}
-// }
-
-// The side detail panel (IssueDetailPanel.tsx, reused as-is from AI
-// Copilot's own Issues tab).
 .issue-detail-panel {
 	.issue-detail-title {
 		font-size: 1.125rem;
@@ -905,24 +735,6 @@
 	}
 }
 
-// PluginOverlapCard.tsx's own per-row "View in VuloPilot →" link is now
-// a real `<ButtonInput color="text-purple">` - no local CSS needed.
-
-// `.backups-table-wrap`/`.backups-table`/`.backups-row-actions`/
-// `.backups-error-message` were all removed here - BackupsTab.tsx's own
-// backups list is a real `<TableCard>` (@zyra/table) now, not a
-// hand-rolled `<table>`, and its Status/Destination columns' own inline
-// errors are a real `NoticeComponent` (`type="error"`
-// `displayPosition="inline"`) instead of that local class - all styling
-// comes from those shared components now.
-
-// Status column - the real badge (icon+label) plus, when relevant, a real
-// small sub-line underneath it. Currently used for
-// `statusDestinationCaveat()` (BackupsTab.tsx) - clarifies that a green
-// "Completed" badge only ever covers the LOCAL archive when this row's
-// separately-tracked remote upload failed or was never configured, so it
-// doesn't read as contradicting a red/yellow Destination badge in the same
-// row.
 .backups-status-cell {
 	display: flex;
 	flex-direction: column;
@@ -963,10 +775,6 @@
 	gap: 0.625rem;
 }
 
-
-// Brief attention pulse on the issues table when a status tile's "View"
-// jumps to it (SecurityTab.tsx / SiteHealthTab.tsx) - scroll alone isn't
-// enough of a cue when the table is already partly on screen.
 .vulopilot-issues-table-pulse {
 	border-radius: 0.75rem;
 	animation: vulopilot-issues-table-pulse 1.3s ease-in-out 2;

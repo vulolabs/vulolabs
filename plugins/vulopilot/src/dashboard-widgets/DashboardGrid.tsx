@@ -5,7 +5,7 @@ import { __ } from '@wordpress/i18n';
 import { getApiLink, getApiResponse, sendApiResponse } from '@zyra/core';
 import { ColumnComponent, BadgeComponent } from '@zyra/components';
 import { DEFAULT_DASHBOARD_WIDGETS } from './registry';
-import { DashboardSummary, WidgetLayoutEntry, WidgetDefinition } from './types';
+import { DashboardSummary, WidgetLayoutEntry } from './types';
 import './DashboardGrid.scss';
 
 interface DashboardGridProps {

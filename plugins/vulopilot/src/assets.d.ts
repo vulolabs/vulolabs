@@ -5,5 +5,6 @@
 // resolution (reproduced in isolation while verifying this plugin's
 // TypeScript), so this split isn't stylistic, it's load-bearing.
 declare module '*.png';
+declare module '*.jpg';
 declare module '*.svg';
 declare module '*.scss';

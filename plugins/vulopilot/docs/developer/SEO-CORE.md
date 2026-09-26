@@ -30,7 +30,7 @@ Post editor sidebar (src/post-editor)
 
 - `SitemapManager` does not build a sitemap from scratch. It filters WordPress core's sitemap (`wp_sitemaps_enabled`, `wp_sitemaps_max_urls`, `wp_sitemaps_post_types`, `wp_sitemaps_taxonomies`, `wp_sitemaps_posts_query_args`, `wp_sitemaps_taxonomies_query_args`) using the settings below, and pings on `save_post`.
 - `SitemapUrlRewriter` rewrites core URLs to `/sitemap_index.xml` and `/{subtype}-sitemap{page}.xml`, and 301-redirects the legacy `wp-sitemap*.xml` URLs.
-- `SitemapStylesheet` restyles the browser view through `wp_sitemaps_stylesheet_css` and `wp_sitemaps_stylesheet_index_content`. The `<style>` inside the XSL document is intentional: the file is XML served to the browser, not an enqueueable page asset.
+- `SitemapStylesheet` restyles the browser view through `wp_sitemaps_stylesheet_css` and `wp_sitemaps_stylesheet_index_content`. The sitemap index page links its stylesheet (`assets/styles/public/vulopilot-sitemap-stylesheet.min.css`, registered with `wp_register_style()`) instead of embedding CSS, and the individual sitemap pages get the same file's contents through the core filter.
 - `HtmlSitemapRenderer` registers the `[vulopilot_html_sitemap]` shortcode and reads the same post types, taxonomies and exclusions.
 
 ## Title and meta formats

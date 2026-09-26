@@ -1,11 +1,10 @@
-/* global vulopilotAppLocalizer */
 import { __, sprintf } from '@wordpress/i18n';
 import { PopupComponent, SectionComponent } from '@zyra/components';
 import { ButtonInput, SelectInput } from '@zyra/inputs';
 import { useState } from 'react';
 import type { ComponentType } from 'react';
-import { ADVANCED_REPORTS_MODULE_ID, DAY_OPTIONS } from './reportsOverview';
-import ShowProPopup, { resolveModuleDisplayName } from '../../components/Popup/Popup';
+import { DAY_OPTIONS } from './reportsOverview';
+import ShowProPopup from '../../components/Popup/Popup';
 import { useFilterSlot } from '../../services/useFilterSlot';
 
 interface ReportsOverviewHeaderProps {
@@ -38,10 +37,6 @@ const ReportsOverviewHeader = ({
 	const RealActions = useFilterSlot<
 		ComponentType<{ onDataChanged: () => void }>
 	>('vulopilot_reports_header_actions');
-	const isProInstalled = Boolean(vulopilotAppLocalizer.khali_dabba);
-	const proTagText = isProInstalled
-		? resolveModuleDisplayName(ADVANCED_REPORTS_MODULE_ID)
-		: __('PRO', 'vulopilot');
 
 	return (
 		<>
@@ -115,11 +110,7 @@ const ReportsOverviewHeader = ({
 				height="auto"
 				position="lightbox"
 			>
-				{isProInstalled ? (
-					<ShowProPopup moduleName={ADVANCED_REPORTS_MODULE_ID} />
-				) : (
-					<ShowProPopup />
-				)}
+				<ShowProPopup />
 			</PopupComponent>
 		</>
 	);

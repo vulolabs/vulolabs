@@ -6,7 +6,6 @@ import { getApiLink, getApiResponse } from '@zyra/core';
 /** Same 3-preset shape WebsiteProgressChart.tsx already established for this page - no arbitrary calendar range picker. */
 export const DAY_OPTIONS = [7, 30, 90] as const;
 
-export const ADVANCED_REPORTS_MODULE_ID = 'advanced-reports';
 
 /**
  * Fabricated "Recent Reports"/"Report History" rows - same "obviously
@@ -164,11 +163,16 @@ export interface ReportsOverviewResponse {
  * changing the day-range preset once (ReportsOverviewHeader.tsx) refetches
  * everything together rather than each section owning its own fetch.
  */
-export const useReportsOverview = (days: number) => {
+export const useReportsOverview = (days: number, enabled = true) => {
 	const [data, setData] = useState<ReportsOverviewResponse | null>(null);
-	const [isLoading, setIsLoading] = useState(true);
+	const [isLoading, setIsLoading] = useState(enabled);
 
 	useEffect(() => {
+		if (!enabled) {
+			setIsLoading(false);
+			return;
+		}
+
 		let cancelled = false;
 		setIsLoading(true);
 
@@ -194,7 +198,7 @@ export const useReportsOverview = (days: number) => {
 		return () => {
 			cancelled = true;
 		};
-	}, [days]);
+	}, [days, enabled]);
 
 	return { data, isLoading };
 };

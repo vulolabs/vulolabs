@@ -13,4 +13,4 @@
 
 defined( 'ABSPATH' ) || exit;
 
-echo \VuloPilot\Content\TableOfContentsRenderer::render( $attributes, get_the_ID() ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- escaped internally by TableOfContentsRenderer.
+echo wp_kses_post( \VuloPilot\Content\TableOfContentsRenderer::render( $attributes, get_the_ID() ) );

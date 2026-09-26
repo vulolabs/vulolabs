@@ -4,7 +4,6 @@ import { ContainerComponent } from '@zyra/components';
 import '../SeoVisibility.scss';
 import BusinessProfileCard from './BusinessProfileCard';
 import KnowledgeGraphSection from './KnowledgeGraphSection';
-import IssuesSection from './IssuesSection';
 import StructuredDataSection from './StructuredDataSection';
 import InspectorSection from './InspectorSection';
 import { useSchemaCoverage } from './useSchemaCoverage';

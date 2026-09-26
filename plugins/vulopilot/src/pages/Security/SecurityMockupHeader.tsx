@@ -30,11 +30,6 @@ const SecurityMockupHeader = ({
 	scrollTargetId,
 	onViewSection,
 }: SecurityMockupHeaderProps) => {
-	const scrollToTarget = () => {
-		document
-			.getElementById(scrollTargetId)
-			?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-	};
 
 	return (
 		<ContainerComponent>

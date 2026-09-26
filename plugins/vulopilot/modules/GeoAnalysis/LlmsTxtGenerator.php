@@ -88,12 +88,25 @@ class LlmsTxtGenerator {
             return;
         }
 
-        header( 'Content-Type: text/plain; charset=utf-8' );
         // Prefer an admin's saved edits (Settings → GEO's llms_txt_content
         // textarea) over the auto-generated version, same precedence
         // write_file()/maybe_bootstrap_physical_file() use - this virtual
-        // route and the real on-disk file should never disagree.
-        echo empty( $settings['llms_txt_content'] ) ? $this->generate() : $settings['llms_txt_content']; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Content-Type is text/plain (not HTML/JS), so raw Markdown content here can't execute in a browser regardless of escaping; generate()'s own output only interpolates get_bloginfo()/get_permalink()/get_the_title().
+        // route and the real on-disk file should never disagree. The text is
+        // sent from that real file (written here if it is missing) rather than
+        // echoed, since it is plain text and must not be HTML-escaped.
+        $file_path = trailingslashit( ABSPATH ) . 'llms.txt';
+
+        if ( ! file_exists( $file_path ) ) {
+            $this->write_file( empty( $settings['llms_txt_content'] ) ? $this->generate() : $settings['llms_txt_content'] );
+        }
+
+        if ( ! file_exists( $file_path ) ) {
+            return;
+        }
+
+        header( 'Content-Type: text/plain; charset=utf-8' );
+        header( 'X-Content-Type-Options: nosniff' );
+        readfile( $file_path ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_readfile -- streams this plugin's own llms.txt.
         exit;
     }
 

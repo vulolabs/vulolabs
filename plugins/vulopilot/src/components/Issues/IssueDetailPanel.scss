@@ -1,38 +1,11 @@
 @use '../../components/config' as *;
 
-// Priority/Category - real group.severity/category, docked as inline
-// badges right under the header (per direct instruction, matching a
-// reference design) instead of two of the stat-tile grid's own tiles.
 .issue-detail-badges-row {
 	display: flex;
 	gap: 0.5rem;
 	margin-bottom: 0.875rem;
 }
 
-// The "Affected/Detected/Scope" stat tiles are now zyra's own
-// `<AnalyticsComponent variant="priority-card">` (per direct
-// instruction - /components-analyticscomponent--priority-card), not
-// the hand-rolled `.issue-detail-stats-grid`/`.issue-detail-stat-tile`
-// markup below (now dead - kept only so this rule's own "instead of"
-// comment still makes sense; nothing in IssueDetailPanel.tsx renders
-// those classes any more).
-//
-// That shared variant's own `.number` is sized for a short digit like
-// "4" (AnalyticsComponent.scss: 2rem, single line, an absolutely-
-// positioned icon pinned over the top-right corner) - this panel's own
-// real values run much longer (a full date, "1 endpoint", a page path)
-// and, at this panel's own narrow 3-column width, both overflowed their
-// tile and visibly collided with the icon (confirmed live). Scoped to
-// `.issue-detail-panel` only, rather than changing the shared
-// component's own default size for every other real `priority-card`
-// caller (Storybook's own PriorityCard story).
-//
-// `!important` throughout - same real reason `.accessibility-hero-score`
-// below needs it for zyra's own pie-legend rule: zyra's own base
-// `.analytics-container[data-template="priority-card"] .number` rule is
-// injected into a runtime `<style>` tag (styleInject), not this
-// stylesheet - equal selector specificity, but it lands later in the
-// cascade, so it silently won the tie (confirmed live) without this.
 .issue-detail-panel .analytics-container[data-template='priority-card'] {
 	gap: 0.5rem !important;
 
@@ -52,8 +25,7 @@
 	}
 
 	.details {
-		// Reserves room so `.number` never runs under the icon circle
-		// above it.
+
 		padding-right: 1.5rem !important;
 		width: 100% !important;
 
@@ -61,10 +33,7 @@
 			font-size: 0.75rem !important;
 			font-weight: 700 !important;
 			line-height: 1.3 !important;
-			// These real values can run longer than a short digit (a
-			// full date, "1 endpoint", a page path) - wrap at real word
-			// boundaries onto as many lines as needed (the tile grows
-			// taller) rather than breaking mid-word.
+
 			overflow-wrap: normal !important;
 		}
 
@@ -181,10 +150,6 @@
 	margin-top: 0.5rem;
 }
 
-// Performance findings' own real, scanner-authored "Recommended fix" steps
-// (`Finding::get_meta()['recommended_fix']`) - replaces "Example finding"
-// for this one category only, per direct instruction. Numbered circles
-// match that same reference design's own step list.
 .issue-detail-fix-steps {
 	display: flex;
 	flex-direction: column;
@@ -252,19 +217,13 @@
 }
 
 .issue-detail-pro-gate-dummy {
-	// Blurred on top of already being dummy copy, per direct instruction -
-	// this is never the real title/description/list (see
-	// IssueDetailPanel.tsx's own renderProGatedSection docblock for why
-	// the real thing is never rendered here at all), so blurring it further
-	// is purely a visual "locked" cue, not a second layer of data-hiding.
+
 	filter: blur(0.25rem);
 	opacity: 0.6;
 	pointer-events: none;
 	user-select: none;
 }
 
-// Covers the whole dummy-content box so a click anywhere in it (not just
-// the tag) opens the upgrade popup.
 .issue-detail-pro-gate-overlay {
 	position: absolute;
 	inset: 0;

@@ -15,7 +15,7 @@ use VuloPilot\Utill\ScannerUtil;
 defined( 'ABSPATH' ) || exit;
 
 /**
- * Extracts every `<script type="application/ld+json">` block on the
+ * Extracts every JSON-LD block on the
  * homepage and flags any that fail to parse as valid JSON. This
  * complements SchemaScanner's separate presence check (is there *any*
  * JSON-LD at all) with a validity check: malformed structured data is
@@ -112,13 +112,27 @@ class StructuredDataValidationScanner extends ScannerUtil {
      * "what JSON-LD blocks are actually on this page" question.
      *
      * @param string $html Page HTML.
-     * @return string[] Contents of each application/ld+json script block found.
+     * @return string[] Contents of each application/ld+json block found.
      */
     public static function extract_json_ld_blocks( string $html ): array {
-        if ( ! preg_match_all( '#<script[^>]+type=["\']application/ld\+json["\'][^>]*>(.*?)</script>#is', $html, $matches ) ) {
+        if ( '' === trim( $html ) || ! class_exists( '\\DOMDocument' ) ) {
             return array();
         }
 
-        return $matches[1];
+        $previous = libxml_use_internal_errors( true );
+        $document = new \DOMDocument();
+        $document->loadHTML( $html );
+        libxml_clear_errors();
+        libxml_use_internal_errors( $previous );
+
+        $blocks = array();
+
+        foreach ( $document->getElementsByTagName( 'script' ) as $node ) {
+            if ( 'application/ld+json' === strtolower( trim( $node->getAttribute( 'type' ) ) ) ) {
+                $blocks[] = $node->textContent;
+            }
+        }
+
+        return $blocks;
     }
 }

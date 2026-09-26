@@ -61,9 +61,9 @@ class LoginAttemptRepository extends RepositoryUtil {
     public function count_recent_failures( string $ip_address, int $minutes ): int {
         global $wpdb;
 
-        return (int) $wpdb->get_var(  // phpcs:ignore PluginCheck.Security.DirectDB.UnescapedDBParameter, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching  -- {$this->get_table()}/$table-style variables here are always this plugin's own hardcoded table name(s), never user input; dynamic placeholder counts (IN (...) lists, optional WHERE fragments) are sized correctly at runtime, just not statically visible to this sniff.
+        return (int) $wpdb->get_var(  // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching  -- {$this->get_table()}/$table-style variables here are always this plugin's own hardcoded table name(s), never user input; dynamic placeholder counts (IN (...) lists, optional WHERE fragments) are sized correctly at runtime, just not statically visible to this sniff.
             $wpdb->prepare(
-                "SELECT COUNT(*) FROM {$this->get_table()} WHERE event_type = %s AND ip_address = %s AND success = 0 AND created_at >= %s", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+                "SELECT COUNT(*) FROM %i WHERE event_type = %s AND ip_address = %s AND success = 0 AND created_at >= %s", $this->get_table(), // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
                 self::EVENT_TYPE,
                 $ip_address,
                 gmdate( 'Y-m-d H:i:s', time() - ( $minutes * MINUTE_IN_SECONDS ) )
@@ -88,9 +88,9 @@ class LoginAttemptRepository extends RepositoryUtil {
     public function get_recent_lockouts( int $days, int $threshold ): array {
         global $wpdb;
 
-        $rows = $wpdb->get_results(  // phpcs:ignore PluginCheck.Security.DirectDB.UnescapedDBParameter, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching  -- {$this->get_table()}/$table-style variables here are always this plugin's own hardcoded table name(s), never user input; dynamic placeholder counts (IN (...) lists, optional WHERE fragments) are sized correctly at runtime, just not statically visible to this sniff.
+        $rows = $wpdb->get_results(  // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching  -- {$this->get_table()}/$table-style variables here are always this plugin's own hardcoded table name(s), never user input; dynamic placeholder counts (IN (...) lists, optional WHERE fragments) are sized correctly at runtime, just not statically visible to this sniff.
             $wpdb->prepare(
-                "SELECT ip_address, COUNT(*) AS failure_count FROM {$this->get_table()} WHERE event_type = %s AND success = 0 AND created_at >= %s GROUP BY ip_address HAVING failure_count >= %d ORDER BY failure_count DESC", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+                "SELECT ip_address, COUNT(*) AS failure_count FROM %i WHERE event_type = %s AND success = 0 AND created_at >= %s GROUP BY ip_address HAVING failure_count >= %d ORDER BY failure_count DESC", $this->get_table(), // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
                 self::EVENT_TYPE,
                 gmdate( 'Y-m-d H:i:s', time() - ( $days * DAY_IN_SECONDS ) ),
                 $threshold

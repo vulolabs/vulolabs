@@ -350,14 +350,6 @@ Used only if you enable Instant Indexing, to tell search engines about new or up
 * Data sent: the changed URL(s), your site's host name and your IndexNow key, sent to api.indexnow.org.
 * Terms of use: https://www.indexnow.org/terms - Privacy: https://www.indexnow.org/privacy
 
-= Bing sitemap ping =
-
-Used when the XML sitemap feature is enabled, to tell Bing that your sitemap was updated.
-
-* When: when content that affects your sitemap changes (the request is sent in the background).
-* Data sent: your sitemap URL, sent to www.bing.com/ping.
-* Provided by Microsoft Corporation. Terms: https://www.microsoft.com/servicesagreement - Privacy: https://privacy.microsoft.com/privacystatement
-
 = WordPress.com mShots =
 
 Used by the dashboard to show a preview thumbnail of your homepage when no featured image or logo is available.
