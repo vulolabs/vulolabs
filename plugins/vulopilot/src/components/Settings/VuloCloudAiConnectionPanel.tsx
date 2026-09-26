@@ -12,9 +12,7 @@ import ShowProPopup from '../Popup/Popup';
 import CardHeader from '../CardHeader';
 
 interface VuloCloudStatus {
-	/** Is this site connected to a VuloCloud account at all (a real site secret exists)? */
 	connected: boolean;
-	/** Does an Organization's own (or an allowed Customer backup) AI service key actually resolve for this site right now? */
 	configured: boolean;
 }
 
@@ -24,20 +22,6 @@ interface VuloCloudAiConnectionResponse {
 
 const nonceHeaders = { headers: { 'X-WP-Nonce': vulopilotAppLocalizer.nonce } };
 
-/**
- * Settings → Connections → VuloCloud AI.
- *
- * Every cloud AI service (OpenAI, Gemini, Anthropic, OpenRouter, Groq) and
- * the self-hosted Ollama option this panel used to let a site owner
- * individually configure with their own credentials are gone by direct
- * instruction: VuloCloud is now the only supported way to get an AI
- * provider key, so this panel is just the "Connect to VuloCloud"/
- * "Disconnect" section - no local provider-config UI at
- * all anymore. See Controllers\VuloCloudAiConnection' own docblock (GET-only now)
- * and AIAssistant.tsx's own "Online" badge (now checks `vulocloud_status`
- * too, not just a local provider row that can no longer exist for a new
- * site).
- */
 const VuloCloudAiConnectionPanel = () => {
 	const [vulocloudStatus, setVulocloudStatus] = useState<VuloCloudStatus>({
 		connected: false,
@@ -119,7 +103,6 @@ const VuloCloudAiConnectionPanel = () => {
 			.catch(() => setIsConnectingToVulocloud(false));
 	};
 
-	/** Opens the confirm popup - the actual disconnect runs from `handleConfirmDisconnectVulocloud` once the user confirms there. */
 	const handleDisconnectFromVulocloud = () => {
 		setShowVulocloudDisconnectConfirm(true);
 	};
@@ -163,11 +146,11 @@ const VuloCloudAiConnectionPanel = () => {
 									)
 								: vulocloudStatus.configured
 									? __(
-											'Connected - an AI key is configured for this site by your Organization (or an allowed personal backup key).',
+											'Connected - AI requests run on your Organization’s AI key and use your AI credits.',
 											'vulopilot'
 										)
 									: __(
-											'Connected to VuloCloud, but no AI service key is configured yet for this site. Add one from your VuloCloud account, or ask your agency to.',
+											'Connected to VuloCloud, but your Organization hasn’t configured an AI key yet. Ask your Organization to add one.',
 											'vulopilot'
 										)
 						}
@@ -181,7 +164,7 @@ const VuloCloudAiConnectionPanel = () => {
 									? __('Not Connected', 'vulopilot')
 									: vulocloudStatus.configured
 										? __('Connected', 'vulopilot')
-										: __('Key needed', 'vulopilot')}
+										: __('Awaiting AI key', 'vulopilot')}
 							</span>
 						}
 						action={
