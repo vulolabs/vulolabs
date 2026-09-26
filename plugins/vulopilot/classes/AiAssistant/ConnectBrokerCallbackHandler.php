@@ -44,13 +44,13 @@ class ConnectBrokerCallbackHandler {
 
 		// `state` is the nonce this flow put on the authorize URL; nothing else in
 		// the request is read until it checks out.
-		if ( ! isset( $_GET['state'] ) || ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_GET['state'] ) ), 'vulopilot_connect_broker' ) ) {
+		if ( ! wp_verify_nonce( sanitize_text_field( (string) filter_input( INPUT_GET, 'state' ) ), 'vulopilot_connect_broker' ) ) {
 			wp_safe_redirect( $redirect_base . '&connect_status=error' );
 			exit;
 		}
 
-		$error = isset( $_GET['error'] ) ? sanitize_text_field( wp_unslash( $_GET['error'] ) ) : '';
-		$code  = isset( $_GET['code'] ) ? sanitize_text_field( wp_unslash( $_GET['code'] ) ) : '';
+		$error = sanitize_text_field( (string) filter_input( INPUT_GET, 'error' ) );
+		$code  = sanitize_text_field( (string) filter_input( INPUT_GET, 'code' ) );
 
 		if ( '' !== $error || '' === $code ) {
 			wp_safe_redirect( $redirect_base . '&connect_status=error' );

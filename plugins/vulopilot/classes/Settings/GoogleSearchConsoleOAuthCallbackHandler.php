@@ -60,8 +60,8 @@ class GoogleSearchConsoleOAuthCallbackHandler {
 
         // `state` carries the nonce this flow put on the authorize URL; nothing else
         // in the request is read until it checks out.
-        $state_is_valid = isset( $_GET['state'] ) && wp_verify_nonce( $connection->get_state_nonce( sanitize_text_field( wp_unslash( $_GET['state'] ) ) ), 'vulopilot_gsc_oauth' );
-        $state          = isset( $_GET['state'] ) ? sanitize_text_field( wp_unslash( $_GET['state'] ) ) : '';
+        $state          = sanitize_text_field( (string) filter_input( INPUT_GET, 'state' ) );
+        $state_is_valid = wp_verify_nonce( $connection->get_state_nonce( $state ), 'vulopilot_gsc_oauth' );
         $redirect_base  = 'keywords' === $connection->get_return_to_from_state( $state )
             ? admin_url( 'admin.php?page=vulopilot#&tab=seo-visibility&subtab=keywords' )
             : admin_url( 'admin.php?page=vulopilot#&tab=settings&subtab=google-services' );
@@ -71,8 +71,8 @@ class GoogleSearchConsoleOAuthCallbackHandler {
             exit;
         }
 
-        $error = isset( $_GET['error'] ) ? sanitize_text_field( wp_unslash( $_GET['error'] ) ) : '';
-        $code  = isset( $_GET['code'] ) ? sanitize_text_field( wp_unslash( $_GET['code'] ) ) : '';
+        $error = sanitize_text_field( (string) filter_input( INPUT_GET, 'error' ) );
+        $code  = sanitize_text_field( (string) filter_input( INPUT_GET, 'code' ) );
 
         if ( '' !== $error || '' === $code ) {
             wp_safe_redirect( $redirect_base . '&gsc_status=error' );

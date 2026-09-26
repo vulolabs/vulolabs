@@ -13,7 +13,7 @@ defined( 'ABSPATH' ) || exit;
  * plugin can practically run).
  *
  * Checks only the request URI + raw query string - deliberately never
- * `$_POST`, since inspecting POST bodies for these same substrings would
+ * the request body, since inspecting POST bodies for these same substrings would
  * false-positive on entirely legitimate content (e.g. an admin editing a
  * blog post that happens to discuss SQL injection, or pasting a `../`
  * relative path into a code sample). A small, well-known, low-false-
