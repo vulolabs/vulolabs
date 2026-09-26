@@ -1,30 +1,27 @@
 import { __ } from '@wordpress/i18n';
-import { Button, TextControl, TextareaControl } from '@wordpress/components';
-import { useEffect, useState } from '@wordpress/element';
+import { Button, TextControl, TextareaControl, ToggleControl } from '@wordpress/components';
+import { useState } from '@wordpress/element';
 import { usePostData } from '../usePostData';
 import SnippetPreview from '../SnippetPreview';
-import Checklist from '../Checklist';
-import { analyzePost, AnalysisResult, FixResponse } from '../api';
-
-const GROUP_LABELS: Record< AnalysisResult[ 'group' ], string > = {
-	basic: __( 'Basic SEO', 'vulopilot' ),
-	additional: __( 'Additional', 'vulopilot' ),
-	title_readability: __( 'Title Readability', 'vulopilot' ),
-};
+import { useFieldHighlight } from '../useFieldHighlight';
 
 interface GeneralTabProps {
-	/** "All SEO Issues" table's "Fix with AI" deep link - an OnPageAnalyzer check id (e.g. 'description_length') to scroll to and highlight once the checklist below has (re-)computed it. */
+	/** "All SEO Issues" table's "Fix with AI" deep link - currently only ever resolves to 'canonical_url' on this tab (see seoIssueEditorTarget.ts). */
 	highlightTarget?: string;
-	/** `PostSeoPanel.tsx`'s own in-sidebar tab switch - accepted for prop-shape parity with every other tab (`PostSeoPanel.tsx` passes it uniformly to whichever tab is active), unused here since this tab is never itself the target of `PageAnalysisTab.tsx`'s own row clicks. */
+	/** `PostSeoPanel.tsx`'s own in-sidebar tab switch - accepted for prop-shape parity with every other tab, unused here. */
 	onNavigate?: ( tab: string, target?: string ) => void;
 }
 
 /**
  * The metabox's General tab - focus keyword, SEO title (native
  * `post_title`), meta description (native `post_excerpt`), a live snippet
- * preview, and Services\OnPageAnalyzer's checklist. Analysis re-runs on a
- * short debounce against LIVE, possibly-unsaved editor state (see
- * PostSeo.php for why that's a POST-with-body, not a stored-post read).
+ * preview, and the per-post robots/canonical settings: a canonical URL
+ * override (Services\CanonicalUrlManager::maybe_override_canonical(), which
+ * filters WP core's own `get_canonical_url` directly, so it takes effect
+ * regardless of the sitewide "Add canonical URL tags" setting) and
+ * noindex/nofollow (Services\PostRobotsMetaManager's `wp_robots` filter).
+ * The live checklist (Services\OnPageAnalyzer) is on the Page Analysis tab,
+ * next to the saved-page checks it complements.
  *
  * Preview sits first with title/description tucked behind an "Edit
  * Snippet" toggle; Focus Keyword is a single removable pill, not a
@@ -35,66 +32,17 @@ interface GeneralTabProps {
  * nothing.
  */
 export default function GeneralTab( { highlightTarget }: GeneralTabProps ) {
-	const { postId, title, excerpt, slug, content, meta, setTitle, setExcerpt, setMeta } = usePostData();
+	const { title, excerpt, slug, meta, setTitle, setExcerpt, setMeta } = usePostData();
+	const { metaKeys } = window.vulopilotPostSeo;
+	const canonicalUrl = ( meta[ metaKeys.canonical_url ] as string ) || '';
+	const noindex = Boolean( meta[ metaKeys.robots_noindex ] );
+	const nofollow = Boolean( meta[ metaKeys.robots_nofollow ] );
+	const isCanonicalHighlighted = useFieldHighlight( highlightTarget, 'canonical_url' );
 	const focusKeyword = ( meta[ window.vulopilotPostSeo.metaKeys.focus_keyword ] as string ) || '';
 
-	const [ results, setResults ] = useState< AnalysisResult[] >( [] );
-	const [ analyzing, setAnalyzing ] = useState( false );
 	const [ isEditingSnippet, setIsEditingSnippet ] = useState( false );
 	const [ isAddingKeyword, setIsAddingKeyword ] = useState( false );
 	const [ keywordDraft, setKeywordDraft ] = useState( '' );
-
-	useEffect( () => {
-		let cancelled = false;
-		setAnalyzing( true );
-
-		const timeout = setTimeout( () => {
-			analyzePost( postId, { title, content, excerpt, slug, focus_keyword: focusKeyword } )
-				.then( ( response ) => {
-					if ( ! cancelled ) {
-						setResults( response.results );
-					}
-				} )
-				.catch( () => {
-					// A failed analysis call just leaves the previous
-					// checklist showing - not worth surfacing as an error,
-					// it re-runs automatically on the next edit.
-				} )
-				.finally( () => {
-					if ( ! cancelled ) {
-						setAnalyzing( false );
-					}
-				} );
-		}, 600 );
-
-		return () => {
-			cancelled = true;
-			clearTimeout( timeout );
-		};
-	}, [ postId, title, excerpt, slug, content, focusKeyword ] );
-
-	const handleFixed = ( actionId: string, response: FixResponse ) => {
-		if ( ! response.post ) {
-			return;
-		}
-
-		if ( 'write-meta-title' === actionId ) {
-			setTitle( response.post.title );
-		}
-
-		if ( 'write-meta-description' === actionId ) {
-			setExcerpt( response.post.excerpt );
-		}
-
-		// improve-readability/add-subheadings rewrite post_content on the
-		// server - deliberately NOT live-synced into the open editor's
-		// block canvas (that would mean re-parsing HTML into blocks under
-		// an actively-edited post, risking clobbering an in-progress edit
-		// or the undo stack). The write already happened and is real;
-		// reloading the editor is what picks it up.
-	};
-
-	const byGroup = ( group: AnalysisResult[ 'group' ] ) => results.filter( ( result ) => result.group === group );
 
 	const startAddingKeyword = () => {
 		setKeywordDraft( '' );
@@ -158,7 +106,7 @@ export default function GeneralTab( { highlightTarget }: GeneralTabProps ) {
 
 			<div className="vulopilot-seo-section-label">{ __( 'Focus Keyword', 'vulopilot' ) }</div>
 			<p className="small desc vulopilot-seo-focus-keyword-help">
-				{ __( 'The main term you want this page to rank for - drives the checks below.', 'vulopilot' ) }
+				{ __( 'The main term you want this page to rank for - drives the checks on the Page Analysis tab.', 'vulopilot' ) }
 			</p>
 
 			<div className="vulopilot-seo-focus-keyword">
@@ -204,22 +152,34 @@ export default function GeneralTab( { highlightTarget }: GeneralTabProps ) {
 				) }
 			</div>
 
-			{ analyzing && 0 === results.length ? (
-				<div className="desc">{ __( 'Analyzing…', 'vulopilot' ) }</div>
-			) : (
-				( [ 'basic', 'additional', 'title_readability' ] as const ).map( ( group ) => (
-					<Checklist
-						key={ group }
-						title={ GROUP_LABELS[ group ] }
-						results={ byGroup( group ) }
-						postId={ postId }
-						isPro={ window.vulopilotPostSeo.isPro }
-						shopUrl={ window.vulopilotPostSeo.shopUrl }
-						onFixed={ handleFixed }
-						highlightId={ highlightTarget }
-					/>
-				) )
-			) }
+			<div className="vulopilot-seo-section-label">{ __( 'Robots & Canonical', 'vulopilot' ) }</div>
+
+			<div
+				id="vulopilot-seo-field-canonical_url"
+				className={ isCanonicalHighlighted ? 'vulopilot-seo-highlight-pulse' : undefined }
+			>
+				<TextControl
+					label={ __( 'Canonical URL', 'vulopilot' ) }
+					help={ __( 'Leave empty to use this page\'s own permalink (the default WordPress already uses).', 'vulopilot' ) }
+					placeholder={ window.location.origin + '/' + slug }
+					value={ canonicalUrl }
+					onChange={ ( value ) => setMeta( { [ metaKeys.canonical_url ]: value } ) }
+				/>
+			</div>
+
+			<ToggleControl
+				label={ __( 'No Index', 'vulopilot' ) }
+				help={ __( 'Tell search engines not to show this page in search results.', 'vulopilot' ) }
+				checked={ noindex }
+				onChange={ ( value ) => setMeta( { [ metaKeys.robots_noindex ]: value } ) }
+			/>
+
+			<ToggleControl
+				label={ __( 'No Follow', 'vulopilot' ) }
+				help={ __( 'Tell search engines not to follow links on this page.', 'vulopilot' ) }
+				checked={ nofollow }
+				onChange={ ( value ) => setMeta( { [ metaKeys.robots_nofollow ]: value } ) }
+			/>
 		</div>
 	);
 }

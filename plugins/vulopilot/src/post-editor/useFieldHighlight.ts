@@ -1,8 +1,8 @@
 import { useEffect, useRef, useState } from '@wordpress/element';
 
 /**
- * Same scroll-to-and-pulse-highlight idiom `Checklist.tsx` uses for General
- * tab checklist rows, factored out for the Advanced/Social tabs' own plain
+ * Same scroll-to-and-pulse-highlight idiom `PageAnalysisTab.tsx` uses for its
+ * rows, factored out for the General/Social tabs' own plain
  * fields (no live-recomputed list to wait on there, so this is simpler:
  * the target element already exists as soon as the tab mounts). `fieldKey`
  * is one of `SEO_ISSUE_EDITOR_TARGETS`' own `target` strings

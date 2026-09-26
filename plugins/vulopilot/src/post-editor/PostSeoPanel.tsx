@@ -2,7 +2,6 @@ import { __ } from '@wordpress/i18n';
 import { useState } from '@wordpress/element';
 import { TabPanel } from '@wordpress/components';
 import GeneralTab from './tabs/GeneralTab';
-import AdvancedTab from './tabs/AdvancedTab';
 import SocialTab from './tabs/SocialTab';
 import SchemaTab from './tabs/SchemaTab';
 import PageAnalysisTab from './tabs/PageAnalysisTab';
@@ -18,7 +17,6 @@ import type { SeoIssueEditorTab } from '../services/seoIssueEditorTarget';
  */
 const TABS = [
 	{ name: 'general', title: __( 'General', 'vulopilot' ), icon: 'admin-generic', Component: GeneralTab },
-	{ name: 'advanced', title: __( 'Advanced', 'vulopilot' ), icon: 'portfolio', Component: AdvancedTab },
 	{ name: 'social', title: __( 'Social', 'vulopilot' ), icon: 'share', Component: SocialTab },
 	{ name: 'schema', title: __( 'Schema', 'vulopilot' ), icon: 'editor-code', Component: SchemaTab },
 	{ name: 'page-analysis', title: __( 'Page Analysis', 'vulopilot' ), icon: 'chart-bar', Component: PageAnalysisTab },
@@ -39,7 +37,7 @@ interface PostSeoPanelProps {
  *
  * `navTarget` is this panel's own in-sidebar navigation state - lets
  * `PageAnalysisTab.tsx`'s own checklist rows jump straight to the real
- * field that fixes them (General/Advanced/Social/Schema, whichever one
+ * field that fixes them (General/Social/Schema, whichever one
  * `SEO_ISSUE_EDITOR_TARGETS` names for that check), the same real
  * tab+highlight pair the "All SEO Issues" table's own "Fix with AI" deep
  * link already lands on from outside the editor - just switched without a

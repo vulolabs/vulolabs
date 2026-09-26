@@ -5,7 +5,7 @@ namespace VuloPilot\SeoVisibility;
 defined( 'ABSPATH' ) || exit;
 
 /**
- * The post-editor metabox's Advanced tab noindex/nofollow toggles
+ * The post-editor metabox's General tab noindex/nofollow toggles
  * (Services\PostSeoMetaFields::META_KEYS) - filters WordPress core's own
  * `wp_robots` output (the `<meta name="robots">` tag core has generated
  * since WP 5.7) rather than echoing a second, competing robots tag. No

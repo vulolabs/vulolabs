@@ -14,23 +14,23 @@
  * pretend to highlight something that isn't there.
  */
 
-export type SeoIssueEditorTab = 'general' | 'advanced' | 'social' | 'schema' | 'page-analysis';
+export type SeoIssueEditorTab = 'general' | 'social' | 'schema' | 'page-analysis';
 
 export interface SeoIssueEditorTarget {
 	tab: SeoIssueEditorTab;
-	/** OnPageAnalyzer check id (General tab) or field key (Advanced/Social/Schema). */
+	/** OnPageAnalyzer check id (General tab) or field key (Social/Schema, or a General-tab field). */
 	target?: string;
 }
 
 export const SEO_ISSUE_EDITOR_TARGETS: Record<string, SeoIssueEditorTarget> = {
-	seo: { tab: 'general', target: 'title_length' },
-	'meta-description': { tab: 'general', target: 'description_length' },
-	'thin-content': { tab: 'general', target: 'content_length' },
-	'heading-structure': { tab: 'general', target: 'has_subheadings' },
-	'seo-images': { tab: 'general', target: 'image_alt' },
-	images: { tab: 'general', target: 'image_alt' },
-	'internal-linking': { tab: 'general', target: 'has_links' },
-	'canonical-url': { tab: 'advanced', target: 'canonical_url' },
+	seo: { tab: 'page-analysis', target: 'title_length' },
+	'meta-description': { tab: 'page-analysis', target: 'description_length' },
+	'thin-content': { tab: 'page-analysis', target: 'content_length' },
+	'heading-structure': { tab: 'page-analysis', target: 'has_subheadings' },
+	'seo-images': { tab: 'page-analysis', target: 'image_alt' },
+	images: { tab: 'page-analysis', target: 'image_alt' },
+	'internal-linking': { tab: 'page-analysis', target: 'has_links' },
+	'canonical-url': { tab: 'general', target: 'canonical_url' },
 	'open-graph': { tab: 'social', target: 'social_title' },
 	'twitter-card': { tab: 'social', target: 'social_title' },
 	schema: { tab: 'schema', target: 'schema_json' },
