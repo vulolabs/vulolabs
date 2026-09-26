@@ -3,7 +3,6 @@ import { useEffect, useMemo, useState } from 'react';
 import { __, _n, sprintf } from '@wordpress/i18n';
 import { getApiLink, getApiResponse, COLOR_PALETTE } from '@zyra/core';
 import {
-	AnalyticsComponent,
 	CardComponent,
 	ChartComponent,
 	ColumnComponent,
@@ -12,18 +11,15 @@ import {
 	FormGroupWrapperComponent,
 	ListComponent,
 	ModuleGuardComponent,
-	NoticeComponent,
 	TooltipComponent,
 	TypographyComponent,
 } from '@zyra/components';
-import { SelectInput, ToggleInput } from '@zyra/inputs';
+import { ToggleInput } from '@zyra/inputs';
 import { TableCard } from '@zyra/table';
 import { formatWpDate } from '../../services/formatWpDate';
 import RecommendedFixesCard from './RecommendedFixesCard';
 import './Performance.scss';
 
-/** `id: 'integrations'` (Settings/Integrations.ts) - where the real PageSpeed Insights API key field this notice's own "no PSI connected" message used to describe in text actually lives (merged in from the old standalone `pagespeed-insights` tab per direct instruction). */
-const PERFORMANCE_SETTINGS_URL = '?page=vulopilot#&tab=settings&subtab=integrations';
 
 interface PageSpeedRow {
 	id: number;
@@ -79,11 +75,6 @@ interface ScoreSnapshot {
 	performance_score: number;
 }
 
-const TREND_DAY_OPTIONS = [
-	{ label: __('7D', 'vulopilot'), value: '7' },
-	{ label: __('30D', 'vulopilot'), value: '30' },
-	{ label: __('90D', 'vulopilot'), value: '90' },
-];
 
 const PAGE_TYPE_ICONS: Record<string, string> = {
 	homepage: 'home',
@@ -279,7 +270,7 @@ const SlowPagesTab = () => {
 	const [pageTypeFilter, setPageTypeFilter] = useState('');
 	const [searchTerm, setSearchTerm] = useState('');
 	const [detailRow, setDetailRow] = useState<PageSpeedRow | null>(null);
-	const [trendDays, setTrendDays] = useState('30');
+	const [trendDays] = useState('30');
 	// Real "which real PSI device's own scores to show" toggle for the
 	// "Slow Pages Score" summary card's header - mobile first, same real
 	// "mobile is the default device" convention PageSpeedScanner.php's own

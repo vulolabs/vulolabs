@@ -561,10 +561,6 @@ const BusinessProfileCard = () => {
 							className="mini-card report"
 							items={
 								entities?.people.map((person) => {
-									const roleLabel =
-										'string' === typeof person.meta?.role_label
-											? person.meta.role_label
-											: '';
 
 									const editUrl =
 										'string' === typeof person.meta?.edit_url

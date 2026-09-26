@@ -11,7 +11,7 @@ import {
 	ListComponent,
 	TypographyComponent,
 } from '@zyra/components';
-import { ButtonInput, ToggleInput } from '@zyra/inputs';
+import { ToggleInput } from '@zyra/inputs';
 import { formatWpDate } from '../../services/formatWpDate';
 import type { FindingGroup } from '../../components/Issues/issuesTypes';
 import { useVisibilityScore } from './useVisibilityScore';

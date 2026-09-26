@@ -55,22 +55,6 @@ const overallRatingLabel = (score: number): string => {
 	return __('At Risk', 'vulopilot');
 };
 
-/**
- * `.geo-overall-rating`'s own real `is-good`/`is-attention`/`is-poor`
- * classes (`SeoVisibility.scss`) - NOT `ratingColorFor()` above's
- * `green`/`yellow`/`red` (that one feeds `TypographyComponent`'s own
- * `color` prop for the per-topic row values instead, a different consumer
- * with a different real class contract).
- */
-const overallRatingClass = (score: number): string => {
-	if (score >= 70) {
-		return 'is-good';
-	}
-	if (score >= 40) {
-		return 'is-attention';
-	}
-	return 'is-poor';
-};
 
 interface AeoTopic {
 	key: string;
@@ -79,14 +63,6 @@ interface AeoTopic {
 	scannerIds: string[];
 }
 
-/**
- * Score a site needs to reach for a real "Good" AEO rating - same `>= 70`
- * cutoff AeoTab.tsx's own `getRating()`/`ratingClass()` already use for the
- * gauge itself, so this card's own "Goal: 70+" copy always agrees with
- * what actually turns that gauge green, rather than a second, invented
- * number.
- */
-const GOOD_RATING_THRESHOLD = 70;
 
 interface AeoScoreSummaryCardProps {
 	isLoading: boolean;

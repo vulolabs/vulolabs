@@ -5,7 +5,6 @@ import { getApiLink, getApiResponse, COLOR_PALETTE } from '@zyra/core';
 import {
 	CardComponent,
 	ChartComponent,
-	ContainerComponent,
 	ColumnComponent,
 	ModuleGuardComponent,
 	TypographyComponent
@@ -15,10 +14,7 @@ import './Performance.scss';
 import RealTimeMonitoringCard from './RealTimeMonitoringCard';
 import SpeedHistoryCard from './SpeedHistoryCard';
 import LiveSiteInsightsCard from '../Security/LiveSiteInsightsCard';
-import PhpAccelerationCard from './PhpAccelerationCard';
 
-/** `id: 'integrations'` (Settings/Integrations.ts) - where the real PageSpeed Insights API key field this card's own "no PSI connected" message used to describe in text actually lives; originally moved from the old Settings → Scanning → Performance tab, then merged (along with this folder's other sub-tabs) into this one "Integrations" tab per direct instruction. */
-const PERFORMANCE_SETTINGS_URL = '?page=vulopilot#&tab=settings&subtab=integrations';
 
 interface DashboardSummary {
 	category_scores: { performance: number };
@@ -48,8 +44,6 @@ interface PerformanceScoreCardProps {
 	onViewDetails: () => void;
 }
 
-/** Below this many real RUM samples, a p75 isn't trustworthy enough to show. */
-const MIN_SAMPLES = 10;
 
 interface Rating {
 	label: string;
@@ -99,120 +93,11 @@ const TEXT_COLOR: Record<Rating['className'], string> = {
 	poor: 'red',
 };
 
-/** Google's real, public Core Web Vitals thresholds - LCP/INP in ms, CLS unitless. */
-const CWV_THRESHOLDS: Record<'lcp' | 'inp' | 'cls', { good: number; needsImprovement: number }> = {
-	lcp: { good: 2500, needsImprovement: 4000 },
-	inp: { good: 200, needsImprovement: 500 },
-	cls: { good: 0.1, needsImprovement: 0.25 },
-};
 
-const getVitalRating = (
-	value: number,
-	thresholds: { good: number; needsImprovement: number }
-): Rating => {
-	if (value <= thresholds.good) {
-		return { label: __('Good', 'vulopilot'), className: 'good' };
-	}
-	if (value <= thresholds.needsImprovement) {
-		return { label: __('Needs Work', 'vulopilot'), className: 'needs-improvement' };
-	}
-	return { label: __('At Risk', 'vulopilot'), className: 'poor' };
-};
 
-interface VitalRowProps {
-	label: string;
-	displayValue: string;
-	value: number;
-	thresholds: { good: number; needsImprovement: number };
-	goodCaption: string;
-}
 
-/**
- * Same small "status row" ring gauge zyra's own ChartComponent Storybook
- * `RingRow` story establishes (independent per-metric rings, custom
- * per-item color, no shared axis) - replacing this row's own linear
- * fill bar, which plotted the exact same proportional read (`fillPercent`
- * below, unchanged) just as a bar instead of a ring.
- */
-const VitalRow = ({ label, displayValue, value, thresholds, goodCaption }: VitalRowProps) => {
-	const rating = getVitalRating(value, thresholds);
-	// How far this value sits toward 1.3x the "needs improvement" ceiling,
-	// capped at 100 - a real proportional read of where this value sits,
-	// not a literal percentile-of-all-sites (no such dataset exists here).
-	const fillPercent = Math.min(100, (value / (thresholds.needsImprovement * 1.3)) * 100);
 
-	return (
-		<div className="core-web-vital-row">
-			<ChartComponent
-				type="ring"
-				height={90}
-				color={RATING_COLOR[rating.className]}
-				data={[{ value: fillPercent }]}
-				centerLabel={
-					<span className={`core-web-vital-row-value ${rating.className}`}>
-						{displayValue}
-					</span>
-				}
-			/>
-			<TypographyComponent variant="body-sm" className="core-web-vital-row-label">
-				{label}
-			</TypographyComponent>
-			<TypographyComponent
-				variant="body-sm"
-				weight="semibold"
-				className={`core-web-vital-row-rating ${rating.className}`}
-			>
-				<span className="core-web-vital-row-dot" />
-				{rating.label}
-			</TypographyComponent>
-			<TypographyComponent variant="desc" className="core-web-vital-row-caption">
-				{goodCaption}
-			</TypographyComponent>
-		</div>
-	);
-};
 
-interface ScoreTileProps {
-	label: string;
-	score: number;
-	/** `speed-score-tile-single` when there's no PSI key configured (one real unified score, not a device split) - see the "Overall Speed Score" fallback below. */
-	single?: boolean;
-}
-
-/**
- * One score-ring tile - Mobile/Desktop (real PSI key configured) or Overall
- * (no PSI key, the single real unified `category_scores.performance`
- * number). Extracted from 3 near-identical copies of the same
- * ring+label+rating markup, one per case, that only ever differed in which
- * real score they read.
- */
-const ScoreTile = ({ label, score, single = false }: ScoreTileProps) => {
-	const rating = getScoreRating(score);
-
-	return (
-		<div className={`speed-score-tile${single ? ' speed-score-tile-single' : ''}`}>
-			<div className="speed-score-tile-label">{label}</div>
-			<ChartComponent
-				type="ring"
-				height={90}
-				color={RATING_COLOR[rating.className]}
-				data={[{ value: score }]}
-				centerLabel={
-					<>
-						<span className={`speed-score-tile-value ${rating.className}`}>
-							{score}
-						</span>
-						<span className="speed-score-tile-max">/100</span>
-					</>
-				}
-			/>
-			<span className={`speed-score-tile-rating ${rating.className}`}>
-				<span className="speed-score-tile-dot" />
-				{rating.label}
-			</span>
-		</div>
-	);
-};
 
 /**
  * "Performance Score" - now two real cards:
@@ -238,7 +123,7 @@ const ScoreTile = ({ label, score, single = false }: ScoreTileProps) => {
  */
 const PerformanceScoreCard = ({ onViewDetails }: PerformanceScoreCardProps) => {
 	const [dashboard, setDashboard] = useState<DashboardSummary | null>(null);
-	const [vitals, setVitals] = useState<CoreWebVitalsSummary | null>(null);
+	const [, setVitals] = useState<CoreWebVitalsSummary | null>(null);
 	const [isLoading, setIsLoading] = useState(true);
 	const [hasError, setHasError] = useState(false);
 	/** Drives SpeedHistoryCard's own real `days` param below - same `PERIOD_OPTIONS`/`ToggleInput` shape SecurityTrendCard.tsx's own card action already uses. RealTimeMonitoringCard isn't affected - its own metrics are real-time, not a day-range trend. */

@@ -69,46 +69,6 @@ const truncateDescription = (text: string, maxLength = 50): string => {
 	return `${cut.trimEnd()}…`;
 };
 
-/**
- * Real, client-side CSV built straight from whatever groups currently
- * pass every active filter (tab/priority/search/category/resource) - same
- * real "export exactly what's on screen" posture BrokenLinksSection.tsx's
- * own `downloadBrokenLinksCsv` already established, not a second server
- * round-trip.
- */
-const downloadIssuesCsv = (groups: FindingGroup[]) => {
-	const header = [
-		__('Issue', 'vulopilot'),
-		__('Category', 'vulopilot'),
-		__('Severity', 'vulopilot'),
-		__('Affected', 'vulopilot'),
-		__('Resource type', 'vulopilot'),
-	];
-	const lines = groups.map((group) => [
-		group.label,
-		CATEGORY_LABELS[group.category] ?? group.category,
-		group.severity,
-		String(group.count),
-		group.object_type ?? '',
-	]);
-	const csv = [header, ...lines]
-		.map((row) =>
-			row
-				.map((cell) => `"${String(cell).replace(/"/g, '""')}"`)
-				.join(',')
-		)
-		.join('\n');
-
-	const blob = new Blob([csv], { type: 'text/csv' });
-	const url = URL.createObjectURL(blob);
-	const link = document.createElement('a');
-	link.href = url;
-	link.download = 'issues.csv';
-	document.body.appendChild(link);
-	link.click();
-	document.body.removeChild(link);
-	URL.revokeObjectURL(url);
-};
 
 export type SectionedIssuesTab = 'all' | 'important' | string;
 
@@ -176,7 +136,6 @@ interface SectionedIssuesTableProps {
  */
 const SectionedIssuesTable = ({
 	id,
-	title,
 	sections,
 	allScannerIds: allScannerIdsProp,
 	activeTab,
@@ -197,7 +156,7 @@ const SectionedIssuesTable = ({
 	// (FindingRepository::get_finding_groups()'s own real escape hatch,
 	// added alongside this) so real ignored/resolved/snoozed findings are
 	// folded into the same real groups too, not a second, separate list.
-	const [showIgnored, setShowIgnored] = useState(false);
+	const [showIgnored] = useState(false);
 
 	useEffect(() => {
 		setIsLoading(true);
@@ -276,7 +235,6 @@ const SectionedIssuesTable = ({
 		})),
 	];
 
-	const activeTabMeta = tabs.find((tab) => tab.id === activeTab);
 
 	const scannerIdsForTab: Record<string, string[]> = {
 		all: allScannerIds,

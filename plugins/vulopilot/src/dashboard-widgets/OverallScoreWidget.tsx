@@ -10,8 +10,6 @@ import {
 } from '@zyra/components';
 import { ButtonInput } from '@zyra/inputs';
 import DashboardWidget from './DashboardWidget';
-import { useLastScanTime } from '../services/useLastScanTime';
-import { formatWpDate } from '../services/formatWpDate';
 import { WidgetProps } from './types';
 import { useApiList } from '../services/useApiList';
 import { SEO_SECTIONS } from '../pages/GEO/seoSections';
@@ -130,13 +128,6 @@ const OverallScoreWidget: React.FC<WidgetProps> = ({
 	isCustomizing,
 	onRefreshSummary,
 }) => {
-	// Real most-recent completed scan across every category - same real
-	// `useLastScanTime()` hook CrawlRobotsSitemapSection.tsx's own "Last
-	// Checked" tile already uses, called here with no category filter
-	// since this widget's own score is a sitewide rollup, not scoped to
-	// one category.
-	const { lastScanAt } = useLastScanTime();
-
 	// Fixed cardinality (always exactly 3 rows), so one real `useApiList`
 	// call each rather than a loop - `per_page: 1` since only `total` is used.
 	const seoFindings = useApiList<{ id: number }>('findings', {

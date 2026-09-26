@@ -6,7 +6,7 @@ import { ColumnComponent, ModuleGuardComponent } from '@zyra/components';
 import { TableCard } from '@zyra/table';
 import type { FindingGroup } from '../../../components/Issues/issuesTypes';
 import { CATEGORY_LABELS, formatAffected } from '../../../components/Issues/issuesTypes';
-import IssuesSummaryCards, { Priority } from '../../../components/Issues/IssuesSummaryCards';
+import { Priority } from '../../../components/Issues/IssuesSummaryCards';
 import IssueDetailPanel from '../../../components/Issues/IssueDetailPanel';
 
 /**
@@ -36,13 +36,13 @@ interface GroupsResponse {
 }
 
 const IssuesSection = () => {
-	const [activePriority, setActivePriority] = useState<Priority>('all');
+	const [activePriority] = useState<Priority>('all');
 	const [paged, setPaged] = useState(1);
 	const [perPage, setPerPage] = useState(10);
 
 	const [data, setData] = useState<FindingGroup[]>([]);
 	const [total, setTotal] = useState(0);
-	const [priorityCounts, setPriorityCounts] = useState({
+	const [, setPriorityCounts] = useState({
 		high: 0,
 		medium: 0,
 		low: 0,
@@ -130,10 +130,6 @@ const IssuesSection = () => {
 
 	const refetch = () => setReloadToken((n) => n + 1);
 
-	const handlePriorityChange = (priority: Priority) => {
-		setActivePriority(priority);
-		setPaged(1);
-	};
 
 	/** Shared by the row click and the action cell's own "More Details"/"Showing" button below - same real toggle IssuesList.tsx's own identical `selectGroup` already establishes, now also scrolling the detail panel into view (`scrollToId`, not `window.scrollTo` - WP admin's own scrollable wrapper isn't the document) on a real select, never on deselect. */
 	const handleSelectGroup = (group: FindingGroup) => {

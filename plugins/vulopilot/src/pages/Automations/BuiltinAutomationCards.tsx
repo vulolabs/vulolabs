@@ -131,7 +131,6 @@ const BuiltinAutomationCard = ({
 	isHighlighted,
 }: BuiltinAutomationCardProps) => {
 	const [isRunning, setIsRunning] = useState(false);
-	const [isEditing, setIsEditing] = useState(false);
 	const config = parseTriggerConfig(row);
 	const isEnabled = 'enabled' === row.status;
 

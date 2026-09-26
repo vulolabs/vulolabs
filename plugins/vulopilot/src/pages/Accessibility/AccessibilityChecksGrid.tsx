@@ -1,5 +1,4 @@
 import { __, sprintf, _n } from '@wordpress/i18n';
-import { ButtonInput } from '@zyra/inputs';
 import { ListComponent, TypographyComponent } from '@zyra/components';
 import { useApiList } from '../../services/useApiList';
 import { ACCESSIBILITY_CHECKS } from './accessibilityChecks';

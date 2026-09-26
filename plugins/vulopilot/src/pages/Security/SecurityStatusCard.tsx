@@ -114,7 +114,7 @@ const SecurityStatusCard = ({
 	// Same real open-finding count the old SecurityStatusCard already
 	// fetched, still used below for the "protected / needs attention"
 	// verdict line.
-	const { total: openFindings, isLoading: isLoadingFindings } =
+	const { total: openFindings } =
 		useApiList<FindingRow>('findings', {
 			category: 'security',
 			status: 'open',

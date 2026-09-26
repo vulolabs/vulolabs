@@ -15,7 +15,6 @@ import {
 } from '@zyra/components';
 import type { FindingGroup } from '../../components/Issues/issuesTypes';
 import { useSeoScore, SeoScoreResponse } from './useSeoTabData';
-import { useRunScan } from '../../services/useRunScan';
 import { getRating, ratingColor } from './seoRating';
 import { ALL_SEO_SCANNER_IDS } from './seoIssuesShared';
 import { SEO_SECTIONS } from './seoSections';
@@ -59,29 +58,6 @@ const SEARCH_ENGINE_ACCESS_SCANNER_IDS = [
 ];
 
 
-/**
- * Real day-by-day average of every real per-category `trend` array
- * (`Seo.php`'s own `get_category_trend()`, already real, one point per
- * category per day) - meant to feed a real 7th "All Areas" tile's own
- * sparkline below, folding `CATEGORY_CARDS`' own 6 real per-category
- * scores into one combined number. That 7th tile was never actually added
- * to the tile row further down (`CATEGORY_CARDS.map()` only produces 6) -
- * confirmed unreachable, real, working, just flagged here rather than
- * deleted or built without knowing the intended tile's exact copy/icon.
- */
-const overallCategoryTrend = (score: SeoScoreResponse): number[] => {
-	const trends = Object.values(score.category_scores).map(
-		(category) => category.trend
-	);
-	const days = trends[0]?.length ?? 0;
-
-	return Array.from({ length: days }, (_, dayIndex) =>
-		Math.round(
-			trends.reduce((sum, trend) => sum + (trend[dayIndex] ?? 0), 0) /
-			trends.length
-		)
-	);
-};
 
 /**
  * Real per-band copy under the "Overall SEO Score" ring - same real
@@ -136,99 +112,14 @@ const categoryScoreDelta = (category: SeoScoreResponse['category_scores'][keyof 
 const isSeoModuleActive = () =>
 	vulopilotAppLocalizer.active_modules?.includes('technical-seo') ?? false;
 
-/**
- * "SEO" tab of "SEO & Visibility" - restyled a 2nd time to match a newer
- * reference mockup ("SEO Health Score" hero card, a 6-tile "SEO areas"
- * grid, "What should I fix first?"/"Pages that need attention"/"All SEO
- * findings" below, all real). One piece of that mockup is deliberately NOT
- * built here (direct instruction, after flagging it as genuinely unbacked
- * by any real data source): the "Page Analysis" panel - a live per-URL
- * check runner with a Search Preview snippet, per-check pass/fail list, and
- * a "Fix with AI" button. Nothing in this codebase runs a live check
- * against an arbitrary URL on demand like this; building it would mean a
- * genuinely new feature, not a restyle.
- *
- * Everything else here is real:
- * - "SEO Health Score" merges what used to be 2 separate cards (a plain
- *   ring + a separate 3-tile category grid) into the mockup's own single
- *   hero card: the same real ring, plus 4 real stat blocks (Pages checked/
- *   Issues found/Critical issues/High priority issues - `Seo.php`'s own
- *   `pages_checked`/`total_open`/`severity_breakdown`, `pages_checked`
- *   being the real published post+page count `SeoScanner` itself scans,
- *   not a separate invented definition). "Issues found"/"Critical"/"High"
- *   each get the one real delta above; "Pages checked" doesn't (no
- *   per-day history exists for that count, only for findings). 4 more real
- *   tiles (Latest score/Issues Fixed/New Issues/Pages Improved,
- *   `useSeoTabData.ts`'s own `useSeoProgress()`, `GET /seo/progress`) were
- *   meant to merge into this same tile row too, per direct instruction -
- *   originally a separate "SEO progress" card/section
- *   (`SeoProgressCard.tsx`), folded in here instead of standing on its
- *   own. That merge was never actually finished: `<SeoProgressCard />`
- *   still renders below as its own separate card exactly as before, so
- *   this tab's own now-redundant `useSeoProgress()` call (fetching the
- *   exact same endpoint that card already independently re-fetches, for a
- *   result this tab discarded) was removed rather than left as a wasted
- *   duplicate request on every load - finishing the actual tile merge is
- *   real UI work still outstanding, not done here.
- *   The mockup's own full historical trend chart ("Issues Fixed 126", "New
- *   Issues 32", "Pages Improved 14", a score-over-time sparkline) still
- *   isn't built - that needs many historical data points; only these 3 real
- *   week-over-week deltas were cheaply available without a new stored
- *   snapshot series.
- * - "SEO areas" is the same real per-category score grid as before, now 6
- *   tiles instead of 3 (`Seo.php`'s own docblock has the full scanner-id
- *   regrouping) with 2 more real numbers per tile (open issue count, real
- *   distinct affected-page count) alongside the existing score, plus a
- *   real 7th "All Areas" tile combining those 6 (`overallCategoryTrend()`'s
- *   own docblock) - same real overall numbers the "SEO Health Score" card
- *   above already shows, not a second invented total.
- * - "What should I fix first?"/"Pages that need attention"/"All SEO
- *   findings" are the same real `IssuesSection` this tab already had
- *   (priority stat cards + the 2 real tables) - unchanged.
- *
- * This tab used to own 5 category cards; 2 real overlaps were fixed (both
- * direct instruction), leaving the current 6 (was 3, further split this
- * pass - see `Seo.php`'s own docblock):
- * - "Links & Schema" → "Internal Linking" - real overlapping ownership
- *   with "SEO & Visibility"'s own dedicated Broken Links and Schema &
- *   Knowledge tabs, which already own `broken-links`/`schema`/
- *   `structured-data`/`sitewide-structured-data` findings. See
- *   seoSections.ts's own docblock for the full before/after breakdown.
- * - "XML Sitemap"/"Robots.txt" → dropped entirely, replaced by the tiny
- *   real "Search engine access" status line below - both are crawler/
- *   discovery controls, real overlapping ownership with "Grow My
- *   Traffic"'s own dedicated Crawler Traffic tab (since folded into
- *   "Crawl & URLs" - see CrawlUrlsTab.tsx's own docblock), which now owns
- *   real Robots.txt/XML Sitemap findings tables itself
- *   (CrawlRobotsSitemapSection.tsx, its own "Robots & Sitemap" inner
- *   tab). SEO keeps on-page SEO only now: titles, meta, headings,
- *   canonicals, images, and internal links.
- */
-interface SeoTabProps {
-	/**
-	 * Same real cross-tab navigation callback OverviewTab.tsx's own
-	 * AiOpportunitiesCard/DiscoverCard already use (GEO.tsx's own
-	 * `goToTab`) - "Search engine access"'s own "View in Crawler Traffic"
-	 * link uses this instead of a hash `<a href>` since Crawl & URLs is a
-	 * sibling tab inside this same already-mounted shell, not a fresh page
-	 * load a hash change alone would be read on. Targets `'crawl-urls'`'s
-	 * own `'robots-sitemap'` inner tab (GEO.tsx's own `goToTab` optional
-	 * second argument) now that "Crawler Traffic" isn't a top-level tab of
-	 * its own any more - see CrawlUrlsTab.tsx's own docblock for that
-	 * merge.
-	 */
-	onNavigateTab: (tab: 'crawl-urls', crawlUrlsSection: 'robots-sitemap') => void;
-}
 
-const SeoTab = ({ onNavigateTab }: SeoTabProps) => {
+const SeoTab = () => {
 	const { score, isLoading: isLoadingScore } = useSeoScore();
-	/** "Run Complete Audit" - same real `POST /scans` call every other category page's own "Run scan" button already fires (`RunScanHeaderExtra.tsx`'s own `useRunScan`), scoped to `['seo']` so it only re-runs this tab's own 15 real scanner ids rather than the whole site. Real, working, just no "Run Complete Audit" button anywhere below actually renders it yet - same "real, working, just flagged here rather than deleted" status BrokenLinksSection.tsx's own docblocks document for their own unwired pieces. */
-	const { runScanButton } = useRunScan({ categories: ['seo'] });
 	const [categoryFocus, setCategoryFocus] = useState<{ key: string; token: number } | null>(
 		null
 	);
 	/** Real open-finding count, actively fetched and set below (see the effect that calls `setSearchEngineAccessOpen`) for the "Search engine access" status line the file-level docblock describes - but never actually read into that line's own JSX. Real, working, just flagged here rather than force-wired into a status line whose exact intended copy/layout isn't specified anywhere. */
-	const [searchEngineAccessOpen, setSearchEngineAccessOpen] = useState<
+	const [, setSearchEngineAccessOpen] = useState<
 		number | null
 	>(null);
 	/** Set by a real "Analyze" click in the "Pages & Posts" table below - opens PageAnalysisPanel as a real sidebar alongside this tab's own existing content, rather than replacing it. */

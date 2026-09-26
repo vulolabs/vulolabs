@@ -1,17 +1,9 @@
 import { __ } from '@wordpress/i18n';
 import { applyFilters } from '@wordpress/hooks';
 import { createStatWidgetComponent, StatWidgetConfig } from './StatWidget';
-import HealthTimelineWidget from './HealthTimelineWidget';
-import LatestReportsWidget from './LatestReportsWidget';
 import CrawlerTrafficWidget from './CrawlerTrafficWidget';
-import KnowledgeGraphWidget from './KnowledgeGraphWidget';
 import NeedsAttentionWidget from './NeedsAttentionWidget';
-import BrandBreakdownWidget from './BrandBreakdownWidget';
 import OverallScoreWidget from './OverallScoreWidget';
-import ScoreBreakdownWidget from './ScoreBreakdownWidget';
-import RunAuditWidget from './RunAuditWidget';
-import RecentChangesWidget from './RecentChangesWidget';
-import KeyPagesWidget from './KeyPagesWidget';
 import SiteSnapshotWidget from './SiteSnapshotWidget';
 import RecentActivityWidget from './RecentActivityWidget';
 import { WidgetDefinition } from './types';

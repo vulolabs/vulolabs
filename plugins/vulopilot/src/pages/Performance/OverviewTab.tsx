@@ -2,13 +2,10 @@ import { useState } from 'react';
 import { ColumnComponent, ContainerComponent } from '@zyra/components';
 import { scrollToId } from '@zyra/core';
 import type { SectionedIssuesTab } from '../Security/SectionedIssuesTable';
-import LiveSiteInsightsCard from '../Security/LiveSiteInsightsCard';
 import PerformanceScoreCard from './PerformanceScoreCard';
 import MetricsGrid from './MetricsGrid';
-import SpeedHistoryCard from './SpeedHistoryCard';
 import QuickActionsCard from './QuickActionsCard';
 import BiggestSpeedOpportunityCard from './BiggestSpeedOpportunityCard';
-import PhpAccelerationCard from './PhpAccelerationCard';
 import PerformanceTab from './PerformanceTab';
 import './Performance.scss';
 

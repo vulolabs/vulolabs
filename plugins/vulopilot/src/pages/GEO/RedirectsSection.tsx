@@ -50,8 +50,6 @@ const FETCH_PAGE_SIZE = 100;
 const MAX_REDIRECTS = 1000;
 const DEFAULT_PER_PAGE = 10;
 
-/** Real HEAD-check cadence - Controllers/Redirects.php's own `HEALTH_CACHE_SECONDS` (an hour); kept in sync so the "Recheck in ~Xm" line here reflects the same real cache window the backend actually enforces, not a guess. */
-const HEALTH_CACHE_SECONDS = 60 * 60;
 
 const TYPE_BADGE_CLASS: Record<number, string> = {
 	301: 'badge-active',
@@ -586,11 +584,6 @@ const RedirectsSection = () => {
 		);
 	}
 
-	const nextCheckLabel = health
-		? formatWpDate(
-			new Date((health.checked_at + HEALTH_CACHE_SECONDS) * 1000).toISOString()
-		)
-		: null;
 
 	// Real percentage of redirects that are active - the one real 0-100
 	// figure these 5 stats naturally produce (the other 4 are plain counts

@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react';
 import { __, sprintf } from '@wordpress/i18n';
 import { NoticeComponent, PopupComponent } from '@zyra/components';
 import { ButtonInput } from '@zyra/inputs';
-import { buyCreditsUrl, formatCredits, useAiCredits } from '../../services/useAiCredits';
+import { formatCredits, useAiCredits } from '../../services/useAiCredits';
 import { INSUFFICIENT_CREDITS_EVENT } from './insufficientCredits';
 import { VuloCloudInlineNotice } from '../Popup/Popup';
 import './AiCreditsIndicator.scss';

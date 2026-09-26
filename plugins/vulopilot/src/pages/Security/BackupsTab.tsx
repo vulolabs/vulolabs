@@ -168,40 +168,6 @@ const destinationBadge = (
 	}
 };
 
-/**
- * Clarifies what a green "Completed" badge actually covers when this row's
- * destination story isn't a clean success - `status: 'completed'` only
- * ever means the LOCAL archive was created successfully
- * (Services\BackupManager::finalize_backup()), written the moment the zip
- * finishes and completely independent of any configured remote upload,
- * which runs afterward on its own separate cron tick
- * (Services\BackupStorageManager) and writes its own outcome into
- * `destination_status`/`destination_error` - two different backend fields,
- * two different render branches (this one and `destinationBadge()` below),
- * with nothing reconciling them until now. Without this, a real, confirmed
- * customer confusion: a green "Completed" badge sitting right next to a
- * red "Google Drive upload failed" (or yellow "not configured") badge in
- * the same row reads as an outright contradiction rather than two
- * correctly-labeled, independent facts. `null` for every case that isn't
- * this specific "completed, but the remote copy isn't actually there"
- * combination - an ordinary Completed row with no remote destination
- * configured (`destination === 'local'`) needs no caveat at all.
- */
-const statusDestinationCaveat = (row: BackupRow): string | null => {
-	if ('completed' !== row.status || 'local' === row.destination || !row.destination) {
-		return null;
-	}
-
-	if ('failed' === row.destination_status) {
-		return __('Saved locally - the remote upload failed, see Destination.', 'vulopilot');
-	}
-
-	if ('skipped_not_configured' === row.destination_status) {
-		return __('Saved locally only - no remote destination is configured.', 'vulopilot');
-	}
-
-	return null;
-};
 
 /** Real file size, human-scaled - same rounding convention this codebase's other byte-count displays already use. */
 const formatFileSize = (bytes: number | null): string => {

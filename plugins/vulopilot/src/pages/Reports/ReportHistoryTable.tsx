@@ -1,4 +1,3 @@
-/* global vulopilotAppLocalizer */
 import { useState } from 'react';
 import type { ComponentType } from 'react';
 import { __ } from '@wordpress/i18n';
@@ -18,7 +17,6 @@ const ReportHistoryTable = ({ refreshSignal }: ReportHistoryTableProps) => {
 	const RealPanel = useFilterSlot<
 		ComponentType<{ refreshSignal?: number }>
 	>('vulopilot_report_history_panel');
-	const isProInstalled = Boolean(vulopilotAppLocalizer.khali_dabba);
 
 	return (
 		<CardComponent
@@ -45,11 +43,7 @@ const ReportHistoryTable = ({ refreshSignal }: ReportHistoryTableProps) => {
 						height="auto"
 						position="lightbox"
 					>
-						{isProInstalled ? (
-							<ShowProPopup />
-						) : (
-							<ShowProPopup />
-						)}
+						<ShowProPopup />
 					</PopupComponent>
 				</>
 			)}

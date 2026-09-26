@@ -2,7 +2,7 @@
 import { useEffect, useState } from 'react';
 import { __ } from '@wordpress/i18n';
 import { getApiLink, getApiResponse } from '@zyra/core';
-import { AnalyticsComponent, CardComponent } from '@zyra/components';
+import { AnalyticsComponent } from '@zyra/components';
 import './Performance.scss';
 
 interface RealtimeStats {
@@ -59,7 +59,7 @@ const formatBytes = (bytes: number): string => {
 const RealTimeMonitoringCard = () => {
 	const [stats, setStats] = useState<RealtimeStats | null>(null);
 	const [vitals, setVitals] = useState<CoreWebVitalsSummary | null>(null);
-	const [isLoading, setIsLoading] = useState(true);
+	const [, setIsLoading] = useState(true);
 
 	useEffect(() => {
 		Promise.all([

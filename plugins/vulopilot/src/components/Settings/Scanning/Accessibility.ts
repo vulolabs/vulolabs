@@ -1,6 +1,4 @@
 import { __ } from '@wordpress/i18n';
-import { createElement } from 'react';
-import AccessibilityRestoreDefaultsHeader from './AccessibilityRestoreDefaultsHeader';
 
 /**
  * Settings → Scanning → Accessibility.

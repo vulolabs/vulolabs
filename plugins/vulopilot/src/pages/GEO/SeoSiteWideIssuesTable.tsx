@@ -10,7 +10,6 @@ import {
 	PopupComponent,
 	SectionComponent
 } from '@zyra/components';
-import { ButtonInput } from '@zyra/inputs';
 import { TableCard } from '@zyra/table';
 import ShowProPopup from '../../components/Popup/Popup';
 import { PRIORITY_SEVERITIES, Priority, RawFinding } from './seoIssuesShared';

@@ -96,7 +96,6 @@ const HistoryTimeline = ({
 							(null === row.change.before ||
 								row.change.before.length <= 40);
 
-						const isPulsing = pulsingRowId === String(row.id);
 
 						return (
 							<div

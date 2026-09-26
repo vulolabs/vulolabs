@@ -1,10 +1,6 @@
 import { __ } from '@wordpress/i18n';
 import {
-	ContainerComponent,
-	ModuleGridComponent,
-	NavigatorHeaderComponent,
-	FormGroupWrapperComponent
-} from '@zyra/components';
+	ModuleGridComponent} from '@zyra/components';
 import { getModuleData } from '../../services/templateService';
 import proPopupContent from '../Popup/Popup';
 

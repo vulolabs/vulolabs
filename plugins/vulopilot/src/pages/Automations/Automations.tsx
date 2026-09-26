@@ -5,7 +5,6 @@ import {
 	ColumnComponent,
 	ContainerComponent,
 	NavigatorHeaderComponent,
-	NoticeComponent,
 	PopupComponent,
 } from '@zyra/components';
 import ShowProPopup from '../../components/Popup/Popup';
