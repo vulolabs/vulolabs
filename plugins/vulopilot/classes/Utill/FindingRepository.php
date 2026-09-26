@@ -109,33 +109,44 @@ class FindingRepository extends RepositoryUtil {
     public function find_open_duplicate( string $scanner_id, ?string $object_type, ?string $object_ref, string $title, ?string $dedupe_key = null ): ?array {
         global $wpdb;
 
-        $conditions = array( "status = 'open'", 'scanner_id = %s' );
-        $params     = array( $scanner_id );
+        $params = array( $this->get_table(), $scanner_id );
 
-        foreach ( array(
-            'object_type' => $object_type,
-            'object_ref'  => $object_ref,
-        ) as $column => $value ) {
-            if ( null === $value || '' === $value ) {
-                $conditions[] = "{$column} IS NULL";
-            } else {
-                $conditions[] = "{$column} = %s";
-                $params[]     = $value;
-            }
+        // Column names are bound with %i and each optional condition is picked
+        // (never assembled) so the query text stays fixed apart from that choice.
+        $type_is_null = null === $object_type || '' === $object_type;
+        $ref_is_null  = null === $object_ref || '' === $object_ref;
+
+        $params[] = 'object_type';
+
+        if ( ! $type_is_null ) {
+            $params[] = $object_type;
+        }
+
+        $params[] = 'object_ref';
+
+        if ( ! $ref_is_null ) {
+            $params[] = $object_ref;
         }
 
         if ( null !== $dedupe_key ) {
-            $conditions[] = 'dedupe_key = %s';
-            $params[]     = $dedupe_key;
+            $params[] = $dedupe_key;
         } else {
-            $conditions[] = 'title = %s';
-            $conditions[] = 'dedupe_key IS NULL';
-            $params[]     = $title;
+            $params[] = $title;
         }
 
-        $sql = "SELECT * FROM {$this->get_table()} WHERE " . implode( ' AND ', $conditions ) . ' ORDER BY id DESC LIMIT 1'; // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+        $where = implode(
+            ' AND ',
+            array(
+                "status = 'open'",
+                'scanner_id = %s',
+                $type_is_null ? '%i IS NULL' : '%i = %s',
+                $ref_is_null ? '%i IS NULL' : '%i = %s',
+                null !== $dedupe_key ? 'dedupe_key = %s' : 'title = %s',
+                null !== $dedupe_key ? '1 = 1' : 'dedupe_key IS NULL',
+            )
+        );
 
-        $row = $wpdb->get_row( $wpdb->prepare( $sql, $params ), ARRAY_A ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, PluginCheck.Security.DirectDB.UnescapedDBParameter, WordPress.DB.PreparedSQL.NotPrepared -- $sql is built above from {$this->get_table()} (this plugin's own table name) and a fixed set of column/placeholder fragments, never raw user input; it IS passed through $wpdb->prepare() here, the sniff just can't see that since $sql is a variable rather than a literal in the prepare() call.
+        $row = $wpdb->get_row( $wpdb->prepare( "SELECT * FROM %i WHERE {$where} ORDER BY id DESC LIMIT 1", $params ), ARRAY_A ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- $sql is built above from {$this->get_table()} (this plugin's own table name) and a fixed set of column/placeholder fragments, never raw user input; it IS passed through $wpdb->prepare() here, the sniff just can't see that since $sql is a variable rather than a literal in the prepare() call.
 
         return $row ?: null;
     }
@@ -155,9 +166,9 @@ class FindingRepository extends RepositoryUtil {
     public function get_open_finding_ids_for_scanner( string $scanner_id ): array {
         global $wpdb;
 
-        $ids = $wpdb->get_col( // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, PluginCheck.Security.DirectDB.UnescapedDBParameter -- {$this->get_table()} is this plugin's own table name, not user input.
+        $ids = $wpdb->get_col( // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- {$this->get_table()} is this plugin's own table name, not user input.
             $wpdb->prepare(
-                "SELECT id FROM {$this->get_table()} WHERE status = 'open' AND scanner_id = %s", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+                "SELECT id FROM %i WHERE status = 'open' AND scanner_id = %s", $this->get_table(), // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
                 $scanner_id
             )
         );
@@ -399,9 +410,9 @@ class FindingRepository extends RepositoryUtil {
     public function get_group_by_scanner_id( string $scanner_id ): ?array {
         global $wpdb;
 
-        $row = $wpdb->get_row(  // phpcs:ignore PluginCheck.Security.DirectDB.UnescapedDBParameter, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching  -- {$this->get_table()}/$table-style variables here are always this plugin's own hardcoded table name(s), never user input; dynamic placeholder counts (IN (...) lists, optional WHERE fragments) are sized correctly at runtime, just not statically visible to this sniff.
+        $row = $wpdb->get_row(  // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching  -- {$this->get_table()}/$table-style variables here are always this plugin's own hardcoded table name(s), never user input; dynamic placeholder counts (IN (...) lists, optional WHERE fragments) are sized correctly at runtime, just not statically visible to this sniff.
             $wpdb->prepare(
-                "SELECT category, COUNT(*) AS count, MIN( CASE severity WHEN 'critical' THEN 0 WHEN 'high' THEN 1 WHEN 'medium' THEN 2 WHEN 'low' THEN 3 WHEN 'info' THEN 4 ELSE 5 END ) AS severity_rank FROM {$this->get_table()} WHERE status = 'open' AND scanner_id = %s GROUP BY category", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+                "SELECT category, COUNT(*) AS count, MIN( CASE severity WHEN 'critical' THEN 0 WHEN 'high' THEN 1 WHEN 'medium' THEN 2 WHEN 'low' THEN 3 WHEN 'info' THEN 4 ELSE 5 END ) AS severity_rank FROM %i WHERE status = 'open' AND scanner_id = %s GROUP BY category", $this->get_table(), // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
                 $scanner_id
             ),
             ARRAY_A
@@ -445,7 +456,7 @@ class FindingRepository extends RepositoryUtil {
         global $wpdb;
         $table = $this->get_table();
 
-        $rows = $wpdb->get_results( "SELECT category, COUNT(*) AS total FROM ( SELECT scanner_id, category FROM {$table} WHERE status = 'open' GROUP BY scanner_id, category ) grouped GROUP BY category", ARRAY_A ); // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQL.NotPrepared, PluginCheck.Security.DirectDB.UnescapedDBParameter, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- $table is code-controlled, no user input in this query.
+        $rows = $wpdb->get_results( $wpdb->prepare( "SELECT category, COUNT(*) AS total FROM ( SELECT scanner_id, category FROM %i WHERE status = 'open' GROUP BY scanner_id, category ) grouped GROUP BY category", $table ), ARRAY_A ); // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- $table is code-controlled, no user input in this query.
 
         $counts = array();
 
@@ -491,28 +502,38 @@ class FindingRepository extends RepositoryUtil {
         // value any row ever has - for a caller that wants every real row
         // regardless of status (e.g. a "Show ignored" toggle: real open
         // findings AND real ignored ones together, not one or the other).
-        if ( 'all' === $status ) {
-            $where  = 'WHERE 1=1';
-            $values = array();
-        } else {
-            $where  = 'WHERE status = %s';
-            $values = array( $status );
-        }
+        $category_values = array();
 
-        if ( is_array( $category ) && $category ) {
-            $placeholders = implode( ', ', array_fill( 0, count( $category ), '%s' ) );
-            $where       .= " AND category IN ({$placeholders})";
-            array_push( $values, ...$category );
+        if ( is_array( $category ) ) {
+            $category_values = array_map( 'strval', $category );
         } elseif ( is_string( $category ) && '' !== $category ) {
-            $where   .= ' AND category = %s';
-            $values[] = $category;
+            $category_values = array( $category );
         }
 
-        if ( $scanner_ids ) {
-            $scanner_placeholders = implode( ', ', array_fill( 0, count( $scanner_ids ), '%s' ) );
-            $where                .= " AND scanner_id IN ({$scanner_placeholders})";
-            array_push( $values, ...$scanner_ids );
+        $values = array();
+
+        if ( 'all' !== $status ) {
+            $values[] = $status;
         }
+
+        array_push( $values, ...$category_values );
+        array_push( $values, ...$scanner_ids );
+
+        $category_placeholders = implode( ', ', array_fill( 0, count( $category_values ), '%s' ) );
+        $scanner_placeholders  = implode( ', ', array_fill( 0, count( $scanner_ids ), '%s' ) );
+        $rank_placeholders     = implode( ', ', array_fill( 0, count( $priority_ranks ), '%d' ) );
+
+        // Each optional filter is picked, never assembled, so the query text stays
+        // fixed apart from these choices.
+        $where = implode(
+            ' AND ',
+            array(
+                '1 = 1',
+                'all' !== $status ? 'status = %s' : '1 = 1',
+                $category_values ? "category IN ({$category_placeholders})" : '1 = 1',
+                $scanner_ids ? "scanner_id IN ({$scanner_placeholders})" : '1 = 1',
+            )
+        );
 
         // Grouped once, filtered by the group's own worst-severity rank in
         // an outer WHERE against this subquery rather than filtering raw
@@ -521,29 +542,22 @@ class FindingRepository extends RepositoryUtil {
         // priority tile is active, since the mockup's own "22 pages
         // affected" reads as the group's real total, not a subset matching
         // whichever severities happen to satisfy the current filter.
-        $group_sql = "SELECT scanner_id, category, COUNT(*) AS count, MAX(object_type) AS object_type, MIN( CASE severity WHEN 'critical' THEN 0 WHEN 'high' THEN 1 WHEN 'medium' THEN 2 WHEN 'low' THEN 3 WHEN 'info' THEN 4 ELSE 5 END ) AS severity_rank FROM {$table} {$where} GROUP BY scanner_id, category"; // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare -- $where's %s count matches $values' size at runtime; this string is only ever passed through $wpdb->prepare() by its two callers below, never queried directly.
+        $having = implode(
+            ' AND ',
+            array(
+                '1 = 1',
+                $priority_ranks ? "severity_rank IN ({$rank_placeholders})" : '1 = 1',
+            )
+        );
 
-        $having = '';
+        $count_values = array_merge( array( $table ), $values, $priority_ranks );
 
-        if ( $priority_ranks ) {
-            $rank_placeholders = implode( ', ', array_fill( 0, count( $priority_ranks ), '%d' ) );
-            $having            = " WHERE severity_rank IN ({$rank_placeholders})";
-        }
-
-        $count_values = array_merge( $values, $priority_ranks );
-        $count_sql    = "SELECT COUNT(*) FROM ( {$group_sql} ) grouped{$having}";
-        // `$count_values` is genuinely empty only when `$status` is the
-        // real 'all' escape hatch above with no category/priority filter
-        // either - `$wpdb->prepare()` itself requires at least one real
-        // value to bind, so this real no-placeholders-left case runs the
-        // query directly instead (every piece of `$count_sql` at that
-        // point is code-controlled - `$table`/`$where`/`$having` - not
-        // user input, same real precedent this file's own
-        // `get_category_group_counts()` already established for a
-        // likewise placeholder-free query).
-        $total_groups = (int) ( $count_values
-            ? $wpdb->get_var( $wpdb->prepare( $count_sql, ...$count_values ) ) // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare, PluginCheck.Security.DirectDB.UnescapedDBParameter, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- $where's/$having's placeholder count matches $values'/$priority_ranks' combined size at runtime.
-            : $wpdb->get_var( $count_sql ) ); // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.PreparedSQLPlaceholders.NotPrepared, PluginCheck.Security.DirectDB.UnescapedDBParameter -- no real placeholders left to bind in this branch; see comment above.
+        $total_groups = (int) $wpdb->get_var( // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- the query is prepared.
+            $wpdb->prepare(
+                "SELECT COUNT(*) FROM ( SELECT scanner_id, category, MIN( CASE severity WHEN 'critical' THEN 0 WHEN 'high' THEN 1 WHEN 'medium' THEN 2 WHEN 'low' THEN 3 WHEN 'info' THEN 4 ELSE 5 END ) AS severity_rank FROM %i WHERE {$where} GROUP BY scanner_id, category ) grouped WHERE {$having}", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- the table and optional filters are picked from fixed literals and every value is a bound placeholder; only the placeholder count varies at runtime.
+                ...$count_values
+            )
+        );
 
         if ( 0 === $total_groups ) {
             return array(
@@ -552,8 +566,11 @@ class FindingRepository extends RepositoryUtil {
             );
         }
 
-        $rows = $wpdb->get_results(  // phpcs:ignore PluginCheck.Security.DirectDB.UnescapedDBParameter, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching  -- {$this->get_table()}/$table-style variables here are always this plugin's own hardcoded table name(s), never user input; dynamic placeholder counts (IN (...) lists, optional WHERE fragments) are sized correctly at runtime, just not statically visible to this sniff.
-            $wpdb->prepare( "SELECT * FROM ( {$group_sql} ) grouped{$having} ORDER BY severity_rank ASC, count DESC LIMIT %d OFFSET %d", ...array_merge( $values, $priority_ranks, array( $per_page, $offset ) ) ), // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare, WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber -- same runtime-sized-array case as above, plus the trailing LIMIT/OFFSET pair.
+        $rows = $wpdb->get_results( // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- the query is prepared.
+            $wpdb->prepare( // phpcs:ignore WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber -- the table and optional filters are picked from fixed literals and every value is a bound placeholder; only the placeholder count varies at runtime.
+                "SELECT * FROM ( SELECT scanner_id, category, COUNT(*) AS count, MAX(object_type) AS object_type, MIN( CASE severity WHEN 'critical' THEN 0 WHEN 'high' THEN 1 WHEN 'medium' THEN 2 WHEN 'low' THEN 3 WHEN 'info' THEN 4 ELSE 5 END ) AS severity_rank FROM %i WHERE {$where} GROUP BY scanner_id, category ) grouped WHERE {$having} ORDER BY severity_rank ASC, count DESC, scanner_id ASC LIMIT %d OFFSET %d", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- the table and optional filters are picked from fixed literals and every value is a bound placeholder; only the placeholder count varies at runtime.
+                ...array_merge( array( $table ), $values, $priority_ranks, array( $per_page, $offset ) )
+            ),
             ARRAY_A
         );
 
@@ -594,9 +611,9 @@ class FindingRepository extends RepositoryUtil {
     public function count_by_severity( string $severity ): int {
         global $wpdb;
 
-        return (int) $wpdb->get_var(  // phpcs:ignore PluginCheck.Security.DirectDB.UnescapedDBParameter, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching  -- {$this->get_table()}/$table-style variables here are always this plugin's own hardcoded table name(s), never user input; dynamic placeholder counts (IN (...) lists, optional WHERE fragments) are sized correctly at runtime, just not statically visible to this sniff.
+        return (int) $wpdb->get_var(  // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching  -- {$this->get_table()}/$table-style variables here are always this plugin's own hardcoded table name(s), never user input; dynamic placeholder counts (IN (...) lists, optional WHERE fragments) are sized correctly at runtime, just not statically visible to this sniff.
             $wpdb->prepare(
-                "SELECT COUNT(*) FROM {$this->get_table()} WHERE severity = %s AND status = 'open'", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+                "SELECT COUNT(*) FROM %i WHERE severity = %s AND status = 'open'", $this->get_table(), // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
                 $severity
             )
         );
@@ -613,9 +630,9 @@ class FindingRepository extends RepositoryUtil {
     public function count_by_category( string $category ): int {
         global $wpdb;
 
-        return (int) $wpdb->get_var(  // phpcs:ignore PluginCheck.Security.DirectDB.UnescapedDBParameter, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching  -- {$this->get_table()}/$table-style variables here are always this plugin's own hardcoded table name(s), never user input; dynamic placeholder counts (IN (...) lists, optional WHERE fragments) are sized correctly at runtime, just not statically visible to this sniff.
+        return (int) $wpdb->get_var(  // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching  -- {$this->get_table()}/$table-style variables here are always this plugin's own hardcoded table name(s), never user input; dynamic placeholder counts (IN (...) lists, optional WHERE fragments) are sized correctly at runtime, just not statically visible to this sniff.
             $wpdb->prepare(
-                "SELECT COUNT(*) FROM {$this->get_table()} WHERE category = %s AND status = 'open'", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+                "SELECT COUNT(*) FROM %i WHERE category = %s AND status = 'open'", $this->get_table(), // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
                 $category
             )
         );
@@ -634,9 +651,9 @@ class FindingRepository extends RepositoryUtil {
     public function count_created_since( string $since ): int {
         global $wpdb;
 
-        return (int) $wpdb->get_var(  // phpcs:ignore PluginCheck.Security.DirectDB.UnescapedDBParameter, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching  -- {$this->get_table()}/$table-style variables here are always this plugin's own hardcoded table name(s), never user input; dynamic placeholder counts (IN (...) lists, optional WHERE fragments) are sized correctly at runtime, just not statically visible to this sniff.
+        return (int) $wpdb->get_var(  // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching  -- {$this->get_table()}/$table-style variables here are always this plugin's own hardcoded table name(s), never user input; dynamic placeholder counts (IN (...) lists, optional WHERE fragments) are sized correctly at runtime, just not statically visible to this sniff.
             $wpdb->prepare(
-                "SELECT COUNT(*) FROM {$this->get_table()} WHERE created_at >= %s", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+                "SELECT COUNT(*) FROM %i WHERE created_at >= %s", $this->get_table(), // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
                 $since
             )
         );
@@ -654,9 +671,9 @@ class FindingRepository extends RepositoryUtil {
     public function count_resolved_since( string $since ): int {
         global $wpdb;
 
-        return (int) $wpdb->get_var(  // phpcs:ignore PluginCheck.Security.DirectDB.UnescapedDBParameter, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching  -- {$this->get_table()}/$table-style variables here are always this plugin's own hardcoded table name(s), never user input; dynamic placeholder counts (IN (...) lists, optional WHERE fragments) are sized correctly at runtime, just not statically visible to this sniff.
+        return (int) $wpdb->get_var(  // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching  -- {$this->get_table()}/$table-style variables here are always this plugin's own hardcoded table name(s), never user input; dynamic placeholder counts (IN (...) lists, optional WHERE fragments) are sized correctly at runtime, just not statically visible to this sniff.
             $wpdb->prepare(
-                "SELECT COUNT(*) FROM {$this->get_table()} WHERE resolved_at >= %s", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+                "SELECT COUNT(*) FROM %i WHERE resolved_at >= %s", $this->get_table(), // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
                 $since
             )
         );
@@ -680,21 +697,29 @@ class FindingRepository extends RepositoryUtil {
     public function count_resolved_between( string $period_start, string $period_end, ?string $category = null, ?array $scanner_ids = null ): int {
         global $wpdb;
 
-        $where  = 'WHERE resolved_at BETWEEN %s AND %s';
-        $values = array( $period_start, $period_end );
+        $scanner_ids = $scanner_ids ? $scanner_ids : array();
+        $values      = array( $this->get_table(), $period_start, $period_end );
 
         if ( null !== $category ) {
-            $where   .= ' AND category = %s';
             $values[] = $category;
         }
 
-        if ( null !== $scanner_ids && $scanner_ids ) {
-            $where .= ' AND scanner_id IN (' . implode( ', ', array_fill( 0, count( $scanner_ids ), '%s' ) ) . ')';
-            array_push( $values, ...$scanner_ids );
-        }
+        array_push( $values, ...$scanner_ids );
 
-        return (int) $wpdb->get_var(  // phpcs:ignore PluginCheck.Security.DirectDB.UnescapedDBParameter, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching  -- {$this->get_table()}/$table-style variables here are always this plugin's own hardcoded table name(s), never user input; dynamic placeholder counts (IN (...) lists, optional WHERE fragments) are sized correctly at runtime, just not statically visible to this sniff.
-            $wpdb->prepare( "SELECT COUNT(*) FROM {$this->get_table()} {$where}", ...$values ) // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare -- $where's %s count matches $values' size at runtime.
+        $scanner_placeholders = implode( ', ', array_fill( 0, count( $scanner_ids ), '%s' ) );
+
+        // Each optional filter is picked, never assembled.
+        $where = implode(
+            ' AND ',
+            array(
+                'resolved_at BETWEEN %s AND %s',
+                null !== $category ? 'category = %s' : '1 = 1',
+                $scanner_ids ? "scanner_id IN ({$scanner_placeholders})" : '1 = 1',
+            )
+        );
+
+        return (int) $wpdb->get_var(  // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching  -- {$this->get_table()}/$table-style variables here are always this plugin's own hardcoded table name(s), never user input; dynamic placeholder counts (IN (...) lists, optional WHERE fragments) are sized correctly at runtime, just not statically visible to this sniff.
+            $wpdb->prepare( "SELECT COUNT(*) FROM %i WHERE {$where}", ...$values ) // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- the table and optional filters are picked from fixed literals and every value is a bound placeholder; only the placeholder count varies at runtime.
         );
     }
 
@@ -714,9 +739,9 @@ class FindingRepository extends RepositoryUtil {
 
         $counts = array_fill_keys( array( 'critical', 'high', 'medium', 'low' ), 0 );
 
-        $rows = $wpdb->get_results(  // phpcs:ignore PluginCheck.Security.DirectDB.UnescapedDBParameter, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching  -- {$this->get_table()}/$table-style variables here are always this plugin's own hardcoded table name(s), never user input; dynamic placeholder counts (IN (...) lists, optional WHERE fragments) are sized correctly at runtime, just not statically visible to this sniff.
+        $rows = $wpdb->get_results(  // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching  -- {$this->get_table()}/$table-style variables here are always this plugin's own hardcoded table name(s), never user input; dynamic placeholder counts (IN (...) lists, optional WHERE fragments) are sized correctly at runtime, just not statically visible to this sniff.
             $wpdb->prepare(
-                "SELECT severity, COUNT(*) AS total FROM {$this->get_table()} WHERE category = %s AND status = 'open' GROUP BY severity", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+                "SELECT severity, COUNT(*) AS total FROM %i WHERE category = %s AND status = 'open' GROUP BY severity", $this->get_table(), // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
                 $category
             ),
             ARRAY_A
@@ -765,9 +790,9 @@ class FindingRepository extends RepositoryUtil {
 
         $placeholders = implode( ', ', array_fill( 0, count( $scanner_ids ), '%s' ) );
 
-        $rows = $wpdb->get_results(  // phpcs:ignore PluginCheck.Security.DirectDB.UnescapedDBParameter, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching  -- {$this->get_table()}/$table-style variables here are always this plugin's own hardcoded table name(s), never user input; dynamic placeholder counts (IN (...) lists, optional WHERE fragments) are sized correctly at runtime, just not statically visible to this sniff.
-            $wpdb->prepare(
-                "SELECT severity, COUNT(*) AS total FROM {$this->get_table()} WHERE scanner_id IN ({$placeholders}) AND status = 'open' GROUP BY severity", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare -- $placeholders' %s count matches $scanner_ids' size at runtime.
+        $rows = $wpdb->get_results(  // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching  -- {$this->get_table()}/$table-style variables here are always this plugin's own hardcoded table name(s), never user input; dynamic placeholder counts (IN (...) lists, optional WHERE fragments) are sized correctly at runtime, just not statically visible to this sniff.
+            $wpdb->prepare( // phpcs:ignore WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber -- the table and optional filters are picked from fixed literals and every value is a bound placeholder; only the placeholder count varies at runtime.
+                "SELECT severity, COUNT(*) AS total FROM %i WHERE scanner_id IN ({$placeholders}) AND status = 'open' GROUP BY severity", $this->get_table(), // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare -- $placeholders' %s count matches $scanner_ids' size at runtime.
                 ...$scanner_ids
             ),
             ARRAY_A
@@ -793,13 +818,13 @@ class FindingRepository extends RepositoryUtil {
         $counts = array_fill_keys( array( 'critical', 'high', 'medium', 'low' ), 0 );
 
         // {$this->get_table()} is this plugin's own table name, not user input.
-        // phpcs:disable PluginCheck.Security.DirectDB.UnescapedDBParameter, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+        // phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
         $rows = $wpdb->get_results(
             $wpdb->prepare(
-                "SELECT severity, COUNT(*) AS total FROM {$this->get_table()}
+                "SELECT severity, COUNT(*) AS total FROM %i
                 WHERE category = %s AND status != 'ignored' AND status != 'snoozed'
                 AND created_at <= %s AND ( status = 'open' OR ( resolved_at IS NOT NULL AND resolved_at > %s ) )
-                GROUP BY severity",
+                GROUP BY severity", $this->get_table(),
                 $category,
                 $as_of,
                 $as_of
@@ -843,13 +868,13 @@ class FindingRepository extends RepositoryUtil {
 
         // {$this->get_table()}/{$placeholders} are this plugin's own table name and a run-time-sized
         // placeholder string - not user input; the sniff can't statically see either.
-        // phpcs:disable PluginCheck.Security.DirectDB.UnescapedDBParameter, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare, WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber
+        // phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare, WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber
         $rows = $wpdb->get_results(
             $wpdb->prepare(
-                "SELECT severity, COUNT(*) AS total FROM {$this->get_table()}
+                "SELECT severity, COUNT(*) AS total FROM %i
                 WHERE scanner_id IN ({$placeholders}) AND status != 'ignored' AND status != 'snoozed'
                 AND created_at <= %s AND ( status = 'open' OR ( resolved_at IS NOT NULL AND resolved_at > %s ) )
-                GROUP BY severity",
+                GROUP BY severity", $this->get_table(),
                 ...array_merge( $scanner_ids, array( $as_of, $as_of ) )
             ),
             ARRAY_A
@@ -896,12 +921,12 @@ class FindingRepository extends RepositoryUtil {
 
         // {$this->get_table()}/{$placeholders} are this plugin's own table name and a run-time-sized
         // placeholder string - not user input; the sniff can't statically see either.
-        // phpcs:disable PluginCheck.Security.DirectDB.UnescapedDBParameter, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare, WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber
+        // phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare, WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber
         if ( null === $as_of ) {
             $rows = $wpdb->get_results(
                 $wpdb->prepare(
-                    "SELECT id, title, severity, object_ref FROM {$this->get_table()}
-                    WHERE scanner_id IN ({$placeholders}) AND status = 'open' AND object_type = 'post'",
+                    "SELECT id, title, severity, object_ref FROM %i
+                    WHERE scanner_id IN ({$placeholders}) AND status = 'open' AND object_type = 'post'", $this->get_table(),
                     ...$scanner_ids
                 ),
                 ARRAY_A
@@ -909,10 +934,10 @@ class FindingRepository extends RepositoryUtil {
         } else {
             $rows = $wpdb->get_results(
                 $wpdb->prepare(
-                    "SELECT id, title, severity, object_ref FROM {$this->get_table()}
+                    "SELECT id, title, severity, object_ref FROM %i
                     WHERE scanner_id IN ({$placeholders}) AND object_type = 'post'
                     AND status != 'ignored' AND status != 'snoozed'
-                    AND created_at <= %s AND ( status = 'open' OR ( resolved_at IS NOT NULL AND resolved_at > %s ) )",
+                    AND created_at <= %s AND ( status = 'open' OR ( resolved_at IS NOT NULL AND resolved_at > %s ) )", $this->get_table(),
                     ...array_merge( $scanner_ids, array( $as_of, $as_of ) )
                 ),
                 ARRAY_A
@@ -962,9 +987,9 @@ class FindingRepository extends RepositoryUtil {
 
         $placeholders = implode( ', ', array_fill( 0, count( $scanner_ids ), '%s' ) );
 
-        return (int) $wpdb->get_var(  // phpcs:ignore PluginCheck.Security.DirectDB.UnescapedDBParameter, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching  -- {$this->get_table()}/$table-style variables here are always this plugin's own hardcoded table name(s), never user input; dynamic placeholder counts (IN (...) lists, optional WHERE fragments) are sized correctly at runtime, just not statically visible to this sniff.
-            $wpdb->prepare(
-                "SELECT COUNT(DISTINCT object_ref) FROM {$this->get_table()} WHERE scanner_id IN ({$placeholders}) AND status = 'open'", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare -- $placeholders' %s count matches $scanner_ids' size at runtime.
+        return (int) $wpdb->get_var(  // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching  -- {$this->get_table()}/$table-style variables here are always this plugin's own hardcoded table name(s), never user input; dynamic placeholder counts (IN (...) lists, optional WHERE fragments) are sized correctly at runtime, just not statically visible to this sniff.
+            $wpdb->prepare( // phpcs:ignore WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber -- the table and optional filters are picked from fixed literals and every value is a bound placeholder; only the placeholder count varies at runtime.
+                "SELECT COUNT(DISTINCT object_ref) FROM %i WHERE scanner_id IN ({$placeholders}) AND status = 'open'", $this->get_table(), // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare -- $placeholders' %s count matches $scanner_ids' size at runtime.
                 ...$scanner_ids
             )
         );
@@ -991,23 +1016,31 @@ class FindingRepository extends RepositoryUtil {
     public function get_stats_for_period( string $period_start, string $period_end, ?string $category = null, ?array $scanner_ids = null ): array {
         global $wpdb;
 
-        $where  = 'WHERE DATE(created_at) BETWEEN %s AND %s';
-        $values = array( $period_start, $period_end );
+        $scanner_ids = $scanner_ids ? $scanner_ids : array();
+        $values      = array( $period_start, $period_end );
 
         if ( null !== $category ) {
-            $where   .= ' AND category = %s';
             $values[] = $category;
         }
 
-        if ( null !== $scanner_ids && $scanner_ids ) {
-            $where .= ' AND scanner_id IN (' . implode( ', ', array_fill( 0, count( $scanner_ids ), '%s' ) ) . ')';
-            array_push( $values, ...$scanner_ids );
-        }
+        array_push( $values, ...$scanner_ids );
+
+        $scanner_placeholders = implode( ', ', array_fill( 0, count( $scanner_ids ), '%s' ) );
+
+        // Each optional filter is picked, never assembled.
+        $where = implode(
+            ' AND ',
+            array(
+                'DATE(created_at) BETWEEN %s AND %s',
+                null !== $category ? 'category = %s' : '1 = 1',
+                $scanner_ids ? "scanner_id IN ({$scanner_placeholders})" : '1 = 1',
+            )
+        );
 
         $by_severity = array_fill_keys( array( 'critical', 'high', 'medium', 'low', 'info' ), 0 );
 
-        $severity_rows = $wpdb->get_results(  // phpcs:ignore PluginCheck.Security.DirectDB.UnescapedDBParameter, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching  -- {$this->get_table()}/$table-style variables here are always this plugin's own hardcoded table name(s), never user input; dynamic placeholder counts (IN (...) lists, optional WHERE fragments) are sized correctly at runtime, just not statically visible to this sniff.
-            $wpdb->prepare( "SELECT severity, COUNT(*) AS total FROM {$this->get_table()} {$where} GROUP BY severity", ...$values ), // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare -- $where's %s count matches $values' size at runtime.
+        $severity_rows = $wpdb->get_results(  // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching  -- {$this->get_table()}/$table-style variables here are always this plugin's own hardcoded table name(s), never user input; dynamic placeholder counts (IN (...) lists, optional WHERE fragments) are sized correctly at runtime, just not statically visible to this sniff.
+            $wpdb->prepare( "SELECT severity, COUNT(*) AS total FROM %i WHERE {$where} GROUP BY severity", $this->get_table(), ...$values ), // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare, WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber -- $where's %s count matches $values' size at runtime.
             ARRAY_A
         );
 
@@ -1020,8 +1053,8 @@ class FindingRepository extends RepositoryUtil {
         $by_category = array();
 
         if ( null === $category ) {
-            $category_rows = $wpdb->get_results(  // phpcs:ignore PluginCheck.Security.DirectDB.UnescapedDBParameter, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching  -- {$this->get_table()}/$table-style variables here are always this plugin's own hardcoded table name(s), never user input; dynamic placeholder counts (IN (...) lists, optional WHERE fragments) are sized correctly at runtime, just not statically visible to this sniff.
-                $wpdb->prepare( "SELECT category, COUNT(*) AS total FROM {$this->get_table()} {$where} GROUP BY category", ...$values ), // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare -- same runtime-sized-array case as above.
+            $category_rows = $wpdb->get_results(  // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching  -- {$this->get_table()}/$table-style variables here are always this plugin's own hardcoded table name(s), never user input; dynamic placeholder counts (IN (...) lists, optional WHERE fragments) are sized correctly at runtime, just not statically visible to this sniff.
+                $wpdb->prepare( "SELECT category, COUNT(*) AS total FROM %i WHERE {$where} GROUP BY category", $this->get_table(), ...$values ), // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare, WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber -- same runtime-sized-array case as above.
                 ARRAY_A
             );
 
@@ -1030,8 +1063,8 @@ class FindingRepository extends RepositoryUtil {
             }
         }
 
-        $status_rows = $wpdb->get_results(  // phpcs:ignore PluginCheck.Security.DirectDB.UnescapedDBParameter, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching  -- {$this->get_table()}/$table-style variables here are always this plugin's own hardcoded table name(s), never user input; dynamic placeholder counts (IN (...) lists, optional WHERE fragments) are sized correctly at runtime, just not statically visible to this sniff.
-            $wpdb->prepare( "SELECT status, COUNT(*) AS total FROM {$this->get_table()} {$where} GROUP BY status", ...$values ), // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare -- same runtime-sized-array case as above.
+        $status_rows = $wpdb->get_results(  // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching  -- {$this->get_table()}/$table-style variables here are always this plugin's own hardcoded table name(s), never user input; dynamic placeholder counts (IN (...) lists, optional WHERE fragments) are sized correctly at runtime, just not statically visible to this sniff.
+            $wpdb->prepare( "SELECT status, COUNT(*) AS total FROM %i WHERE {$where} GROUP BY status", $this->get_table(), ...$values ), // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare, WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber -- same runtime-sized-array case as above.
             ARRAY_A
         );
 
@@ -1065,9 +1098,9 @@ class FindingRepository extends RepositoryUtil {
     public function get_object_refs_for_scan( int $scan_id ): array {
         global $wpdb;
 
-        $rows = $wpdb->get_results(  // phpcs:ignore PluginCheck.Security.DirectDB.UnescapedDBParameter, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching  -- {$this->get_table()}/$table-style variables here are always this plugin's own hardcoded table name(s), never user input; dynamic placeholder counts (IN (...) lists, optional WHERE fragments) are sized correctly at runtime, just not statically visible to this sniff.
+        $rows = $wpdb->get_results(  // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching  -- {$this->get_table()}/$table-style variables here are always this plugin's own hardcoded table name(s), never user input; dynamic placeholder counts (IN (...) lists, optional WHERE fragments) are sized correctly at runtime, just not statically visible to this sniff.
             $wpdb->prepare(
-                "SELECT object_type, object_ref FROM {$this->get_table()} WHERE scan_id = %d LIMIT 2000", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+                "SELECT object_type, object_ref FROM %i WHERE scan_id = %d LIMIT 2000", $this->get_table(), // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
                 $scan_id
             ),
             ARRAY_A
@@ -1090,9 +1123,9 @@ class FindingRepository extends RepositoryUtil {
     public function get_top_open_findings( int $limit = 10 ): array {
         global $wpdb;
 
-        $rows = $wpdb->get_results(  // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, PluginCheck.Security.DirectDB.UnescapedDBParameter  -- {$this->get_table()}/$table-style variables here are always this plugin's own hardcoded table name(s), never user input; dynamic placeholder counts (IN (...) lists, optional WHERE fragments) are sized correctly at runtime, just not statically visible to this sniff.
+        $rows = $wpdb->get_results(  // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching  -- {$this->get_table()}/$table-style variables here are always this plugin's own hardcoded table name(s), never user input; dynamic placeholder counts (IN (...) lists, optional WHERE fragments) are sized correctly at runtime, just not statically visible to this sniff.
             $wpdb->prepare(
-                "SELECT id, title, description, severity, category, created_at FROM {$this->get_table()} WHERE status = 'open' ORDER BY FIELD(severity, 'critical', 'high', 'medium', 'low', 'info') ASC, created_at DESC LIMIT %d", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+                "SELECT id, title, description, severity, category, created_at FROM %i WHERE status = 'open' ORDER BY FIELD(severity, 'critical', 'high', 'medium', 'low', 'info') ASC, created_at DESC LIMIT %d", $this->get_table(), // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
                 max( 1, $limit )
             ),
             ARRAY_A
@@ -1116,24 +1149,32 @@ class FindingRepository extends RepositoryUtil {
     public function get_top_findings_for_period( string $period_start, string $period_end, ?string $category = null, int $limit = 10, ?array $scanner_ids = null ): array {
         global $wpdb;
 
-        $where  = 'WHERE DATE(created_at) BETWEEN %s AND %s';
-        $values = array( $period_start, $period_end );
+        $scanner_ids = $scanner_ids ? $scanner_ids : array();
+        $values      = array( $period_start, $period_end );
 
         if ( null !== $category ) {
-            $where   .= ' AND category = %s';
             $values[] = $category;
         }
 
-        if ( null !== $scanner_ids && $scanner_ids ) {
-            $where .= ' AND scanner_id IN (' . implode( ', ', array_fill( 0, count( $scanner_ids ), '%s' ) ) . ')';
-            array_push( $values, ...$scanner_ids );
-        }
+        array_push( $values, ...$scanner_ids );
+
+        $scanner_placeholders = implode( ', ', array_fill( 0, count( $scanner_ids ), '%s' ) );
+
+        // Each optional filter is picked, never assembled.
+        $where = implode(
+            ' AND ',
+            array(
+                'DATE(created_at) BETWEEN %s AND %s',
+                null !== $category ? 'category = %s' : '1 = 1',
+                $scanner_ids ? "scanner_id IN ({$scanner_placeholders})" : '1 = 1',
+            )
+        );
 
         $values[] = max( 1, $limit );
 
-        $rows = $wpdb->get_results(  // phpcs:ignore PluginCheck.Security.DirectDB.UnescapedDBParameter, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching  -- {$this->get_table()}/$table-style variables here are always this plugin's own hardcoded table name(s), never user input; dynamic placeholder counts (IN (...) lists, optional WHERE fragments) are sized correctly at runtime, just not statically visible to this sniff.
+        $rows = $wpdb->get_results(  // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching  -- {$this->get_table()}/$table-style variables here are always this plugin's own hardcoded table name(s), never user input; dynamic placeholder counts (IN (...) lists, optional WHERE fragments) are sized correctly at runtime, just not statically visible to this sniff.
             $wpdb->prepare(
-                "SELECT id, title, severity, category, status, created_at FROM {$this->get_table()} {$where} ORDER BY FIELD(severity, 'critical', 'high', 'medium', 'low', 'info') ASC, created_at DESC LIMIT %d", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare -- $where's %s count matches $values' size at runtime.
+                "SELECT id, title, severity, category, status, created_at FROM %i WHERE {$where} ORDER BY FIELD(severity, 'critical', 'high', 'medium', 'low', 'info') ASC, created_at DESC LIMIT %d", $this->get_table(), // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare -- $where's %s count matches $values' size at runtime.
                 ...$values
             ),
             ARRAY_A

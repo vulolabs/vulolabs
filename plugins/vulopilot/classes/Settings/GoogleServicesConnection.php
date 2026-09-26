@@ -239,6 +239,14 @@ class GoogleServicesConnection {
 
     /**
      * @param string $state The `state` query param Google's redirect carried back.
+     * @return string The nonce inside it, or '' when it has none.
+     */
+    public function get_state_nonce( string $state ): string {
+        return self::decode_state( $state )['nonce'];
+    }
+
+    /**
+     * @param string $state The `state` query param Google's redirect carried back.
      * @return bool
      */
     public function verify_state( string $state ): bool {

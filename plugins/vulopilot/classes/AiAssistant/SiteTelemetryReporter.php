@@ -105,7 +105,7 @@ class SiteTelemetryReporter {
 			'Multisite'      => is_multisite(),
 			'File Location'  => ABSPATH,
 			'Email'          => get_bloginfo( 'admin_email' ),
-			'Server'         => isset( $_SERVER['SERVER_SOFTWARE'] ) ? sanitize_text_field( wp_unslash( $_SERVER['SERVER_SOFTWARE'] ) ) : '', // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- server-reported environment info, not user input; sanitized regardless.
+			'Server'         => isset( $_SERVER['SERVER_SOFTWARE'] ) ? sanitize_text_field( wp_unslash( $_SERVER['SERVER_SOFTWARE'] ) ) : '',
 			'Text Direction' => is_rtl() ? 'rtl' : 'ltr',
 			'Plugin'         => VULOPILOT_PLUGIN_NAME,
 			'Version'        => VULOPILOT_PLUGIN_VERSION,

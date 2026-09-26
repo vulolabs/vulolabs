@@ -164,11 +164,16 @@ export interface ReportsOverviewResponse {
  * changing the day-range preset once (ReportsOverviewHeader.tsx) refetches
  * everything together rather than each section owning its own fetch.
  */
-export const useReportsOverview = (days: number) => {
+export const useReportsOverview = (days: number, enabled = true) => {
 	const [data, setData] = useState<ReportsOverviewResponse | null>(null);
-	const [isLoading, setIsLoading] = useState(true);
+	const [isLoading, setIsLoading] = useState(enabled);
 
 	useEffect(() => {
+		if (!enabled) {
+			setIsLoading(false);
+			return;
+		}
+
 		let cancelled = false;
 		setIsLoading(true);
 
@@ -194,7 +199,7 @@ export const useReportsOverview = (days: number) => {
 		return () => {
 			cancelled = true;
 		};
-	}, [days]);
+	}, [days, enabled]);
 
 	return { data, isLoading };
 };

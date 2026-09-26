@@ -69,11 +69,11 @@ class AddSubheadingsAction extends AbstractBasicAction {
         $post    = $post_id ? get_post( $post_id ) : null;
 
         if ( ! $post || ! in_array( $post->post_type, array( 'post', 'page' ), true ) ) {
-            throw new VuloPilotException( esc_html__( 'post_id must refer to an existing post or page.', 'vulopilot' ), VuloPilotException::TYPE_INVALID_ACTION_INPUT );  // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- false positive: flags the VuloPilotException::TYPE_* constant token itself, not unescaped output; the message argument is already esc_html()-wrapped.
+            VuloPilotException::raise( esc_html__( 'post_id must refer to an existing post or page.', 'vulopilot' ), VuloPilotException::TYPE_INVALID_ACTION_INPUT );
         }
 
         if ( $this->has_subheading( $post->post_content ) ) {
-            throw new VuloPilotException( esc_html__( 'This post already has subheadings - there is nothing to fix.', 'vulopilot' ), VuloPilotException::TYPE_INVALID_ACTION_INPUT );  // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- false positive: flags the VuloPilotException::TYPE_* constant token itself, not unescaped output; the message argument is already esc_html()-wrapped.
+            VuloPilotException::raise( esc_html__( 'This post already has subheadings - there is nothing to fix.', 'vulopilot' ), VuloPilotException::TYPE_INVALID_ACTION_INPUT );
         }
 
         return array(
@@ -117,19 +117,19 @@ class AddSubheadingsAction extends AbstractBasicAction {
         $rewritten = $output['rewritten_content'] ?? '';
 
         if ( '' === trim( wp_strip_all_tags( $rewritten ) ) ) {
-            throw new VuloPilotException( esc_html__( 'The AI returned empty content.', 'vulopilot' ), VuloPilotException::TYPE_INVALID_ACTION_OUTPUT );  // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- false positive: flags the VuloPilotException::TYPE_* constant token itself, not unescaped output; the message argument is already esc_html()-wrapped.
+            VuloPilotException::raise( esc_html__( 'The AI returned empty content.', 'vulopilot' ), VuloPilotException::TYPE_INVALID_ACTION_OUTPUT );
         }
 
         $original_length  = mb_strlen( wp_strip_all_tags( $input['original_content'] ) );
         $rewritten_length = mb_strlen( wp_strip_all_tags( $rewritten ) );
 
         if ( $original_length > 0 && ( $rewritten_length / $original_length ) < self::MIN_LENGTH_RATIO ) {
-            throw new VuloPilotException(
-                esc_html__( 'The AI returned content that looks truncated rather than the original text with headings added - rejected for safety.', 'vulopilot' ), VuloPilotException::TYPE_INVALID_ACTION_OUTPUT );  // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- false positive: flags the VuloPilotException::TYPE_* constant token itself, not unescaped output; the message argument is already esc_html()-wrapped.
+            VuloPilotException::raise(
+                esc_html__( 'The AI returned content that looks truncated rather than the original text with headings added - rejected for safety.', 'vulopilot' ), VuloPilotException::TYPE_INVALID_ACTION_OUTPUT );
         }
 
         if ( ! $this->has_subheading( $rewritten ) ) {
-            throw new VuloPilotException( esc_html__( 'The AI did not add any subheadings - rejected.', 'vulopilot' ), VuloPilotException::TYPE_INVALID_ACTION_OUTPUT );  // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- false positive: flags the VuloPilotException::TYPE_* constant token itself, not unescaped output; the message argument is already esc_html()-wrapped.
+            VuloPilotException::raise( esc_html__( 'The AI did not add any subheadings - rejected.', 'vulopilot' ), VuloPilotException::TYPE_INVALID_ACTION_OUTPUT );
         }
     }
 

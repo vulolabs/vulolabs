@@ -81,7 +81,22 @@ class RedirectManager {
         // RestAPI\Controllers\Redirects::create_item()/update_item()
         // already ran it through esc_url_raw() before it was ever stored),
         // not from this request's own input.
-        wp_redirect( $redirect['target_url'], (int) $redirect['redirect_type'] ); // phpcs:ignore WordPress.Security.SafeRedirect.wp_redirect_wp_redirect -- see comment above: target is admin-configured and pre-sanitized, not visitor input.
+        // wp_safe_redirect() only follows hosts on the allowed list, so the
+        // admin-configured target's own host is added for this one redirect.
+        $target_host = wp_parse_url( (string) $redirect['target_url'], PHP_URL_HOST );
+
+        if ( $target_host ) {
+            add_filter(
+                'allowed_redirect_hosts',
+                static function ( $hosts ) use ( $target_host ) {
+                    $hosts[] = $target_host;
+
+                    return $hosts;
+                }
+            );
+        }
+
+        wp_safe_redirect( $redirect['target_url'], (int) $redirect['redirect_type'] );
         exit;
     }
 

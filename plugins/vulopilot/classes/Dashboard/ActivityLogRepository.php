@@ -92,27 +92,23 @@ class ActivityLogRepository extends RepositoryUtil {
         $per_page = max( 1, min( 100, (int) ( $args['per_page'] ?? 20 ) ) );
         $offset   = ( $page - 1 ) * $per_page;
 
-        $placeholders = implode( ', ', array_fill( 0, count( $event_types ), '%s' ) );
-        $where        = "WHERE event_type IN ({$placeholders})";
-        $values       = $event_types;
+        $values = $this->timeline_values( $event_types, $args );
 
-        if ( ! empty( $args['search'] ) ) {
-            $where   .= ' AND message LIKE %s';
-            $values[] = '%' . $wpdb->esc_like( (string) $args['search'] ) . '%';
-        }
+        $event_placeholders = implode( ', ', array_fill( 0, count( $event_types ), '%s' ) );
 
-        if ( ! empty( $args['date_from'] ) ) {
-            $where   .= ' AND DATE(created_at) >= %s';
-            $values[] = (string) $args['date_from'];
-        }
+        // Each optional filter is picked, never assembled.
+        $where = implode(
+            ' AND ',
+            array(
+                "event_type IN ({$event_placeholders})",
+                ! empty( $args['search'] ) ? 'message LIKE %s' : '1 = 1',
+                ! empty( $args['date_from'] ) ? 'DATE(created_at) >= %s' : '1 = 1',
+                ! empty( $args['date_to'] ) ? 'DATE(created_at) <= %s' : '1 = 1',
+            )
+        );
 
-        if ( ! empty( $args['date_to'] ) ) {
-            $where   .= ' AND DATE(created_at) <= %s';
-            $values[] = (string) $args['date_to'];
-        }
-
-        $total = (int) $wpdb->get_var(  // phpcs:ignore PluginCheck.Security.DirectDB.UnescapedDBParameter, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching  -- {$this->get_table()}/$table-style variables here are always this plugin's own hardcoded table name(s), never user input; dynamic placeholder counts (IN (...) lists, optional WHERE fragments) are sized correctly at runtime, just not statically visible to this sniff.
-            $wpdb->prepare( "SELECT COUNT(*) FROM {$table} {$where}", ...$values ) // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare -- $where's %s count matches $values' size at runtime.
+        $total = (int) $wpdb->get_var( // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- the query is prepared.
+            $wpdb->prepare( "SELECT COUNT(*) FROM %i WHERE {$where}", $table, ...$values ) // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber -- the table and optional filters are picked from fixed literals and every value is a bound placeholder; only the placeholder count varies at runtime.
         );
 
         if ( 0 === $total ) {
@@ -128,7 +124,7 @@ class ActivityLogRepository extends RepositoryUtil {
         $around_id    = absint( $args['around_id'] ?? 0 );
 
         if ( $around_id > 0 ) {
-            $pages_to_target = $this->get_pages_down_to( $table, $where, $values, $around_id, $per_page );
+            $pages_to_target = $this->get_pages_down_to( $table, $event_types, $args, $around_id, $per_page );
 
             if ( $pages_to_target > 0 && $pages_to_target * $per_page <= self::MAX_AROUND_ROWS ) {
                 $limit        = $pages_to_target * $per_page;
@@ -137,8 +133,8 @@ class ActivityLogRepository extends RepositoryUtil {
             }
         }
 
-        $rows = $wpdb->get_results(  // phpcs:ignore PluginCheck.Security.DirectDB.UnescapedDBParameter, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching  -- {$this->get_table()}/$table-style variables here are always this plugin's own hardcoded table name(s), never user input; dynamic placeholder counts (IN (...) lists, optional WHERE fragments) are sized correctly at runtime, just not statically visible to this sniff.
-            $wpdb->prepare( "SELECT * FROM {$table} {$where} ORDER BY created_at DESC, id DESC LIMIT %d OFFSET %d", ...array_merge( $values, array( $limit, $offset ) ) ), // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare, WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber -- same runtime-sized-array case as above.
+        $rows = $wpdb->get_results(  // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching  -- {$this->get_table()}/$table-style variables here are always this plugin's own hardcoded table name(s), never user input; dynamic placeholder counts (IN (...) lists, optional WHERE fragments) are sized correctly at runtime, just not statically visible to this sniff.
+            $wpdb->prepare( "SELECT * FROM %i WHERE {$where} ORDER BY created_at DESC, id DESC LIMIT %d OFFSET %d", $table, ...array_merge( $values, array( $limit, $offset ) ) ), // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare, WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber -- same runtime-sized-array case as above.
             ARRAY_A
         );
 
@@ -150,25 +146,68 @@ class ActivityLogRepository extends RepositoryUtil {
     }
 
     /**
-     * How many `$per_page`-sized pages, counted from the newest row, it takes
-     * to include row `$id` under the same WHERE as the timeline query - 0 when
-     * that row doesn't pass those filters (wrong event type, outside the date
-     * range, doesn't match the search, or doesn't exist), meaning "nothing to
-     * seek." Position uses the same `created_at DESC, id DESC` ordering the
-     * timeline itself sorts by.
+     * Placeholder values for the timeline's WHERE clause, in the order the
+     * clause's own placeholders appear: event types, then the search term,
+     * `date_from` and `date_to` when they are given.
      *
-     * @param string       $table    This plugin's own activity-log table name.
-     * @param string       $where    The timeline's already-built WHERE clause.
-     * @param array<mixed> $values   Placeholder values for `$where`.
-     * @param int          $id       Row to reach.
-     * @param int          $per_page Page size.
-     * @return int
+     * @param string[]             $event_types Event types the timeline is limited to.
+     * @param array<string, mixed> $args        Same filters `get_timeline()` takes.
+     * @return array<int, string>
      */
-    private function get_pages_down_to( string $table, string $where, array $values, int $id, int $per_page ): int {
+    private function timeline_values( array $event_types, array $args ): array {
         global $wpdb;
 
-        $target = $wpdb->get_row(  // phpcs:ignore PluginCheck.Security.DirectDB.UnescapedDBParameter, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching  -- table name is this plugin's own hardcoded one; $where's placeholder count matches $values at runtime.
-            $wpdb->prepare( "SELECT id, created_at FROM {$table} {$where} AND id = %d", ...array_merge( $values, array( $id ) ) ), // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare, WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber -- same runtime-sized-array case as above.
+        $values = $event_types;
+
+        if ( ! empty( $args['search'] ) ) {
+            $values[] = '%' . $wpdb->esc_like( (string) $args['search'] ) . '%';
+        }
+
+        if ( ! empty( $args['date_from'] ) ) {
+            $values[] = (string) $args['date_from'];
+        }
+
+        if ( ! empty( $args['date_to'] ) ) {
+            $values[] = (string) $args['date_to'];
+        }
+
+        return $values;
+    }
+
+    /**
+     * How many `$per_page`-sized pages, counted from the newest row, it takes
+     * to include row `$id` under the same filters as the timeline query - 0
+     * when that row doesn't pass those filters (wrong event type, outside the
+     * date range, doesn't match the search, or doesn't exist), meaning
+     * "nothing to seek." Position uses the same `created_at DESC, id DESC`
+     * ordering the timeline itself sorts by.
+     *
+     * @param string               $table       This plugin's own activity-log table name.
+     * @param string[]             $event_types Event types the timeline is limited to.
+     * @param array<string, mixed> $args        Same filters `get_timeline()` takes.
+     * @param int                  $id          Row to reach.
+     * @param int                  $per_page    Page size.
+     * @return int
+     */
+    private function get_pages_down_to( string $table, array $event_types, array $args, int $id, int $per_page ): int {
+        global $wpdb;
+
+        $values             = $this->timeline_values( $event_types, $args );
+        $event_placeholders = implode( ', ', array_fill( 0, count( $event_types ), '%s' ) );
+
+        // Same filters as get_timeline(), each picked rather than assembled.
+        $where = implode(
+            ' AND ',
+            array(
+                "event_type IN ({$event_placeholders})",
+                ! empty( $args['search'] ) ? 'message LIKE %s' : '1 = 1',
+                ! empty( $args['date_from'] ) ? 'DATE(created_at) >= %s' : '1 = 1',
+                ! empty( $args['date_to'] ) ? 'DATE(created_at) <= %s' : '1 = 1',
+            )
+        );
+
+        $target = $wpdb->get_row( // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- the query is prepared.
+            $wpdb->prepare( "SELECT id, created_at FROM %i WHERE {$where} AND id = %d", $table, ...array_merge( $values, array( $id ) ) ), // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- the table and optional filters are picked from fixed literals and every value is a bound placeholder; only the placeholder count varies at runtime.
             ARRAY_A
         );
 
@@ -176,8 +215,8 @@ class ActivityLogRepository extends RepositoryUtil {
             return 0;
         }
 
-        $newer_rows = (int) $wpdb->get_var(  // phpcs:ignore PluginCheck.Security.DirectDB.UnescapedDBParameter, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching  -- same as above.
-            $wpdb->prepare( "SELECT COUNT(*) FROM {$table} {$where} AND ( created_at > %s OR ( created_at = %s AND id > %d ) )", ...array_merge( $values, array( $target['created_at'], $target['created_at'], (int) $target['id'] ) ) ) // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare, WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber -- same runtime-sized-array case as above.
+        $newer_rows = (int) $wpdb->get_var( // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- the query is prepared.
+            $wpdb->prepare( "SELECT COUNT(*) FROM %i WHERE {$where} AND ( created_at > %s OR ( created_at = %s AND id > %d ) )", $table, ...array_merge( $values, array( $target['created_at'], $target['created_at'], (int) $target['id'] ) ) ) // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber -- the table and optional filters are picked from fixed literals and every value is a bound placeholder; only the placeholder count varies at runtime.
         );
 
         return (int) floor( $newer_rows / $per_page ) + 1;
@@ -214,9 +253,10 @@ class ActivityLogRepository extends RepositoryUtil {
 
         $placeholders = implode( ', ', array_fill( 0, count( $event_types ), '%s' ) );
 
-        $rows = $wpdb->get_results(  // phpcs:ignore PluginCheck.Security.DirectDB.UnescapedDBParameter, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching  -- {$this->get_table()}/$table-style variables here are always this plugin's own hardcoded table name(s), never user input; dynamic placeholder counts (IN (...) lists, optional WHERE fragments) are sized correctly at runtime, just not statically visible to this sniff.
+        $rows = $wpdb->get_results(  // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching  -- {$this->get_table()}/$table-style variables here are always this plugin's own hardcoded table name(s), never user input; dynamic placeholder counts (IN (...) lists, optional WHERE fragments) are sized correctly at runtime, just not statically visible to this sniff.
             $wpdb->prepare(  // phpcs:ignore WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber  -- {$this->get_table()}/$table-style variables here are always this plugin's own hardcoded table name(s), never user input; dynamic placeholder counts (IN (...) lists, optional WHERE fragments) are sized correctly at runtime, just not statically visible to this sniff.
-                "SELECT * FROM {$table} WHERE event_type IN ({$placeholders}) AND created_at BETWEEN %s AND %s ORDER BY created_at ASC LIMIT 10", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare -- placeholder count matches $event_types' size at runtime.
+                "SELECT * FROM %i WHERE event_type IN ({$placeholders}) AND created_at BETWEEN %s AND %s ORDER BY created_at ASC LIMIT 10", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare -- placeholder count matches $event_types' size at runtime.
+                $table,
                 ...array_merge( $event_types, array( $after, $before ) )
             ),
             ARRAY_A

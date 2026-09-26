@@ -67,45 +67,14 @@ abstract class RepositoryUtil implements RepositoryInterface {
 
         global $wpdb;
 
-        $row = $wpdb->get_row(  // phpcs:ignore PluginCheck.Security.DirectDB.UnescapedDBParameter, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching  -- {$this->get_table()}/$table-style variables here are always this plugin's own hardcoded table name(s), never user input; dynamic placeholder counts (IN (...) lists, optional WHERE fragments) are sized correctly at runtime, just not statically visible to this sniff.
-            $wpdb->prepare( "SELECT * FROM {$this->get_table()} WHERE id = %d", $id ), // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+        $row = $wpdb->get_row(  // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching  -- {$this->get_table()}/$table-style variables here are always this plugin's own hardcoded table name(s), never user input; dynamic placeholder counts (IN (...) lists, optional WHERE fragments) are sized correctly at runtime, just not statically visible to this sniff.
+            $wpdb->prepare( "SELECT * FROM %i WHERE id = %d", $this->get_table(), $id ), // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
             ARRAY_A
         );
 
         $this->cache[ $id ] = $row ?: null;
 
         return $this->cache[ $id ];
-    }
-
-    /**
-     * Builds one filterable-column WHERE clause, appending its bound
-     * value(s) to $where_values by reference. A plain scalar becomes an
-     * exact-match `= %s` (the original, only behavior this had); an array
-     * (e.g. a findings table section grouping several scanner_id values
-     * together, SEO.tsx) becomes `IN (%s, %s, ...)` instead - additive, so
-     * every existing scalar caller's query is unchanged.
-     *
-     * @param string                  $column       Column name (already restricted to $filterable_columns entries).
-     * @param string|int|array<mixed> $value        Raw filter value from $args.
-     * @param array<int, string|int>  $where_values Bound values accumulator, appended to by reference.
-     * @return string|null WHERE fragment, or null if $value had nothing usable in it.
-     */
-    private function build_column_where_clause( string $column, $value, array &$where_values ): ?string {
-        if ( is_array( $value ) ) {
-            $values = array_values( array_filter( array_map( 'strval', $value ), fn( $item ) => '' !== $item ) );
-
-            if ( ! $values ) {
-                return null;
-            }
-
-            array_push( $where_values, ...$values );
-
-            return "`{$column}` IN (" . implode( ', ', array_fill( 0, count( $values ), '%s' ) ) . ')';
-        }
-
-        $where_values[] = (string) $value;
-
-        return "`{$column}` = %s";
     }
 
     /**
@@ -121,7 +90,7 @@ abstract class RepositoryUtil implements RepositoryInterface {
         $orderby  = preg_replace( '/[^a-zA-Z_]/', '', (string) ( ! empty( $args['orderby'] ) ? $args['orderby'] : 'id' ) );
         $order    = 'asc' === strtolower( (string) ( $args['order'] ?? 'desc' ) ) ? 'ASC' : 'DESC';
 
-        $where_clauses = array();
+        $where_clauses = array( '1 = 1' );
         $where_values  = array();
 
         foreach ( $this->filterable_columns as $column ) {
@@ -129,44 +98,49 @@ abstract class RepositoryUtil implements RepositoryInterface {
                 continue;
             }
 
-            $clause = $this->build_column_where_clause( $column, $args[ $column ], $where_values );
+            // A plain scalar is an exact match; an array (e.g. a findings table
+            // section grouping several scanner_id values together) becomes IN (...).
+            if ( is_array( $args[ $column ] ) ) {
+                $values = array_values( array_filter( array_map( 'strval', $args[ $column ] ), fn( $item ) => '' !== $item ) );
 
-            if ( null !== $clause ) {
-                $where_clauses[] = $clause;
+                if ( ! $values ) {
+                    continue;
+                }
+
+                $where_clauses[] = '%i IN (' . implode( ', ', array_fill( 0, count( $values ), '%s' ) ) . ')';
+                $where_values[]  = $column;
+                array_push( $where_values, ...$values );
+            } else {
+                $where_clauses[] = '%i = %s';
+                $where_values[]  = $column;
+                $where_values[]  = (string) $args[ $column ];
             }
         }
 
         if ( ! empty( $args['search'] ) && $this->searchable_columns ) {
-            $like              = '%' . $wpdb->esc_like( (string) $args['search'] ) . '%';
-            $search_conditions = array();
+            $like = '%' . $wpdb->esc_like( (string) $args['search'] ) . '%';
 
             foreach ( $this->searchable_columns as $column ) {
-                $search_conditions[] = "`{$column}` LIKE %s";
-                $where_values[]      = $like;
+                $where_values[] = $column;
+                $where_values[] = $like;
             }
 
-            $where_clauses[] = '(' . implode( ' OR ', $search_conditions ) . ')';
+            $search_sql      = implode( ' OR ', array_fill( 0, count( $this->searchable_columns ), '%i LIKE %s' ) );
+            $where_clauses[] = "({$search_sql})";
         }
 
-        $where_sql = $where_clauses ? ( 'WHERE ' . implode( ' AND ', $where_clauses ) ) : '';
+        $where_sql = implode( ' AND ', $where_clauses );
 
-        if ( $where_values ) {
-            $count_sql = $wpdb->prepare( "SELECT COUNT(*) FROM {$table} {$where_sql}", ...$where_values ); // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare -- $where_sql's %s count matches $where_values' size at runtime; the sniff can't see that statically.
-            $rows_sql  = $wpdb->prepare( // phpcs:ignore WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber -- same runtime-sized-array case as above.
-                "SELECT * FROM {$table} {$where_sql} ORDER BY {$orderby} {$order} LIMIT %d OFFSET %d", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-                ...array_merge( $where_values, array( $per_page, $offset ) )
-            );
+        $count_sql = $wpdb->prepare( "SELECT COUNT(*) FROM %i WHERE {$where_sql}", $table, ...$where_values ); // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber -- the table and optional filters are picked from fixed literals and every value is a bound placeholder; only the placeholder count varies at runtime.
+
+        if ( 'ASC' === $order ) {
+            $rows_sql = $wpdb->prepare( "SELECT * FROM %i WHERE {$where_sql} ORDER BY %i ASC LIMIT %d OFFSET %d", $table, ...array_merge( $where_values, array( $orderby, $per_page, $offset ) ) ); // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber -- the table and optional filters are picked from fixed literals and every value is a bound placeholder; only the placeholder count varies at runtime.
         } else {
-            $count_sql = "SELECT COUNT(*) FROM {$table}"; // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
-            $rows_sql  = $wpdb->prepare(
-                "SELECT * FROM {$table} ORDER BY {$orderby} {$order} LIMIT %d OFFSET %d", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-                $per_page,
-                $offset
-            );
+            $rows_sql = $wpdb->prepare( "SELECT * FROM %i WHERE {$where_sql} ORDER BY %i DESC LIMIT %d OFFSET %d", $table, ...array_merge( $where_values, array( $orderby, $per_page, $offset ) ) ); // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber -- the table and optional filters are picked from fixed literals and every value is a bound placeholder; only the placeholder count varies at runtime.
         }
 
-        $total = (int) $wpdb->get_var( $count_sql ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, PluginCheck.Security.DirectDB.UnescapedDBParameter
-        $rows  = $wpdb->get_results( $rows_sql, ARRAY_A ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, PluginCheck.Security.DirectDB.UnescapedDBParameter
+        $total = (int) $wpdb->get_var( $count_sql ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.NotPrepared -- the query above is prepared.
+        $rows  = $wpdb->get_results( $rows_sql, ARRAY_A ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.NotPrepared -- the query above is prepared.
 
         return array(
             'data'  => $rows ?: array(),
@@ -192,7 +166,7 @@ abstract class RepositoryUtil implements RepositoryInterface {
 
         $table         = $this->get_table();
         $safe_column   = preg_replace( '/[^a-zA-Z_]/', '', $column );
-        $where_clauses = array();
+        $where_clauses = array( '1 = 1' );
         $where_values  = array();
 
         foreach ( $this->filterable_columns as $filter_column ) {
@@ -204,22 +178,27 @@ abstract class RepositoryUtil implements RepositoryInterface {
                 continue;
             }
 
-            $clause = $this->build_column_where_clause( $filter_column, $args[ $filter_column ], $where_values );
+            if ( is_array( $args[ $filter_column ] ) ) {
+                $values = array_values( array_filter( array_map( 'strval', $args[ $filter_column ] ), fn( $item ) => '' !== $item ) );
 
-            if ( null !== $clause ) {
-                $where_clauses[] = $clause;
+                if ( ! $values ) {
+                    continue;
+                }
+
+                $where_clauses[] = '%i IN (' . implode( ', ', array_fill( 0, count( $values ), '%s' ) ) . ')';
+                $where_values[]  = $filter_column;
+                array_push( $where_values, ...$values );
+            } else {
+                $where_clauses[] = '%i = %s';
+                $where_values[]  = $filter_column;
+                $where_values[]  = (string) $args[ $filter_column ];
             }
         }
 
-        $where_sql = $where_clauses ? ( 'WHERE ' . implode( ' AND ', $where_clauses ) ) : '';
+        $where_sql = implode( ' AND ', $where_clauses );
 
-        if ( $where_values ) {
-            $sql = $wpdb->prepare( "SELECT `{$safe_column}` AS bucket, COUNT(*) AS total FROM {$table} {$where_sql} GROUP BY `{$safe_column}`", ...$where_values ); // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare -- $where_sql's %s count matches $where_values' size at runtime.
-        } else {
-            $sql = "SELECT `{$safe_column}` AS bucket, COUNT(*) AS total FROM {$table} GROUP BY `{$safe_column}`"; // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
-        }
-
-        $rows = $wpdb->get_results( $sql, ARRAY_A ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, PluginCheck.Security.DirectDB.UnescapedDBParameter
+        $sql  = $wpdb->prepare( "SELECT %i AS bucket, COUNT(*) AS total FROM %i WHERE {$where_sql} GROUP BY %i", ...array_merge( array( $safe_column, $table ), $where_values, array( $safe_column ) ) ); // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber -- the table and optional filters are picked from fixed literals and every value is a bound placeholder; only the placeholder count varies at runtime.
+        $rows = $wpdb->get_results( $sql, ARRAY_A ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.NotPrepared -- the query above is prepared.
 
         $counts = array();
 

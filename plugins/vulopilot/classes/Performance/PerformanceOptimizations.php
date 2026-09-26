@@ -32,15 +32,19 @@ class PerformanceOptimizations {
             add_filter( 'wp_lazy_loading_enabled', '__return_true', 999 );
         }
 
-        add_action( 'wp_head', array( $this, 'maybe_output_preloads' ), 1 );
+        add_filter( 'wp_preload_resources', array( $this, 'add_preloads' ) );
     }
 
     /**
-     * @return void
+     * Adds the site logo and the first queued stylesheet to the resources
+     * WordPress preloads in the page head (core prints the tags itself).
+     *
+     * @param array<int, array<string, mixed>> $preload_resources Resources core is already going to preload.
+     * @return array<int, array<string, mixed>>
      */
-    public function maybe_output_preloads(): void {
+    public function add_preloads( $preload_resources ) {
         if ( ! get_option( 'vulopilot_preload_critical_resources' ) ) {
-            return;
+            return $preload_resources;
         }
 
         $logo_id = get_theme_mod( 'custom_logo' );
@@ -49,9 +53,9 @@ class PerformanceOptimizations {
             $logo_url = wp_get_attachment_image_url( (int) $logo_id, 'full' );
 
             if ( $logo_url ) {
-                printf(
-                    '<link rel="preload" as="image" href="%s" />' . "\n",
-                    esc_url( $logo_url )
+                $preload_resources[] = array(
+                    'href' => $logo_url,
+                    'as'   => 'image',
                 );
             }
         }
@@ -64,12 +68,14 @@ class PerformanceOptimizations {
                     continue;
                 }
 
-                printf(
-                    '<link rel="preload" as="style" href="%s" />' . "\n",
-                    esc_url( $wp_styles->registered[ $handle ]->src )
+                $preload_resources[] = array(
+                    'href' => $wp_styles->registered[ $handle ]->src,
+                    'as'   => 'style',
                 );
                 break;
             }
         }
+
+        return $preload_resources;
     }
 }

@@ -280,7 +280,7 @@ class Admin {
             return;
         }
 
-        $highlight = isset( $_GET['highlight'] ) ? sanitize_key( wp_unslash( $_GET['highlight'] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- read-only display affordance (scrolls/outlines a field), no state changes; only 'email' is ever acted on.
+        $highlight = sanitize_key( (string) filter_input( INPUT_GET, 'highlight' ) );
 
         if ( 'email' !== $highlight ) {
             return;

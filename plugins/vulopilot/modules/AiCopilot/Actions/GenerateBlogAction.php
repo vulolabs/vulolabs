@@ -73,7 +73,7 @@ class GenerateBlogAction extends AbstractBasicAction {
         $topic = sanitize_text_field( (string) ( $input['topic'] ?? '' ) );
 
         if ( mb_strlen( $topic ) < 5 ) {
-            throw new VuloPilotException( esc_html__( 'Please provide a topic of at least 5 characters.', 'vulopilot' ), VuloPilotException::TYPE_INVALID_ACTION_INPUT );  // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- false positive: flags the VuloPilotException::TYPE_* constant token itself, not unescaped output; the message argument is already esc_html()-wrapped.
+            VuloPilotException::raise( esc_html__( 'Please provide a topic of at least 5 characters.', 'vulopilot' ), VuloPilotException::TYPE_INVALID_ACTION_INPUT );
         }
 
         // Both optional - a bare topic is still a complete, valid input,
@@ -139,12 +139,12 @@ class GenerateBlogAction extends AbstractBasicAction {
      */
     public function validate_output( array $output, array $input ): void {
         if ( '' === ( $output['title'] ?? '' ) || '' === ( $output['body'] ?? '' ) ) {
-            throw new VuloPilotException(
-                esc_html__( 'The AI response did not match the expected TITLE/BODY format.', 'vulopilot' ), VuloPilotException::TYPE_INVALID_ACTION_OUTPUT );  // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- false positive: flags the VuloPilotException::TYPE_* constant token itself, not unescaped output; the message argument is already esc_html()-wrapped.
+            VuloPilotException::raise(
+                esc_html__( 'The AI response did not match the expected TITLE/BODY format.', 'vulopilot' ), VuloPilotException::TYPE_INVALID_ACTION_OUTPUT );
         }
 
         if ( mb_strlen( wp_strip_all_tags( $output['body'] ) ) < 100 ) {
-            throw new VuloPilotException( esc_html__( 'The AI returned a post body that is too short to be useful.', 'vulopilot' ), VuloPilotException::TYPE_INVALID_ACTION_OUTPUT );  // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- false positive: flags the VuloPilotException::TYPE_* constant token itself, not unescaped output; the message argument is already esc_html()-wrapped.
+            VuloPilotException::raise( esc_html__( 'The AI returned a post body that is too short to be useful.', 'vulopilot' ), VuloPilotException::TYPE_INVALID_ACTION_OUTPUT );
         }
     }
 

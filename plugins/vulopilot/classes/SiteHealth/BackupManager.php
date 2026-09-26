@@ -410,7 +410,7 @@ class BackupManager {
             throw new \RuntimeException( 'Could not open temporary SQL file for writing.' );
         }
 
-        $create_row = $wpdb->get_row( "SHOW CREATE TABLE `{$table}`", ARRAY_N ); // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, PluginCheck.Security.DirectDB.UnescapedDBParameter, WordPress.DB.DirectDatabaseQuery.SchemaChange -- $table is always a real name read from SHOW TABLES above, never client input; SHOW CREATE TABLE is read-only introspection for this backup export, not an actual schema mutation.
+        $create_row = $wpdb->get_row( $wpdb->prepare( 'SHOW CREATE TABLE %i', $table ), ARRAY_N ); // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.DirectDatabaseQuery.SchemaChange -- $table is always a real name read from SHOW TABLES above, never client input; SHOW CREATE TABLE is read-only introspection for this backup export, not an actual schema mutation.
 
         // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fwrite
         fwrite( $handle, "\n-- Table: {$table}\n" );
@@ -425,7 +425,7 @@ class BackupManager {
         $offset = 0;
 
         while ( true ) {
-            $rows = $wpdb->get_results( "SELECT * FROM `{$table}` LIMIT {$offset}, " . self::DB_CHUNK_SIZE, ARRAY_A ); // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, PluginCheck.Security.DirectDB.UnescapedDBParameter -- $table is always a real name read from SHOW TABLES above; $offset/DB_CHUNK_SIZE are internal ints, never client input.
+            $rows = $wpdb->get_results( $wpdb->prepare( 'SELECT * FROM %i LIMIT %d, %d', $table, $offset, self::DB_CHUNK_SIZE ), ARRAY_A ); // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- $table is always a real name read from SHOW TABLES above; $offset/DB_CHUNK_SIZE are internal ints, never client input.
 
             if ( empty( $rows ) ) {
                 break;
@@ -437,7 +437,7 @@ class BackupManager {
                     ', ',
                     array_map(
                         static function ( $value ) use ( $wpdb ) {
-                            return null === $value ? 'NULL' : "'" . $wpdb->_real_escape( $value ) . "'";
+                            return null === $value ? 'NULL' : "'" . $wpdb->remove_placeholder_escape( $wpdb->_real_escape( $value ) ) . "'";
                         },
                         array_values( $row )
                     )
@@ -579,13 +579,9 @@ class BackupManager {
             $statements = array_filter( array_map( 'trim', explode( ";\n", $sql ) ) );
 
             foreach ( $statements as $statement ) {
-                if ( '' === $statement ) {
-                    continue;
-                }
+                $result = $this->restore_sql_statement( $statement );
 
-                $result = $wpdb->query( $statement ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, PluginCheck.Security.DirectDB.UnescapedDBParameter -- replaying VuloPilot's own real backup archive's SQL dump, never client-supplied SQL.
-
-                if ( false === $result ) {
+                if ( is_wp_error( $result ) ) {
                     $this->delete_directory_recursive( $tmp_dir );
 
                     return new \WP_Error(
@@ -593,7 +589,7 @@ class BackupManager {
                         sprintf(
                             /* translators: %s is the real database error that stopped the restore. */
                             __( 'Restore stopped partway through the database import: %s', 'vulopilot' ),
-                            $wpdb->last_error
+                            $result->get_error_message()
                         ),
                         array( 'status' => 500 )
                     );
@@ -688,6 +684,129 @@ class BackupManager {
             // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_copy -- restoring VuloPilot's own just-extracted, plugin-controlled backup archive contents back into place.
             copy( $file->getPathname(), $destination_path );
         }
+    }
+
+    /**
+     * Replays one statement of a backup's `database.sql`. Backups only ever
+     * contain three kinds - `DROP TABLE IF EXISTS`, `CREATE TABLE` and
+     * `INSERT INTO` - so each is handled through the matching WordPress
+     * database API instead of running the file's text as SQL, and only
+     * tables that belong to this site (its own prefix) are touched.
+     *
+     * @param string $statement One statement from the dump, without its trailing `;`.
+     * @return true|\WP_Error
+     */
+    private function restore_sql_statement( string $statement ) {
+        global $wpdb;
+
+        // Drop the "-- Table: name" comment lines that head each table's block.
+        $statement = trim( (string) preg_replace( '/^--[^\n]*\n?/m', '', $statement ) );
+
+        if ( '' === $statement ) {
+            return true;
+        }
+
+        if ( preg_match( '/^DROP TABLE IF EXISTS `([A-Za-z0-9_]+)`$/', $statement, $matches ) ) {
+            if ( 0 !== strpos( $matches[1], $wpdb->prefix ) ) {
+                return new \WP_Error( 'vulopilot_restore_foreign_table', __( 'The backup refers to a table outside this site.', 'vulopilot' ) );
+            }
+
+            $wpdb->query( $wpdb->prepare( 'DROP TABLE IF EXISTS %i', $matches[1] ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.DirectDatabaseQuery.SchemaChange -- restoring this site's own table from its backup.
+
+            return $wpdb->last_error ? new \WP_Error( 'vulopilot_restore_drop_failed', $wpdb->last_error ) : true;
+        }
+
+        if ( preg_match( '/^CREATE TABLE `([A-Za-z0-9_]+)`/', $statement, $matches ) ) {
+            if ( 0 !== strpos( $matches[1], $wpdb->prefix ) ) {
+                return new \WP_Error( 'vulopilot_restore_foreign_table', __( 'The backup refers to a table outside this site.', 'vulopilot' ) );
+            }
+
+            require_once ABSPATH . 'wp-admin/includes/upgrade.php';
+
+            dbDelta( $statement );
+
+            $exists = $wpdb->get_var( $wpdb->prepare( 'SHOW TABLES LIKE %s', $wpdb->esc_like( $matches[1] ) ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- checking the table was created.
+
+            return $exists ? true : new \WP_Error( 'vulopilot_restore_create_failed', $wpdb->last_error ? $wpdb->last_error : $matches[1] );
+        }
+
+        if ( preg_match( '/^INSERT INTO `([A-Za-z0-9_]+)` \((.+?)\) VALUES \((.*)\)$/s', $statement, $matches ) ) {
+            if ( 0 !== strpos( $matches[1], $wpdb->prefix ) ) {
+                return new \WP_Error( 'vulopilot_restore_foreign_table', __( 'The backup refers to a table outside this site.', 'vulopilot' ) );
+            }
+
+            preg_match_all( '/`([A-Za-z0-9_]+)`/', $matches[2], $column_matches );
+            $values = $this->parse_sql_values( $matches[3] );
+
+            if ( null === $values || count( $values ) !== count( $column_matches[1] ) ) {
+                return new \WP_Error( 'vulopilot_restore_bad_row', $matches[1] );
+            }
+
+            $inserted = $wpdb->insert( $matches[1], array_combine( $column_matches[1], $values ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- restoring this site's own rows from its backup.
+
+            return false === $inserted ? new \WP_Error( 'vulopilot_restore_insert_failed', $wpdb->last_error ) : true;
+        }
+
+        return new \WP_Error( 'vulopilot_restore_unsupported', __( 'The backup contains a statement this version cannot restore.', 'vulopilot' ) );
+    }
+
+    /**
+     * Reads the value list of one dumped `INSERT` - `NULL` or a single-quoted
+     * string with backslash escapes, separated by commas - back into an array.
+     *
+     * @param string $list The text between `VALUES (` and the closing `)`.
+     * @return array<int, string|null>|null Null when the text is not in that format.
+     */
+    private function parse_sql_values( string $list ): ?array {
+        $escapes = array(
+            'n' => "\n",
+            'r' => "\r",
+            '0' => "\0",
+            'Z' => "\x1a",
+        );
+        $values  = array();
+        $length  = strlen( $list );
+        $i       = 0;
+
+        while ( $i < $length ) {
+            if ( 'NULL' === substr( $list, $i, 4 ) ) {
+                $values[] = null;
+                $i       += 4;
+            } elseif ( "'" === $list[ $i ] ) {
+                $value = '';
+                ++$i;
+
+                while ( $i < $length && "'" !== $list[ $i ] ) {
+                    if ( '\\' === $list[ $i ] && $i + 1 < $length ) {
+                        ++$i;
+                        $value .= $escapes[ $list[ $i ] ] ?? $list[ $i ];
+                    } else {
+                        $value .= $list[ $i ];
+                    }
+
+                    ++$i;
+                }
+
+                if ( $i >= $length ) {
+                    return null;
+                }
+
+                ++$i;
+                $values[] = $value;
+            } else {
+                return null;
+            }
+
+            if ( $i < $length ) {
+                if ( ', ' !== substr( $list, $i, 2 ) ) {
+                    return null;
+                }
+
+                $i += 2;
+            }
+        }
+
+        return $values;
     }
 
     /**

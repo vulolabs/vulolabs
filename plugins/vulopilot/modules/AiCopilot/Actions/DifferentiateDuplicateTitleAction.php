@@ -81,7 +81,7 @@ class DifferentiateDuplicateTitleAction extends AbstractBasicAction {
         $post_ids = array_values( array_unique( array_filter( array_map( 'absint', (array) ( $input['post_ids'] ?? array() ) ) ) ) );
 
         if ( count( $post_ids ) < 2 ) {
-            throw new VuloPilotException( esc_html__( 'post_ids must list at least 2 posts sharing a duplicate title.', 'vulopilot' ), VuloPilotException::TYPE_INVALID_ACTION_INPUT );  // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- false positive: flags the VuloPilotException::TYPE_* constant token itself, not unescaped output; the message argument is already esc_html()-wrapped.
+            VuloPilotException::raise( esc_html__( 'post_ids must list at least 2 posts sharing a duplicate title.', 'vulopilot' ), VuloPilotException::TYPE_INVALID_ACTION_INPUT );
         }
 
         sort( $post_ids );
@@ -89,7 +89,7 @@ class DifferentiateDuplicateTitleAction extends AbstractBasicAction {
         $post      = get_post( $target_id );
 
         if ( ! $post || 'publish' !== $post->post_status ) {
-            throw new VuloPilotException( esc_html__( 'The targeted duplicate post no longer exists or is not published.', 'vulopilot' ), VuloPilotException::TYPE_INVALID_ACTION_INPUT );  // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- false positive: flags the VuloPilotException::TYPE_* constant token itself, not unescaped output; the message argument is already esc_html()-wrapped.
+            VuloPilotException::raise( esc_html__( 'The targeted duplicate post no longer exists or is not published.', 'vulopilot' ), VuloPilotException::TYPE_INVALID_ACTION_INPUT );
         }
 
         $sibling_titles = array();
@@ -103,7 +103,7 @@ class DifferentiateDuplicateTitleAction extends AbstractBasicAction {
         }
 
         if ( empty( $sibling_titles ) ) {
-            throw new VuloPilotException( esc_html__( 'None of the other posts sharing this title still exist.', 'vulopilot' ), VuloPilotException::TYPE_INVALID_ACTION_INPUT );  // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- false positive: flags the VuloPilotException::TYPE_* constant token itself, not unescaped output; the message argument is already esc_html()-wrapped.
+            VuloPilotException::raise( esc_html__( 'None of the other posts sharing this title still exist.', 'vulopilot' ), VuloPilotException::TYPE_INVALID_ACTION_INPUT );
         }
 
         return array(
@@ -154,20 +154,20 @@ class DifferentiateDuplicateTitleAction extends AbstractBasicAction {
         $title = $output['title'] ?? '';
 
         if ( '' === $title ) {
-            throw new VuloPilotException( esc_html__( 'The AI returned an empty title.', 'vulopilot' ), VuloPilotException::TYPE_INVALID_ACTION_OUTPUT );  // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- false positive: flags the VuloPilotException::TYPE_* constant token itself, not unescaped output; the message argument is already esc_html()-wrapped.
+            VuloPilotException::raise( esc_html__( 'The AI returned an empty title.', 'vulopilot' ), VuloPilotException::TYPE_INVALID_ACTION_OUTPUT );
         }
 
         if ( mb_strlen( $title ) > self::MAX_LENGTH ) {
-            throw new VuloPilotException( esc_html__( 'The AI returned a title that is too long.', 'vulopilot' ), VuloPilotException::TYPE_INVALID_ACTION_OUTPUT );  // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- false positive: flags the VuloPilotException::TYPE_* constant token itself, not unescaped output; the message argument is already esc_html()-wrapped.
+            VuloPilotException::raise( esc_html__( 'The AI returned a title that is too long.', 'vulopilot' ), VuloPilotException::TYPE_INVALID_ACTION_OUTPUT );
         }
 
         if ( 0 === strcasecmp( trim( $title ), trim( $input['previous_title'] ) ) ) {
-            throw new VuloPilotException( esc_html__( 'The AI returned the same title unchanged - rejected.', 'vulopilot' ), VuloPilotException::TYPE_INVALID_ACTION_OUTPUT );  // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- false positive: flags the VuloPilotException::TYPE_* constant token itself, not unescaped output; the message argument is already esc_html()-wrapped.
+            VuloPilotException::raise( esc_html__( 'The AI returned the same title unchanged - rejected.', 'vulopilot' ), VuloPilotException::TYPE_INVALID_ACTION_OUTPUT );
         }
 
         foreach ( $input['sibling_titles'] as $sibling_title ) {
             if ( 0 === strcasecmp( trim( $title ), trim( $sibling_title ) ) ) {
-                throw new VuloPilotException( esc_html__( 'The AI returned a title that duplicates another post\'s title - rejected.', 'vulopilot' ), VuloPilotException::TYPE_INVALID_ACTION_OUTPUT );  // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- false positive: flags the VuloPilotException::TYPE_* constant token itself, not unescaped output; the message argument is already esc_html()-wrapped.
+                VuloPilotException::raise( esc_html__( 'The AI returned a title that duplicates another post\'s title - rejected.', 'vulopilot' ), VuloPilotException::TYPE_INVALID_ACTION_OUTPUT );
             }
         }
     }

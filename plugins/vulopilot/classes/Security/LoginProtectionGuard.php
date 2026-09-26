@@ -50,7 +50,7 @@ class LoginProtectionGuard {
      * @return string Real IP, or '0.0.0.0' if genuinely unavailable (e.g. CLI context).
      */
     private function get_client_ip(): string {
-        $raw = isset( $_SERVER['REMOTE_ADDR'] ) ? sanitize_text_field( wp_unslash( $_SERVER['REMOTE_ADDR'] ) ) : ''; // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.MissingUnslash
+        $raw = isset( $_SERVER['REMOTE_ADDR'] ) ? sanitize_text_field( wp_unslash( $_SERVER['REMOTE_ADDR'] ) ) : '';
 
         $valid = filter_var( $raw, FILTER_VALIDATE_IP );
 

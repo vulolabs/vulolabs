@@ -42,4 +42,19 @@ const config = createWebpackConfig(
 // touches PickerInput before assuming this alias is still safe.
 config.resolve.alias['@react-pdf/renderer$'] = false;
 
+// wordpress.org does not allow a plugin to load code from other sites. zyra and
+// @tinymce/tinymce-react bundle widgets that fetch scripts/styles/images from
+// Google Maps, Mapbox, reCAPTCHA and TinyMCE Cloud; this plugin uses none of
+// them, so their host names are replaced at build time (see the loader's own
+// docblock). Opt-in per plugin, like the @react-pdf/renderer alias above.
+config.module.rules.unshift( {
+	test: /\.(c|m)?js$/,
+	include: /[\\/](?:@multivendorx[\\/]zyra|@tinymce[\\/]tinymce-react)[\\/]/,
+	enforce: 'pre',
+	use: require( 'path' ).resolve(
+		__dirname,
+		'../../tools/webpack/loaders/disable-remote-hosts.js'
+	),
+} );
+
 module.exports = config;

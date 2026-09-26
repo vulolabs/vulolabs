@@ -79,7 +79,16 @@ class WebmasterToolsManager {
         $custom_tags = trim( (string) ( $settings['webmaster_custom_tags'] ?? '' ) );
 
         if ( '' !== $custom_tags ) {
-            echo $this->sanitize_custom_meta_tags( $custom_tags ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- sanitize_custom_meta_tags() itself only ever returns re-built <meta name="..." content="..." /> tags, each of whose attribute values already went through esc_attr() there.
+            echo wp_kses(
+                $this->sanitize_custom_meta_tags( $custom_tags ),
+                array(
+                    'meta' => array(
+                        'name'     => true,
+                        'property' => true,
+                        'content'  => true,
+                    ),
+                )
+            );
         }
     }
 

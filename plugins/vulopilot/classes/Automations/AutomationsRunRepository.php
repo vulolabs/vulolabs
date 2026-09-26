@@ -53,9 +53,9 @@ class AutomationsRunRepository extends RepositoryUtil {
     public function get_stats_for_period( string $period_start, string $period_end ): array {
         global $wpdb;
 
-        $rows = $wpdb->get_results( // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, PluginCheck.Security.DirectDB.UnescapedDBParameter -- {$this->get_table()} is this plugin's own table name, not user input.
+        $rows = $wpdb->get_results( // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- {$this->get_table()} is this plugin's own table name, not user input.
             $wpdb->prepare(
-                "SELECT status, COUNT(*) AS total FROM {$this->get_table()} WHERE DATE(created_at) BETWEEN %s AND %s GROUP BY status", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+                "SELECT status, COUNT(*) AS total FROM %i WHERE DATE(created_at) BETWEEN %s AND %s GROUP BY status", $this->get_table(), // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
                 $period_start,
                 $period_end
             ),
@@ -90,9 +90,9 @@ class AutomationsRunRepository extends RepositoryUtil {
     public function get_action_totals_for_period( string $period_start, string $period_end ): array {
         global $wpdb;
 
-        $row = $wpdb->get_row( // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, PluginCheck.Security.DirectDB.UnescapedDBParameter -- {$this->get_table()} is this plugin's own table name, not user input.
+        $row = $wpdb->get_row( // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- {$this->get_table()} is this plugin's own table name, not user input.
             $wpdb->prepare(
-                "SELECT COALESCE(SUM(actions_executed), 0) AS executed, COALESCE(SUM(actions_failed), 0) AS failed, COALESCE(SUM(changes_made), 0) AS changes_made FROM {$this->get_table()} WHERE DATE(created_at) BETWEEN %s AND %s", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+                "SELECT COALESCE(SUM(actions_executed), 0) AS executed, COALESCE(SUM(actions_failed), 0) AS failed, COALESCE(SUM(changes_made), 0) AS changes_made FROM %i WHERE DATE(created_at) BETWEEN %s AND %s", $this->get_table(), // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
                 $period_start,
                 $period_end
             ),
@@ -125,9 +125,9 @@ class AutomationsRunRepository extends RepositoryUtil {
     public function get_action_type_totals_for_period( string $period_start, string $period_end ): array {
         global $wpdb;
 
-        $logs = $wpdb->get_col( // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, PluginCheck.Security.DirectDB.UnescapedDBParameter -- {$this->get_table()} is this plugin's own table name, not user input.
+        $logs = $wpdb->get_col( // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- {$this->get_table()} is this plugin's own table name, not user input.
             $wpdb->prepare(
-                "SELECT result_log FROM {$this->get_table()} WHERE DATE(created_at) BETWEEN %s AND %s AND result_log IS NOT NULL", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+                "SELECT result_log FROM %i WHERE DATE(created_at) BETWEEN %s AND %s AND result_log IS NOT NULL", $this->get_table(), // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
                 $period_start,
                 $period_end
             )
@@ -182,18 +182,20 @@ class AutomationsRunRepository extends RepositoryUtil {
         // {$this->get_table()}/{$placeholders} are this plugin's own table name and a run-time-built
         // string of %d placeholders (one per $automation_ids entry) - not user input, and
         // $automation_ids is passed below as prepare()'s array of values.
-        // phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, PluginCheck.Security.DirectDB.UnescapedDBParameter, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare
+        // phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare
         $rows = $wpdb->get_results(
-            $wpdb->prepare(
+            $wpdb->prepare( // phpcs:ignore WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber -- the table and optional filters are picked from fixed literals and every value is a bound placeholder; only the placeholder count varies at runtime.
                 "SELECT r.automation_id, r.status, r.actions_executed, r.actions_failed, r.changes_made, r.started_at, r.finished_at
-                 FROM {$this->get_table()} r
+                 FROM %i r
                  INNER JOIN (
                      SELECT automation_id, MAX(started_at) AS max_started
-                     FROM {$this->get_table()}
+                     FROM %i
                      WHERE automation_id IN ({$placeholders})
                      GROUP BY automation_id
                  ) latest ON latest.automation_id = r.automation_id AND latest.max_started = r.started_at",
-                $automation_ids
+                $this->get_table(),
+                $this->get_table(),
+                ...$automation_ids
             ),
             ARRAY_A
         );
@@ -239,9 +241,9 @@ class AutomationsRunRepository extends RepositoryUtil {
     public function get_failed_count_since( string $since_mysql_datetime ): int {
         global $wpdb;
 
-        return (int) $wpdb->get_var( // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, PluginCheck.Security.DirectDB.UnescapedDBParameter -- {$this->get_table()} is this plugin's own table name, not user input.
+        return (int) $wpdb->get_var( // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- {$this->get_table()} is this plugin's own table name, not user input.
             $wpdb->prepare(
-                "SELECT COUNT(*) FROM {$this->get_table()} WHERE status = 'failed' AND created_at >= %s", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+                "SELECT COUNT(*) FROM %i WHERE status = 'failed' AND created_at >= %s", $this->get_table(), // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
                 $since_mysql_datetime
             )
         );
@@ -258,8 +260,8 @@ class AutomationsRunRepository extends RepositoryUtil {
     public function get_most_recent_finished_at(): ?string {
         global $wpdb;
 
-        $value = $wpdb->get_var( // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, PluginCheck.Security.DirectDB.UnescapedDBParameter -- {$this->get_table()} is this plugin's own table name, not user input.
-            "SELECT MAX(finished_at) FROM {$this->get_table()} WHERE finished_at IS NOT NULL" // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+        $value = $wpdb->get_var( // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- {$this->get_table()} is this plugin's own table name, not user input.
+            $wpdb->prepare( 'SELECT MAX(finished_at) FROM %i WHERE finished_at IS NOT NULL', $this->get_table() )
         );
 
         return $value ?: null;
@@ -281,18 +283,19 @@ class AutomationsRunRepository extends RepositoryUtil {
         $automations_table = $wpdb->prefix . CoreUtill::TABLES['automations'];
 
         // {$this->get_table()}/{$automations_table} are this plugin's own table names, not user input.
-        // phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, PluginCheck.Security.DirectDB.UnescapedDBParameter, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+        // phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
         $rows = $wpdb->get_results(
             $wpdb->prepare(
                 "SELECT r.automation_id AS automation_id, a.name AS name,
                         COUNT(*) AS runs,
                         SUM(CASE WHEN r.status = 'completed' THEN 1 ELSE 0 END) AS succeeded,
                         SUM(CASE WHEN r.status = 'failed' THEN 1 ELSE 0 END) AS failed
-                 FROM {$this->get_table()} r
-                 LEFT JOIN {$automations_table} a ON a.id = r.automation_id
+                 FROM %i r
+                 LEFT JOIN %i a ON a.id = r.automation_id
                  WHERE DATE(r.created_at) BETWEEN %s AND %s
                  GROUP BY r.automation_id, a.name
-                 ORDER BY runs DESC",
+                 ORDER BY runs DESC", $this->get_table(),
+                $automations_table,
                 $period_start,
                 $period_end
             ),

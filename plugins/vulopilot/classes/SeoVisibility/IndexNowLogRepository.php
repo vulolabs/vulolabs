@@ -111,10 +111,12 @@ class IndexNowLogRepository {
 
         $table = $wpdb->prefix . \VuloPilot\Utill::TABLES['activity_log'];
 
-        $wpdb->query( // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, PluginCheck.Security.DirectDB.UnescapedDBParameter
+        $wpdb->query( // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
             $wpdb->prepare(
-                "DELETE FROM {$table} WHERE event_type = %s AND id NOT IN (SELECT id FROM (SELECT id FROM {$table} WHERE event_type = %s ORDER BY id DESC LIMIT %d) AS keep_ids)", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+                'DELETE FROM %i WHERE event_type = %s AND id NOT IN (SELECT id FROM (SELECT id FROM %i WHERE event_type = %s ORDER BY id DESC LIMIT %d) AS keep_ids)',
+                $table,
                 self::EVENT_TYPE,
+                $table,
                 self::EVENT_TYPE,
                 self::MAX_ROWS
             )

@@ -45,8 +45,8 @@ class AutomationsRepository extends RepositoryUtil {
     public function count_enabled(): int {
         global $wpdb;
 
-        return (int) $wpdb->get_var( // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, PluginCheck.Security.DirectDB.UnescapedDBParameter -- {$this->get_table()} is this plugin's own table name, not user input.
-            "SELECT COUNT(*) FROM {$this->get_table()} WHERE status = 'enabled'" // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+        return (int) $wpdb->get_var( // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- {$this->get_table()} is this plugin's own table name, not user input.
+            $wpdb->prepare( "SELECT COUNT(*) FROM %i WHERE status = 'enabled'", $this->get_table() )
         );
     }
 
@@ -80,9 +80,9 @@ class AutomationsRepository extends RepositoryUtil {
     public function find_by_system_default_marker( string $marker ): ?array {
         global $wpdb;
 
-        $row = $wpdb->get_row( // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, PluginCheck.Security.DirectDB.UnescapedDBParameter -- {$this->get_table()} is this plugin's own table name, not user input.
+        $row = $wpdb->get_row( // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- {$this->get_table()} is this plugin's own table name, not user input.
             $wpdb->prepare(
-                "SELECT * FROM {$this->get_table()} WHERE trigger_config LIKE %s ORDER BY id ASC LIMIT 1", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+                "SELECT * FROM %i WHERE trigger_config LIKE %s ORDER BY id ASC LIMIT 1", $this->get_table(), // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
                 '%"system_default":"' . $wpdb->esc_like( $marker ) . '"%'
             ),
             ARRAY_A

@@ -86,9 +86,9 @@ class CoreWebVitalsRepository extends RepositoryUtil {
     public function get_p75_summary(): array {
         global $wpdb;
 
-        $rows = $wpdb->get_results(  // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, PluginCheck.Security.DirectDB.UnescapedDBParameter  -- {$this->get_table()}/$table-style variables here are always this plugin's own hardcoded table name(s), never user input; dynamic placeholder counts (IN (...) lists, optional WHERE fragments) are sized correctly at runtime, just not statically visible to this sniff.
+        $rows = $wpdb->get_results(  // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching  -- {$this->get_table()}/$table-style variables here are always this plugin's own hardcoded table name(s), never user input; dynamic placeholder counts (IN (...) lists, optional WHERE fragments) are sized correctly at runtime, just not statically visible to this sniff.
             $wpdb->prepare(
-                "SELECT lcp_ms, cls_thousandths, inp_ms, page_load_ms, transfer_bytes FROM {$this->get_table()} WHERE sample_type = %s ORDER BY created_at DESC LIMIT %d", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+                "SELECT lcp_ms, cls_thousandths, inp_ms, page_load_ms, transfer_bytes FROM %i WHERE sample_type = %s ORDER BY created_at DESC LIMIT %d", $this->get_table(), // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
                 self::SAMPLE_TYPE,
                 self::MAX_SAMPLES
             ),
@@ -144,9 +144,9 @@ class CoreWebVitalsRepository extends RepositoryUtil {
     public function delete_older_than( int $days ): void {
         global $wpdb;
 
-        $wpdb->query( // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, PluginCheck.Security.DirectDB.UnescapedDBParameter
+        $wpdb->query( // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
             $wpdb->prepare(
-                "DELETE FROM {$this->get_table()} WHERE sample_type = %s AND created_at < %s", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+                "DELETE FROM %i WHERE sample_type = %s AND created_at < %s", $this->get_table(), // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
                 self::SAMPLE_TYPE,
                 gmdate( 'Y-m-d H:i:s', time() - $days * DAY_IN_SECONDS )
             )

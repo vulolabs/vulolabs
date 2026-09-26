@@ -42,9 +42,9 @@ class ScanRepository extends RepositoryUtil {
     public function get_stats_for_period( string $period_start, string $period_end ): array {
         global $wpdb;
 
-        $rows = $wpdb->get_results( // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, PluginCheck.Security.DirectDB.UnescapedDBParameter -- {$this->get_table()} is this plugin's own table name, not user input.
+        $rows = $wpdb->get_results( // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- {$this->get_table()} is this plugin's own table name, not user input.
             $wpdb->prepare(
-                "SELECT status, COUNT(*) AS total FROM {$this->get_table()} WHERE DATE(created_at) BETWEEN %s AND %s GROUP BY status", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+                "SELECT status, COUNT(*) AS total FROM %i WHERE DATE(created_at) BETWEEN %s AND %s GROUP BY status", $this->get_table(), // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
                 $period_start,
                 $period_end
             ),
@@ -83,9 +83,10 @@ class ScanRepository extends RepositoryUtil {
 
         $placeholders = implode( ', ', array_fill( 0, count( $scanner_ids ), '%s' ) );
 
-        $row = $wpdb->get_row( // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, PluginCheck.Security.DirectDB.UnescapedDBParameter -- {$this->get_table()} is this plugin's own table name, not user input.
+        $row = $wpdb->get_row( // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- {$this->get_table()} is this plugin's own table name, not user input.
             $wpdb->prepare( // phpcs:ignore WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber -- $placeholders expands to exactly count($scanner_ids) %s placeholders (built above via array_fill), and ...$scanner_ids spreads that many values; the sniff can't statically count either the dynamic placeholder string or the spread args.
-                "SELECT duration_ms, finished_at FROM {$this->get_table()} WHERE status = %s AND scanner_id IN ({$placeholders}) AND finished_at IS NOT NULL ORDER BY finished_at DESC LIMIT 1", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+                "SELECT duration_ms, finished_at FROM %i WHERE status = %s AND scanner_id IN ({$placeholders}) AND finished_at IS NOT NULL ORDER BY finished_at DESC LIMIT 1", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- the table and optional filters are picked from fixed literals and every value is a bound placeholder; only the placeholder count varies at runtime.
+                $this->get_table(),
                 'completed',
                 ...$scanner_ids
             ),

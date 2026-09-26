@@ -66,11 +66,11 @@ class AuditContentAction extends AbstractBasicAction {
 		$post    = $post_id ? get_post( $post_id ) : null;
 
 		if ( ! $post || ! in_array( $post->post_type, array( 'post', 'page' ), true ) ) {
-			throw new VuloPilotException( esc_html__( 'post_id must refer to an existing post or page.', 'vulopilot' ), VuloPilotException::TYPE_INVALID_ACTION_INPUT );  // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- false positive: flags the VuloPilotException::TYPE_* constant token itself, not unescaped output; the message argument is already esc_html()-wrapped.
+			VuloPilotException::raise( esc_html__( 'post_id must refer to an existing post or page.', 'vulopilot' ), VuloPilotException::TYPE_INVALID_ACTION_INPUT );
 		}
 
 		if ( mb_strlen( wp_strip_all_tags( $post->post_content ) ) < 50 ) {
-			throw new VuloPilotException( esc_html__( 'This post needs at least some existing content to audit.', 'vulopilot' ), VuloPilotException::TYPE_INVALID_ACTION_INPUT );  // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- false positive: flags the VuloPilotException::TYPE_* constant token itself, not unescaped output; the message argument is already esc_html()-wrapped.
+			VuloPilotException::raise( esc_html__( 'This post needs at least some existing content to audit.', 'vulopilot' ), VuloPilotException::TYPE_INVALID_ACTION_INPUT );
 		}
 
 		return array(
@@ -138,8 +138,8 @@ class AuditContentAction extends AbstractBasicAction {
 	 */
 	public function validate_output( array $output, array $input ): void {
 		if ( null === $output['score'] || '' === $output['summary'] ) {
-			throw new VuloPilotException(
-				esc_html__( 'The AI response did not match the expected audit format.', 'vulopilot' ), VuloPilotException::TYPE_INVALID_ACTION_OUTPUT );  // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- false positive: flags the VuloPilotException::TYPE_* constant token itself, not unescaped output; the message argument is already esc_html()-wrapped.
+			VuloPilotException::raise(
+				esc_html__( 'The AI response did not match the expected audit format.', 'vulopilot' ), VuloPilotException::TYPE_INVALID_ACTION_OUTPUT );
 		}
 	}
 

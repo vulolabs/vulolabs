@@ -64,11 +64,12 @@ class SnapshotRepository extends RepositoryUtil {
     protected function store( string $date, array $values ): void {
         global $wpdb;
 
-        $wpdb->query( // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, PluginCheck.Security.DirectDB.UnescapedDBParameter -- {$this->get_table()} is this plugin's own table name, not user input.
+        $wpdb->query( // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- {$this->get_table()} is this plugin's own table name, not user input.
             $wpdb->prepare(
                 // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- {$this->get_table()} is this plugin's own table name, not user input.
-                "INSERT INTO {$this->get_table()} (snapshot_type, snapshot_date, data) VALUES (%s, %s, %s)
-                ON DUPLICATE KEY UPDATE data = VALUES(data)",
+                'INSERT INTO %i (snapshot_type, snapshot_date, data) VALUES (%s, %s, %s)
+                ON DUPLICATE KEY UPDATE data = VALUES(data)',
+                $this->get_table(),
                 $this->snapshot_type,
                 $date,
                 wp_json_encode( $values )
@@ -93,10 +94,7 @@ class SnapshotRepository extends RepositoryUtil {
      * @return array<int, array<string, mixed>>
      */
     public function get_recent( int $days = 30 ): array {
-        return $this->query_rows(
-            'snapshot_date >= %s ORDER BY snapshot_date ASC',
-            array( gmdate( 'Y-m-d', strtotime( "-{$days} days" ) ) )
-        );
+        return $this->query_rows( 'recent', array( gmdate( 'Y-m-d', strtotime( "-{$days} days" ) ) ) );
     }
 
     /**
@@ -107,43 +105,54 @@ class SnapshotRepository extends RepositoryUtil {
      * @return array<int, array<string, mixed>>
      */
     public function get_between( string $period_start, string $period_end ): array {
-        return $this->query_rows(
-            'snapshot_date BETWEEN %s AND %s ORDER BY snapshot_date ASC',
-            array( $period_start, $period_end )
-        );
+        return $this->query_rows( 'between', array( $period_start, $period_end ) );
     }
 
     /**
      * @return array<string, mixed>|null Newest row, or null.
      */
     public function get_latest(): ?array {
-        return $this->query_rows( '1=1 ORDER BY snapshot_date DESC LIMIT 1', array() )[0] ?? null;
+        return $this->query_rows( 'latest', array() )[0] ?? null;
     }
 
     /**
      * @return array<string, mixed>|null The row before the newest, or null.
      */
     public function get_previous(): ?array {
-        return $this->query_rows( '1=1 ORDER BY snapshot_date DESC LIMIT 1 OFFSET 1', array() )[0] ?? null;
+        return $this->query_rows( 'previous', array() )[0] ?? null;
     }
 
     /**
-     * Runs a `WHERE snapshot_type = %s AND {$clause}` query and flattens each row.
+     * Runs one of this class's own fixed snapshot queries and flattens each row.
      *
-     * @param string            $clause Remaining WHERE/ORDER BY SQL (with placeholders).
-     * @param array<int, mixed> $args   Values for the clause's placeholders.
+     * @param string            $query One of 'latest', 'previous', 'recent', 'between'.
+     * @param array<int, mixed> $args  Values for that query's date placeholders.
      * @return array<int, array<string, mixed>>
      */
-    private function query_rows( string $clause, array $args ): array {
+    private function query_rows( string $query, array $args ): array {
         global $wpdb;
 
-        $rows = $wpdb->get_results( // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, PluginCheck.Security.DirectDB.UnescapedDBParameter -- {$this->get_table()} is this plugin's own table name, and {$clause} is one of this class's own private hardcoded WHERE fragments (get_recent()/get_between()/get_latest()/get_previous()), never user input.
-            $wpdb->prepare(
-                "SELECT id, snapshot_date, data, created_at FROM {$this->get_table()} WHERE snapshot_type = %s AND {$clause}", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-                ...array_merge( array( $this->snapshot_type ), $args )
-            ),
-            ARRAY_A
-        );
+        $table = $this->get_table();
+        $type  = $this->snapshot_type;
+
+        switch ( $query ) {
+            case 'latest':
+                $sql = $wpdb->prepare( 'SELECT id, snapshot_date, data, created_at FROM %i WHERE snapshot_type = %s ORDER BY snapshot_date DESC LIMIT 1', $table, $type );
+                break;
+            case 'previous':
+                $sql = $wpdb->prepare( 'SELECT id, snapshot_date, data, created_at FROM %i WHERE snapshot_type = %s ORDER BY snapshot_date DESC LIMIT 1 OFFSET 1', $table, $type );
+                break;
+            case 'recent':
+                $sql = $wpdb->prepare( 'SELECT id, snapshot_date, data, created_at FROM %i WHERE snapshot_type = %s AND snapshot_date >= %s ORDER BY snapshot_date ASC', $table, $type, $args[0] );
+                break;
+            case 'between':
+                $sql = $wpdb->prepare( 'SELECT id, snapshot_date, data, created_at FROM %i WHERE snapshot_type = %s AND snapshot_date BETWEEN %s AND %s ORDER BY snapshot_date ASC', $table, $type, $args[0], $args[1] );
+                break;
+            default:
+                return array();
+        }
+
+        $rows = $wpdb->get_results( $sql, ARRAY_A ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.NotPrepared -- the query above is prepared.
 
         return array_map( array( $this, 'flatten' ), $rows ? $rows : array() );
     }

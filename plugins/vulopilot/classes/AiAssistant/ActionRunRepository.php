@@ -68,9 +68,10 @@ class ActionRunRepository extends RepositoryUtil {
 
         $placeholders = implode( ', ', array_fill( 0, count( $action_ids ), '%s' ) );
 
-        $outputs = $wpdb->get_col(  // phpcs:ignore PluginCheck.Security.DirectDB.UnescapedDBParameter, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching  -- {$this->get_table()}/$table-style variables here are always this plugin's own hardcoded table name(s), never user input; dynamic placeholder counts (IN (...) lists, optional WHERE fragments) are sized correctly at runtime, just not statically visible to this sniff.
+        $outputs = $wpdb->get_col(  // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching  -- {$this->get_table()}/$table-style variables here are always this plugin's own hardcoded table name(s), never user input; dynamic placeholder counts (IN (...) lists, optional WHERE fragments) are sized correctly at runtime, just not statically visible to this sniff.
             $wpdb->prepare( // phpcs:ignore WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber -- $placeholders' %s count matches $action_ids' size at runtime; the trailing 2 %s are $period_start/$period_end, both passed below via the same spread.
-                "SELECT output FROM {$this->get_table()} WHERE status = 'executed' AND action_id IN ({$placeholders}) AND DATE(created_at) BETWEEN %s AND %s", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare -- $placeholders' %s count matches $action_ids' size at runtime.
+                "SELECT output FROM %i WHERE status = 'executed' AND action_id IN ({$placeholders}) AND DATE(created_at) BETWEEN %s AND %s", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare -- $placeholders' %s count matches $action_ids' size at runtime.
+                $this->get_table(),
                 ...array_merge( $action_ids, array( $period_start, $period_end ) )
             )
         );
