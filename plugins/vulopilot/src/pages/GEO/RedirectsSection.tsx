@@ -192,6 +192,9 @@ const RedirectsSection = () => {
 	const [isSaving, setIsSaving] = useState(false);
 	/** Row pending deletion, shown via the `confirmMode` popup below instead of `window.confirm()`. */
 	const [deleteTarget, setDeleteTarget] = useState<RedirectRow | null>(null);
+	/** Bulk delete pending confirmation (`confirmMode` popup, same as the single-row delete). */
+	const [bulkDeleteIds, setBulkDeleteIds] = useState<(string | number)[] | null>(null);
+	const [isBulkApplying, setIsBulkApplying] = useState(false);
 
 	const loadRedirects = () => {
 		setIsLoading(true);
@@ -337,6 +340,93 @@ const RedirectsSection = () => {
 				loadRedirects();
 			}
 		});
+	};
+
+	const handleBulkActionApply = (action: string, selectedIds: (string | number)[]) => {
+		if (!selectedIds.length) {
+			return;
+		}
+
+		if ('delete' === action) {
+			setBulkDeleteIds(selectedIds);
+			return;
+		}
+
+		if ('activate' !== action && 'deactivate' !== action) {
+			return;
+		}
+
+		setIsBulkApplying(true);
+
+		Promise.all(
+			selectedIds.map((id) =>
+				sendApiResponse(
+					vulopilotAppLocalizer,
+					getApiLink(vulopilotAppLocalizer, `redirects/${id}`),
+					{ is_active: 'activate' === action ? 1 : 0 }
+				)
+			)
+		)
+			.then((results) => {
+				const failed = results.filter((response) => !response).length;
+
+				NoticeManager.add({
+					uniqueKey: 'vulopilot-redirect-bulk-status',
+					type: failed ? 'error' : 'success',
+					position: 'float',
+					message: failed
+						? sprintf(
+							/* translators: %d: number of redirects that failed to update. */
+							__('%d redirect(s) could not be updated.', 'vulopilot'),
+							failed
+						)
+						: 'activate' === action
+							? __('Selected redirects activated.', 'vulopilot')
+							: __('Selected redirects deactivated.', 'vulopilot'),
+				});
+
+				loadRedirects();
+			})
+			.finally(() => setIsBulkApplying(false));
+	};
+
+	const handleConfirmBulkDelete = () => {
+		if (!bulkDeleteIds) {
+			return;
+		}
+
+		const ids = bulkDeleteIds;
+		setBulkDeleteIds(null);
+		setIsBulkApplying(true);
+
+		Promise.all(
+			ids.map((id) =>
+				sendApiResponse(
+					vulopilotAppLocalizer,
+					getApiLink(vulopilotAppLocalizer, `redirects/${id}/delete`),
+					{}
+				)
+			)
+		)
+			.then((results) => {
+				const failed = results.filter((response) => !response).length;
+
+				NoticeManager.add({
+					uniqueKey: 'vulopilot-redirect-bulk-delete',
+					type: failed ? 'error' : 'success',
+					position: 'float',
+					message: failed
+						? sprintf(
+							/* translators: %d: number of redirects that failed to delete. */
+							__('%d redirect(s) could not be deleted.', 'vulopilot'),
+							failed
+						)
+						: __('Selected redirects deleted.', 'vulopilot'),
+				});
+
+				loadRedirects();
+			})
+			.finally(() => setIsBulkApplying(false));
 	};
 
 	const visibleRedirects = allRedirects
@@ -720,7 +810,13 @@ const RedirectsSection = () => {
 						rows={pageRows}
 						ids={pageRows.map((row) => row.id)}
 						totalRows={visibleRedirects.length}
-						isLoading={isLoading}
+						isLoading={isLoading || isBulkApplying}
+						bulkActions={[
+							{ label: __('Activate', 'vulopilot'), value: 'activate' },
+							{ label: __('Deactivate', 'vulopilot'), value: 'deactivate' },
+							{ label: __('Delete', 'vulopilot'), value: 'delete' },
+						]}
+						onBulkActionApply={handleBulkActionApply}
 						search={{
 							placeholder: __('Search by URL or redirect…', 'vulopilot'),
 						}}
@@ -867,6 +963,28 @@ const RedirectsSection = () => {
 						confirmNoText={__('Cancel', 'vulopilot')}
 						onConfirm={handleConfirmDeleteRedirect}
 						onCancel={() => setDeleteTarget(null)}
+					/>
+				</PopupComponent>
+
+				<PopupComponent
+					position="lightbox"
+					open={!!bulkDeleteIds}
+					onClose={() => setBulkDeleteIds(null)}
+					width={31.25}
+					height="auto"
+				>
+					<ShowProPopup
+						confirmMode
+						title={__('Delete Redirects', 'vulopilot')}
+						confirmMessage={sprintf(
+							/* translators: %d: number of selected redirects. */
+							__('Delete %d selected redirect(s)? This cannot be undone.', 'vulopilot'),
+							bulkDeleteIds?.length ?? 0
+						)}
+						confirmYesText={__('Delete', 'vulopilot')}
+						confirmNoText={__('Cancel', 'vulopilot')}
+						onConfirm={handleConfirmBulkDelete}
+						onCancel={() => setBulkDeleteIds(null)}
 					/>
 				</PopupComponent>
 			</ColumnComponent>

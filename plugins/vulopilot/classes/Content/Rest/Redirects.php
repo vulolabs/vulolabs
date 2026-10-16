@@ -183,12 +183,14 @@ class Redirects extends \WP_REST_Controller {
 		}
 
 		$redirect_type = absint( $request->get_param( 'redirect_type' ) );
+		$match_type    = (string) $request->get_param( 'match_type' );
 
 		$id = $repository->insert(
 			array(
 				'source_path'   => $source_path,
 				'target_url'    => $target_url,
 				'redirect_type' => in_array( $redirect_type, array( 301, 302, 307 ), true ) ? $redirect_type : 301,
+				'match_type'    => in_array( $match_type, array( 'exact', 'contains', 'start', 'end', 'regex' ), true ) ? $match_type : 'exact',
 				'hit_count'     => 0,
 				'is_active'     => 1,
 				'created_by'    => get_current_user_id(),
@@ -225,6 +227,11 @@ class Redirects extends \WP_REST_Controller {
 
 		if ( null !== $request->get_param( 'is_active' ) ) {
 			$update['is_active'] = $request->get_param( 'is_active' ) ? 1 : 0;
+		}
+
+		if ( null !== $request->get_param( 'match_type' ) ) {
+			$match_type         = (string) $request->get_param( 'match_type' );
+			$update['match_type'] = in_array( $match_type, array( 'exact', 'contains', 'start', 'end', 'regex' ), true ) ? $match_type : 'exact';
 		}
 
 		if ( empty( $update ) ) {

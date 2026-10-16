@@ -28,6 +28,7 @@ class TitleFormatter {
 		'tag_title'        => array( __CLASS__, 'var_current_title' ),
 		'search_term'      => array( __CLASS__, 'var_search_term' ),
 		'archive_title'    => array( __CLASS__, 'var_current_title' ),
+		'author_name'      => array( __CLASS__, 'var_author_name' ),
 	);
 
 	/**
@@ -56,7 +57,7 @@ class TitleFormatter {
 			return $title; // 404s and any other context this feature doesn't cover - leave core's own title alone.
 		}
 
-		$template = trim( (string) ( $settings[ "title_format_{$context_key}" ] ?? '' ) );
+		$template = $this->get_template( $settings, 'title_format_', $context_key );
 
 		if ( '' === $template ) {
 			return $title;
@@ -97,7 +98,7 @@ class TitleFormatter {
 		}
 
 		if ( '' === $content ) {
-			$template = trim( (string) ( $settings[ "description_format_{$context_key}" ] ?? '' ) );
+			$template = $this->get_template( $settings, 'description_format_', $context_key );
 
 			if ( '' !== $template ) {
 				$content = $this->resolve( $template, $context_key, (string) ( $settings['title_separator'] ?? '|' ) );
@@ -109,6 +110,36 @@ class TitleFormatter {
 		}
 
 		echo '<meta name="description" content="' . esc_attr( $content ) . '" />' . "\n";
+	}
+
+	/**
+	 * Looks up a raw template for one context key - a flat `{$prefix}{$context_key}` settings
+	 * field for the built-in contexts (home/post/page/category/tag/search/archive), or the
+	 * matching `{$prefix}post_types`/`{$prefix}taxonomies` map entry for a dynamic
+	 * `post_type:{slug}`/`taxonomy:{slug}` context key current_context_key() returns for anything
+	 * else.
+	 *
+	 * @param array<string, mixed> $settings    Effective plugin settings.
+	 * @param string                $prefix      `'title_format_'` or `'description_format_'`.
+	 * @param string                $context_key current_context_key()'s own return value.
+	 * @return string
+	 */
+	private function get_template( array $settings, string $prefix, string $context_key ): string {
+		if ( 0 === strpos( $context_key, 'post_type:' ) ) {
+			$post_type = substr( $context_key, strlen( 'post_type:' ) );
+			$map       = (array) ( $settings[ "{$prefix}post_types" ] ?? array() );
+
+			return trim( (string) ( $map[ $post_type ] ?? '' ) );
+		}
+
+		if ( 0 === strpos( $context_key, 'taxonomy:' ) ) {
+			$taxonomy = substr( $context_key, strlen( 'taxonomy:' ) );
+			$map      = (array) ( $settings[ "{$prefix}taxonomies" ] ?? array() );
+
+			return trim( (string) ( $map[ $taxonomy ] ?? '' ) );
+		}
+
+		return trim( (string) ( $settings[ "{$prefix}{$context_key}" ] ?? '' ) );
 	}
 
 	/**
@@ -148,6 +179,10 @@ class TitleFormatter {
 			return 'search';
 		}
 
+		if ( is_author() ) {
+			return 'author';
+		}
+
 		if ( is_category() ) {
 			return 'category';
 		}
@@ -156,11 +191,30 @@ class TitleFormatter {
 			return 'tag';
 		}
 
+		// Any taxonomy term page that isn't category/tag - a dynamic 'taxonomy:{slug}' key, looked
+		// up in the `title_format_taxonomies`/`description_format_taxonomies` maps (get_template()
+		// below) rather than a flat settings field, since the taxonomy slug is only known at runtime.
+		if ( is_tax() ) {
+			$term = get_queried_object();
+
+			if ( $term instanceof \WP_Term ) {
+				return 'taxonomy:' . $term->taxonomy;
+			}
+		}
+
 		if ( is_page() ) {
 			return 'page';
 		}
 
 		if ( is_singular() ) {
+			$post_type = get_post_type();
+
+			// Same dynamic-key story as the taxonomy branch above, for any post type other than
+			// the two with their own flat settings fields.
+			if ( $post_type && ! in_array( $post_type, array( 'post', 'page' ), true ) ) {
+				return 'post_type:' . $post_type;
+			}
+
 			return 'post';
 		}
 
@@ -192,7 +246,7 @@ class TitleFormatter {
 	 * @return string
 	 */
 	private static function var_current_title(): string {
-		if ( is_category() || is_tag() ) {
+		if ( is_category() || is_tag() || is_tax() ) {
 			return single_term_title( '', false ) ? single_term_title( '', false ) : '';
 		}
 
@@ -208,5 +262,18 @@ class TitleFormatter {
 	 */
 	private static function var_search_term(): string {
 		return get_search_query();
+	}
+
+	/**
+	 * @return string
+	 */
+	private static function var_author_name(): string {
+		if ( ! is_author() ) {
+			return '';
+		}
+
+		$author = get_queried_object();
+
+		return $author instanceof \WP_User ? $author->display_name : '';
 	}
 }

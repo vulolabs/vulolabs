@@ -284,6 +284,13 @@ class Utill {
 		'flag_ai_crawler_blocked_pages'         => array( 'flag_ai_crawler_blocked_pages' ),
 		'canonical_url_enabled'                 => array(),
 		'social_meta_tags_enabled'              => array(),
+		// Scanning > SEO > Open Graph - fallback used by SocialMetaTagsManager only when a page
+		// has no post thumbnail/site icon of its own.
+		'social_default_image_id'               => 0,
+		'social_twitter_card_type'              => 'summary_large_image',
+		// Newline-separated profile URLs - fed into Pro's Organization schema `sameAs` array
+		// alongside entity_business_name/entity_business_logo_id above.
+		'social_profile_urls'                   => '',
 		// Settings → Site Identity → Title Formats, read by TitleFormatter
 		// (`pre_get_document_title`).
 		'site_identity_enabled'                 => 'enabled',
@@ -295,6 +302,10 @@ class Utill {
 		'title_format_tag'                      => '%tag_title% %sep% %site_title%',
 		'title_format_search'                   => 'Search results for "%search_term%" %sep% %site_title%',
 		'title_format_archive'                  => '%archive_title% %sep% %site_title%',
+		// Author archives aren't covered by the generic 'archive' bucket above - a real,
+		// dedicated context (TitleFormatter's own 'author' context key), same as Rank
+		// Math's/Yoast's own separate author-archive title/description fields.
+		'title_format_author'                   => '%author_name% %sep% %site_title%',
 		// Same feature, same `TitleFormatter::resolve()`/`%variable%` engine as `title_format_*`
 		// above.
 		'description_format_home'               => '%site_description%',
@@ -304,6 +315,7 @@ class Utill {
 		'description_format_tag'                => '%tag_title% %sep% %site_description%',
 		'description_format_search'             => 'Search results for "%search_term%" %sep% %site_description%',
 		'description_format_archive'            => '%archive_title% %sep% %site_description%',
+		'description_format_author'             => '',
 		// Read by RedirectManager (the first two) and NotFoundLogger (the third).
 		'enable_redirect_manager'               => array( 'enable_redirect_manager' ),
 		'auto_redirect_on_slug_change'          => array( 'auto_redirect_on_slug_change' ),
@@ -387,6 +399,40 @@ class Utill {
 		// Newline-separated `Name | Address` lines - same reasoning as 'entity_service_pages'
 		// above.
 		'entity_business_locations'             => '',
+		// Owner-provided override - EntityExtractor falls back to the first extracted
+		// organization's name, then the site title, when this is empty.
+		'entity_business_name'                  => '',
+		// Attachment id - same convention as PostSeoMetaFields::META_KEYS['social_image_id'].
+		'entity_business_logo_id'               => 0,
+		// Scanning > SEO > Open Graph - read by SocialMetaTagsManager, output as
+		// fb:app_id/fb:admin_id meta tags (Facebook's own app-association tags, not an API
+		// credential - the still-unused App Secret purposely has no field here).
+		'facebook_app_id'                       => '',
+		'facebook_admin_id'                     => '',
+		// Scanning > SEO > Robots - read by DefaultRobotsManager. Each is a real, narrow condition
+		// (not Rank Math's single freeform "default robots meta" value, which is almost always
+		// 'index,follow' and rarely actionable) - 'robots_noindex_sitewide' is the one blunt
+		// "noindex everything" switch, useful for staging sites.
+		'robots_noindex_sitewide'               => array(),
+		'robots_noindex_search'                 => array(),
+		'robots_noindex_empty_taxonomies'       => array(),
+		'robots_noindex_archive_subpages'       => array(),
+		'robots_noindex_paginated_pages'        => array(),
+		'robots_noindex_password_protected'     => array(),
+		'robots_noindex_author'                 => array(),
+		'robots_noindex_author_without_posts'   => array( 'robots_noindex_author_without_posts' ),
+		// Scanning > Sitemap > Authors.
+		'sitemap_include_authors'               => array( 'sitemap_include_authors' ),
+		// Comma-separated role slugs/user IDs.
+		'sitemap_exclude_author_roles'          => '',
+		'sitemap_exclude_author_ids'            => '',
+		// Settings → Site Identity → Title Formats - per-post-type/per-taxonomy overrides for any
+		// post type/taxonomy other than the built-in post/page/category/tag (which keep their own
+		// flat title_format_*/description_format_* fields above). Keyed by post type/taxonomy slug.
+		'title_format_post_types'               => array(),
+		'description_format_post_types'         => array(),
+		'title_format_taxonomies'               => array(),
+		'description_format_taxonomies'         => array(),
 		// Advanced / Debug.
 		'enable_debug_logging'                  => array(),
 	);

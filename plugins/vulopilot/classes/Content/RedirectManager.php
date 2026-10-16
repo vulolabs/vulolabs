@@ -42,7 +42,7 @@ class RedirectManager {
 		$source_path = RedirectRepository::normalize_path( $path );
 
 		$repository = new RedirectRepository();
-		$redirect   = $repository->find_by_source_path( $source_path );
+		$redirect   = $repository->find_matching( $source_path );
 
 		if ( ! $redirect || empty( $redirect['is_active'] ) ) {
 			return;
@@ -86,6 +86,15 @@ class RedirectManager {
 		// Only a slug change on a post that was ALREADY publicly published has a real, previously-
 		// indexable URL worth protecting with a redirect.
 		if ( 'publish' !== $post_before->post_status || $post_before->post_name === $post_after->post_name ) {
+			return;
+		}
+
+		// Trashing a post renames its slug internally (appends '__trashed') to free it up for
+		// reuse, which fires this same 'post_updated' hook with a "slug change" that isn't one -
+		// without this guard, get_permalink($post_after) on an already-trashed post returns a
+		// '?page_id=' fallback URL, which would overwrite TrashedPostRedirector's own
+		// home-page redirect for the same path with that useless self-reference.
+		if ( 'trash' === $post_after->post_status ) {
 			return;
 		}
 

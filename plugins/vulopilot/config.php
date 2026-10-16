@@ -8,7 +8,7 @@
 defined( 'ABSPATH' ) || exit;
 
 define( 'VULOPILOT_PLUGIN_TEXTDOMAIN', 'vulopilot' );
-define( 'VULOPILOT_PLUGIN_VERSION', '1.0.0' );
+define( 'VULOPILOT_PLUGIN_VERSION', '1.0.1' );
 define( 'VULOPILOT_PLUGIN_SLUG', 'vulopilot' );
 define( 'VULOPILOT_PLUGIN_NAME', 'VuloPilot' );
 define( 'VULOPILOT_PRO_SHOP_URL', 'https://vulopilot.com/pricing/?utm_source=wpadmin&utm_medium=pluginsettings&utm_campaign=vulopilot' );

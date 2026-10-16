@@ -8,7 +8,7 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-10-14T12:19:44+00:00\n"
+"POT-Creation-Date: 2026-10-16T10:03:43+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.12.0\n"
 "X-Domain: vulopilot\n"
@@ -40,7 +40,7 @@ msgid "https://vulolabs.com/"
 msgstr ""
 
 #: classes/Accessibility/AccessibilityScanner.php:39
-#: classes/Admin.php:102
+#: classes/Admin.php:138
 #: modules/AiCopilot/Rest/Copilot.php:629
 #: assets/js/index.js:1
 #: assets/js/index.js:17
@@ -127,24 +127,24 @@ msgstr ""
 msgid "A link reading only \"click here\" or \"read more\" makes no sense out of context - screen reader users who navigate by a page's link list can't tell them apart. Link text should describe its own destination (WCAG 2.4.4)."
 msgstr ""
 
-#: classes/Admin.php:70
+#: classes/Admin.php:106
 msgid "Dashboard"
 msgstr ""
 
-#: classes/Admin.php:75
+#: classes/Admin.php:111
 #: assets/js/index.js:1
 #: assets/js/index.js:17
 msgid "AI Copilot"
 msgstr ""
 
-#: classes/Admin.php:80
+#: classes/Admin.php:116
 #: assets/js/index.js:1
 #: assets/js/index.js:9
 #: assets/js/index.js:17
 msgid "SEO & Visibility"
 msgstr ""
 
-#: classes/Admin.php:85
+#: classes/Admin.php:121
 #: modules/TechnicalSeo/Rest/Seo.php:628
 #: assets/js/block/faq/index.js:1
 #: assets/js/index.js:1
@@ -155,7 +155,7 @@ msgstr ""
 msgid "Content"
 msgstr ""
 
-#: classes/Admin.php:90
+#: classes/Admin.php:126
 #: classes/Performance/PerformanceScanner.php:37
 #: modules/AiCopilot/Rest/Copilot.php:627
 #: assets/js/index.js:9
@@ -163,15 +163,15 @@ msgstr ""
 msgid "Performance"
 msgstr ""
 
-#: classes/Admin.php:97
-#: classes/Admin.php:271
+#: classes/Admin.php:133
+#: classes/Admin.php:307
 #: assets/js/index.js:1
 #: assets/js/index.js:9
 #: assets/js/index.js:17
 msgid "Site Health"
 msgstr ""
 
-#: classes/Admin.php:109
+#: classes/Admin.php:145
 #: modules/AiCopilot/Rest/Copilot.php:628
 #: assets/js/index.js:1
 #: assets/js/index.js:9
@@ -179,42 +179,42 @@ msgstr ""
 msgid "Security"
 msgstr ""
 
-#: classes/Admin.php:114
+#: classes/Admin.php:150
 #: assets/js/index.js:1
 #: assets/js/index.js:17
 msgid "Commerce"
 msgstr ""
 
-#: classes/Admin.php:119
+#: classes/Admin.php:155
 #: assets/js/index.js:1
 #: assets/js/index.js:17
 msgid "Automations"
 msgstr ""
 
-#: classes/Admin.php:126
+#: classes/Admin.php:162
 #: assets/js/index.js:1
 #: assets/js/index.js:9
 msgid "Reports"
 msgstr ""
 
-#: classes/Admin.php:132
+#: classes/Admin.php:168
 #: assets/js/block/faq/index.js:1
 #: assets/js/index.js:17
 msgid "Settings"
 msgstr ""
 
-#: classes/Admin.php:269
+#: classes/Admin.php:305
 #: assets/js/index.js:1
 #: assets/js/index.js:9
 msgid "AI Visibility"
 msgstr ""
 
-#: classes/Admin.php:270
+#: classes/Admin.php:306
 #: assets/js/index.js:1
 msgid "SEO & Content"
 msgstr ""
 
-#: classes/Admin.php:272
+#: classes/Admin.php:308
 msgid "Tools"
 msgstr ""
 
@@ -378,7 +378,7 @@ msgid "Invalid automation status."
 msgstr ""
 
 #: classes/Automations/Rest/Automations.php:168
-#: classes/Content/Rest/Redirects.php:231
+#: classes/Content/Rest/Redirects.php:238
 msgid "Nothing to update."
 msgstr ""
 
@@ -531,22 +531,28 @@ msgstr ""
 msgid "A redirect for this path already exists - edit or delete the existing one instead."
 msgstr ""
 
-#: classes/Content/Rest/Redirects.php:212
-#: classes/Content/Rest/Redirects.php:252
+#: classes/Content/Rest/Redirects.php:214
+#: classes/Content/Rest/Redirects.php:259
 msgid "Redirect not found."
 msgstr ""
 
-#: classes/Content/Rest/Redirects.php:235
+#: classes/Content/Rest/Redirects.php:242
 msgid "Could not update this redirect."
 msgstr ""
 
-#: classes/Content/Rest/Redirects.php:256
+#: classes/Content/Rest/Redirects.php:263
 #: assets/js/index.js:5
 msgid "Could not delete this redirect."
 msgstr ""
 
 #: classes/Content/TableOfContentsRenderer.php:32
 msgid "Table of Contents"
+msgstr ""
+
+#. translators: 1: deleted page/post title, 2: its old URL path, 3: Redirects tab URL.
+#: classes/Content/TrashedPostRedirector.php:109
+#, php-format
+msgid "<strong>%1$s</strong> has been deleted. VuloPilot doesn't redirect it automatically - if %2$s is still linked to elsewhere or indexed by search engines, you can <a href=\"%3$s\">add a redirect for it</a>."
 msgstr ""
 
 #: classes/Dashboard/Rest/DashboardLayout.php:79
@@ -557,20 +563,39 @@ msgstr ""
 msgid "No valid widgets in the submitted layout."
 msgstr ""
 
-#: classes/Migration/AllInOneSeoMigrator.php:37
+#: classes/Migration/AllInOneSeoMigrator.php:76
 msgid "All in One SEO"
 msgstr ""
 
-#: classes/Migration/RankMathMigrator.php:32
+#: classes/Migration/RankMathMigrator.php:135
 msgid "Rank Math SEO"
+msgstr ""
+
+#: classes/Migration/RankMathMigrator.php:204
+#: classes/Migration/YoastSeoMigrator.php:192
+msgid "robots.txt content was copied into VuloPilot, but a real robots.txt file still exists on your server - WordPress serves that file directly and ignores every plugin's own robots.txt output (VuloPilot's included) while it's there. Remove or rename the physical robots.txt file at your site's root for VuloPilot's version to take effect."
 msgstr ""
 
 #: classes/Migration/Rest.php:109
 msgid "Unknown migration source."
 msgstr ""
 
-#: classes/Migration/YoastSeoMigrator.php:32
+#: classes/Migration/ThinkRankMigrator.php:149
+msgid "ThinkRank AI SEO"
+msgstr ""
+
+#: classes/Migration/ThinkRankMigrator.php:428
+msgid "ThinkRank writes its managed rules into the real physical robots.txt file on disk, which (if still present) is served directly by the webserver and bypasses every plugin's virtual robots.txt output, including VuloPilot's own - remove that physical file for the migrated content to actually take effect."
+msgstr ""
+
+#: classes/Migration/YoastSeoMigrator.php:127
 msgid "Yoast SEO"
+msgstr ""
+
+#. translators: %d: Yoast's own readability score, 0-100.
+#: classes/Migration/YoastSeoMigrator.php:300
+#, php-format
+msgid "Readability score from Yoast: %d/100."
 msgstr ""
 
 #: classes/Performance/CacheDetectionScanner.php:45
@@ -843,7 +868,7 @@ msgstr ""
 #: classes/SeoVisibility/Rest/Schema.php:202
 #: classes/SeoVisibility/Rest/Schema.php:204
 #: classes/SeoVisibility/SchemaCoverageAnalyzer.php:141
-#: modules/KnowledgeGraph/EntityExtractor.php:145
+#: modules/KnowledgeGraph/EntityExtractor.php:178
 #: assets/js/index.js:1
 #: assets/js/index.js:9
 msgid "Homepage"
@@ -2992,45 +3017,45 @@ msgstr ""
 msgid "AI answer engines and readers both use \"who is behind this site\" pages as a baseline trust signal before treating content as citable."
 msgstr ""
 
-#: modules/KnowledgeGraph/EntityExtractor.php:152
+#: modules/KnowledgeGraph/EntityExtractor.php:185
 msgid "Website title"
 msgstr ""
 
-#: modules/KnowledgeGraph/EntityExtractor.php:159
+#: modules/KnowledgeGraph/EntityExtractor.php:192
 #: assets/js/index.js:5
 msgid "Organization schema"
 msgstr ""
 
-#: modules/KnowledgeGraph/EntityExtractor.php:166
+#: modules/KnowledgeGraph/EntityExtractor.php:199
 msgid "About page"
 msgstr ""
 
 #. translators: 1: real business name, 2: real service or product name.
-#: modules/KnowledgeGraph/EntityExtractor.php:264
-#: modules/KnowledgeGraph/EntityExtractor.php:273
+#: modules/KnowledgeGraph/EntityExtractor.php:297
+#: modules/KnowledgeGraph/EntityExtractor.php:306
 #, php-format
 msgid "%1$s offers %2$s"
 msgstr ""
 
 #. translators: 1: real business name, 2: real published category name.
-#: modules/KnowledgeGraph/EntityExtractor.php:288
+#: modules/KnowledgeGraph/EntityExtractor.php:321
 #, php-format
 msgid "%1$s publishes content about %2$s"
 msgstr ""
 
-#: modules/KnowledgeGraph/EntityExtractor.php:493
+#: modules/KnowledgeGraph/EntityExtractor.php:526
 msgid "Missing product image"
 msgstr ""
 
-#: modules/KnowledgeGraph/EntityExtractor.php:497
+#: modules/KnowledgeGraph/EntityExtractor.php:530
 msgid "Missing SKU"
 msgstr ""
 
-#: modules/KnowledgeGraph/EntityExtractor.php:504
+#: modules/KnowledgeGraph/EntityExtractor.php:537
 msgid "Missing product description"
 msgstr ""
 
-#: modules/KnowledgeGraph/EntityExtractor.php:508
+#: modules/KnowledgeGraph/EntityExtractor.php:541
 msgid "Missing price"
 msgstr ""
 
@@ -5087,6 +5112,13 @@ msgstr ""
 msgid "Import SEO data from another SEO plugin into VuloPilot."
 msgstr ""
 
+#. translators: 1: plugin name, 2: number of items found.
+#: assets/js/index.js:1
+#: assets/js/index.js:17
+#, js-format
+msgid "%1$s (%2$d item(s) found)"
+msgstr ""
+
 #: assets/js/index.js:1
 msgid "SEO migration"
 msgstr ""
@@ -5103,17 +5135,12 @@ msgstr ""
 msgid "Get a hands-on feel of your SEO data in minutes."
 msgstr ""
 
-#. translators: 1: plugin name, 2: number of posts found.
-#: assets/js/index.js:1
-#, js-format
-msgid "%1$s (%2$d posts found)"
-msgstr ""
-
 #: assets/js/index.js:1
 msgid "No SEO plugin data found currently"
 msgstr ""
 
 #: assets/js/index.js:1
+#: assets/js/index.js:17
 msgid "Importing…"
 msgstr ""
 
@@ -5123,6 +5150,7 @@ msgstr ""
 
 #. translators: %s: source plugin name.
 #: assets/js/index.js:1
+#: assets/js/index.js:17
 #, js-format
 msgid "Importing from %s…"
 msgstr ""
@@ -5701,6 +5729,10 @@ msgid "Archive title"
 msgstr ""
 
 #: assets/js/index.js:1
+msgid "Author name"
+msgstr ""
+
+#: assets/js/index.js:1
 msgid "Separator (e.g. | – -)"
 msgstr ""
 
@@ -5830,6 +5862,18 @@ msgstr ""
 
 #: assets/js/index.js:1
 msgid "Used on date-based and other archive pages."
+msgstr ""
+
+#: assets/js/index.js:1
+msgid "Author Archive"
+msgstr ""
+
+#: assets/js/index.js:1
+msgid "Used on author archive pages."
+msgstr ""
+
+#: assets/js/index.js:1
+msgid "Sample Author"
 msgstr ""
 
 #: assets/js/index.js:1
@@ -10149,10 +10193,12 @@ msgid "Created"
 msgstr ""
 
 #: assets/js/index.js:1
+#: assets/js/index.js:5
 msgid "Deactivate"
 msgstr ""
 
 #: assets/js/index.js:1
+#: assets/js/index.js:5
 msgid "Activate"
 msgstr ""
 
@@ -10203,6 +10249,20 @@ msgstr ""
 
 #: assets/js/index.js:5
 msgid "Every real redirect rule you've set up, searchable and filterable."
+msgstr ""
+
+#. translators: %d: number of redirects that failed to update.
+#: assets/js/index.js:5
+#, js-format
+msgid "%d redirect(s) could not be updated."
+msgstr ""
+
+#: assets/js/index.js:5
+msgid "Selected redirects activated."
+msgstr ""
+
+#: assets/js/index.js:5
+msgid "Selected redirects deactivated."
 msgstr ""
 
 #: assets/js/index.js:5
@@ -10267,6 +10327,26 @@ msgstr ""
 
 #: assets/js/index.js:5
 msgid "Redirect deleted."
+msgstr ""
+
+#: assets/js/index.js:5
+msgid "Delete Redirects"
+msgstr ""
+
+#. translators: %d: number of selected redirects.
+#: assets/js/index.js:5
+#, js-format
+msgid "Delete %d selected redirect(s)? This cannot be undone."
+msgstr ""
+
+#. translators: %d: number of redirects that failed to delete.
+#: assets/js/index.js:5
+#, js-format
+msgid "%d redirect(s) could not be deleted."
+msgstr ""
+
+#: assets/js/index.js:5
+msgid "Selected redirects deleted."
 msgstr ""
 
 #: assets/js/index.js:5
@@ -14277,6 +14357,44 @@ msgstr ""
 
 #: assets/js/index.js:17
 msgid "Could not load the dashboard"
+msgstr ""
+
+#: assets/js/index.js:17
+msgid "Checking for data to import…"
+msgstr ""
+
+#: assets/js/index.js:17
+msgid "You're all set!"
+msgstr ""
+
+#. translators: 1: number of items migrated, 2: number skipped.
+#: assets/js/index.js:17
+#, js-format
+msgid "%1$d item(s) imported, %2$d skipped."
+msgstr ""
+
+#: assets/js/index.js:17
+msgid "Go to Dashboard"
+msgstr ""
+
+#: assets/js/index.js:17
+msgid "Welcome to VuloPilot"
+msgstr ""
+
+#: assets/js/index.js:17
+msgid "We found existing SEO data on this site. Import it into VuloPilot before you get started - nothing in the other plugin is changed or removed."
+msgstr ""
+
+#: assets/js/index.js:17
+msgid "Skip for now"
+msgstr ""
+
+#: assets/js/index.js:17
+msgid "Import & Continue"
+msgstr ""
+
+#: assets/js/index.js:17
+msgid "Migration failed. Please try again from Settings → Migration."
 msgstr ""
 
 #: assets/js/index.js:17

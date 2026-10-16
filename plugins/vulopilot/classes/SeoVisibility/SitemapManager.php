@@ -29,6 +29,7 @@ class SitemapManager {
 		add_filter( 'wp_sitemaps_taxonomies_query_args', array( $this, 'filter_taxonomies_query_args' ) );
 		add_filter( 'wp_sitemaps_posts_entry', array( $this, 'filter_posts_entry' ), 10, 2 );
 		add_filter( 'wp_sitemaps_add_provider', array( $this, 'filter_provider' ), 10, 2 );
+		add_filter( 'wp_sitemaps_users_query_args', array( $this, 'filter_users_query_args' ) );
 
 		add_action( 'save_post', array( $this, 'clear_conflict_cache' ) );
 		add_action( 'deleted_post', array( $this, 'clear_conflict_cache' ) );
@@ -151,7 +152,17 @@ class SitemapManager {
 	 * @return \WP_Sitemaps_Provider|false
 	 */
 	public function filter_provider( $provider, $name ) {
-		if ( 'users' !== $name || ! $this->is_enabled( 'sitemap_skip_single_author' ) ) {
+		if ( 'users' !== $name ) {
+			return $provider;
+		}
+
+		// Scanning → Sitemap → Authors' own master switch - 'on' by default (Rank Math's own
+		// default too), so most sites see no behavior change from this field existing.
+		if ( ! $this->is_enabled( 'sitemap_include_authors' ) ) {
+			return false;
+		}
+
+		if ( ! $this->is_enabled( 'sitemap_skip_single_author' ) ) {
 			return $provider;
 		}
 
@@ -164,6 +175,40 @@ class SitemapManager {
 		);
 
 		return count( $authors ) > 1 ? $provider : false;
+	}
+
+	/**
+	 * `sitemap_exclude_author_roles`/`sitemap_exclude_author_ids` - applied via core's own
+	 * `wp_sitemaps_users_query_args` filter (the 'users' provider's own get_users() args).
+	 *
+	 * @param array $args Core's own current get_users() args for one users-sitemap page.
+	 * @return array
+	 */
+	public function filter_users_query_args( $args ) {
+		$settings      = $this->get_settings();
+		$excluded_ids   = $this->parse_id_list( (string) ( $settings['sitemap_exclude_author_ids'] ?? '' ) );
+		$excluded_roles = array_values(
+			array_filter( array_map( 'trim', explode( ',', (string) ( $settings['sitemap_exclude_author_roles'] ?? '' ) ) ) )
+		);
+
+		if ( $excluded_ids ) {
+			$args['exclude'] = array_merge( $args['exclude'] ?? array(), $excluded_ids );
+		}
+
+		if ( $excluded_roles ) {
+			$role_user_ids = get_users(
+				array(
+					'role__in' => $excluded_roles,
+					'fields'   => 'ID',
+				)
+			);
+
+			if ( $role_user_ids ) {
+				$args['exclude'] = array_merge( $args['exclude'] ?? array(), $role_user_ids );
+			}
+		}
+
+		return $args;
 	}
 
 	/**

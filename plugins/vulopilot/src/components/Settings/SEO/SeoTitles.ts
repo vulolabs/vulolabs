@@ -25,6 +25,7 @@ export default {
 		{ key: 'title_format_tag', type: 'text', label: '' },
 		{ key: 'title_format_search', type: 'text', label: '' },
 		{ key: 'title_format_archive', type: 'text', label: '' },
+		{ key: 'title_format_author', type: 'text', label: '' },
 		{ key: 'description_format_home', type: 'text', label: '' },
 		{ key: 'description_format_post', type: 'text', label: '' },
 		{ key: 'description_format_page', type: 'text', label: '' },
@@ -32,6 +33,7 @@ export default {
 		{ key: 'description_format_tag', type: 'text', label: '' },
 		{ key: 'description_format_search', type: 'text', label: '' },
 		{ key: 'description_format_archive', type: 'text', label: '' },
+		{ key: 'description_format_author', type: 'text', label: '' },
 	],
 	PanelComponent: SeoTitlesPanel,
 };

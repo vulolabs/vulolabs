@@ -12,8 +12,12 @@ import Security from './pages/Security/Security';
 import SiteHealth from './pages/SiteHealth/SiteHealth';
 import Accessibility from './pages/Accessibility/Accessibility';
 import Content from './pages/Content/Content';
+import SetupWizard from './pages/SetupWizard/SetupWizard';
 
 registerVuloPilotRoute({ tab: 'dashboard', component: Dashboard });
+// Not listed in Admin.php's $submenus - reached only via the activation redirect
+// (Admin::maybe_redirect_to_setup_wizard()) or a direct link, never shown in the sidebar.
+registerVuloPilotRoute({ tab: 'setup-wizard', component: SetupWizard });
 registerVuloPilotRoute({ tab: 'performance', component: Performance });
 registerVuloPilotRoute({ tab: 'seo-visibility', component: SeoVisibility });
 registerVuloPilotRoute({ tab: 'commerce', component: Commerce });

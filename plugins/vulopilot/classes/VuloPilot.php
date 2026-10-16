@@ -75,6 +75,15 @@ final class VuloPilot {
 		// this hook.
 		delete_option( 'vulopilot_sitemap_rewrite_version' );
 		flush_rewrite_rules();
+
+		// One-shot flag - admin_init's own maybe_redirect_to_setup_wizard() consumes and deletes
+		// this on the very next admin page load, same pattern WooCommerce/Jetpack-style onboarding
+		// redirects use. Not set on a bulk activation (several plugins at once) - that redirect
+		// would only ever reach whichever plugin's own admin_init ran last, dropping every other
+		// bulk-activated plugin's own redirect.
+		if ( ! isset( $_GET['activate-multi'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- read-only, core's own bulk-activate query var.
+			add_option( 'vulopilot_activation_redirect', true );
+		}
 	}
 
 	/**
@@ -199,6 +208,7 @@ final class VuloPilot {
 		// and the Block Editor sidebar's asset loader (PostEditorAssets).
 		$this->container['post_seo_meta_fields']     = new \VuloPilot\SeoVisibility\PostSeoMetaFields();
 		$this->container['post_robots_meta_manager'] = new \VuloPilot\SeoVisibility\PostRobotsMetaManager();
+		$this->container['default_robots_manager']   = new \VuloPilot\SeoVisibility\DefaultRobotsManager();
 		$this->container['post_editor_assets']       = new \VuloPilot\SeoVisibility\PostEditorAssets();
 
 		// Gutenberg blocks - `vulopilot/table-of-contents` and `vulopilot/faq` (src/blocks/).
@@ -207,8 +217,9 @@ final class VuloPilot {
 
 		// Redirects & 404s (readme.txt) - real functionality behind the
 		// enable_redirect_manager/auto_redirect_on_slug_change/log_404s settings.
-		$this->container['redirect_manager'] = new \VuloPilot\Content\RedirectManager();
-		$this->container['not_found_logger'] = new \VuloPilot\Content\NotFoundLogger();
+		$this->container['redirect_manager']         = new \VuloPilot\Content\RedirectManager();
+		$this->container['not_found_logger']         = new \VuloPilot\Content\NotFoundLogger();
+		$this->container['trashed_post_redirector']  = new \VuloPilot\Content\TrashedPostRedirector();
 
 		// "Performance" Overview - Speed History's daily score snapshots (scan-completed + daily-
 		// cron triggered).

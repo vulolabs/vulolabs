@@ -43,7 +43,7 @@ class EntityExtractor {
 	private const MAX_SUGGESTED_RELATIONSHIPS = 6;
 
 	/**
-	 * @return array{people: array, organizations: array, products: array|null, services: array, locations: array, categories: array, business_type: string, has_contact_page: bool, contact_page_url: string|null, suggested_relationships: array<int, string>}
+	 * @return array{people: array, organizations: array, products: array|null, services: array, locations: array, categories: array, business_type: string, business_name: string, business_logo_url: string|null, has_contact_page: bool, contact_page_url: string|null, suggested_relationships: array<int, string>}
 	 */
 	public function extract_all(): array {
 		$cached = get_transient( self::CACHE_KEY );
@@ -61,6 +61,8 @@ class EntityExtractor {
 				'locations'               => array(),
 				'categories'              => array(),
 				'business_type'           => '',
+				'business_name'           => '',
+				'business_logo_url'       => null,
 				'has_contact_page'        => false,
 				'contact_page_url'        => null,
 				'suggested_relationships' => array(),
@@ -75,8 +77,9 @@ class EntityExtractor {
 		$services      = $this->extract_services();
 		$locations     = $this->extract_locations();
 		$categories    = $this->extract_categories();
-		$contact       = $this->find_contact_page();
-		$business_name = $organizations[0]['name'] ?? trim( (string) get_bloginfo( 'name' ) );
+		$contact        = $this->find_contact_page();
+		$override_name  = $this->get_business_name_setting();
+		$business_name  = '' !== $override_name ? $override_name : ( $organizations[0]['name'] ?? trim( (string) get_bloginfo( 'name' ) ) );
 
 		$result = array(
 			'people'                  => $people,
@@ -86,6 +89,8 @@ class EntityExtractor {
 			'locations'               => $locations,
 			'categories'              => $categories,
 			'business_type'           => $this->get_business_type_setting(),
+			'business_name'           => $business_name,
+			'business_logo_url'       => $this->get_business_logo_url(),
 			'has_contact_page'        => null !== $contact,
 			'contact_page_url'        => $contact,
 			'suggested_relationships' => $this->build_suggested_relationships( $business_name, $services, $products, $categories ),
@@ -103,6 +108,34 @@ class EntityExtractor {
 		$settings = wp_parse_args( get_option( Utill::VULOPILOT_SETTINGS_KEY, array() ), Utill::VULOPILOT_SETTINGS_DEFAULTS );
 
 		return trim( (string) ( $settings['entity_business_type'] ?? '' ) );
+	}
+
+	/**
+	 * @return string Real, owner-provided `entity_business_name` override - empty when unset, so
+	 *                callers fall back to the first extracted organization's name, then the site
+	 *                title.
+	 */
+	private function get_business_name_setting(): string {
+		$settings = wp_parse_args( get_option( Utill::VULOPILOT_SETTINGS_KEY, array() ), Utill::VULOPILOT_SETTINGS_DEFAULTS );
+
+		return trim( (string) ( $settings['entity_business_name'] ?? '' ) );
+	}
+
+	/**
+	 * @return string|null Full URL of the owner-uploaded `entity_business_logo_id` attachment, or
+	 *                      null when none is set.
+	 */
+	private function get_business_logo_url(): ?string {
+		$settings = wp_parse_args( get_option( Utill::VULOPILOT_SETTINGS_KEY, array() ), Utill::VULOPILOT_SETTINGS_DEFAULTS );
+		$logo_id  = absint( $settings['entity_business_logo_id'] ?? 0 );
+
+		if ( ! $logo_id ) {
+			return null;
+		}
+
+		$url = wp_get_attachment_image_url( $logo_id, 'full' );
+
+		return $url ?: null;
 	}
 
 	/**

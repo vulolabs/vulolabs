@@ -39,6 +39,42 @@ class Admin {
 		add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_admin_script' ) );
 		add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_menu_grouping_assets' ) );
 		add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_user_edit_highlight_script' ) );
+		add_action( 'admin_init', array( $this, 'maybe_redirect_to_setup_wizard' ) );
+	}
+
+	/**
+	 * Consumes `activate()`'s one-shot `vulopilot_activation_redirect` flag: redirects straight to
+	 * the Migration setup wizard, but only when there's real migratable data waiting (a Rank
+	 * Math/Yoast/AIOSEO install) - no point interrupting a fresh install's first admin page load
+	 * with a migration wizard that would find nothing to do.
+	 *
+	 * @return void
+	 */
+	public function maybe_redirect_to_setup_wizard() {
+		if ( ! get_option( 'vulopilot_activation_redirect' ) ) {
+			return;
+		}
+
+		delete_option( 'vulopilot_activation_redirect' );
+
+		if ( wp_doing_ajax() || defined( 'REST_REQUEST' ) || ! current_user_can( 'manage_options' ) ) {
+			return;
+		}
+
+		$sources = ( new \VuloPilot\Migration\MigrationManager() )->list_sources();
+		$has_migratable_data = (bool) array_filter(
+			$sources,
+			static function ( $source ) {
+				return ( $source['count'] ?? 0 ) > 0;
+			}
+		);
+
+		if ( ! $has_migratable_data ) {
+			return;
+		}
+
+		wp_safe_redirect( admin_url( 'admin.php?page=vulopilot#&tab=setup-wizard' ) );
+		exit;
 	}
 
 	/**

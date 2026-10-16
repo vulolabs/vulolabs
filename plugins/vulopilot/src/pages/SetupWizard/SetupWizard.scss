@@ -1,0 +1,127 @@
+.vulopilot-setup-wizard {
+	max-width: 42rem;
+	margin: 3rem auto;
+	padding: 0 1rem;
+}
+
+.vulopilot-setup-wizard-card {
+	padding: 1rem;
+}
+
+.vulopilot-setup-wizard-row {
+	margin: 1.25rem 0;
+}
+
+.vulopilot-setup-wizard-actions {
+	display: flex;
+	justify-content: flex-end;
+	gap: 0.75rem;
+	margin-top: 1.5rem;
+	padding-top: 1rem;
+	border-top: 1px solid #e5e7eb;
+}
+
+.vulopilot-setup-wizard-done {
+	text-align: center;
+	padding: 1.5rem 1rem;
+
+	h2 {
+		margin: 0.5rem 0;
+	}
+
+	p {
+		color: #6b7280;
+		margin-bottom: 1.25rem;
+	}
+}
+
+.vulopilot-setup-wizard-done-icon {
+	font-size: 2.5rem;
+	color: #16a34a;
+}
+
+// Same progress-row visuals MigrationPanel.scss already defines (import on this module's own
+// bundle too, since SetupWizard.tsx is a separate page chunk that doesn't otherwise load it).
+.sequential-task-executor {
+	display: flex;
+	flex-direction: column;
+	width: 100%;
+	padding: 0.75rem 0 0;
+
+	.sequential-task {
+		position: relative;
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		gap: 0.75rem;
+		padding: 0.625rem 0;
+		font-size: 0.95rem;
+		font-weight: 500;
+
+		&::after {
+			position: absolute;
+			bottom: 0;
+			left: 0;
+			width: 0;
+			height: 0.125rem;
+			content: '';
+			background-color: #7c3aed;
+		}
+
+		&.running::after {
+			width: 60%;
+			animation: vulopilot-setup-wizard-progress 1.4s ease-in-out infinite alternate;
+		}
+
+		.status-wrapper {
+			display: flex;
+			align-items: center;
+			gap: 0.5rem;
+			font-weight: 400;
+			color: #6b7280;
+		}
+	}
+}
+
+@keyframes vulopilot-setup-wizard-progress {
+	from {
+		left: 0;
+		width: 10%;
+	}
+
+	to {
+		left: 60%;
+		width: 40%;
+	}
+}
+
+.multivendorx-loader {
+	display: inline-block;
+	width: 1rem;
+	aspect-ratio: 1;
+	--c: no-repeat radial-gradient(farthest-side, #7c3aed 92%, #0000);
+	background:
+		var(--c) 50% 0,
+		var(--c) 50% 100%,
+		var(--c) 100% 50%,
+		var(--c) 0 50%;
+	background-size: 0.3125rem 0.3125rem;
+	animation: vulopilot-setup-wizard-loader 1s infinite;
+	position: relative;
+
+	&::before {
+		content: '';
+		position: absolute;
+		inset: 0;
+		margin: 0.09375rem;
+		background: repeating-conic-gradient(#0000 0 35deg, #7c3aed 0 90deg);
+		mask: radial-gradient(farthest-side, #0000 calc(100% - 0.09375rem), #000 0);
+		border-radius: 50%;
+	}
+}
+
+@keyframes vulopilot-setup-wizard-loader {
+	100% {
+		transform: rotate(0.5turn);
+	}
+}

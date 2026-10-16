@@ -42,6 +42,14 @@ class SocialMetaTagsManager {
 			return;
 		}
 
+		if ( '' !== (string) ( $settings['facebook_app_id'] ?? '' ) ) {
+			$tags['fb:app_id'] = (string) $settings['facebook_app_id'];
+		}
+
+		if ( '' !== (string) ( $settings['facebook_admin_id'] ?? '' ) ) {
+			$tags['fb:admin_id'] = (string) $settings['facebook_admin_id'];
+		}
+
 		foreach ( $tags as $property => $content ) {
 			if ( '' === $content ) {
 				continue;
@@ -71,6 +79,8 @@ class SocialMetaTagsManager {
 	 * @return array<string, string>|null
 	 */
 	private function build_tags(): ?array {
+		$settings = wp_parse_args( get_option( Utill::VULOPILOT_SETTINGS_KEY, array() ), Utill::VULOPILOT_SETTINGS_DEFAULTS );
+
 		if ( is_singular() ) {
 			$post_id           = get_queried_object_id();
 			$override_image_id = absint( get_post_meta( $post_id, PostSeoMetaFields::META_KEYS['social_image_id'], true ) );
@@ -88,10 +98,17 @@ class SocialMetaTagsManager {
 			return null; // Archives/search/404 - same scope CanonicalUrlManager limits itself to.
 		}
 
+		if ( ! $image ) {
+			$default_image_id = absint( $settings['social_default_image_id'] ?? 0 );
+			$image            = $default_image_id ? wp_get_attachment_image_url( $default_image_id, 'large' ) : '';
+		}
+
+		$card_type = $image ? (string) ( $settings['social_twitter_card_type'] ?? 'summary_large_image' ) : 'summary';
+
 		$tags = array(
 			'og:title'            => $title,
 			'og:description'      => $excerpt,
-			'twitter:card'        => $image ? 'summary_large_image' : 'summary',
+			'twitter:card'        => $card_type,
 			'twitter:title'       => $title,
 			'twitter:description' => $excerpt,
 		);

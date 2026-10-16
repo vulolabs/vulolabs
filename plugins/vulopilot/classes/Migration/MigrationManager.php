@@ -28,6 +28,7 @@ class MigrationManager {
 		RankMathMigrator::class,
 		YoastSeoMigrator::class,
 		AllInOneSeoMigrator::class,
+		ThinkRankMigrator::class,
 	);
 
 	/**

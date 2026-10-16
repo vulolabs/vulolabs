@@ -290,6 +290,7 @@ class Install {
             `source_path`   varchar(255) NOT NULL,
             `target_url`    varchar(255) NOT NULL,
             `redirect_type` smallint(3) unsigned NOT NULL DEFAULT 301,
+            `match_type`    varchar(10) NOT NULL DEFAULT 'exact',
             `hit_count`     int(10) unsigned NOT NULL DEFAULT 0,
             `is_active`     tinyint(1) NOT NULL DEFAULT 1,
             `created_by`    bigint(20) unsigned DEFAULT NULL,

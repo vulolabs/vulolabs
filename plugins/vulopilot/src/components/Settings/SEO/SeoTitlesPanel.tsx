@@ -58,6 +58,7 @@ const VARIABLES: Array<{ token: string; label: string }> = [
 	{ token: '%tag_title%', label: __('Tag title', 'vulopilot') },
 	{ token: '%search_term%', label: __('Search term', 'vulopilot') },
 	{ token: '%archive_title%', label: __('Archive title', 'vulopilot') },
+	{ token: '%author_name%', label: __('Author name', 'vulopilot') },
 	{ token: '%sep%', label: __('Separator (e.g. | – -)', 'vulopilot') },
 ];
 
@@ -239,6 +240,18 @@ const SeoTitlesPanel = () => {
 				description: __('Used on date-based and other archive pages.', 'vulopilot'),
 				urlExample: `${siteUrl}/${archiveDatePath}`,
 				vars: { site_title: siteTitle, site_description: siteDescription, archive_title: archiveLabel },
+				hasRealUrl: false,
+			},
+			{
+				key: 'author',
+				templateKey: 'title_format_author',
+				descriptionTemplateKey: 'description_format_author',
+				icon: 'users yellow',
+				label: __('Author Archive', 'vulopilot'),
+				badgeColor: 'yellow',
+				description: __('Used on author archive pages.', 'vulopilot'),
+				urlExample: `${siteUrl}/author/sample-author`,
+				vars: { site_title: siteTitle, site_description: siteDescription, author_name: __('Sample Author', 'vulopilot') },
 				hasRealUrl: false,
 			},
 		];
