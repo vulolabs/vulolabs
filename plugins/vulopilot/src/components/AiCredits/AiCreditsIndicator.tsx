@@ -4,7 +4,7 @@ import { __, sprintf } from '@wordpress/i18n';
 import { NoticeComponent, PopupComponent } from '@zyra/components';
 import { ButtonInput } from '@zyra/inputs';
 import { formatCredits, useAiCredits } from '../../services/useAiCredits';
-import { INSUFFICIENT_CREDITS_EVENT } from './insufficientCredits';
+import { CREDITS_SPENT_EVENT, INSUFFICIENT_CREDITS_EVENT } from './insufficientCredits';
 import { useConnectVuloCloud } from '../../services/useConnectVuloCloud';
 import './AiCreditsIndicator.scss';
 
@@ -34,7 +34,11 @@ const AiCreditsIndicator = () => {
 	useEffect(() => {
 		const onInsufficient = () => refresh();
 		window.addEventListener(INSUFFICIENT_CREDITS_EVENT, onInsufficient);
-		return () => window.removeEventListener(INSUFFICIENT_CREDITS_EVENT, onInsufficient);
+		window.addEventListener(CREDITS_SPENT_EVENT, onInsufficient);
+		return () => {
+			window.removeEventListener(INSUFFICIENT_CREDITS_EVENT, onInsufficient);
+			window.removeEventListener(CREDITS_SPENT_EVENT, onInsufficient);
+		};
 	}, [refresh]);
 
 	if (isLoading || !status) {

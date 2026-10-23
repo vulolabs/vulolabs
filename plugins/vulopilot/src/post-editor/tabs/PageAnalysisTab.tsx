@@ -1,4 +1,4 @@
-import { __ } from '@wordpress/i18n';
+import { __, _n, sprintf } from '@wordpress/i18n';
 import { Button, Dropdown, Spinner } from '@wordpress/components';
 import { useEffect, useRef, useState } from '@wordpress/element';
 import { dispatch, select } from '@wordpress/data';
@@ -395,26 +395,51 @@ interface IssueSectionProps {
 	showSummary?: boolean;
 }
 
+/**
+ * A Rank-Math-style collapsible group: header (title + real error/warning-count pill) always
+ * visible, row list expands/collapses on click. Starts collapsed, except when one of its own rows
+ * is the deep-link target (`pulsingId`) - that row needs to be visible and scrolled to the moment
+ * this tab opens, same as before this section became collapsible.
+ */
 function IssueSection( { heading, idPrefix, rows, isLoading, error, emptyMessage, pulsingId, onNavigate, fixControls, showSummary }: IssueSectionProps ) {
-	const summary = rows.some( ( row ) => 'fail' === row.status ) ? 'bad' : rows.some( ( row ) => 'warn' === row.status ) ? 'ok' : 'good';
-	const summaryLabel = { good: __( 'All Good', 'vulopilot' ), ok: __( 'Could Be Better', 'vulopilot' ), bad: __( 'Needs Improvement', 'vulopilot' ) }[ summary ];
+	const failCount = rows.filter( ( row ) => 'fail' === row.status ).length;
+	const warnCount = rows.filter( ( row ) => 'warn' === row.status ).length;
+	const summary = failCount > 0 ? 'bad' : warnCount > 0 ? 'ok' : 'good';
+	const summaryLabel =
+		failCount > 0
+			? sprintf( /* translators: %d: number of failing checks. */ _n( '%d Error', '%d Errors', failCount, 'vulopilot' ), failCount )
+			: warnCount > 0
+				? sprintf( /* translators: %d: number of checks that could be improved. */ _n( '%d Warning', '%d Warnings', warnCount, 'vulopilot' ), warnCount )
+				: __( 'All Good', 'vulopilot' );
+
+	const containsPulsingRow = Boolean( pulsingId ) && rows.some( ( row ) => row.id === pulsingId );
+	const [ isOpenState, setIsOpenState ] = useState( false );
+	const isOpen = isOpenState || containsPulsingRow;
 
 	return (
-		<div className="vulopilot-seo-checklist">
-			<div className="vulopilot-seo-checklist__header">
+		<div className={ `vulopilot-seo-checklist vulopilot-seo-checklist--collapsible${ isOpen ? ' vulopilot-seo-checklist--open' : '' }` }>
+			<button
+				type="button"
+				className="vulopilot-seo-checklist__header"
+				aria-expanded={ isOpen }
+				onClick={ () => setIsOpenState( ( open ) => ! open ) }
+			>
 				<span className="title vulopilot-seo-checklist__title">{ heading }</span>
 				{ showSummary && rows.length > 0 && (
 					<span className={ `vulopilot-seo-checklist__summary vulopilot-seo-checklist__summary--${ summary }` }>{ summaryLabel }</span>
 				) }
-			</div>
-			{ isLoading ? (
-				<div className="desc vulopilot-seo-checklist__error">{ __( 'Loading…', 'vulopilot' ) }</div>
-			) : error ? (
-				<div className="desc vulopilot-seo-checklist__error">{ error }</div>
-			) : 0 === rows.length ? (
-				<div className="desc vulopilot-seo-checklist__error">{ emptyMessage }</div>
-			) : (
-				<IssueList idPrefix={ idPrefix } rows={ rows } pulsingId={ pulsingId } onNavigate={ onNavigate } fixControls={ fixControls } />
+				<i className={ `dashicons dashicons-arrow-${ isOpen ? 'up' : 'down' }-alt2 vulopilot-seo-checklist__chevron` } />
+			</button>
+			{ isOpen && (
+				isLoading ? (
+					<div className="desc vulopilot-seo-checklist__error">{ __( 'Loading…', 'vulopilot' ) }</div>
+				) : error ? (
+					<div className="desc vulopilot-seo-checklist__error">{ error }</div>
+				) : 0 === rows.length ? (
+					<div className="desc vulopilot-seo-checklist__error">{ emptyMessage }</div>
+				) : (
+					<IssueList idPrefix={ idPrefix } rows={ rows } pulsingId={ pulsingId } onNavigate={ onNavigate } fixControls={ fixControls } />
+				)
 			) }
 		</div>
 	);
@@ -424,7 +449,11 @@ function IssueSection( { heading, idPrefix, rows, isLoading, error, emptyMessage
  * The metabox's "Page Analysis" tab - 3 headed sections (SEO / GEO Issues / AEO Issues).
  */
 export default function PageAnalysisTab( { highlightTarget, onNavigate }: PageAnalysisTabProps ) {
-	const { postId, title, excerpt, slug, content, meta, setTitle, setExcerpt } = usePostData();
+	const { postId, title, excerpt, slug, content, meta, setExcerpt, setMeta } = usePostData();
+	// Same per-post override GeneralTab.tsx's own SEO Title field writes - independent of the real
+	// post title, which "Fix with AI" must never silently rename (#bug: this used to call
+	// setTitle(), renaming the page itself).
+	const seoTitle = ( meta[ window.vulopilotPostSeo.metaKeys.seo_title ] as string ) || '';
 	const focusKeyword = ( meta[ window.vulopilotPostSeo.metaKeys.focus_keyword ] as string ) || '';
 
 	const [ liveResults, setLiveResults ] = useState< AnalysisResult[] >( [] );
@@ -545,7 +574,7 @@ export default function PageAnalysisTab( { highlightTarget, onNavigate }: PageAn
 		setIsAnalyzingLive( true );
 
 		const timeout = setTimeout( () => {
-			analyzePost( postId, { title, content, excerpt, slug, focus_keyword: focusKeyword } )
+			analyzePost( postId, { title: seoTitle || title, content, excerpt, slug, focus_keyword: focusKeyword } )
 				.then( ( response ) => {
 					if ( ! cancelled ) {
 						setLiveResults( response.results );
@@ -566,7 +595,7 @@ export default function PageAnalysisTab( { highlightTarget, onNavigate }: PageAn
 			cancelled = true;
 			clearTimeout( timeout );
 		};
-	}, [ postId, title, excerpt, slug, content, focusKeyword ] );
+	}, [ postId, title, seoTitle, excerpt, slug, content, focusKeyword ] );
 
 	const applyPostFix = ( actionId: string, response: FixResponse ) => {
 		if ( ! response.post ) {
@@ -574,7 +603,7 @@ export default function PageAnalysisTab( { highlightTarget, onNavigate }: PageAn
 		}
 
 		if ( 'write-meta-title' === actionId ) {
-			setTitle( response.post.title );
+			setMeta( { [ window.vulopilotPostSeo.metaKeys.seo_title ]: response.post.title } );
 		}
 
 		if ( 'write-meta-description' === actionId ) {
@@ -735,6 +764,7 @@ export default function PageAnalysisTab( { highlightTarget, onNavigate }: PageAn
 				pulsingId={ pulsingKey }
 				onNavigate={ onNavigate }
 				fixControls={ fixControls }
+				showSummary
 			/>
 
 			<IssueSection
@@ -747,6 +777,7 @@ export default function PageAnalysisTab( { highlightTarget, onNavigate }: PageAn
 				pulsingId={ pulsingKey }
 				onNavigate={ onNavigate }
 				fixControls={ fixControls }
+				showSummary
 			/>
 		</div>
 	);

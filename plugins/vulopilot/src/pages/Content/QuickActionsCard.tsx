@@ -1,6 +1,5 @@
 /* global vulopilotAppLocalizer */
 import { useState } from 'react';
-import type { ComponentType } from 'react';
 import { __ } from '@wordpress/i18n';
 import { CardComponent, ListComponent, PopupComponent } from '@zyra/components';
 import { ButtonInput } from '@zyra/inputs';
@@ -9,7 +8,6 @@ import { ContentTool } from './ContentToolsGrid';
 import ShowProPopup from '../../components/Popup/Popup';
 import { useAiCredits } from '../../services/useAiCredits';
 import { useContentToolsEnabled } from '../../services/useContentToolsEnabled';
-import { useFilterSlot } from '../../services/useFilterSlot';
 
 /**
  * "Quick Actions" card: standalone AI actions using the same propose, preview and approve flow as
@@ -85,16 +83,14 @@ const QuickActionsCard = () => {
 		document.getElementById(id)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
 	};
 
-	// Content Planner is registered on this slot (ContentOptimization's `ContentPlannerPopup`);
-	// without it the row is an upsell tag.
-	const PlannerPopup = useFilterSlot<
-		ComponentType<{ open: boolean; onClose: () => void }>
-	>('vulopilot_content_planner');
-	const [isPlannerOpen, setIsPlannerOpen] = useState(false);
-
+	// Content Planner has its own dedicated page (`pages/ContentPlanner/ContentPlanner.tsx`, WP
+	// menu slug `content-planner`) - this button navigates there directly rather than opening a
+	// second, competing create UI over the same `/content-planner` REST store (the Content
+	// Planner Redesign spec's "two competing create flows" complaint - the old popup this used
+	// to open has been removed).
 	const openPlanner = () => {
-		if (PlannerPopup) {
-			setIsPlannerOpen(true);
+		if (vulopilotAppLocalizer.khali_dabba) {
+			window.location.href = '?page=vulopilot#&tab=content-planner';
 			return;
 		}
 
@@ -151,7 +147,7 @@ const QuickActionsCard = () => {
 						className: 'icon-blue',
 						title: __('Content Planner', 'vulopilot'),
 						desc: __('Plan and schedule content', 'vulopilot'),
-						tags: PlannerPopup ? (
+						tags: vulopilotAppLocalizer.khali_dabba ? (
 							<i className="adminfont-arrow-right" />
 						) : (
 							<span className="admin-tag pro-tag pro-tag-inline">
@@ -173,9 +169,6 @@ const QuickActionsCard = () => {
 				}}
 			/>
 			<ContentToolPopup tool={activeTool} onClose={() => setActiveTool(null)} />
-			{PlannerPopup && (
-				<PlannerPopup open={isPlannerOpen} onClose={() => setIsPlannerOpen(false)} />
-			)}
 			<PopupComponent
 				open={isCloudConnectPromptOpen}
 				onClose={() => setIsCloudConnectPromptOpen(false)}

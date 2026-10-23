@@ -27,6 +27,17 @@ class AuditContentAction extends AbstractBasicAction {
 	private const META_KEY = '_vulopilot_ai_content_audit';
 
 	/**
+	 * Word cap on the content sent to the AI - `AiRequestSender::validate_prompt()` rejects any
+	 * combined prompt over 32,000 characters outright (every request, no partial send), so a
+	 * long page/post sent here in full previously failed this action unconditionally with "This
+	 * request is too long to send to the AI service". A content audit only needs enough of the
+	 * page to judge quality/structure/engagement, not every word - `wp_trim_words()` here is the
+	 * same truncation helper this codebase's own preview rendering already uses elsewhere
+	 * (e.g. ImproveReadabilityAction's build_preview()), just applied to the prompt itself.
+	 */
+	private const MAX_CONTENT_WORDS = 3000;
+
+	/**
 	 * @inheritDoc
 	 */
 	public function get_id(): string {
@@ -77,6 +88,10 @@ class AuditContentAction extends AbstractBasicAction {
 	 * @inheritDoc
 	 */
 	public function build_prompt( array $input ): array {
+		$plain_content  = wp_strip_all_tags( $input['post_content'] );
+		$trimmed        = wp_trim_words( $plain_content, self::MAX_CONTENT_WORDS, '' );
+		$was_truncated  = $trimmed !== $plain_content;
+
 		return array(
 			array(
 				'role'    => 'system',
@@ -88,9 +103,10 @@ class AuditContentAction extends AbstractBasicAction {
 			array(
 				'role'    => 'user',
 				'content' => sprintf(
-					"Page title: %s\n\nContent:\n%s\n\nAudit this page.",
+					"Page title: %s\n\nContent:\n%s%s\n\nAudit this page.",
 					$input['post_title'],
-					wp_strip_all_tags( $input['post_content'] )
+					$trimmed,
+					$was_truncated ? "\n\n[Content truncated for length - audit based on this excerpt.]" : ''
 				),
 			),
 		);

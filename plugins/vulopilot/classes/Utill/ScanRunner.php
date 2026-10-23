@@ -151,8 +151,6 @@ class ScanRunner {
 		}
 
 		delete_option( self::QUEUE_OPTION );
-
-		do_action( 'vulopilot_scan_queue_completed' );
 	}
 
 	/**

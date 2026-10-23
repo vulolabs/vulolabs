@@ -45,6 +45,17 @@ class TitleFormatter {
 	 * @return string
 	 */
 	public function maybe_filter_title( string $title ): string {
+		// A per-post "SEO Title" override (General tab) always wins, same as every other per-post
+		// SEO field (canonical URL, robots, social title) - independent of whether the sitewide
+		// Title Format templates below are even enabled.
+		if ( is_singular() ) {
+			$override = trim( (string) get_post_meta( get_queried_object_id(), PostSeoMetaFields::META_KEYS['seo_title'], true ) );
+
+			if ( '' !== $override ) {
+				return $override;
+			}
+		}
+
 		$settings = wp_parse_args( get_option( Utill::VULOPILOT_SETTINGS_KEY, array() ), Utill::VULOPILOT_SETTINGS_DEFAULTS );
 
 		if ( empty( $settings['site_identity_enabled'] ) || 'enabled' !== $settings['site_identity_enabled'] ) {

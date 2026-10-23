@@ -4,11 +4,11 @@ namespace VuloPilot\Utill;
 defined( 'ABSPATH' ) || exit;
 
 /**
- * Fetches `/scans` to list past scan runs; submitting to `/scans` triggers one synchronously
- * via VuloPilot()->scan_runner (Scanners\ScanRunner - already wired in
- * VuloPilot::init_classes()). Persistence of the result happens via
- * Services\ScanPersistenceListener's `vulopilot_scan_completed` hook, not
- * anything in this controller - it only asks the runner to run.
+ * Fetches `/scans` to list past scan runs. Submitting to `/scans` queues a background run via
+ * `VuloPilot()->scan_runner->run_queued()` (Utill\ScanRunner - already wired in
+ * VuloPilot::init_classes()) and returns immediately; `/scans/status` reports real progress.
+ * Persistence of each scanner's result happens via Utill\ScanPersistenceListener's
+ * `vulopilot_scan_completed` hook, not anything in this controller.
  *
  * @class       Scans controller
  * @version     1.0.0
@@ -81,7 +81,11 @@ class Scans extends \WP_REST_Controller {
 		$categories  = $this->parse_comma_separated_list( $request->get_param( 'category' ) );
 
 		if ( $categories ) {
-			$registry = new ScannerRegistry();
+			// The shared, already-populated registry - a fresh `new ScannerRegistry()` has no
+			// scanner sources registered (those are merged in once, onto VuloPilot()'s own
+			// instance, via the `vulopilot_scanner_sources` filter during init_classes()), so
+			// every category lookup against it would silently resolve to zero scanners.
+			$registry = VuloPilot()->scanner_registry;
 
 			foreach ( $categories as $category ) {
 				$scanner_ids = array_merge( $scanner_ids, array_keys( $registry->get_scanners_by_category( $category ) ) );

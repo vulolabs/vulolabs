@@ -20,6 +20,7 @@ class PostSeoMetaFields {
 	 */
 	public const META_KEYS = array(
 		'focus_keyword'      => '_vulopilot_focus_keyword',
+		'seo_title'          => '_vulopilot_seo_title',
 		'canonical_url'      => '_vulopilot_canonical_url',
 		'robots_noindex'     => '_vulopilot_robots_noindex',
 		'robots_nofollow'    => '_vulopilot_robots_nofollow',
@@ -55,6 +56,11 @@ class PostSeoMetaFields {
 				self::META_KEYS['focus_keyword'],
 				$this->string_field_args()
 			);
+
+			// The title shown in search results/`<title>` - independent of the real `post_title`,
+			// which stays whatever the editor's own Title field says (#bug: this used to be bound
+			// straight to `post_title`, so typing an "SEO title" silently renamed the page itself).
+			register_post_meta( $post_type, self::META_KEYS['seo_title'], $this->string_field_args() );
 
 			register_post_meta(
 				$post_type,

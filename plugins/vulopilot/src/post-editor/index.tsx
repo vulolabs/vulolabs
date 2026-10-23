@@ -1,9 +1,82 @@
 import { registerPlugin } from '@wordpress/plugins';
-import { PluginSidebar, PluginSidebarMoreMenuItem } from '@wordpress/edit-post';
+import { PluginSidebar, PluginSidebarMoreMenuItem } from '@wordpress/editor';
 import { dispatch } from '@wordpress/data';
-import { useEffect } from '@wordpress/element';
+import { useEffect, useState } from '@wordpress/element';
+import { createPortal } from 'react-dom';
 import { __ } from '@wordpress/i18n';
 import PostSeoPanel from './PostSeoPanel';
+import ToolbarScorePills from './ToolbarScorePills';
+import { registerTextSelectionActions } from './TextSelectionActions';
+
+// Registers once at module load - safe even when Pro is inactive, since the format's own `edit`
+// component checks `window.vulopilotPostSeo.isPro` and renders nothing when it's false.
+registerTextSelectionActions();
+
+/**
+ * Gutenberg's `PluginSidebar` `icon` prop goes through `@wordpress/components`' `Icon`, which
+ * expects a simple dashicon/SVG sized to fit a small square toolbar button - not an arbitrary
+ * flex layout with two text pills, which it clips/squashes to nothing. So instead of fighting
+ * that, this portals the real score pills straight into the header's own settings row
+ * (`.editor-header__settings`, confirmed against this WP version's own real `editor.js` source -
+ * `HeaderSkeleton`'s `settings` prop, a plain `Fragment` the Header component builds and
+ * re-renders inline).
+ *
+ * That `Fragment` is hardcoded JSX with no public Slot/Fill for arbitrary content, and React owns
+ * and fully replaces that div's children on every one of its own re-renders (which fire
+ * constantly - any editor state change, including this very score refetching) - so a plain
+ * `insertBefore()` gets silently wiped out the next time Header re-renders, which is near-
+ * immediate. A MutationObserver watches for that and re-inserts the container every time,
+ * the same defensive pattern third-party scripts use to keep content alive inside someone
+ * else's React tree.
+ */
+const useToolbarScorePillsPortal = () => {
+	const [ container, setContainer ] = useState< HTMLElement | null >( null );
+
+	useEffect( () => {
+		let cancelled = false;
+		let observer: MutationObserver | null = null;
+
+		const ensureMounted = ( settingsRow: Element ) => {
+			if ( settingsRow.querySelector( '.vulopilot-toolbar-score-pills-root' ) ) {
+				return;
+			}
+
+			const root = document.createElement( 'div' );
+			root.className = 'vulopilot-toolbar-score-pills-root';
+			settingsRow.insertBefore( root, settingsRow.firstChild );
+			setContainer( root );
+		};
+
+		const findAndWatch = () => {
+			if ( cancelled ) {
+				return;
+			}
+
+			const settingsRow = document.querySelector( '.editor-header__settings' );
+
+			if ( ! settingsRow ) {
+				// The header mounts asynchronously - keep trying until it exists.
+				requestAnimationFrame( findAndWatch );
+				return;
+			}
+
+			ensureMounted( settingsRow );
+
+			observer = new MutationObserver( () => ensureMounted( settingsRow ) );
+			observer.observe( settingsRow, { childList: true } );
+		};
+
+		findAndWatch();
+
+		return () => {
+			cancelled = true;
+			observer?.disconnect();
+		};
+	}, [] );
+
+	return container;
+};
+
 import {
 	getEditorTargetForScanner,
 	SEO_ISSUE_QUERY_PARAM,
@@ -60,6 +133,67 @@ const readDeepLinkTarget = (): DeepLinkTarget => {
 // Read once at module scope, before first render - deep-link state is static for the lifetime of
 // this editor page load.
 const { wasPresent: shouldOpenSidebar, tab: deepLinkTab, target: deepLinkHighlight } = readDeepLinkTarget();
+
+/**
+ * Opens the VuloPilot SEO sidebar the first time the user clicks into the title field - works
+ * for any post type (post, page, product, ...), since Gutenberg's title field uses the same
+ * real markup regardless. The block editor canvas (title field included) renders inside its own
+ * same-origin iframe (`iframe[name="editor-canvas"]`) since WP 5.9's iframed editor, so a
+ * listener on the top-level `document` never sees focus/click events that happen inside it -
+ * confirmed live (`core/block-editor`'s own `getSelectedBlock()` stayed `null` after a real
+ * click on the title, and `page.frames()` shows the real iframe). The iframe mounts
+ * asynchronously and its `contentDocument` is swapped on every editor reload, so this polls for
+ * it the same way `useToolbarScorePillsPortal` above already does for the same async-canvas
+ * problem. Fires once per page load (`firedRef`) and never re-opens after the user closes the
+ * sidebar themselves.
+ */
+const useOpenSidebarOnTitleClick = () => {
+	useEffect( () => {
+		let cancelled = false;
+		let attachedDoc: Document | null = null;
+		const firedRef = { current: false };
+
+		const onFocusIn = ( event: FocusEvent ) => {
+			if ( firedRef.current ) {
+				return;
+			}
+
+			const target = event.target as HTMLElement | null;
+			const isTitleField = Boolean( target?.closest( '.editor-post-title__input' ) );
+
+			if ( ! isTitleField ) {
+				return;
+			}
+
+			firedRef.current = true;
+			dispatch( 'core/edit-post' ).openGeneralSidebar( `vulopilot-seo/${ SIDEBAR_NAME }` );
+		};
+
+		const tryAttach = () => {
+			if ( cancelled || firedRef.current ) {
+				return;
+			}
+
+			const iframe = document.querySelector< HTMLIFrameElement >( 'iframe[name="editor-canvas"]' );
+			const doc = iframe?.contentDocument;
+
+			if ( doc && doc !== attachedDoc ) {
+				attachedDoc?.removeEventListener( 'focusin', onFocusIn );
+				doc.addEventListener( 'focusin', onFocusIn );
+				attachedDoc = doc;
+			}
+
+			requestAnimationFrame( tryAttach );
+		};
+
+		tryAttach();
+
+		return () => {
+			cancelled = true;
+			attachedDoc?.removeEventListener( 'focusin', onFocusIn );
+		};
+	}, [] );
+};
 
 /**
  * The post-editor SEO metabox, mounted separately from the dashboard app.
@@ -120,6 +254,20 @@ const VuloPilotIcon = () => (
  * VuloPilot SEO sidebar.
  */
 const VuloPilotSeoPlugin = () => {
+	const toolbarPortalContainer = useToolbarScorePillsPortal();
+	// Toolbar score pills live in a separate portaled tree from PostSeoPanel below, so a click
+	// on one needs to reach the panel's tab state from here, the shared parent - `requestedTab`
+	// bridges the two. Re-keys on every click (`Date.now()`) so clicking the same pill twice in a
+	// row still re-navigates even though the tab name itself didn't change.
+	const [ requestedTab, setRequestedTab ] = useState< { tab: 'general' | 'ai-visibility'; target?: string; nonce: number } | null >( null );
+
+	const openSidebarToTab = ( tab: 'general' | 'ai-visibility', target?: string ) => {
+		setRequestedTab( { tab, target, nonce: Date.now() } );
+		dispatch( 'core/edit-post' ).openGeneralSidebar( `vulopilot-seo/${ SIDEBAR_NAME }` );
+	};
+
+	useOpenSidebarOnTitleClick();
+
 	useEffect( () => {
 		if ( ! shouldOpenSidebar ) {
 			return;
@@ -148,7 +296,15 @@ const VuloPilotSeoPlugin = () => {
 
 	return (
 		<>
-			<PluginSidebarMoreMenuItem target={ SIDEBAR_NAME }>
+			{ toolbarPortalContainer && createPortal(
+				<ToolbarScorePills
+					onClickSeo={ () => openSidebarToTab( 'general', 'snippet' ) }
+					onClickAeo={ () => openSidebarToTab( 'ai-visibility' ) }
+				/>,
+				toolbarPortalContainer
+			) }
+
+			<PluginSidebarMoreMenuItem target={ SIDEBAR_NAME } icon={ <VuloPilotIcon /> }>
 				{ __( 'VuloPilot SEO', 'vulopilot' ) }
 			</PluginSidebarMoreMenuItem>
 
@@ -158,8 +314,10 @@ const VuloPilotSeoPlugin = () => {
 				icon={ <VuloPilotIcon /> }
 			>
 				<PostSeoPanel
-					initialTabName={ deepLinkTab }
-					highlightTarget={ deepLinkHighlight }
+					initialTabName={ requestedTab?.tab ?? deepLinkTab }
+					highlightTarget={ requestedTab ? undefined : deepLinkHighlight }
+					navigationNonce={ requestedTab?.nonce }
+					navigationTarget={ requestedTab?.target }
 				/>
 			</PluginSidebar>
 		</>
