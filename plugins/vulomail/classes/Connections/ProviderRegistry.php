@@ -144,9 +144,9 @@ class ProviderRegistry {
 	}
 
 	/**
-	 * Get every provider definition.
+	 * Every provider definition, both channels.
 	 *
-	 * @return array<int, array> Every provider definition, both channels.
+	 * @return array<int, array>
 	 */
 	public function definitions() {
 		$definitions = array();

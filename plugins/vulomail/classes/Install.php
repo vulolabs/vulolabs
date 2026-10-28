@@ -19,13 +19,12 @@ defined( 'ABSPATH' ) || exit;
 class Install {
 
 	/**
-	 * Version of the table layout below. Bump it with every schema change, so a site that already
-	 * runs this plugin version still gets the new columns on its next load.
+	 * Table layout version. Bump on every schema change so an existing install still gets new columns.
 	 */
 	const SCHEMA_VERSION = 3;
 
 	/**
-	 * Class constructor - runs the install immediately.
+	 * Constructor - runs the install immediately.
 	 */
 	public function __construct() {
 		$this->install();
@@ -59,7 +58,7 @@ class Install {
 			require_once ABSPATH . 'wp-admin/includes/upgrade.php';
 		}
 
-		// No "IF NOT EXISTS": dbDelta would read "IF" as the table name and never diff the real table.
+		// No "IF NOT EXISTS": dbDelta would read "IF" as the table name and never diff it.
 		$sql_logs = "CREATE TABLE {$wpdb->prefix}" . Utill::TABLES['log'] . " (
 			id bigint(20) unsigned NOT NULL AUTO_INCREMENT,
 			channel varchar(10) NOT NULL DEFAULT 'email',
@@ -93,8 +92,7 @@ class Install {
 			KEY idx_tracking_token (tracking_token)
 		) $collate;";
 
-		// One row per tracked link that has been clicked at least once; `position` is the link's
-		// place among the message's tracked links.
+		// One row per tracked link clicked at least once; `position` is the link's place in the message.
 		$sql_links = "CREATE TABLE {$wpdb->prefix}" . Utill::TABLES['log_link'] . " (
 			id bigint(20) unsigned NOT NULL AUTO_INCREMENT,
 			log_id bigint(20) unsigned NOT NULL,
@@ -112,8 +110,8 @@ class Install {
 	}
 
 	/**
-	 * Gives Gmail connections saved before Gmail had sign-in methods their method: they all use an
-	 * app password. Without it they would show the newer default method.
+	 * Backfills a sign-in method onto Gmail connections saved before methods existed: they all used
+	 * an app password, and without it they'd show the newer default method instead.
 	 *
 	 * @return void
 	 */
@@ -134,8 +132,8 @@ class Install {
 	}
 
 	/**
-	 * Uninstall routine (register_uninstall_hook). Keeps everything unless Settings → Data says
-	 * "Delete everything", so an accidental delete never destroys saved connections.
+	 * Uninstall routine. Keeps everything unless Settings → Data says "Delete everything", so an
+	 * accidental uninstall never destroys saved connections.
 	 *
 	 * @return void
 	 */
@@ -149,7 +147,7 @@ class Install {
 		global $wpdb;
 
 		foreach ( Utill::TABLES as $table ) {
-			// Table identifiers can't be prepared placeholders; the name is a constant from this codebase.
+			// Table identifiers can't be prepared placeholders; the name is a constant, not user input.
 			// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.SchemaChange, WordPress.DB.DirectDatabaseQuery.NoCaching
 			$wpdb->query( "DROP TABLE IF EXISTS `{$wpdb->prefix}{$table}`" );
 		}

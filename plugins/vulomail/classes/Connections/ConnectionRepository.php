@@ -43,9 +43,9 @@ class ConnectionRepository {
 	}
 
 	/**
-	 * Get every stored connection.
+	 * Every stored connection.
 	 *
-	 * @return array<string, array> Connection id => stored record (secrets still encrypted).
+	 * @return array<string, array> Connection id => record (secrets still encrypted).
 	 */
 	public function all() {
 		$stored = get_option( Utill::CONNECTIONS_KEY, array() );
@@ -54,7 +54,7 @@ class ConnectionRepository {
 	}
 
 	/**
-	 * Get one connection by id.
+	 * One connection by id.
 	 *
 	 * @param string $id Connection id.
 	 * @return array|null Stored record.
@@ -151,8 +151,8 @@ class ConnectionRepository {
 	/**
 	 * Creates or updates a connection.
 	 *
-	 * A secret field left empty, or still holding its mask, keeps the stored value: the UI never has
-	 * the real secret to send back.
+	 * A secret field left empty, or still holding its mask, keeps the stored value: the UI never
+	 * has the real secret to send back.
 	 *
 	 * @param array $input Raw input: id (optional), channel, provider, label, enabled, settings.
 	 * @return array|\WP_Error The stored record.

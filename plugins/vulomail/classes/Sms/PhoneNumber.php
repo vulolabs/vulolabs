@@ -17,9 +17,9 @@ class PhoneNumber {
 	/**
 	 * Normalises a number to E.164 (`+` and 8-15 digits).
 	 *
-	 * @param string $raw          Number as entered: spaces, dashes, brackets and a 00 prefix are accepted.
-	 * @param string $country_code Digits of the default country calling code, applied to national numbers.
-	 * @return string E.164 number, or '' when the input can't be a phone number.
+	 * @param string $raw          Number as entered: spaces, dashes, brackets, a 00 prefix allowed.
+	 * @param string $country_code Default country calling code digits, applied to national numbers.
+	 * @return string E.164 number, or '' if not a valid phone number.
 	 */
 	public static function normalize( $raw, $country_code = '' ) {
 		$raw           = trim( (string) $raw );
@@ -38,7 +38,7 @@ class PhoneNumber {
 				return '';
 			}
 
-			// National numbers are usually written with a leading trunk zero that isn't dialled internationally.
+			// National numbers usually carry a leading trunk zero not dialled internationally.
 			$digits = $country_code . ltrim( $digits, '0' );
 		}
 

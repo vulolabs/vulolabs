@@ -16,8 +16,8 @@ defined( 'ABSPATH' ) || exit;
 /**
  * Routes wp_mail() through VuloMail.
  *
- * With no usable connection, or with email routing switched off, `pre_wp_mail` is left untouched and
- * WordPress sends exactly as it would without the plugin; those sends are only observed, for the log.
+ * With no usable connection, or routing switched off, `pre_wp_mail` is left untouched and WordPress
+ * sends as it normally would; those sends are only observed, for the log.
  */
 class WpMailInterceptor {
 
@@ -62,7 +62,7 @@ class WpMailInterceptor {
 	private $tracking;
 
 	/**
-	 * True while this class fires core's success/failure hooks itself, so its own observers skip them.
+	 * True while this class fires core's success/failure hooks itself, so its observers skip them.
 	 *
 	 * @var bool
 	 */
@@ -106,8 +106,7 @@ class WpMailInterceptor {
 
 		// Late, so a plugin that deliberately short-circuits wp_mail() itself is respected.
 		add_filter( 'pre_wp_mail', array( $this, 'maybe_send' ), 999, 2 );
-		// The configured sender also applies when WordPress's own mailer ends up sending (no
-		// connection yet, or every connection failed).
+		// Configured sender also applies when WordPress's own mailer ends up sending.
 		add_filter( 'wp_mail_from', array( $this, 'filter_from_email' ), 999 );
 		add_filter( 'wp_mail_from_name', array( $this, 'filter_from_name' ), 999 );
 		add_action( 'wp_mail_succeeded', array( $this, 'observe_success' ), 999 );
@@ -215,8 +214,8 @@ class WpMailInterceptor {
 
 	/**
 	 * `phpmailer_init` callback: when WordPress's own mailer takes over a message VuloMail's
-	 * connections failed to deliver, applies that message's tracking to the body core is sending.
-	 * Mail VuloMail isn't routing is left exactly as WordPress builds it.
+	 * connections failed to deliver, applies that message's tracking to the body core sends.
+	 * Mail VuloMail isn't routing is left as WordPress builds it.
 	 *
 	 * @param object $phpmailer Core's PHPMailer instance.
 	 * @return void

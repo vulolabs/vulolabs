@@ -43,7 +43,7 @@ class Admin {
 			57
 		);
 
-		// Each entry is a hash tab of the one React screen (src/routes.ts).
+		// Each entry is a hash tab of the React screen (src/routes.ts).
 		$submenus = apply_filters(
 			'vulomail_submenus',
 			array(
@@ -88,7 +88,7 @@ class Admin {
 			);
 		}
 
-		// add_menu_page() auto-registers a duplicate first submenu for the top-level item.
+		// add_menu_page() auto-registers a duplicate first submenu item.
 		remove_submenu_page( 'vulomail', 'vulomail' );
 	}
 

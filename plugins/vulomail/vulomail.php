@@ -19,12 +19,11 @@
 defined( 'ABSPATH' ) || exit;
 
 require_once __DIR__ . '/vendor/autoload.php';
-// The public integration API. It lives under classes/ because the shared release script only
-// packages a fixed list of top-level paths.
+// Lives under classes/ because the release script only packages a fixed list of top-level paths.
 require_once __DIR__ . '/classes/Integrations/functions.php';
 
 /**
- * Returns the main instance of the VuloMail plugin.
+ * Returns the main plugin instance.
  *
  * @return \VuloMail\VuloMail
  */

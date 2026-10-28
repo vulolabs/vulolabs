@@ -19,21 +19,21 @@ defined( 'ABSPATH' ) || exit;
 final class VuloMail {
 
 	/**
-	 * Holds the single instance of the class (singleton pattern).
+	 * Singleton instance.
 	 *
 	 * @var self|null
 	 */
 	private static $instance = null;
 
 	/**
-	 * Container for shared class instances and config values.
+	 * Shared instance/config container.
 	 *
 	 * @var array
 	 */
 	private $container = array();
 
 	/**
-	 * Class constructor.
+	 * Constructor.
 	 *
 	 * @param string $file Main plugin file path.
 	 */
@@ -49,12 +49,10 @@ final class VuloMail {
 
 		register_activation_hook( $file, array( $this, 'activate' ) );
 		register_deactivation_hook( $file, array( $this, 'deactivate' ) );
-		// uninstall.php isn't in the shared release script's file list, so the uninstall routine is
-		// registered as a hook instead.
+		// uninstall.php isn't in the release script's file list, so this registers as a hook instead.
 		register_uninstall_hook( $file, array( Install::class, 'uninstall' ) );
 
-		// The delivery services are built here, not on `init`: other plugins call wp_mail() as early
-		// as `plugins_loaded`, and those messages must reach the configured connection too.
+		// Built here, not on `init`: other plugins can call wp_mail() as early as `plugins_loaded`.
 		$this->init_services();
 
 		add_action( 'plugins_loaded', array( $this, 'init_plugin' ) );
@@ -79,7 +77,7 @@ final class VuloMail {
 	}
 
 	/**
-	 * Builds the delivery pipeline. Nothing here touches the database until a message is sent.
+	 * Builds the delivery pipeline. Nothing touches the database until a message is sent.
 	 *
 	 * @return void
 	 */
@@ -134,7 +132,7 @@ final class VuloMail {
 	}
 
 	/**
-	 * Instantiate the plugin's core classes.
+	 * Instantiates core classes.
 	 *
 	 * @return void
 	 */
@@ -150,7 +148,7 @@ final class VuloMail {
 
 		/**
 		 * Fires once VuloMail has booted. Integrations should wait for this before calling the
-		 * public API in classes/Integrations/functions.php.
+		 * public API (classes/Integrations/functions.php).
 		 */
 		do_action( 'vulomail_loaded' );
 	}

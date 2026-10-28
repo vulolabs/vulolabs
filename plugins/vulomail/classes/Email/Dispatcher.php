@@ -105,9 +105,9 @@ class Dispatcher {
 	 * Sends a message through the chain.
 	 *
 	 * @param Message $message     Message to send.
-	 * @param bool    $log_failure Whether to log a failure. The wp_mail() interceptor passes false when a
-	 *                             failed message will be handed back to WordPress's own mailer, and logs
-	 *                             the combined outcome itself. A success is always logged here.
+	 * @param bool    $log_failure Whether to log a failure. The wp_mail() interceptor passes false when
+	 *                             a failed message will be handed back to WordPress's own mailer and
+	 *                             logs the combined outcome itself. A success is always logged here.
 	 * @return Result Final outcome, with ->attempts filled in.
 	 */
 	public function send( Message $message, $log_failure = true ) {
@@ -155,8 +155,7 @@ class Dispatcher {
 	}
 
 	/**
-	 * Sends through one specific connection, with no failover and no logging. Used by send() and by
-	 * the "send test email" tool.
+	 * Sends through one connection, no failover, no logging. Used by send() and "send test email".
 	 *
 	 * @param array   $connection Stored connection record.
 	 * @param Message $message    Message to send.
@@ -173,8 +172,7 @@ class Dispatcher {
 			try {
 				$result = $mailer->send( $message );
 			} catch ( \Throwable $e ) {
-				// Adapters are meant to return failures; a third-party one that throws must not take
-				// down the request that happened to send an email.
+				// Adapters must return failures, not throw; don't let one take down the request.
 				$result = Result::fail( 'adapter_exception', __( 'The email provider adapter failed unexpectedly.', 'vulomail' ) );
 			}
 		}

@@ -326,7 +326,7 @@ class Triggers {
 			return;
 		}
 
-		$ip = isset( $_SERVER['REMOTE_ADDR'] ) ? sanitize_text_field( wp_unslash( $_SERVER['REMOTE_ADDR'] ) ) : '';
+		$ip = sanitize_text_field( self::server_var( 'REMOTE_ADDR' ) );
 
 		$this->fire(
 			'admin_login',
@@ -539,6 +539,16 @@ class Triggers {
 				)
 			)
 		);
+	}
+
+	/**
+	 * One entry of `$_SERVER`.
+	 *
+	 * @param string $key Entry name.
+	 * @return string
+	 */
+	private static function server_var( $key ) {
+		return isset( $_SERVER[ $key ] ) ? (string) wp_unslash( $_SERVER[ $key ] ) : '';
 	}
 
 	/**

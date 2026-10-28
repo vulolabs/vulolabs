@@ -20,7 +20,7 @@ class Twilio extends AbstractGateway {
 	const ENDPOINT = 'https://api.twilio.com/2010-04-01/Accounts/%s/Messages.json';
 
 	/**
-	 * Describes the gateway and its connection fields.
+	 * Gateway and connection field descriptions.
 	 *
 	 * @return array
 	 */
@@ -56,14 +56,14 @@ class Twilio extends AbstractGateway {
 	/**
 	 * Sends one text message.
 	 *
-	 * @param string $to   Recipient in E.164 format.
+	 * @param string $to   Recipient, E.164.
 	 * @param string $body Message text.
 	 * @return Result
 	 */
 	public function send( $to, $body ) {
 		$sid = $this->config( 'account_sid' );
 
-		// The SID becomes part of the request path.
+		// SID becomes part of the request path.
 		if ( ! preg_match( '/^AC[0-9a-fA-F]{32}$/', $sid ) ) {
 			return Result::fail( 'invalid_account_sid', __( 'The Twilio Account SID should start with "AC" followed by 32 characters.', 'vulomail' ) );
 		}

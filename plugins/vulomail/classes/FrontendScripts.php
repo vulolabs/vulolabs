@@ -96,8 +96,7 @@ class FrontendScripts {
 	}
 
 	/**
-	 * Passes the React app what it needs to boot and call the REST API. No credential is ever
-	 * included here.
+	 * Passes the React app what it needs to boot and call the REST API. No credential is included.
 	 *
 	 * @param string $handle Handle to attach the data to.
 	 * @return void
@@ -124,7 +123,7 @@ class FrontendScripts {
 				'sms_triggers'        => self::sms_trigger_definitions(),
 				// Settings → General → Date Format, in the token syntax zyra's date picker uses.
 				'date_format_js'      => self::convert_date_format_to_js( (string) get_option( 'date_format' ) ),
-				// zyra's settings form locks a field whose `dependentPlugin` isn't in this list.
+				// zyra locks a field whose `dependentPlugin` isn't in this list.
 				'active_plugins'      => class_exists( 'WooCommerce' ) ? array( 'woocommerce' ) : array(),
 				'plugins_url'         => admin_url( 'plugin-install.php?s=woocommerce&tab=search&type=term' ),
 				// zyra's HeaderComponent reads these two keys on every VuloLabs admin screen.
@@ -135,7 +134,7 @@ class FrontendScripts {
 	}
 
 	/**
-	 * Get the catalog of SMS trigger definitions.
+	 * Catalog of SMS trigger definitions.
 	 *
 	 * @return array<int, array>
 	 */
@@ -156,8 +155,8 @@ class FrontendScripts {
 	}
 
 	/**
-	 * Converts a PHP date() format into zyra's token syntax (YYYY/MM/DD...). zyra has no am/pm token,
-	 * so those are dropped.
+	 * Converts a PHP date() format into zyra's token syntax (YYYY/MM/DD...). zyra has no am/pm
+	 * token, so those are dropped.
 	 *
 	 * @param string $php_format PHP date format.
 	 * @return string

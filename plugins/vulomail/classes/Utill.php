@@ -92,8 +92,7 @@ class Utill {
 	}
 
 	/**
-	 * Formats a stored UTC datetime the way the site is set up to show dates: Settings → General's
-	 * date format, time format and timezone, in the site's language.
+	 * Formats a stored UTC datetime per Settings → General's date/time format and timezone.
 	 *
 	 * @param string $utc_datetime UTC `Y-m-d H:i:s`.
 	 * @return string
@@ -119,7 +118,7 @@ class Utill {
 			$timestamp = strtotime( $row['created_at'] . ' UTC' );
 
 			$rows[ $index ]['created_at_display'] = self::format_datetime( (string) $row['created_at'] );
-			// For day-grouped lists: the time on its own, and the day as "Today", "Yesterday" or a date.
+			// For day-grouped lists: time alone, and day as "Today"/"Yesterday"/a date.
 			$rows[ $index ]['created_at_time'] = false === $timestamp ? '' : wp_date( get_option( 'time_format' ), $timestamp );
 			$rows[ $index ]['created_at_day']  = false === $timestamp ? '' : self::day_label( $timestamp );
 		}

@@ -20,7 +20,7 @@ class Vonage extends AbstractGateway {
 	const ENDPOINT = 'https://rest.nexmo.com/sms/json';
 
 	/**
-	 * Describes the gateway and its connection fields.
+	 * Gateway and connection field descriptions.
 	 *
 	 * @return array
 	 */
@@ -56,7 +56,7 @@ class Vonage extends AbstractGateway {
 	/**
 	 * Sends one text message.
 	 *
-	 * @param string $to   Recipient in E.164 format.
+	 * @param string $to   Recipient, E.164.
 	 * @param string $body Message text.
 	 * @return Result
 	 */
@@ -69,7 +69,7 @@ class Vonage extends AbstractGateway {
 			'text'       => $body,
 		);
 
-		// Without this, non-Latin text arrives as question marks.
+		// Needed, or non-Latin text arrives as question marks.
 		if ( preg_match( '/[^\x00-\x7F]/', $body ) ) {
 			$fields['type'] = 'unicode';
 		}
@@ -82,7 +82,7 @@ class Vonage extends AbstractGateway {
 
 		$first = $response['json']['messages'][0] ?? null;
 
-		// Vonage answers HTTP 200 for rejected messages too; the per-message status is what counts.
+		// Vonage returns HTTP 200 even for rejections; per-message status is what counts.
 		if ( ! is_array( $first ) || ! isset( $first['status'] ) ) {
 			return $this->failure( $response, 'invalid_response', __( 'Unexpected response from Vonage.', 'vulomail' ) );
 		}

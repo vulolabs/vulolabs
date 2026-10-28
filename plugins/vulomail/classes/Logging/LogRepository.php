@@ -22,7 +22,7 @@ class LogRepository {
 	const SORTABLE = array( 'id', 'created_at', 'status', 'provider', 'channel' );
 
 	/**
-	 * Get the fully prefixed log table name.
+	 * Fully prefixed log table name.
 	 *
 	 * @return string
 	 */
@@ -33,7 +33,7 @@ class LogRepository {
 	}
 
 	/**
-	 * Get the fully prefixed clicked-links table name.
+	 * Fully prefixed clicked-links table name.
 	 *
 	 * @return string
 	 */
@@ -59,7 +59,7 @@ class LogRepository {
 	}
 
 	/**
-	 * Get one log row by id.
+	 * One log row by id.
 	 *
 	 * @param int $id Row id.
 	 * @return array|null

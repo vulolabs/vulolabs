@@ -144,8 +144,8 @@ class Logs extends Controller {
 			),
 		);
 
-		// Raw tracking columns, replaced by `opened`, `clicked` and `tracking`. The token is what a
-		// tracked email's links carry, and never leaves the server.
+		// Replaced by `opened`, `clicked` and `tracking`. The token is what a tracked email's links
+		// carry, and never leaves the server.
 		unset(
 			$row['tracking_token'],
 			$row['track_opens'],
@@ -185,8 +185,7 @@ class Logs extends Controller {
 	}
 
 	/**
-	 * Sends a logged message again. Only possible when its content was stored and its recipients
-	 * weren't masked.
+	 * Sends a logged message again. Needs its content stored and its recipients unmasked.
 	 *
 	 * @param \WP_REST_Request $request Request.
 	 * @return \WP_REST_Response|\WP_Error
@@ -242,8 +241,8 @@ class Logs extends Controller {
 	}
 
 	/**
-	 * Turns a calendar day from the date-range filter into a UTC datetime. The day is read in the
-	 * site's own timezone, the same one the log's dates are shown in.
+	 * Turns a calendar day from the date-range filter into a UTC datetime, read in the site's own
+	 * timezone (the one the log's dates are shown in).
 	 *
 	 * @param mixed  $day  Raw request value, expected as `Y-m-d`.
 	 * @param string $time `H:i:s` within that day.
@@ -262,10 +261,10 @@ class Logs extends Controller {
 	}
 
 	/**
-	 * Adds `opened` and `clicked` to a log row: 'yes', 'no', or 'not_tracked'. Logger only sets the
-	 * `track_*` flags on an email that was delivered, so a failed email or a text message reads
-	 * 'not_tracked'. A click counts as an open, since the reader must have opened the email to
-	 * click, even when their mail app blocked the pixel.
+	 * Adds `opened` and `clicked` to a log row: 'yes', 'no', or 'not_tracked'. Only a delivered email
+	 * gets `track_*` flags, so a failed email or text message reads 'not_tracked'. A click counts as
+	 * an open - the reader must have opened the email to click, even if their mail app blocked the
+	 * pixel.
 	 *
 	 * @param array $row Log row with its tracking columns.
 	 * @return array

@@ -83,7 +83,7 @@ class GoogleOAuth {
 	}
 
 	/**
-	 * Whether one-click sign-in is offered: the connect service is configured, over HTTPS.
+	 * Whether one-click sign-in is offered: connect service configured, over HTTPS.
 	 *
 	 * @return bool
 	 */

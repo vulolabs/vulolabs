@@ -19,7 +19,7 @@ defined( 'ABSPATH' ) || exit;
 abstract class AbstractApiMailer implements MailerInterface {
 
 	/**
-	 * Largest total attachment payload an API request will carry (most providers cap near here).
+	 * Max total attachment payload per request (most providers cap near here).
 	 */
 	const MAX_ATTACHMENT_BYTES = 20971520;
 
@@ -49,7 +49,7 @@ abstract class AbstractApiMailer implements MailerInterface {
 	}
 
 	/**
-	 * Get a trimmed config value.
+	 * Trimmed config value.
 	 *
 	 * @param string $key Config key.
 	 * @return string
@@ -62,7 +62,7 @@ abstract class AbstractApiMailer implements MailerInterface {
 	 * Reads the message's attachments.
 	 *
 	 * @param Message $message Message.
-	 * @return array<int, array{name: string, content: string, type: string}>|\WP_Error Raw file contents.
+	 * @return array<int, array{name: string, content: string, type: string}>|\WP_Error
 	 */
 	protected function read_attachments( Message $message ) {
 		$files = array();
@@ -94,10 +94,10 @@ abstract class AbstractApiMailer implements MailerInterface {
 	}
 
 	/**
-	 * Builds a failed Result from a transport error or an unexpected HTTP response.
+	 * Builds a failed Result from a transport error or bad HTTP response.
 	 *
 	 * @param array|\WP_Error $response HttpClient::post() return value.
-	 * @param string          $detail   Provider's own error text, if the adapter extracted one.
+	 * @param string          $detail   Provider's own error text, if extracted.
 	 * @return Result
 	 */
 	protected function failure( $response, $detail = '' ) {
@@ -122,7 +122,7 @@ abstract class AbstractApiMailer implements MailerInterface {
 	}
 
 	/**
-	 * Secret config values, removed verbatim from any error text.
+	 * Secret config values, scrubbed from error text.
 	 *
 	 * @return string[]
 	 */

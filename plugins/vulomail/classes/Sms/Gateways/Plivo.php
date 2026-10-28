@@ -20,7 +20,7 @@ class Plivo extends AbstractGateway {
 	const ENDPOINT = 'https://api.plivo.com/v1/Account/%s/Message/';
 
 	/**
-	 * Describes the gateway and its connection fields.
+	 * Gateway and connection field descriptions.
 	 *
 	 * @return array
 	 */
@@ -56,14 +56,14 @@ class Plivo extends AbstractGateway {
 	/**
 	 * Sends one text message.
 	 *
-	 * @param string $to   Recipient in E.164 format.
+	 * @param string $to   Recipient, E.164.
 	 * @param string $body Message text.
 	 * @return Result
 	 */
 	public function send( $to, $body ) {
 		$auth_id = $this->config( 'auth_id' );
 
-		// The Auth ID becomes part of the request path.
+		// Auth ID becomes part of the request path.
 		if ( ! preg_match( '/^[A-Za-z0-9]{10,40}$/', $auth_id ) ) {
 			return Result::fail( 'invalid_auth_id', __( 'The Plivo Auth ID is not valid.', 'vulomail' ) );
 		}

@@ -97,8 +97,8 @@ class Overview extends Controller {
 	}
 
 	/**
-	 * Adds `cause`: the provider, error code and error text to explain a failure by. That is the
-	 * last attempt marked by with_causes(), or the row's own error when no attempt is recorded.
+	 * Adds `cause`: provider, error code and error text explaining the failure - the last attempt
+	 * marked by with_causes(), or the row's own error when none is recorded.
 	 *
 	 * @param array $row      Failed log row from LogRepository::query().
 	 * @param array $attempts The row's attempts.
@@ -126,7 +126,7 @@ class Overview extends Controller {
 	}
 
 	/**
-	 * How many SMS alerts this site can use, and how many are switched on.
+	 * How many SMS alerts are available, and how many are on.
 	 *
 	 * @return array{enabled: int, available: int}
 	 */

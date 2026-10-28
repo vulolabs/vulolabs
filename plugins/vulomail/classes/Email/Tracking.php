@@ -233,8 +233,7 @@ class Tracking {
 	 * @return bool
 	 */
 	public function is_trackable( $url ) {
-		$scheme   = strtolower( (string) wp_parse_url( $url, PHP_URL_SCHEME ) );
-		$eligible = in_array( $scheme, array( 'http', 'https' ), true )
+		$eligible = self::is_http_url( $url )
 			&& '' !== (string) wp_parse_url( $url, PHP_URL_HOST )
 			&& ! preg_match( '/[\s<>]/', $url )
 			// Template placeholders another tool will still fill in.
@@ -250,6 +249,16 @@ class Tracking {
 		 * @param string $url      The link.
 		 */
 		return $eligible && (bool) apply_filters( 'vulomail_track_link', true, $url );
+	}
+
+	/**
+	 * Whether a URL's scheme is http or https.
+	 *
+	 * @param string $url Link address.
+	 * @return bool
+	 */
+	private static function is_http_url( $url ) {
+		return in_array( strtolower( (string) wp_parse_url( $url, PHP_URL_SCHEME ) ), array( 'http', 'https' ), true );
 	}
 
 	/**
@@ -304,7 +313,7 @@ class Tracking {
 
 		if ( ! preg_match( Utill::TOKEN_PATTERN, $token ) || $position < 1 || $position > 65535 || ! is_string( $url )
 			|| ! hash_equals( $this->sign( $token, $position, $url ), (string) $signature )
-			|| ! in_array( strtolower( (string) wp_parse_url( $url, PHP_URL_SCHEME ) ), array( 'http', 'https' ), true ) ) {
+			|| ! self::is_http_url( $url ) ) {
 			return '';
 		}
 
@@ -324,16 +333,15 @@ class Tracking {
 	 * @return void
 	 */
 	public function handle_request() {
-		// phpcs:disable WordPress.Security.NonceVerification.Recommended -- public links from an email; the token and signature are the authorization.
-		$open  = isset( $_GET[ self::OPEN_VAR ] ) ? sanitize_key( wp_unslash( $_GET[ self::OPEN_VAR ] ) ) : '';
-		$click = isset( $_GET[ self::CLICK_VAR ] ) ? sanitize_key( wp_unslash( $_GET[ self::CLICK_VAR ] ) ) : '';
+		$open  = sanitize_key( self::query_var( self::OPEN_VAR ) );
+		$click = sanitize_key( self::query_var( self::CLICK_VAR ) );
 
 		if ( '' === $open && '' === $click ) {
 			return;
 		}
 
-		// Security scanners and link previews often probe with HEAD first; only a real fetch counts.
-		$record = isset( $_SERVER['REQUEST_METHOD'] ) && 'GET' === strtoupper( sanitize_key( wp_unslash( $_SERVER['REQUEST_METHOD'] ) ) );
+		// Scanners and link previews often probe with HEAD first; only a real fetch counts.
+		$record = 'GET' === strtoupper( self::server_var( 'REQUEST_METHOD' ) );
 
 		if ( '' !== $open ) {
 			if ( $record ) {
@@ -351,14 +359,13 @@ class Tracking {
 		try {
 			$url = $this->resolve_click(
 				$click,
-				isset( $_GET['n'] ) ? absint( $_GET['n'] ) : 0,
-				isset( $_GET['u'] ) ? preg_replace( '/[^A-Za-z0-9\-_]/', '', wp_unslash( $_GET['u'] ) ) : '', // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- reduced to the base64url alphabet.
-				isset( $_GET['s'] ) ? sanitize_key( wp_unslash( $_GET['s'] ) ) : '',
+				absint( self::query_var( 'n' ) ),
+				preg_replace( '/[^A-Za-z0-9\-_]/', '', self::query_var( 'u' ) ), // Reduced to the base64url alphabet, so no further sanitizing is needed.
+				sanitize_key( self::query_var( 's' ) ),
 				$record
 			);
 		} catch ( \Throwable $e ) { // phpcs:ignore Generic.CodeAnalysis.EmptyStatement.DetectedCatch -- falls through to the home page.
 		}
-		// phpcs:enable
 
 		nocache_headers();
 		header( 'X-Robots-Tag: noindex, nofollow' );
@@ -367,6 +374,28 @@ class Tracking {
 		// The destination is the email's own, verified link, usually on another site.
 		wp_redirect( '' !== $url ? $url : home_url( '/' ), 302, 'VuloMail' ); // phpcs:ignore WordPress.Security.SafeRedirect.wp_redirect_wp_redirect
 		exit;
+	}
+
+	/**
+	 * One query argument of the current request. The token and signature are the authorization
+	 * for these public links, so no nonce applies.
+	 *
+	 * @param string $key Argument name.
+	 * @return string
+	 */
+	private static function query_var( $key ) {
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- public link from an email; verified by resolve_click()/record_open(), not a nonce.
+		return isset( $_GET[ $key ] ) ? (string) wp_unslash( $_GET[ $key ] ) : '';
+	}
+
+	/**
+	 * One entry of `$_SERVER`.
+	 *
+	 * @param string $key Entry name.
+	 * @return string
+	 */
+	private static function server_var( $key ) {
+		return isset( $_SERVER[ $key ] ) ? (string) wp_unslash( $_SERVER[ $key ] ) : '';
 	}
 
 	/**

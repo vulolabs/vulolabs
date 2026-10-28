@@ -20,7 +20,7 @@ defined( 'ABSPATH' ) || exit;
 interface GatewayInterface {
 
 	/**
-	 * Describes the gateway and the fields its connection form needs. Same shape as
+	 * Gateway and connection form field descriptions. Same shape as
 	 * VuloMail\Email\MailerInterface::definition().
 	 *
 	 * @return array
@@ -28,10 +28,10 @@ interface GatewayInterface {
 	public static function definition();
 
 	/**
-	 * Sends one text message. Must not throw: failures are returned as a failed Result whose
-	 * message contains no credentials.
+	 * Sends one text message. Must not throw: failures return as a failed Result
+	 * whose message contains no credentials.
 	 *
-	 * @param string $to   Recipient in E.164 format, e.g. +14155550123.
+	 * @param string $to   Recipient, E.164, e.g. +14155550123.
 	 * @param string $body Message text.
 	 * @return Result
 	 */

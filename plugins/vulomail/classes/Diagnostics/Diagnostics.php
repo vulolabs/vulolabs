@@ -232,14 +232,13 @@ class Diagnostics {
 		$from  = '' !== $from ? $from : MessageFactory::default_from_email();
 		$host  = substr( (string) strrchr( $from, '@' ), 1 );
 
-		// Development hosts have no public DNS, and PHP's resolver call has no timeout to cut a
-		// lookup for one short.
+		// Dev hosts have no public DNS, and PHP's resolver call has no timeout to cut a lookup short.
 		if ( '' === $host || ! function_exists( 'dns_get_record' ) || false === strpos( $host, '.' ) || preg_match( '/\.(test|local|localhost|example|invalid|internal|lan)$/i', $host ) ) {
 			return null;
 		}
 
-		// Cached so reopening the screen doesn't repeat the lookups. A failed lookup is cached too,
-		// for less time: it is the slow case, and retrying it on every visit would stall the screen.
+		// Cached so reopening the screen doesn't repeat lookups; failures cache shorter, so a
+		// retry isn't stuck waiting on every visit.
 		$cache_key = 'vulomail_dns_' . md5( $host );
 		$cached    = get_transient( $cache_key );
 
@@ -452,8 +451,7 @@ class Diagnostics {
 		$binary   = (string) strtok( $path, ' ' );
 		$found    = null;
 
-		// With open_basedir in force PHP can't look at the binary, which says nothing about whether
-		// it exists.
+		// open_basedir blocks PHP from checking the binary; that says nothing about whether it exists.
 		if ( '' !== $binary && '' === (string) ini_get( 'open_basedir' ) ) {
 			// phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged -- a path PHP may not stat must not raise a warning.
 			$found = (bool) @is_executable( $binary );

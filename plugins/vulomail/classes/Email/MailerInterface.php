@@ -32,8 +32,7 @@ interface MailerInterface {
 	public static function definition();
 
 	/**
-	 * Sends one message. Must not throw: failures are returned as a failed Result whose message
-	 * contains no credentials.
+	 * Sends one message. Must not throw: failures return as a failed Result with no credentials in it.
 	 *
 	 * @param Message $message Message to send.
 	 * @return Result

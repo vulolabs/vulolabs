@@ -10,16 +10,12 @@ namespace VuloMail;
 defined( 'ABSPATH' ) || exit;
 
 /**
- * VuloMail Rest class.
- *
- * @class       Rest class
- * @version     1.0.0
- * @author      VuloLabs
+ * Registers REST controllers.
  */
 class Rest {
 
 	/**
-	 * Rest constructor.
+	 * Constructor.
 	 */
 	public function __construct() {
 		add_action( 'rest_api_init', array( $this, 'register_routes' ) );

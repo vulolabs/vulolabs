@@ -44,7 +44,7 @@ abstract class AbstractGateway implements GatewayInterface {
 	}
 
 	/**
-	 * Get a trimmed config value.
+	 * Trimmed config value.
 	 *
 	 * @param string $key Config key.
 	 * @return string
@@ -54,11 +54,11 @@ abstract class AbstractGateway implements GatewayInterface {
 	}
 
 	/**
-	 * Builds a failed Result from a transport error or an unexpected response.
+	 * Builds a failed Result from a transport error or unexpected response.
 	 *
 	 * @param array|\WP_Error $response HttpClient::post() return value.
-	 * @param string          $code     Gateway's own error code, if any.
-	 * @param string          $detail   Gateway's own error text, if any.
+	 * @param string          $code     Gateway error code, if any.
+	 * @param string          $detail   Gateway error text, if any.
 	 * @return Result
 	 */
 	protected function failure( $response, $code = '', $detail = '' ) {
