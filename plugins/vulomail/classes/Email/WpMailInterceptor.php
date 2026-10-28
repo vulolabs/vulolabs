@@ -55,6 +55,13 @@ class WpMailInterceptor {
 	private $factory;
 
 	/**
+	 * Open and click tracking.
+	 *
+	 * @var Tracking
+	 */
+	private $tracking;
+
+	/**
 	 * True while this class fires core's success/failure hooks itself, so its own observers skip them.
 	 *
 	 * @var bool
@@ -85,15 +92,17 @@ class WpMailInterceptor {
 	/**
 	 * Constructor.
 	 *
-	 * @param Settings   $settings   Plugin settings.
-	 * @param Dispatcher $dispatcher Email dispatcher.
-	 * @param Logger     $logger     Delivery log.
+	 * @param Settings      $settings   Plugin settings.
+	 * @param Dispatcher    $dispatcher Email dispatcher.
+	 * @param Logger        $logger     Delivery log.
+	 * @param Tracking|null $tracking   Open and click tracking.
 	 */
-	public function __construct( Settings $settings, Dispatcher $dispatcher, Logger $logger ) {
+	public function __construct( Settings $settings, Dispatcher $dispatcher, Logger $logger, $tracking = null ) {
 		$this->settings   = $settings;
 		$this->dispatcher = $dispatcher;
 		$this->logger     = $logger;
 		$this->factory    = new MessageFactory( $settings );
+		$this->tracking   = $tracking instanceof Tracking ? $tracking : new Tracking( $settings );
 
 		// Late, so a plugin that deliberately short-circuits wp_mail() itself is respected.
 		add_filter( 'pre_wp_mail', array( $this, 'maybe_send' ), 999, 2 );
@@ -103,6 +112,8 @@ class WpMailInterceptor {
 		add_filter( 'wp_mail_from_name', array( $this, 'filter_from_name' ), 999 );
 		add_action( 'wp_mail_succeeded', array( $this, 'observe_success' ), 999 );
 		add_action( 'wp_mail_failed', array( $this, 'observe_failure' ), 999 );
+		// A message handed back to WordPress keeps the tracking its first attempt was given.
+		add_action( 'phpmailer_init', array( $this, 'track_handed_back' ), 999 );
 	}
 
 	/**
@@ -200,6 +211,26 @@ class WpMailInterceptor {
 		$this->announce( 'wp_mail_failed', new \WP_Error( 'wp_mail_failed', $result->error_message, $atts ) );
 
 		return false;
+	}
+
+	/**
+	 * `phpmailer_init` callback: when WordPress's own mailer takes over a message VuloMail's
+	 * connections failed to deliver, applies that message's tracking to the body core is sending.
+	 * Mail VuloMail isn't routing is left exactly as WordPress builds it.
+	 *
+	 * @param object $phpmailer Core's PHPMailer instance.
+	 * @return void
+	 */
+	public function track_handed_back( $phpmailer ) {
+		if ( ! $this->handed_back || empty( $this->handed_back['message']->tracking ) || ! is_object( $phpmailer )
+			|| 'text/html' !== strtolower( (string) ( $phpmailer->ContentType ?? '' ) ) ) { // phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase -- PHPMailer property.
+			return;
+		}
+
+		try {
+			$phpmailer->Body = $this->tracking->rewrite( (string) $phpmailer->Body, $this->handed_back['message']->tracking ); // phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase -- PHPMailer property.
+		} catch ( \Throwable $e ) { // phpcs:ignore Generic.CodeAnalysis.EmptyStatement.DetectedCatch -- the message goes out untracked.
+		}
 	}
 
 	/**

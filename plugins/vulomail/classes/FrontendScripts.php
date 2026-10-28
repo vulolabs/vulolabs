@@ -107,27 +107,29 @@ class FrontendScripts {
 			$handle,
 			'vulomailAppLocalizer',
 			array(
-				'apiUrl'         => untrailingslashit( get_rest_url() ),
-				'restUrl'        => VuloMail()->rest_namespace,
-				'nonce'          => wp_create_nonce( 'wp_rest' ),
-				'plugin_url'     => VuloMail()->plugin_url,
-				'admin_url'      => admin_url( 'admin.php?page=vulomail' ),
-				'site_url'       => site_url(),
-				'version'        => VuloMail()->version,
-				'plugin_slug'    => VuloMail()->plugin_slug,
-				'text_domain'    => VULOMAIL_PLUGIN_TEXTDOMAIN,
-				'admin_email'    => wp_get_current_user()->user_email,
-				'default_from'   => Email\MessageFactory::default_from_email(),
-				'providers'      => VuloMail()->providers->definitions(),
-				'sms_triggers'   => self::sms_trigger_definitions(),
+				'apiUrl'              => untrailingslashit( get_rest_url() ),
+				'restUrl'             => VuloMail()->rest_namespace,
+				'nonce'               => wp_create_nonce( 'wp_rest' ),
+				'plugin_url'          => VuloMail()->plugin_url,
+				'admin_url'           => admin_url( 'admin.php?page=vulomail' ),
+				'site_url'            => site_url(),
+				'version'             => VuloMail()->version,
+				'plugin_slug'         => VuloMail()->plugin_slug,
+				'text_domain'         => VULOMAIL_PLUGIN_TEXTDOMAIN,
+				'admin_email'         => wp_get_current_user()->user_email,
+				'default_from'        => Email\MessageFactory::default_from_email(),
+				// Shown in the Gmail connection's own-app steps, to paste into Google Cloud.
+				'google_redirect_uri' => Connections\GoogleOAuth::redirect_uri(),
+				'providers'           => VuloMail()->providers->definitions(),
+				'sms_triggers'        => self::sms_trigger_definitions(),
 				// Settings → General → Date Format, in the token syntax zyra's date picker uses.
-				'date_format_js' => self::convert_date_format_to_js( (string) get_option( 'date_format' ) ),
+				'date_format_js'      => self::convert_date_format_to_js( (string) get_option( 'date_format' ) ),
 				// zyra's settings form locks a field whose `dependentPlugin` isn't in this list.
-				'active_plugins' => class_exists( 'WooCommerce' ) ? array( 'woocommerce' ) : array(),
-				'plugins_url'    => admin_url( 'plugin-install.php?s=woocommerce&tab=search&type=term' ),
+				'active_plugins'      => class_exists( 'WooCommerce' ) ? array( 'woocommerce' ) : array(),
+				'plugins_url'         => admin_url( 'plugin-install.php?s=woocommerce&tab=search&type=term' ),
 				// zyra's HeaderComponent reads these two keys on every VuloLabs admin screen.
-				'khali_dabba'    => false,
-				'active_modules' => array(),
+				'khali_dabba'         => false,
+				'active_modules'      => array(),
 			)
 		);
 	}

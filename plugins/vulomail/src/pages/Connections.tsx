@@ -59,6 +59,23 @@ const Connections = () => {
 			.catch((e) => setError(errorMessage(e)));
 	}, []);
 
+	// Back from "Sign in with Google": say how it went, then drop the result from the address so a
+	// reload doesn't repeat it.
+	useEffect(() => {
+		const params = new URLSearchParams(window.location.hash.replace(/^#/, ''));
+		const outcome = params.get('google');
+
+		if (!outcome) {
+			return;
+		}
+
+		notify('connected' === outcome ? 'success' : 'error', params.get('google_message') ?? '', 'vulomail-google');
+
+		params.delete('google');
+		params.delete('google_message');
+		window.history.replaceState(null, '', `${window.location.pathname}${window.location.search}#${params.toString()}`);
+	}, []);
+
 	const confirmDelete = () => {
 		if (!pendingDelete) {
 			return;
@@ -152,7 +169,7 @@ const Connections = () => {
 							__('Missing: %s', 'vulomail'),
 							item.missing.join(', ')
 					  )}`
-					: item.provider_label,
+					: [item.provider_label, item.settings.account_email].filter(Boolean).join(' · '),
 				control: (
 					<ButtonInput
 						buttons={[

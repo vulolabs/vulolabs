@@ -294,21 +294,6 @@ class TestSmsTriggers extends TestCase {
 	 * @return void
 	 */
 	public function test_email_failure_alerts_are_spaced_out_and_skip_test_emails() {
-		$transients = array();
-
-		Functions\when( 'get_transient' )->alias(
-			static function ( $key ) use ( &$transients ) {
-				return $transients[ $key ] ?? false;
-			}
-		);
-		Functions\when( 'set_transient' )->alias(
-			static function ( $key, $value ) use ( &$transients ) {
-				$transients[ $key ] = $value;
-
-				return true;
-			}
-		);
-
 		$triggers = $this->triggers( array( 'email_failed' ) );
 		$result   = (object) array( 'error_message' => 'SMTP Error: Could not authenticate.' );
 

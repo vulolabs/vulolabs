@@ -15,7 +15,8 @@ defined( 'ABSPATH' ) || exit;
  * at myaccount.google.com/apppasswords; the normal account password will not authenticate here.
  *
  * GoogleWorkspaceSmtp extends this with the same host and fields under its own, separate provider
- * entry, since Gmail and Google Workspace are listed as two distinct options.
+ * entry, since Gmail and Google Workspace are listed as two distinct options. The Gmail provider
+ * itself (Gmail) hands its app-password connections to this class.
  */
 class GmailSmtp extends Smtp {
 

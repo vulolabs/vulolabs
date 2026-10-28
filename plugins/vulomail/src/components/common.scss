@@ -192,6 +192,12 @@
 			margin-top: 0.25rem;
 			overflow-wrap: anywhere;
 		}
+
+		// Plain-language advice under a failure's own error text.
+		.vulomail-error-help {
+			margin-top: 0.125rem;
+			color: var(--text-color);
+		}
 	}
 
 	.vulomail-timeline-title {
@@ -396,6 +402,107 @@
 }
 
 // Where to get the value, with its link: directly under the input it is for.
+// The link to the fixing screen, after a failure's plain-language advice (Dashboard).
+.vulomail-error-help-link {
+	color: var(--color-primary);
+	font-weight: 600;
+	text-decoration: none;
+	white-space: nowrap;
+
+	&:hover {
+		text-decoration: underline;
+	}
+}
+
+// A choice drawn as option cards (a field with `display: 'cards'`): the label above, the cards
+// across the whole form.
+.vulomail-field-row.is-wide {
+	grid-template-columns: 1fr;
+}
+
+// "Sign in with Google" for the Gmail connection (GoogleSignIn.tsx).
+.vulomail-google {
+	margin-top: 1rem;
+	border: 0.063rem solid var(--border-color);
+	border-radius: 0.45rem;
+
+	.vulomail-field-row:last-child {
+		border-bottom: 0;
+	}
+}
+
+.vulomail-google-control {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 0.75rem;
+}
+
+.vulomail-google-advanced {
+	border-top: 0.063rem solid var(--border-color);
+
+	summary {
+		padding: 0.75rem 1rem;
+		font-size: 0.8125rem;
+		font-weight: 600;
+		color: var(--color-primary);
+		cursor: pointer;
+	}
+
+	> .vulomail-fields {
+		margin: 0 1rem;
+	}
+}
+
+.vulomail-google-steps {
+	padding: 0.75rem 1rem 1rem;
+	font-size: 0.8125rem;
+	line-height: 1.5;
+	color: var(--sub-text-color);
+
+	ol {
+		margin: 0.5rem 0 0 1.25rem;
+		padding: 0;
+	}
+
+	li {
+		margin-bottom: 0.5rem;
+	}
+
+	a {
+		color: var(--color-primary);
+		font-weight: 600;
+	}
+}
+
+.vulomail-google-steps-title {
+	margin: 0;
+	font-weight: 600;
+	color: var(--text-color);
+}
+
+.vulomail-google-uri {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 0.5rem;
+	margin-top: 0.375rem;
+
+	code {
+		padding: 0.25rem 0.5rem;
+		border-radius: 0.3rem;
+		background: var(--background-color);
+		color: var(--text-color);
+		overflow-wrap: anywhere;
+	}
+}
+
+.vulomail-google-warning {
+	margin: 0.5rem 0 0;
+	color: var(--text-color);
+	font-weight: 600;
+}
+
 .vulomail-field-how {
 	display: flex;
 	align-items: flex-start;

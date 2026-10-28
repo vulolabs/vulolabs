@@ -59,6 +59,8 @@ The alerts themselves are on their own menu item, **VuloMail → SMS Alerts**.
 | Store message content | Off | Keeps message bodies, so you can read and resend them |
 | Mask recipients in the log | Off | Stores a masked address or number |
 | Keep entries for | 30 days | Older entries are deleted automatically; `0` keeps them |
+| Open tracking | Off | Records when an HTML email is opened. Needs the log |
+| Click tracking | Off | Records which links in an HTML email are clicked. Needs the log |
 
 ### Data
 

@@ -2,8 +2,9 @@
 import { useState } from 'react';
 import type { ReactNode } from 'react';
 import { __, sprintf } from '@wordpress/i18n';
-import { ButtonInput, SelectInput, TextInput } from '@zyra/inputs';
+import { ButtonInput, SelectInput, TextInput, ToggleInput } from '@zyra/inputs';
 import Switch from '../components/Switch';
+import GoogleSignIn from '../components/GoogleSignIn';
 import { apiPost } from '../services/api';
 import { errorMessage, notify } from '../services/notify';
 import type {
@@ -107,27 +108,55 @@ const ConnectionForm = ({ channel, connection, onSaved, onCancel }: ConnectionFo
 	const setValue = (key: string, value: string | number | boolean) =>
 		setValues((current) => ({ ...current, [key]: value }));
 
-	const isVisible = (field: ProviderField) =>
-		!field.show_if ||
-		Object.entries(field.show_if).every(([key, expected]) => Boolean(values[key]) === Boolean(expected));
+	// Whether a field's `show_if` rule holds, as ConnectionRepository::field_applies() reads it: a toggle
+	// compares on/off, a select its chosen value or one of a list of values.
+	const applies = (field?: ProviderField) =>
+		!field?.show_if ||
+		Object.entries(field.show_if).every(([key, expected]) => {
+			if ('boolean' === typeof expected) {
+				return Boolean(values[key]) === expected;
+			}
 
-	const handleSave = () => {
-		setIsSaving(true);
+			return ([] as (string | number)[]).concat(expected).map(String).includes(String(values[key] ?? ''));
+		});
 
-		apiPost<ConnectionsPayload>('connections', {
+	const isVisible = (field: ProviderField) => !field.hidden && !field.advanced && applies(field);
+
+	const save = () =>
+		apiPost<ConnectionsPayload & { saved: string }>('connections', {
 			id: connection?.id,
 			channel,
 			provider: providerId,
 			label,
 			enabled,
 			settings: values,
-		})
+		});
+
+	const handleSave = () => {
+		setIsSaving(true);
+
+		save()
 			.then((payload) => {
 				notify('success', __('Connection saved.', 'vulomail'));
 				onSaved(payload);
 			})
 			.catch((error) => notify('error', errorMessage(error)))
 			.finally(() => setIsSaving(false));
+	};
+
+	// Saves what is in the form first (Google returns to a saved connection), then leaves for Google.
+	const handleGoogleSignIn = () => {
+		setIsSaving(true);
+
+		save()
+			.then((payload) => apiPost<{ url: string }>(`connections/${payload.saved}/google`))
+			.then(({ url }) => {
+				window.location.assign(url);
+			})
+			.catch((error) => {
+				notify('error', errorMessage(error));
+				setIsSaving(false);
+			});
 	};
 
 	const renderField = (field: ProviderField) => {
@@ -140,6 +169,18 @@ const ConnectionForm = ({ channel, connection, onSaved, onCancel }: ConnectionFo
 					label={field.label}
 					checked={Boolean(value)}
 					onChange={(checked) => setValue(field.key, checked)}
+				/>
+			);
+		}
+
+		if ('select' === field.type && 'cards' === field.display) {
+			return (
+				<ToggleInput
+					variant="compact"
+					fieldkey={field.key}
+					options={(field.options ?? []).map((option) => ({ ...option, key: option.value }))}
+					value={String(value ?? '')}
+					onChange={(next) => setValue(field.key, next as string)}
 				/>
 			);
 		}
@@ -176,11 +217,18 @@ const ConnectionForm = ({ channel, connection, onSaved, onCancel }: ConnectionFo
 	};
 
 	// One setting: what it is and its help on the left, the control on the right.
-	const row = (key: string, label: string, help: string | undefined, control: ReactNode, htmlFor?: string) => {
+	const row = (
+		key: string,
+		label: string,
+		help: string | undefined,
+		control: ReactNode,
+		htmlFor?: string,
+		wide = false
+	) => {
 		const { note, how } = splitHelp(help);
 
 		return (
-			<div className="vulomail-field-row" key={key}>
+			<div className={`vulomail-field-row${wide ? ' is-wide' : ''}`} key={key}>
 				<div className="vulomail-field-text">
 					<label htmlFor={htmlFor}>{label}</label>
 					{note && <span>{note}</span>}
@@ -199,6 +247,26 @@ const ConnectionForm = ({ channel, connection, onSaved, onCancel }: ConnectionFo
 	};
 
 	const fields = provider?.fields.filter(isVisible) ?? [];
+	const advancedFields = provider?.fields.filter((field) => field.advanced && applies(field)) ?? [];
+
+	const fieldRow = (field: ProviderField) =>
+		row(
+			field.key,
+			field.label,
+			field.help,
+			'toggle' === field.type ? (
+				<Switch
+					name={field.key}
+					label={values[field.key] ? __('On', 'vulomail') : __('Off', 'vulomail')}
+					checked={Boolean(values[field.key])}
+					onChange={(checked) => setValue(field.key, checked)}
+				/>
+			) : (
+				renderField(field)
+			),
+			`vulomail-field-${field.key}`,
+			'cards' === field.display
+		);
 
 	return (
 		<div className="vulomail-connection-form">
@@ -251,26 +319,22 @@ const ConnectionForm = ({ channel, connection, onSaved, onCancel }: ConnectionFo
 							)}
 						</h3>
 						<div className="vulomail-fields">
-							{fields.map((field) =>
-								row(
-									field.key,
-									field.label,
-									field.help,
-									'toggle' === field.type ? (
-										<Switch
-											name={field.key}
-											label={values[field.key] ? __('On', 'vulomail') : __('Off', 'vulomail')}
-											checked={Boolean(values[field.key])}
-											onChange={(checked) => setValue(field.key, checked)}
-										/>
-									) : (
-										renderField(field)
-									),
-									`vulomail-field-${field.key}`
-								)
-							)}
+							{fields.map(fieldRow)}
 						</div>
 					</>
+				)}
+				{/* The sign-in panel stands in for the hidden `refresh_token` field, while that applies. */}
+				{'google' === provider?.oauth && applies(provider.fields.find((field) => 'refresh_token' === field.key)) && (
+					<GoogleSignIn
+						advanced={
+							advancedFields.length > 0 ? <div className="vulomail-fields">{advancedFields.map(fieldRow)}</div> : null
+						}
+						needsSetup={advancedFields.some((field) => field.required && '' === String(values[field.key] ?? ''))}
+						isConnected={'' !== String(values.refresh_token ?? '')}
+						accountEmail={String(values.account_email ?? '')}
+						isBusy={isSaving}
+						onSignIn={handleGoogleSignIn}
+					/>
 				)}
 			</div>
 			<div className="vulomail-connection-footer">

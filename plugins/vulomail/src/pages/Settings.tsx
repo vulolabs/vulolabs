@@ -10,6 +10,7 @@ import type { SettingsField, SettingsSchema } from '../components/Settings';
 import RequiredPluginPopup from '../components/RequiredPluginPopup';
 import { apiGet } from '../services/api';
 import { errorMessage } from '../services/notify';
+import { settingsUrl } from '../services/types';
 import type { Settings as StoredSettings } from '../services/types';
 
 type FormValues = Record<string, unknown>;
@@ -145,7 +146,7 @@ const Settings = () => {
 				settingContent={schemas.map((schema) => ({ type: 'file' as const, content: schema }))}
 				currentSetting={current}
 				getForm={GetForm}
-				prepareUrl={(subTab: string) => `?page=vulomail#&tab=settings&subtab=${subTab}`}
+				prepareUrl={settingsUrl}
 				appLocalizer={vulomailAppLocalizer}
 				Link={Link}
 				settingName={'Settings'}

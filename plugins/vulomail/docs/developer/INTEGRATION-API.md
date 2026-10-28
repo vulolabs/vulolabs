@@ -50,6 +50,8 @@ Core's `wp_mail_succeeded` and `wp_mail_failed` also fire for email VuloMail del
 | `vulomail_email_providers` | `array<string, class-string>` | Add or replace email adapters. |
 | `vulomail_sms_providers` | `array<string, class-string>` | Add or replace SMS adapters. |
 | `vulomail_sms_triggers` | `array` | Add SMS alert definitions. |
+| `vulomail_email_tracking` | `array{opens: bool, clicks: bool}`, `Message` | Switch open or click tracking off for one email. |
+| `vulomail_track_link` | `bool`, `string $url` | Return `false` to keep one link out of click tracking. Links can also carry `data-vulomail-notrack`. |
 | `vulomail_log_data` | `array\|false $row`, `string $channel` | Change a log row, or return `false` to skip it. |
 | `vulomail_diagnostics` | `array $checks` | Add diagnostics results: `id`, `label`, `status`, `message`, optional `fix` and `action`. |
 | `vulomail_http_timeout`, `vulomail_smtp_timeout` | `int` seconds | Default 15. |

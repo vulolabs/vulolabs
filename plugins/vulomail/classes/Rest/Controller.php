@@ -7,6 +7,7 @@
 
 namespace VuloMail\Rest;
 
+use VuloMail\Email\WpMailInterceptor;
 use VuloMail\Utill;
 
 defined( 'ABSPATH' ) || exit;
@@ -29,5 +30,22 @@ abstract class Controller extends \WP_REST_Controller {
 		}
 
 		return true;
+	}
+
+	/**
+	 * Marks each failed attempt worth advice with `is_cause`. When WordPress's own mailer fails after
+	 * a connection already failed, its error only says the server can't send email by itself; the
+	 * connection's error is the one to fix.
+	 *
+	 * @param array $attempts Attempts in order, as Result::to_array() stores them.
+	 * @return array
+	 */
+	protected static function with_causes( array $attempts ) {
+		foreach ( $attempts as $index => $attempt ) {
+			$attempts[ $index ]['is_cause'] = empty( $attempt['success'] )
+				&& ! ( $index > 0 && WpMailInterceptor::DEFAULT_PROVIDER === ( $attempt['provider'] ?? '' ) );
+		}
+
+		return $attempts;
 	}
 }

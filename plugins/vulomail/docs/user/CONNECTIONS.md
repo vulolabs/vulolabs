@@ -66,6 +66,21 @@ Same steps in the **SMS** section, with **Add SMS connection**. The first SMS co
 | **Mailgun** | API key, Sending domain, Region | Mailgun → Sending → Domains. Choose EU if your domain is in Mailgun's EU region |
 | **Brevo** | API key | Brevo → SMTP & API. Use a v3 API key |
 | **Postmark** | Server API token, Message stream | Postmark → your server → API Tokens. Leave the stream as `outbound` unless you created another |
+| **Gmail** | Depends on the sign-in method you pick | See below |
+
+### Gmail
+
+Click **Add email connection** and choose **Gmail**. Under **How do you want to connect?**, click one of the cards. The form then shows only what that way needs.
+
+| Sign-in method | What you do |
+|---|---|
+| **Sign in with Google** | Click **Sign in with Google**, choose your account, click **Allow**. No password is stored. Until VuloLabs' one-click service is available, Google needs your own Google app first: open **Advanced: use your own Google app** under the button and follow its steps once |
+| **App password** | Enter your Gmail address and an app password: Google account → Security → 2-Step Verification → App passwords. Your normal password won't work |
+| **My own Google app** (shown once one-click is available) | Under **Advanced**, follow the five steps shown once (create a Google Cloud project, turn on the Gmail API, set up and **publish** the consent screen, create a "Web application" client with the redirect address shown, paste its Client ID and Client Secret), then click **Sign in with Google** |
+
+After signing in you come back to Connections with "Connected to Google as …". Then choose **Set as primary** and send a test from **Tools**. You can switch method later by editing the connection.
+
+VuloMail can only *send* email from that account. It cannot read your inbox. Email goes out from the Google account you signed in with; to send as another address, add it under "Send mail as" in Gmail's settings first. If Google later asks you to sign in again (you changed your password or removed access), open the connection and click **Sign in again**.
 
 SMTP settings in detail:
 

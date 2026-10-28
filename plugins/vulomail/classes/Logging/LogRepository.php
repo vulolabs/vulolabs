@@ -33,6 +33,17 @@ class LogRepository {
 	}
 
 	/**
+	 * Get the fully prefixed clicked-links table name.
+	 *
+	 * @return string
+	 */
+	private function links_table() {
+		global $wpdb;
+
+		return $wpdb->prefix . Utill::TABLES['log_link'];
+	}
+
+	/**
 	 * Insert a log row.
 	 *
 	 * @param array $row Column => value.
@@ -124,7 +135,7 @@ class LogRepository {
 		// The body is left out of list responses: it can be large, and is fetched per row on demand.
 		$rows = $wpdb->get_results(
 			$wpdb->prepare(
-				"SELECT id, channel, status, provider, used_fallback, recipients, subject, attachments, source, error_message, created_at FROM %i WHERE {$where_sql} ORDER BY {$orderby} {$order}, id DESC LIMIT %d OFFSET %d",
+				"SELECT id, channel, status, provider, used_fallback, recipients, subject, attachments, source, error_code, error_message, track_opens, track_clicks, open_count, click_count, created_at FROM %i WHERE {$where_sql} ORDER BY {$orderby} {$order}, id DESC LIMIT %d OFFSET %d",
 				array_merge( array( $this->table() ), $params, array( $per_page, $offset ) )
 			),
 			ARRAY_A
@@ -167,6 +178,138 @@ class LogRepository {
 	}
 
 	/**
+	 * The recorded attempts of several rows, in one query.
+	 *
+	 * @param int[] $ids Row ids.
+	 * @return array<int, array> Row id => attempts, as Result::to_array() stored them.
+	 */
+	public function attempts( array $ids ) {
+		global $wpdb;
+
+		$ids = array_values( array_filter( array_map( 'absint', $ids ) ) );
+
+		if ( ! $ids ) {
+			return array();
+		}
+
+		$placeholders = implode( ',', array_fill( 0, count( $ids ), '%d' ) );
+
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare, WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber -- $placeholders is a generated list of %d.
+		$rows     = $wpdb->get_results( $wpdb->prepare( "SELECT id, attempts FROM %i WHERE id IN ({$placeholders})", array_merge( array( $this->table() ), $ids ) ), ARRAY_A );
+		$attempts = array();
+
+		foreach ( (array) $rows as $row ) {
+			$decoded                      = json_decode( (string) $row['attempts'], true );
+			$attempts[ (int) $row['id'] ] = is_array( $decoded ) ? $decoded : array();
+		}
+
+		return $attempts;
+	}
+
+	/**
+	 * The row a tracking token belongs to (indexed lookup).
+	 *
+	 * @param string $token Tracking token.
+	 * @return array{id: string, track_opens: string, track_clicks: string}|null
+	 */
+	public function find_by_token( $token ) {
+		global $wpdb;
+
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+		$row = $wpdb->get_row(
+			$wpdb->prepare( 'SELECT id, track_opens, track_clicks FROM %i WHERE tracking_token = %s LIMIT 1', $this->table(), $token ),
+			ARRAY_A
+		);
+
+		return $row ? $row : null;
+	}
+
+	/**
+	 * Counts an open, in one statement so concurrent requests can't lose one.
+	 *
+	 * @param int    $id  Log row id.
+	 * @param string $now UTC `Y-m-d H:i:s`.
+	 * @return bool
+	 */
+	public function record_open( $id, $now ) {
+		global $wpdb;
+
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+		return (bool) $wpdb->query(
+			$wpdb->prepare(
+				'UPDATE %i SET open_count = open_count + 1, first_opened_at = COALESCE(first_opened_at, %s), last_opened_at = %s WHERE id = %d',
+				$this->table(),
+				$now,
+				$now,
+				$id
+			)
+		);
+	}
+
+	/**
+	 * Counts a click on one of a message's links, on the message and on the link.
+	 *
+	 * @param int    $id       Log row id.
+	 * @param int    $position Link position within the message.
+	 * @param string $url      Link as shown in the log.
+	 * @param string $now      UTC `Y-m-d H:i:s`.
+	 * @return bool
+	 */
+	public function record_click( $id, $position, $url, $now ) {
+		global $wpdb;
+
+		// phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+		$updated = $wpdb->query(
+			$wpdb->prepare(
+				'UPDATE %i SET click_count = click_count + 1, first_clicked_at = COALESCE(first_clicked_at, %s), last_clicked_at = %s WHERE id = %d',
+				$this->table(),
+				$now,
+				$now,
+				$id
+			)
+		);
+
+		if ( $updated ) {
+			$wpdb->query(
+				$wpdb->prepare(
+					'INSERT INTO %i (log_id, position, url, click_count, first_clicked_at, last_clicked_at) VALUES (%d, %d, %s, 1, %s, %s) ON DUPLICATE KEY UPDATE click_count = click_count + 1, last_clicked_at = VALUES(last_clicked_at)',
+					$this->links_table(),
+					$id,
+					$position,
+					$url,
+					$now,
+					$now
+				)
+			);
+		}
+		// phpcs:enable
+
+		return (bool) $updated;
+	}
+
+	/**
+	 * The clicked links of one message, most clicked first.
+	 *
+	 * @param int $id Log row id.
+	 * @return array<int, array{position: string, url: string, click_count: string, first_clicked_at: string, last_clicked_at: string}>
+	 */
+	public function links( $id ) {
+		global $wpdb;
+
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+		$rows = $wpdb->get_results(
+			$wpdb->prepare(
+				'SELECT position, url, click_count, first_clicked_at, last_clicked_at FROM %i WHERE log_id = %d ORDER BY click_count DESC, position ASC',
+				$this->links_table(),
+				$id
+			),
+			ARRAY_A
+		);
+
+		return $rows ? $rows : array();
+	}
+
+	/**
 	 * Delete specific log rows.
 	 *
 	 * @param int[] $ids Row ids.
@@ -183,8 +326,13 @@ class LogRepository {
 
 		$placeholders = implode( ',', array_fill( 0, count( $ids ), '%d' ) );
 
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare, WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber -- $placeholders is a generated list of %d.
-		return (int) $wpdb->query( $wpdb->prepare( "DELETE FROM %i WHERE id IN ({$placeholders})", array_merge( array( $this->table() ), $ids ) ) );
+		// phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare, WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber -- $placeholders is a generated list of %d.
+		$deleted = (int) $wpdb->query( $wpdb->prepare( "DELETE FROM %i WHERE id IN ({$placeholders})", array_merge( array( $this->table() ), $ids ) ) );
+
+		$wpdb->query( $wpdb->prepare( "DELETE FROM %i WHERE log_id IN ({$placeholders})", array_merge( array( $this->links_table() ), $ids ) ) );
+		// phpcs:enable
+
+		return $deleted;
 	}
 
 	/**
@@ -195,8 +343,13 @@ class LogRepository {
 	public function delete_all() {
 		global $wpdb;
 
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
-		return (int) $wpdb->query( $wpdb->prepare( 'DELETE FROM %i', $this->table() ) );
+		// phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+		$deleted = (int) $wpdb->query( $wpdb->prepare( 'DELETE FROM %i', $this->table() ) );
+
+		$wpdb->query( $wpdb->prepare( 'DELETE FROM %i', $this->links_table() ) );
+		// phpcs:enable
+
+		return $deleted;
 	}
 
 	/**
@@ -208,8 +361,21 @@ class LogRepository {
 	public function delete_before( $before ) {
 		global $wpdb;
 
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
-		return (int) $wpdb->query( $wpdb->prepare( 'DELETE FROM %i WHERE created_at < %s', $this->table(), $before ) );
+		// phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+		// The clicked links of the rows about to go, found through idx_created and (log_id, position).
+		$wpdb->query(
+			$wpdb->prepare(
+				'DELETE links FROM %i AS links INNER JOIN %i AS logs ON logs.id = links.log_id WHERE logs.created_at < %s',
+				$this->links_table(),
+				$this->table(),
+				$before
+			)
+		);
+
+		$deleted = (int) $wpdb->query( $wpdb->prepare( 'DELETE FROM %i WHERE created_at < %s', $this->table(), $before ) );
+		// phpcs:enable
+
+		return $deleted;
 	}
 
 	/**

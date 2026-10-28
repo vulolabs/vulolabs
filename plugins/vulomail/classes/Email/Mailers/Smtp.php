@@ -123,42 +123,7 @@ class Smtp implements MailerInterface {
 		try {
 			$mailer = $this->factory ? call_user_func( $this->factory ) : self::new_phpmailer();
 
-			$mailer->CharSet = $message->charset; // phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase -- PHPMailer's API.
-			$mailer->setFrom( $message->from_email, $message->from_name, false );
-
-			foreach ( $message->to as $address ) {
-				$mailer->addAddress( $address['email'], $address['name'] );
-			}
-
-			foreach ( $message->cc as $address ) {
-				$mailer->addCC( $address['email'], $address['name'] );
-			}
-
-			foreach ( $message->bcc as $address ) {
-				$mailer->addBCC( $address['email'], $address['name'] );
-			}
-
-			foreach ( $message->reply_to as $address ) {
-				$mailer->addReplyTo( $address['email'], $address['name'] );
-			}
-
-			$mailer->Subject = $message->subject; // phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase
-			$mailer->Body    = $message->body; // phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase
-			$mailer->isHTML( $message->is_html() );
-			$mailer->ContentType = $message->content_type; // phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase
-
-			foreach ( $message->headers as $name => $value ) {
-				$mailer->addCustomHeader( $name, $value );
-			}
-
-			foreach ( $message->attachments as $name => $path ) {
-				$mailer->addAttachment( $path, $name );
-			}
-
-			// Other plugins adjust content here (WooCommerce adds the plain-text part of a multipart
-			// email, for example). The transport is applied afterwards so none of them can redirect
-			// the message to a different server.
-			do_action_ref_array( 'phpmailer_init', array( &$mailer ) ); // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound -- core hook, fired for parity with wp_mail().
+			self::compose( $mailer, $message );
 
 			$this->apply_transport( $mailer );
 
@@ -171,6 +136,53 @@ class Smtp implements MailerInterface {
 				Redactor::scrub( $e->getMessage(), array( (string) ( $this->config['password'] ?? '' ) ) )
 			);
 		}
+	}
+
+	/**
+	 * Fills a PHPMailer instance with a message, then lets other plugins adjust it through
+	 * `phpmailer_init`. Also used to build the raw email the Gmail API sends.
+	 *
+	 * @param object  $mailer  PHPMailer instance.
+	 * @param Message $message Message.
+	 * @return void
+	 */
+	public static function compose( $mailer, Message $message ) {
+		$mailer->CharSet = $message->charset; // phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase -- PHPMailer's API.
+		$mailer->setFrom( $message->from_email, $message->from_name, false );
+
+		foreach ( $message->to as $address ) {
+			$mailer->addAddress( $address['email'], $address['name'] );
+		}
+
+		foreach ( $message->cc as $address ) {
+			$mailer->addCC( $address['email'], $address['name'] );
+		}
+
+		foreach ( $message->bcc as $address ) {
+			$mailer->addBCC( $address['email'], $address['name'] );
+		}
+
+		foreach ( $message->reply_to as $address ) {
+			$mailer->addReplyTo( $address['email'], $address['name'] );
+		}
+
+		$mailer->Subject = $message->subject; // phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase
+		$mailer->Body    = $message->body; // phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase
+		$mailer->isHTML( $message->is_html() );
+		$mailer->ContentType = $message->content_type; // phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase
+
+		foreach ( $message->headers as $name => $value ) {
+			$mailer->addCustomHeader( $name, $value );
+		}
+
+		foreach ( $message->attachments as $name => $path ) {
+			$mailer->addAttachment( $path, $name );
+		}
+
+		// Other plugins adjust content here (WooCommerce adds the plain-text part of a multipart
+		// email, for example). The transport is applied afterwards so none of them can redirect
+		// the message to a different server.
+		do_action_ref_array( 'phpmailer_init', array( &$mailer ) ); // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound -- core hook, fired for parity with wp_mail().
 	}
 
 	/**
@@ -202,7 +214,7 @@ class Smtp implements MailerInterface {
 	 *
 	 * @return \PHPMailer\PHPMailer\PHPMailer
 	 */
-	private static function new_phpmailer() {
+	public static function new_phpmailer() {
 		if ( ! class_exists( '\PHPMailer\PHPMailer\PHPMailer', false ) ) {
 			require_once ABSPATH . WPINC . '/PHPMailer/PHPMailer.php';
 			require_once ABSPATH . WPINC . '/PHPMailer/SMTP.php';

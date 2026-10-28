@@ -268,7 +268,8 @@ class ConnectionRepository {
 	}
 
 	/**
-	 * A field with a `show_if` rule only applies while that other field has the given value.
+	 * A field with a `show_if` rule only applies while that other field has the given value, or one
+	 * of the given values when the rule lists several.
 	 *
 	 * @param array $field  Field definition.
 	 * @param array $config Current settings.
@@ -280,7 +281,8 @@ class ConnectionRepository {
 		}
 
 		foreach ( $field['show_if'] as $key => $expected ) {
-			if ( ( $config[ $key ] ?? null ) != $expected ) { // phpcs:ignore Universal.Operators.StrictComparisons.LooseNotEqual -- toggles are stored as bools, schema values may be scalars.
+			// Loose: toggles are stored as bools, schema values may be scalars.
+			if ( ! in_array( $config[ $key ] ?? null, (array) $expected, false ) ) { // phpcs:ignore WordPress.PHP.StrictInArray.FoundNonStrictFalse
 				return false;
 			}
 		}

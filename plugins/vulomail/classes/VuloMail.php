@@ -88,14 +88,17 @@ final class VuloMail {
 		$this->container['settings']    = new Settings\Settings();
 		$this->container['providers']   = new Connections\ProviderRegistry();
 		$this->container['connections'] = new Connections\ConnectionRepository( $this->container['secrets'], $this->container['providers'] );
+		$this->container['google']      = new Connections\GoogleOAuth( $this->container['connections'] );
 		$this->container['logs']        = new Logging\LogRepository();
 		$this->container['logger']      = new Logging\Logger( $this->container['logs'], $this->container['settings'] );
+		$this->container['tracking']    = new Email\Tracking( $this->container['settings'], $this->container['logs'] );
 
 		$this->container['email'] = new Email\Dispatcher(
 			$this->container['settings'],
 			$this->container['connections'],
 			$this->container['providers'],
-			$this->container['logger']
+			$this->container['logger'],
+			$this->container['tracking']
 		);
 		$this->container['sms']   = new Sms\Dispatcher(
 			$this->container['settings'],
@@ -107,7 +110,8 @@ final class VuloMail {
 		$this->container['wp_mail'] = new Email\WpMailInterceptor(
 			$this->container['settings'],
 			$this->container['email'],
-			$this->container['logger']
+			$this->container['logger'],
+			$this->container['tracking']
 		);
 	}
 
@@ -118,7 +122,8 @@ final class VuloMail {
 	 */
 	public function init_plugin() {
 		$needs_install = get_option( Utill::OTHER_SETTINGS['run_installer'] )
-			|| get_option( Utill::OTHER_SETTINGS['plugin_db_version'] ) !== VULOMAIL_PLUGIN_VERSION;
+			|| get_option( Utill::OTHER_SETTINGS['plugin_db_version'] ) !== VULOMAIL_PLUGIN_VERSION
+			|| (int) get_option( Utill::OTHER_SETTINGS['db_schema_version'] ) !== Install::SCHEMA_VERSION;
 
 		if ( $needs_install ) {
 			new Install();
@@ -141,6 +146,7 @@ final class VuloMail {
 		$this->container['rest']            = new Rest();
 
 		$this->container['logger']->register_retention();
+		$this->container['tracking']->register_endpoint();
 
 		/**
 		 * Fires once VuloMail has booted. Integrations should wait for this before calling the

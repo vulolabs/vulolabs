@@ -98,6 +98,9 @@ class Logger {
 			)
 		);
 
+		// Tracking is only kept for a message that went out: a failed one has no opens to count.
+		$tracking = $result->success && is_array( $message->tracking ) ? $message->tracking : null;
+
 		return $this->write(
 			Utill::CHANNEL_EMAIL,
 			$message->all_recipients(),
@@ -106,9 +109,12 @@ class Logger {
 			$result,
 			$used_fallback,
 			array(
-				'headers'     => wp_json_encode( $headers ),
-				'attachments' => count( $message->attachments ),
-				'source'      => $message->source,
+				'headers'        => wp_json_encode( $headers ),
+				'attachments'    => count( $message->attachments ),
+				'source'         => $message->source,
+				'tracking_token' => $tracking ? (string) $tracking['token'] : '',
+				'track_opens'    => $tracking && ! empty( $tracking['opens'] ) ? 1 : 0,
+				'track_clicks'   => $tracking && ! empty( $tracking['clicks'] ) ? 1 : 0,
 			)
 		);
 	}

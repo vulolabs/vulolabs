@@ -56,6 +56,68 @@ class Connections extends Controller {
 				),
 			)
 		);
+
+		register_rest_route(
+			VuloMail()->rest_namespace,
+			'/' . $this->rest_base . '/(?P<id>[a-z0-9]+)/google',
+			array(
+				array(
+					'methods'             => \WP_REST_Server::CREATABLE,
+					'callback'            => array( $this, 'google_authorize' ),
+					'permission_callback' => array( $this, 'check_permission' ),
+				),
+			)
+		);
+
+		// Google (or VuloLabs' connect service) sends the browser here after consent. It carries no
+		// REST nonce, so it can't be admin-only; the single-use state, created by an admin for one
+		// connection, is the authorization.
+		register_rest_route(
+			VuloMail()->rest_namespace,
+			'/google/callback',
+			array(
+				array(
+					'methods'             => \WP_REST_Server::READABLE,
+					'callback'            => array( $this, 'google_callback' ),
+					'permission_callback' => '__return_true',
+				),
+			)
+		);
+	}
+
+	/**
+	 * Starts "Sign in with Google" for a saved Gmail connection.
+	 *
+	 * @param \WP_REST_Request $request Request.
+	 * @return \WP_REST_Response|\WP_Error
+	 */
+	public function google_authorize( $request ) {
+		$url = VuloMail()->google->authorize_url( sanitize_key( (string) $request['id'] ) );
+
+		return is_wp_error( $url ) ? $url : rest_ensure_response( array( 'url' => $url ) );
+	}
+
+	/**
+	 * Finishes "Sign in with Google" and sends the browser back to the Connections screen, which
+	 * shows the outcome.
+	 *
+	 * @param \WP_REST_Request $request Request.
+	 * @return void
+	 */
+	public function google_callback( $request ) {
+		$outcome = VuloMail()->google->complete(
+			sanitize_key( (string) $request->get_param( 'state' ) ),
+			sanitize_text_field( (string) $request->get_param( 'code' ) ),
+			sanitize_key( (string) $request->get_param( 'error' ) )
+		);
+
+		$target = admin_url( 'admin.php?page=vulomail' ) . '#&tab=settings&subtab=connections&google='
+			. ( $outcome['success'] ? 'connected' : 'failed' )
+			. '&google_message=' . rawurlencode( $outcome['message'] );
+
+		nocache_headers();
+		wp_safe_redirect( $target );
+		exit;
 	}
 
 	/**
@@ -88,7 +150,8 @@ class Connections extends Controller {
 			VuloMail()->settings->update( array( 'sms_primary' => $saved['id'] ) );
 		}
 
-		return rest_ensure_response( $this->payload() );
+		// `saved` lets the form act on a connection it just created (such as signing it in with Google).
+		return rest_ensure_response( array_merge( $this->payload(), array( 'saved' => $saved['id'] ) ) );
 	}
 
 	/**

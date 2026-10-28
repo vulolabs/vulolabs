@@ -352,6 +352,35 @@ const logging: SettingsSchema = {
 			label: __('Keep entries for', 'vulomail'),
 			settingDescription: __('Older entries are deleted automatically. 0 keeps them until you delete them.', 'vulomail'),
 		},
+		{
+			key: 'tracking-section',
+			type: 'section',
+			icon: 'analytics',
+			title: __('Engagement tracking', 'vulomail'),
+			desc: __(
+				'See whether HTML emails are opened and their links clicked, in the Logs. Tracking is stored in the delivery log, so it needs the log switched on, and it never applies to plain-text email or text messages. Opens and clicks are estimates: some mail apps block images, others and security scanners load images or follow links on their own.',
+				'vulomail'
+			),
+		},
+		{
+			key: 'tracking_options',
+			type: 'setting-row',
+			row: false,
+			rows: [
+				toggle(
+					'track_opens',
+					'eye blue',
+					__('Open tracking', 'vulomail'),
+					__('Adds an invisible 1×1 image to each HTML email and records when it is loaded. No IP address or device details are kept.', 'vulomail')
+				),
+				toggle(
+					'track_clicks',
+					'link blue',
+					__('Click tracking', 'vulomail'),
+					__('Sends links through this site before the reader reaches the page, and records which link was clicked. Unsubscribe, password reset, sign-in, mailto: and tel: links are never changed.', 'vulomail')
+				),
+			],
+		},
 	],
 };
 

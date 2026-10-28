@@ -54,8 +54,12 @@ Every route returns the same payload, so the screen refreshes from one response:
 | GET | `/connections` | - | |
 | POST | `/connections` | `id` (to update), `channel`, `provider`, `label`, `enabled`, `settings` | Creates when `id` is absent. A secret left empty or still masked keeps its stored value. Channel and provider can't be changed on an existing connection. The first SMS connection becomes `sms_primary` |
 | DELETE | `/connections/{id}` | - | Clears any routing slot that pointed at it; a deleted primary is replaced by the backup |
+| POST | `/connections/{id}/google` | - | Gmail connections using a "Sign in with Google" method: returns `{ url }` to send the browser to for "Sign in with Google" |
+| GET | `/google/callback` | `state`, `code` or `error` (query) | **Public**: where Google returns after consent. Authorized by the single-use state; redirects to the Connections screen |
 
-Errors: 400 `vulomail_unknown_provider`, 404 `vulomail_connection_not_found`.
+`POST /connections` also returns `saved`: the id of the connection just created or updated.
+
+Errors: 400 `vulomail_unknown_provider`, 400 `vulomail_google_client_missing`, 400 `vulomail_google_app_password`, 404 `vulomail_connection_not_found`.
 
 ## Logs
 

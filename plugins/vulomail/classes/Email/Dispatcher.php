@@ -50,18 +50,27 @@ class Dispatcher {
 	private $logger;
 
 	/**
+	 * Open and click tracking.
+	 *
+	 * @var Tracking
+	 */
+	private $tracking;
+
+	/**
 	 * Constructor.
 	 *
 	 * @param Settings             $settings    Plugin settings.
 	 * @param ConnectionRepository $connections Saved connections.
 	 * @param ProviderRegistry     $providers   Provider adapters.
 	 * @param Logger               $logger      Delivery log.
+	 * @param Tracking|null        $tracking    Open and click tracking.
 	 */
-	public function __construct( Settings $settings, ConnectionRepository $connections, ProviderRegistry $providers, Logger $logger ) {
+	public function __construct( Settings $settings, ConnectionRepository $connections, ProviderRegistry $providers, Logger $logger, $tracking = null ) {
 		$this->settings    = $settings;
 		$this->connections = $connections;
 		$this->providers   = $providers;
 		$this->logger      = $logger;
+		$this->tracking    = $tracking instanceof Tracking ? $tracking : new Tracking( $settings );
 	}
 
 	/**
@@ -104,9 +113,12 @@ class Dispatcher {
 	public function send( Message $message, $log_failure = true ) {
 		$attempts = array();
 		$final    = Result::fail( 'not_configured', __( 'No email connection is configured.', 'vulomail' ) );
+		$chain    = $this->chain();
+		// Tracked once per message, so a failover delivers the same copy under the same token.
+		$outgoing = $chain ? $this->tracking->prepare( $message ) : $message;
 
-		foreach ( $this->chain() as $index => $connection ) {
-			$final      = $this->send_via( $connection, $message );
+		foreach ( $chain as $index => $connection ) {
+			$final      = $this->send_via( $connection, $outgoing );
 			$attempts[] = $final->to_array();
 
 			if ( $final->success ) {

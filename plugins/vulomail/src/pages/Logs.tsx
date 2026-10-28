@@ -1,7 +1,7 @@
 /* global vulomailAppLocalizer */
-import { useCallback, useEffect, useState } from 'react';
+import { Fragment, useCallback, useEffect, useState } from 'react';
 import { useLocation } from 'react-router-dom';
-import { __, sprintf } from '@wordpress/i18n';
+import { __, _n, sprintf } from '@wordpress/i18n';
 import {
 	AnalyticsComponent,
 	BadgeComponent,
@@ -17,7 +17,8 @@ import { ButtonInput, ToggleInput } from '@zyra/inputs';
 import { TableCard } from '@zyra/table';
 import { apiDelete, apiGet, apiPost } from '../services/api';
 import { errorMessage, notify } from '../services/notify';
-import { displayDate, providerLabel } from '../services/types';
+import { displayDate, providerLabel, settingsUrl } from '../services/types';
+import { errorNoticeHtml } from '../services/errorHelp';
 import type { Attempt } from '../services/types';
 
 interface LogRow {
@@ -33,7 +34,29 @@ interface LogRow {
 	error_message: string | null;
 	created_at: string;
 	created_at_display?: string;
+	opened: Engagement;
+	clicked: Engagement;
 	[key: string]: unknown;
+}
+
+/** Whether an email was opened or clicked; 'not_tracked' when tracking didn't apply to it. */
+type Engagement = 'yes' | 'no' | 'not_tracked';
+
+interface TrackedLink {
+	url: string;
+	click_count: number;
+	first_clicked_at: string;
+	last_clicked_at: string;
+}
+
+interface Tracking {
+	open_count: number;
+	first_opened_at: string;
+	last_opened_at: string;
+	click_count: number;
+	first_clicked_at: string;
+	last_clicked_at: string;
+	links: TrackedLink[];
 }
 
 interface LogDetail extends LogRow {
@@ -44,6 +67,7 @@ interface LogDetail extends LogRow {
 	error_code: string;
 	attempts: Attempt[];
 	headers: Record<string, string>;
+	tracking: Tracking;
 }
 
 interface LogList {
@@ -98,6 +122,22 @@ const statusBadge = (row: Pick<LogRow, 'status' | 'used_fallback'>) => {
 	) : (
 		<BadgeComponent color="green" text={__('Sent', 'vulomail')} />
 	);
+};
+
+const engagementBadge = (value: Engagement) =>
+	'not_tracked' === value ? (
+		<span className="vulomail-log-secondary">{__('Not tracked', 'vulomail')}</span>
+	) : (
+		<BadgeComponent color={'yes' === value ? 'green' : 'gray'} text={'yes' === value ? __('Yes', 'vulomail') : __('No', 'vulomail')} />
+	);
+
+/** "First – last" for a pair of display dates, or a dash when nothing was observed. */
+const observedRange = (first: string, last: string): string => {
+	if (!first) {
+		return '—';
+	}
+
+	return first === last ? first : `${first} – ${last}`;
 };
 
 const Logs = () => {
@@ -318,6 +358,14 @@ const Logs = () => {
 									label: __('Status', 'vulomail'),
 									render: (row: LogRow) => statusBadge(row),
 								},
+								opened: {
+									label: __('Opened', 'vulomail'),
+									render: (row: LogRow) => engagementBadge(row.opened),
+								},
+								clicked: {
+									label: __('Clicked', 'vulomail'),
+									render: (row: LogRow) => engagementBadge(row.clicked),
+								},
 								id: {
 									label: '',
 									render: (row: LogRow) => (
@@ -414,18 +462,91 @@ const Logs = () => {
 													index + 1,
 													providerLabel(attempt.provider)
 											  )
-											: sprintf(
-													/* translators: 1: attempt number, 2: provider name, 3: error message. */
-													__('Attempt %1$d: %2$s failed. %3$s', 'vulomail'),
-													index + 1,
-													providerLabel(attempt.provider),
-													attempt.error_message
+											: errorNoticeHtml(
+													attempt,
+													detail.channel,
+													sprintf(
+														/* translators: 1: attempt number, 2: provider name. */
+														__('Attempt %1$d: %2$s failed.', 'vulomail'),
+														index + 1,
+														providerLabel(attempt.provider)
+													) + ' '
 											  )
 									}
 								/>
 							))}
+						{('not_tracked' !== detail.opened || 'not_tracked' !== detail.clicked) && (
+							<>
+								<dl className="vulomail-detail">
+									{[
+										{
+											state: detail.opened,
+											label: __('Opened', 'vulomail'),
+											countLabel: __('Opens', 'vulomail'),
+											count: detail.tracking.open_count,
+											first: detail.tracking.first_opened_at,
+											last: detail.tracking.last_opened_at,
+										},
+										{
+											state: detail.clicked,
+											label: __('Clicked', 'vulomail'),
+											countLabel: __('Clicks', 'vulomail'),
+											count: detail.tracking.click_count,
+											first: detail.tracking.first_clicked_at,
+											last: detail.tracking.last_clicked_at,
+										},
+									].map((item) => (
+										<Fragment key={item.label}>
+											<dt>{item.label}</dt>
+											<dd>{engagementBadge(item.state)}</dd>
+											{'not_tracked' !== item.state && (
+												<>
+													<dt>{item.countLabel}</dt>
+													<dd>
+														{sprintf(
+															/* translators: 1: number of observed opens or clicks, 2: first and last dates. */
+															__('%1$d observed · %2$s', 'vulomail'),
+															item.count,
+															observedRange(item.first, item.last)
+														)}
+													</dd>
+												</>
+											)}
+										</Fragment>
+									))}
+									{detail.tracking.links.map((link, index) => (
+										<Fragment key={`${link.url}-${index}`}>
+											<dt>{0 === index ? __('Clicked links', 'vulomail') : ''}</dt>
+											<dd className="vulomail-log-cell">
+												<span className="vulomail-log-primary">{link.url}</span>
+												<span className="vulomail-log-secondary">
+													{sprintf(
+														/* translators: 1: number of clicks on this link, 2: first and last click dates. */
+														_n('%1$d click · %2$s', '%1$d clicks · %2$s', link.click_count, 'vulomail'),
+														link.click_count,
+														observedRange(link.first_clicked_at, link.last_clicked_at)
+													)}
+												</span>
+											</dd>
+										</Fragment>
+									))}
+								</dl>
+								<NoticeComponent
+									displayPosition="inline-notice"
+									type="info"
+									message={__(
+										'Opens and clicks are estimates. Some mail apps block images, so an open can go unseen; others, and security scanners, load images or follow links on their own, so some opens and clicks are not a person.',
+										'vulomail'
+									)}
+								/>
+							</>
+						)}
 						{detail.attempts.length <= 1 && detail.error_message && (
-							<NoticeComponent displayPosition="inline-notice" type="error" message={detail.error_message} />
+							<NoticeComponent
+								displayPosition="inline-notice"
+								type="error"
+								message={errorNoticeHtml(detail, detail.channel)}
+							/>
 						)}
 						{detail.has_body ? (
 							// Shown as text, never rendered as HTML: a logged email body is untrusted content.
@@ -434,9 +555,14 @@ const Logs = () => {
 							<NoticeComponent
 								displayPosition="inline-notice"
 								type="info"
-								message={__(
-									'Message content was not stored. Turn on "Store message content" under Settings to keep it for new messages and allow resending.',
-									'vulomail'
+								message={sprintf(
+									/* translators: 1: opening link tag to Settings → Logging & Privacy, 2: closing link tag. */
+									__(
+										'Message content was not stored. Turn on "Store message content" under %1$sSettings → Logging & Privacy%2$s to keep it for new messages and allow resending.',
+										'vulomail'
+									),
+									`<a href="${settingsUrl('logging')}">`,
+									'</a>'
 								)}
 							/>
 						)}

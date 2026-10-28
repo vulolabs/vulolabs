@@ -8,11 +8,12 @@
 | `MessageFactory` | `classes/Email/MessageFactory.php` | Turns `wp_mail()` arguments into a `Message`, resolving headers and defaults the way core does |
 | `Message` | `classes/Email/Message.php` | A resolved email: to/cc/bcc/reply-to, from, subject, body, content type, charset, extra headers, attachments, source |
 | `Dispatcher` | `classes/Email/Dispatcher.php` | Tries the primary connection, then the backup; logs; fires outcome actions |
+| `Tracking` | `classes/Email/Tracking.php` | Optional open/click tracking: rewrites the outgoing HTML once per message and serves the pixel and link redirect ([LOGGING](LOGGING.md#6-open-and-click-tracking)) |
 | `MailerInterface` | `classes/Email/MailerInterface.php` | Contract for a provider adapter |
 | `AbstractApiMailer` | `classes/Email/AbstractApiMailer.php` | Shared plumbing for HTTP API providers: config access, attachment reading, failure building |
 | `Mailers\Smtp`, `SendGrid`, `Mailgun`, `Brevo`, `Postmark` | `classes/Email/Mailers/` | The adapters |
 
-Hooks registered by `WpMailInterceptor`: `pre_wp_mail` (999), `wp_mail_from` (999), `wp_mail_from_name` (999), `wp_mail_succeeded` (999), `wp_mail_failed` (999).
+Hooks registered by `WpMailInterceptor`: `pre_wp_mail` (999), `wp_mail_from` (999), `wp_mail_from_name` (999), `wp_mail_succeeded` (999), `wp_mail_failed` (999), `phpmailer_init` (999, applies tracking to a handed-back message only).
 
 ## 1. Interception
 
@@ -57,7 +58,7 @@ It then applies core's own filters, in core's order: `wp_mail_from`, `wp_mail_fr
 
 `Dispatcher::chain()` returns the usable connections in order: the one in `email_primary`, then `email_backup`. A connection is usable when it is enabled and has every required field (see [CONNECTIONS-AND-SECURITY](CONNECTIONS-AND-SECURITY.md)).
 
-`send( Message $message, $log_failure = true )` walks the chain and stops at the first success. A success is always logged. `$log_failure` is false only when the interceptor will hand a failed message back to WordPress and log the combined outcome itself.
+`send( Message $message, $log_failure = true )` applies tracking once (`Tracking::prepare()`), then walks the chain with that one tracked copy and stops at the first success. A success is always logged. `$log_failure` is false only when the interceptor will hand a failed message back to WordPress and log the combined outcome itself.
 
 Failover happens on any failure, including a permanent rejection.
 
