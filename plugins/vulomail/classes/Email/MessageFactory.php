@@ -12,8 +12,7 @@ use VuloMail\Settings\Settings;
 defined( 'ABSPATH' ) || exit;
 
 /**
- * Turns wp_mail() arguments into a Message, resolving headers and defaults the way core does so
- * the message looks the same whichever connection delivers it.
+ * Turns wp_mail() arguments into a Message, resolving headers and defaults the way core does so the message looks the same whichever connection delivers it.
  */
 class MessageFactory {
 
@@ -117,8 +116,7 @@ class MessageFactory {
 	}
 
 	/**
-	 * Applies the configured sender address: always when forced, else only in place of core's
-	 * default (or an invalid one), so a plugin that sets its own From keeps it.
+	 * Applies the configured sender address: always when forced, else only in place of core's default (or an invalid one).
 	 *
 	 * @param string $from_email Address resolved so far.
 	 * @return string

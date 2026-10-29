@@ -97,8 +97,7 @@ class Overview extends Controller {
 	}
 
 	/**
-	 * Adds `cause`: provider, error code and error text explaining the failure - the last attempt
-	 * marked by with_causes(), or the row's own error when none is recorded.
+	 * Adds `cause`: provider, error code and error text - the attempt marked by with_causes(), or the row's own error when none is recorded.
 	 *
 	 * @param array $row      Failed log row from LogRepository::query().
 	 * @param array $attempts The row's attempts.

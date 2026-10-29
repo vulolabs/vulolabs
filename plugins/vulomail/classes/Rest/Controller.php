@@ -13,9 +13,7 @@ use VuloMail\Utill;
 defined( 'ABSPATH' ) || exit;
 
 /**
- * Shared permission check: every route is admin-only. Core's REST cookie auth already verifies
- * the `wp_rest` nonce, so a logged-in admin's browser can't be tricked into calling these routes
- * from another site.
+ * Shared permission check: every route is admin-only. Core's REST cookie auth already verifies the `wp_rest` nonce, so a logged-in admin's browser can't be tricked into calling these routes cross-site.
  */
 abstract class Controller extends \WP_REST_Controller {
 
@@ -33,9 +31,7 @@ abstract class Controller extends \WP_REST_Controller {
 	}
 
 	/**
-	 * Marks each failed attempt worth advice with `is_cause`. WordPress's own mailer failing after a
-	 * connection already failed only means the server can't send email itself; the connection's error
-	 * is the one to fix.
+	 * Marks each failed attempt worth advice with `is_cause`. A later WordPress-mailer failure just means the server itself can't send; the connection's error is the one to fix.
 	 *
 	 * @param array $attempts Attempts in order, as Result::to_array() stores them.
 	 * @return array

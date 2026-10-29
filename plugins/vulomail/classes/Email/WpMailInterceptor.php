@@ -14,10 +14,7 @@ use VuloMail\Settings\Settings;
 defined( 'ABSPATH' ) || exit;
 
 /**
- * Routes wp_mail() through VuloMail.
- *
- * With no usable connection, or routing switched off, `pre_wp_mail` is left untouched and WordPress
- * sends as it normally would; those sends are only observed, for the log.
+ * Routes wp_mail() through VuloMail. With no usable connection, or routing off, `pre_wp_mail` is left untouched and WordPress sends as normal; those sends are only observed, for the log.
  */
 class WpMailInterceptor {
 
@@ -213,9 +210,7 @@ class WpMailInterceptor {
 	}
 
 	/**
-	 * `phpmailer_init` callback: when WordPress's own mailer takes over a message VuloMail's
-	 * connections failed to deliver, applies that message's tracking to the body core sends.
-	 * Mail VuloMail isn't routing is left as WordPress builds it.
+	 * `phpmailer_init` callback: applies a handed-back message's tracking to the body core sends; untracked mail is left alone.
 	 *
 	 * @param object $phpmailer Core's PHPMailer instance.
 	 * @return void

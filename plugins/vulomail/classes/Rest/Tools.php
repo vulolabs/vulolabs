@@ -53,8 +53,7 @@ class Tools extends Controller {
 	}
 
 	/**
-	 * Sends a test email, through the live routing (the path every other email takes) or one named
-	 * connection.
+	 * Sends a test email, through the live routing (the path every other email takes) or one named connection.
 	 *
 	 * @param \WP_REST_Request $request Request.
 	 * @return \WP_REST_Response|\WP_Error

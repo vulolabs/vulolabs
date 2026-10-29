@@ -1,22 +1,21 @@
 /* global vulomailAppLocalizer */
 import { useEffect, useState } from 'react';
 import { useLocation } from 'react-router-dom';
-import { __, sprintf } from '@wordpress/i18n';
+import { __, _n, sprintf } from '@wordpress/i18n';
 import {
-	AnalyticsComponent,
 	BadgeComponent,
 	CardComponent,
 	ColumnComponent,
 	ContainerComponent,
 	FormGroupComponent,
 	FormGroupWrapperComponent,
-	ListComponent,
 	ModuleGuardComponent,
 	NavigatorHeaderComponent,
 	NoticeComponent,
 } from '@zyra/components';
 import { ButtonInput, SelectInput, TextInput } from '@zyra/inputs';
 import { apiGet, apiPost } from '../services/api';
+import { errorNoticeHtml } from '../services/errorHelp';
 import { errorMessage } from '../services/notify';
 import { escapeHtml, providerLabel } from '../services/types';
 import type { Connection, ConnectionsPayload, TestResult } from '../services/types';
@@ -32,8 +31,12 @@ interface Check {
 	action?: { label: string; tab?: string; url?: string } | null;
 }
 
-// Problems first, so what needs doing is at the top of the list.
-const SEVERITY: Check['status'][] = ['error', 'warning', 'info', 'good'];
+const GROUP_TITLE: Record<Check['status'], string> = {
+	error: __('Fix these first', 'vulomail'),
+	warning: __('Needs attention', 'vulomail'),
+	info: __('For your information', 'vulomail'),
+	good: __('Passed', 'vulomail'),
+};
 
 interface TestCardProps {
 	channel: 'email' | 'sms';
@@ -47,7 +50,8 @@ const LIVE = 'live';
 const STATUS: Record<Check['status'], { color: string; icon: string; text: string }> = {
 	good: { color: 'green', icon: 'check', text: __('OK', 'vulomail') },
 	warning: { color: 'yellow', icon: 'error', text: __('Needs attention', 'vulomail') },
-	error: { color: 'red', icon: 'error', text: __('Problem', 'vulomail') },
+	// 'close' (an X) tells a problem apart from a warning triangle at a glance.
+	error: { color: 'red', icon: 'close', text: __('Problem', 'vulomail') },
 	info: { color: 'blue', icon: 'info', text: __('Info', 'vulomail') },
 };
 
@@ -59,12 +63,80 @@ const follow = (action: Check['action']) => {
 	}
 };
 
+/** How long ago `checked` was, for the "Last checked …" stamp. */
+const checkedStamp = (checked: number) => {
+	const minutes = Math.round((Date.now() - checked) / 60000);
+
+	if (minutes < 1) {
+		return __('Last checked just now', 'vulomail');
+	}
+
+	/* translators: %d: minutes since the last diagnostics run. */
+	return sprintf(_n('Last checked %d minute ago', 'Last checked %d minutes ago', minutes, 'vulomail'), minutes);
+};
+
+/** One "Fix these first" / "Needs attention" card: icon tile, title row with its action, description, "what to do". */
+const IssueCard = ({ check }: { check: Check }) => (
+	<div className={`vulomail-diag-card is-${check.status}`}>
+		<span className="vulomail-diag-ico">
+			<i className={`adminfont-${STATUS[check.status].icon}`} aria-hidden="true" />
+		</span>
+		<div className="vulomail-diag-body">
+			<div className="vulomail-diag-row">
+				<span className="vulomail-diag-title">
+					<strong>{escapeHtml(check.label)}</strong>
+					<BadgeComponent color={STATUS[check.status].color} text={STATUS[check.status].text} />
+				</span>
+				{check.action && (
+					<ButtonInput
+						buttons={{
+							text: check.action.label,
+							color: 'error' === check.status ? 'purple' : 'border-purple',
+							onClick: () => follow(check.action),
+						}}
+					/>
+				)}
+			</div>
+			<p className="vulomail-diag-desc">{check.message}</p>
+			{check.fix && (
+				<div className="vulomail-diag-fix">
+					<i className="adminfont-lightbulb" aria-hidden="true" />
+					<p>
+						<strong>{__('What to do: ', 'vulomail')}</strong>
+						{check.fix}
+					</p>
+				</div>
+			)}
+		</div>
+	</div>
+);
+
+/** One "For your information" card: no urgency, so no action is forced on it. */
+const InfoCard = ({ check }: { check: Check }) => (
+	<div className="vulomail-diag-info">
+		<div className="vulomail-diag-info-head">
+			<span className="vulomail-diag-ico is-info">
+				<i className="adminfont-info" aria-hidden="true" />
+			</span>
+			<strong>{escapeHtml(check.label)}</strong>
+			<BadgeComponent color="blue" text={__('Info', 'vulomail')} />
+		</div>
+		<p className="vulomail-diag-desc">{check.message}</p>
+		{check.fix && <p className="vulomail-diag-note">{check.fix}</p>}
+		{check.action && (
+			<ButtonInput
+				buttons={{ text: check.action.label, color: 'border-purple', onClick: () => follow(check.action) }}
+			/>
+		)}
+	</div>
+);
+
 const TestCard = ({ channel, connections, preselected }: TestCardProps) => {
 	const isEmail = 'email' === channel;
 	const cardId = isEmail ? 'tools-test-email-card' : 'tools-test-sms-card';
 	// Whether the "Test" button on Connections sent the visitor here for this card's channel.
 	const isTarget = '' !== preselected && connections.some((item) => item.id === preselected);
-	const [to, setTo] = useState(isEmail ? vulomailAppLocalizer.admin_email : '');
+	const [to, setTo] = useState('');
 	const [connectionId, setConnectionId] = useState(
 		connections.some((item) => item.id === preselected) ? preselected : LIVE
 	);
@@ -123,6 +195,7 @@ const TestCard = ({ channel, connections, preselected }: TestCardProps) => {
 					<TextInput
 						name={`test-${channel}-to`}
 						type={isEmail ? 'email' : 'text'}
+						placeholder={isEmail ? vulomailAppLocalizer.admin_email : '+14155550123'}
 						value={to}
 						onChange={(value) => setTo(String(value))}
 					/>
@@ -159,16 +232,24 @@ const TestCard = ({ channel, connections, preselected }: TestCardProps) => {
 							: __('The test was not sent', 'vulomail')
 					}
 					message={(() => {
-						const lines = [
-							result.message,
-							...result.attempts
-								.filter((attempt) => !attempt.success && result.attempts.length > 1)
-								.map((attempt) => `${providerLabel(attempt.provider)}: ${attempt.error_message}`),
-						];
+						const failedAttempts = result.attempts.filter(
+							(attempt) => !attempt.success && result.attempts.length > 1
+						);
 
-						// NoticeComponent's array form is the auto-rotating, closable banner UI; a
-						// single line should stay plain text, or a stray close icon appears with it.
-						return lines.length > 1 ? lines : lines[0];
+						// NoticeComponent's array form is the auto-rotating, closable banner UI and
+						// renders plain text; only the single-line case below can carry the HTML help link.
+						if (failedAttempts.length > 0) {
+							return [
+								result.message,
+								...failedAttempts.map(
+									(attempt) => `${providerLabel(attempt.provider)}: ${attempt.error_message}`
+								),
+							];
+						}
+
+						return result.success
+							? result.message
+							: errorNoticeHtml({ provider: result.provider, error_message: result.message, is_cause: true }, channel);
 					})()}
 				/>
 			)}
@@ -190,13 +271,17 @@ const Tools = () => {
 	const preselected = new URLSearchParams(useLocation().hash).get('connection') ?? '';
 	const [connections, setConnections] = useState<Connection[] | null>(null);
 	const [checks, setChecks] = useState<Check[] | null>(null);
+	const [lastChecked, setLastChecked] = useState<number | null>(null);
 	const [error, setError] = useState('');
 
 	const runDiagnostics = () => {
 		setChecks(null);
 
 		apiGet<Check[]>('tools/diagnostics')
-			.then(setChecks)
+			.then((data) => {
+				setChecks(data);
+				setLastChecked(Date.now());
+			})
 			.catch((e) => setError(errorMessage(e)));
 	};
 
@@ -214,15 +299,18 @@ const Tools = () => {
 			headerTitle={__('Tools', 'vulomail')}
 			headerDescription={__('Check that messages are going out, and find out why if they are not.', 'vulomail')}
 			headerCustomContent={
-				<ButtonInput
-					buttons={{
-						text: checks ? __('Run diagnostics again', 'vulomail') : __('Running…', 'vulomail'),
-						icon: 'refresh',
-						color: 'purple',
-						disabled: !checks,
-						onClick: runDiagnostics,
-					}}
-				/>
+				<div className="vulomail-inline">
+					{checks && lastChecked && <span className="vulomail-diag-stamp">{checkedStamp(lastChecked)}</span>}
+					<ButtonInput
+						buttons={{
+							text: checks ? __('Run diagnostics again', 'vulomail') : __('Running…', 'vulomail'),
+							icon: 'refresh',
+							color: 'purple',
+							disabled: !checks,
+							onClick: runDiagnostics,
+						}}
+					/>
+				</div>
 			}
 		/>
 	);
@@ -240,7 +328,36 @@ const Tools = () => {
 		);
 	}
 
-	const count = (status: Check['status']) => (checks ?? []).filter((check) => status === check.status).length;
+	const bySeverity = (status: Check['status']) => (checks ?? []).filter((check) => status === check.status);
+	const problems = bySeverity('error').length;
+	const attention = bySeverity('warning').length;
+	const passed = bySeverity('good').length;
+	const overall: Check['status'] = problems ? 'error' : attention ? 'warning' : 'good';
+
+	const overallLabel = problems
+		? __('Messages are not being delivered', 'vulomail')
+		: attention
+			? __('Delivery needs attention', 'vulomail')
+			: __('Everything looks good', 'vulomail');
+
+	const verdict = problems
+		? sprintf(
+				/* translators: %d: number of failing checks. */
+				_n(
+					'%d check found a problem stopping messages from going out.',
+					'%d checks found problems stopping messages from going out.',
+					problems,
+					'vulomail'
+				),
+				problems
+		  )
+		: attention
+			? sprintf(
+					/* translators: %d: number of checks needing attention. */
+					_n('%d check needs attention.', '%d checks need attention.', attention, 'vulomail'),
+					attention
+			  )
+			: __('Everything checked out - no problems found.', 'vulomail');
 
 	return (
 		<>
@@ -277,60 +394,82 @@ const Tools = () => {
 					>
 						{checks && (
 							<>
-								<AnalyticsComponent
-									variant="small"
-									cols={3}
-									data={[
-										{ icon: 'check green', number: count('good'), text: __('Passed', 'vulomail') },
-										{
-											icon: 'error yellow',
-											number: count('warning'),
-											text: __('Need attention', 'vulomail'),
-										},
-										{ icon: 'error red', number: count('error'), text: __('Problems', 'vulomail') },
-									]}
-								/>
-								<ListComponent
-									className="mini-card report without-border"
-									border
-									items={[...checks]
-										.sort((a, b) => SEVERITY.indexOf(a.status) - SEVERITY.indexOf(b.status))
-										.map((check) => ({
-										id: check.id,
-										icon: `${STATUS[check.status].icon} ${STATUS[check.status].color}`,
-										title: escapeHtml(check.label),
-										titleTag: (
-											<BadgeComponent
-												color={STATUS[check.status].color}
-												text={STATUS[check.status].text}
-											/>
-										),
-										desc: (
-											<>
-												{check.message}
-												{check.fix && (
-													<span className="vulomail-check-fix">
-														<strong>
-															{'good' === check.status
-																? __('Tip:', 'vulomail')
-																: __('What to do:', 'vulomail')}
-														</strong>{' '}
-														{check.fix}
+								<div className={`vulomail-diag-summary is-${overall}`}>
+									<div className="vulomail-diag-summary-text">
+										<span className="vulomail-diag-status">
+											<i className="vulomail-diag-status-dot" />
+											{overallLabel}
+										</span>
+										<p className="vulomail-diag-verdict">{verdict}</p>
+										<div className="vulomail-diag-bar" aria-hidden="true">
+											<span className="is-red" style={{ flexGrow: problems }} />
+											<span className="is-amber" style={{ flexGrow: attention }} />
+											<span className="is-green" style={{ flexGrow: passed }} />
+										</div>
+									</div>
+									<div className="vulomail-diag-stats">
+										<div className="vulomail-diag-stat is-red">
+											<strong className="vulomail-diag-stat-number">{problems}</strong>
+											<span className="vulomail-diag-stat-label">{__('Problems', 'vulomail')}</span>
+										</div>
+										<div className="vulomail-diag-stat is-amber">
+											<strong className="vulomail-diag-stat-number">{attention}</strong>
+											<span className="vulomail-diag-stat-label">{__('Need attention', 'vulomail')}</span>
+										</div>
+										<div className="vulomail-diag-stat is-green">
+											<strong className="vulomail-diag-stat-number">{passed}</strong>
+											<span className="vulomail-diag-stat-label">{__('Passed', 'vulomail')}</span>
+										</div>
+									</div>
+								</div>
+
+								{bySeverity('error').length > 0 && (
+									<div className="vulomail-diag-group">
+										<h3 className="vulomail-diag-group-title">{GROUP_TITLE.error}</h3>
+										{bySeverity('error').map((check) => (
+											<IssueCard key={check.id} check={check} />
+										))}
+									</div>
+								)}
+
+								{bySeverity('warning').length > 0 && (
+									<div className="vulomail-diag-group">
+										<h3 className="vulomail-diag-group-title">{GROUP_TITLE.warning}</h3>
+										{bySeverity('warning').map((check) => (
+											<IssueCard key={check.id} check={check} />
+										))}
+									</div>
+								)}
+
+								{bySeverity('info').length > 0 && (
+									<div className="vulomail-diag-group">
+										<h3 className="vulomail-diag-group-title">{GROUP_TITLE.info}</h3>
+										<div className="vulomail-diag-info-grid">
+											{bySeverity('info').map((check) => (
+												<InfoCard key={check.id} check={check} />
+											))}
+										</div>
+									</div>
+								)}
+
+								{bySeverity('good').length > 0 && (
+									<div className="vulomail-diag-group">
+										<h3 className="vulomail-diag-group-title">{GROUP_TITLE.good}</h3>
+										<div className="vulomail-diag-passed">
+											{bySeverity('good').map((check) => (
+												<div className="vulomail-diag-pass" key={check.id}>
+													<span className="vulomail-diag-tick">
+														<i className="adminfont-check" aria-hidden="true" />
 													</span>
-												)}
-											</>
-										),
-										tags: check.action ? (
-											<ButtonInput
-												buttons={{
-													text: check.action.label,
-													color: 'purple',
-													onClick: () => follow(check.action),
-												}}
-											/>
-										) : undefined,
-									}))}
-								/>
+													<div>
+														<strong>{escapeHtml(check.label)}</strong>
+														<span>{check.message}</span>
+													</div>
+												</div>
+											))}
+										</div>
+									</div>
+								)}
 							</>
 						)}
 					</CardComponent>

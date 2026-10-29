@@ -105,9 +105,7 @@ class Dispatcher {
 	 * Sends a message through the chain.
 	 *
 	 * @param Message $message     Message to send.
-	 * @param bool    $log_failure Whether to log a failure. The wp_mail() interceptor passes false when
-	 *                             a failed message will be handed back to WordPress's own mailer and
-	 *                             logs the combined outcome itself. A success is always logged here.
+	 * @param bool    $log_failure Whether to log a failure; wp_mail() interceptor passes false when it will log the combined outcome itself.
 	 * @return Result Final outcome, with ->attempts filled in.
 	 */
 	public function send( Message $message, $log_failure = true ) {

@@ -149,10 +149,7 @@ class ConnectionRepository {
 	}
 
 	/**
-	 * Creates or updates a connection.
-	 *
-	 * A secret field left empty, or still holding its mask, keeps the stored value: the UI never
-	 * has the real secret to send back.
+	 * Creates or updates a connection. A secret left empty or still holding its mask keeps the stored value.
 	 *
 	 * @param array $input Raw input: id (optional), channel, provider, label, enabled, settings.
 	 * @return array|\WP_Error The stored record.
@@ -268,8 +265,7 @@ class ConnectionRepository {
 	}
 
 	/**
-	 * A field with a `show_if` rule only applies while that other field has the given value, or one
-	 * of the given values when the rule lists several.
+	 * A field with a `show_if` rule only applies while that other field matches the given value(s).
 	 *
 	 * @param array $field  Field definition.
 	 * @param array $config Current settings.

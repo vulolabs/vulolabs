@@ -166,8 +166,7 @@ class Logger {
 				'used_fallback' => $used_fallback ? 1 : 0,
 				'recipients'    => implode( ', ', $recipients ),
 				'subject'       => mb_substr( wp_strip_all_tags( $subject ), 0, 255 ),
-				// Message content is personal data and may carry reset links or codes, so it is only
-				// stored when the site owner has opted in.
+				// Message content is personal data; only stored when the site owner has opted in.
 				'body'          => $this->settings->get( 'log_content' ) ? $body : null,
 				'message_id'    => $result->message_id,
 				'error_code'    => $result->error_code,

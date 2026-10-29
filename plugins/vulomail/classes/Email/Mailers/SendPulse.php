@@ -14,8 +14,7 @@ use VuloMail\Email\Message;
 defined( 'ABSPATH' ) || exit;
 
 /**
- * SendPulse SMTP API. Authenticates with OAuth2 client credentials, exchanged for a short-lived
- * token before every send - SendPulse issues no long-lived API key for this endpoint.
+ * SendPulse SMTP API. Authenticates via OAuth2 client credentials exchanged for a short-lived token before every send - no long-lived API key exists for this endpoint.
  */
 class SendPulse extends AbstractApiMailer {
 

@@ -124,8 +124,7 @@ class SparkPost extends AbstractApiMailer {
 
 		$recipients = $map( $message->to );
 
-		// SparkPost has no separate Cc/Bcc: every address is a recipient, so Cc/Bcc are added to the
-		// content's own headers and sent as extra recipients that do not appear in the To header.
+		// SparkPost has no separate Cc/Bcc: added to content's headers and sent as extra recipients that don't appear in the To header.
 		if ( $message->cc ) {
 			$content['headers']['CC'] = implode( ', ', array_map( array( Message::class, 'format' ), $message->cc ) );
 			$recipients               = array_merge( $recipients, $map( $message->cc ) );

@@ -155,8 +155,7 @@ class FrontendScripts {
 	}
 
 	/**
-	 * Converts a PHP date() format into zyra's token syntax (YYYY/MM/DD...). zyra has no am/pm
-	 * token, so those are dropped.
+	 * Converts a PHP date() format into zyra's token syntax (YYYY/MM/DD...); zyra has no am/pm token, so those are dropped.
 	 *
 	 * @param string $php_format PHP date format.
 	 * @return string

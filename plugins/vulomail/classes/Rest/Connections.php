@@ -10,8 +10,7 @@ namespace VuloMail\Rest;
 defined( 'ABSPATH' ) || exit;
 
 /**
- * REST controller for vulomail/v1/connections - list, create/update, delete. Secret fields always
- * come back masked.
+ * REST controller for vulomail/v1/connections - list, create/update, delete. Secret fields always come back masked.
  */
 class Connections extends Controller {
 
@@ -69,9 +68,7 @@ class Connections extends Controller {
 			)
 		);
 
-		// Google (or VuloLabs' connect service) sends the browser here after consent, with no REST
-		// nonce - so this can't be admin-only. The single-use state, created by an admin for one
-		// connection, is the authorization instead.
+		// Google sends the browser here after consent with no REST nonce, so this can't be admin-only; the single-use state is the authorization instead.
 		register_rest_route(
 			VuloMail()->rest_namespace,
 			'/google/callback',
@@ -98,8 +95,7 @@ class Connections extends Controller {
 	}
 
 	/**
-	 * Finishes "Sign in with Google" and sends the browser back to the Connections screen, which
-	 * shows the outcome.
+	 * Finishes "Sign in with Google" and sends the browser back to the Connections screen with the outcome.
 	 *
 	 * @param \WP_REST_Request $request Request.
 	 * @return void
@@ -144,8 +140,7 @@ class Connections extends Controller {
 			return $saved;
 		}
 
-		// Email defaults to WordPress's own mailer until a primary is picked. SMS has no such default,
-		// so its first gateway becomes the primary.
+		// Email defaults to WordPress's own mailer until a primary is picked; SMS has no such default, so its first gateway becomes primary.
 		if ( \VuloMail\Utill::CHANNEL_SMS === $saved['channel'] && '' === (string) VuloMail()->settings->get( 'sms_primary' ) ) {
 			VuloMail()->settings->update( array( 'sms_primary' => $saved['id'] ) );
 		}

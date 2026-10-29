@@ -108,8 +108,7 @@ class Message {
 	public $source = '';
 
 	/**
-	 * Open/click tracking, set once by Tracking::prepare() so a failover resends the same tracked
-	 * copy: `array{token: string, opens: bool, clicks: bool}`, or null if untracked.
+	 * Open/click tracking, set once by Tracking::prepare() so a failover resends the same tracked copy: `array{token: string, opens: bool, clicks: bool}`, or null.
 	 *
 	 * @var array|null
 	 */

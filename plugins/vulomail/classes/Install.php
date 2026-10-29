@@ -110,8 +110,7 @@ class Install {
 	}
 
 	/**
-	 * Backfills a sign-in method onto Gmail connections saved before methods existed: they all used
-	 * an app password, and without it they'd show the newer default method instead.
+	 * Backfills a sign-in method onto Gmail connections saved before methods existed - they all used an app password.
 	 *
 	 * @return void
 	 */
@@ -132,8 +131,7 @@ class Install {
 	}
 
 	/**
-	 * Uninstall routine. Keeps everything unless Settings → Data says "Delete everything", so an
-	 * accidental uninstall never destroys saved connections.
+	 * Uninstall routine. Keeps everything unless Settings → Data says "Delete everything".
 	 *
 	 * @return void
 	 */

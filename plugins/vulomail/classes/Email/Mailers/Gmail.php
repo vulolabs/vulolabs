@@ -16,16 +16,9 @@ use VuloMail\Security\Redactor;
 defined( 'ABSPATH' ) || exit;
 
 /**
- * Gmail, with a choice of sign-in method:
- *
- * - "Sign in with Google" (`oneclick` through VuloLabs' connect service, or `own` through the site
- *   owner's Google app): sends through the Gmail API. The message is built by PHPMailer exactly as
- *   the SMTP adapter builds it (so `phpmailer_init` adjustments still apply) and uploaded as a raw
- *   RFC 822 message, which also carries attachments up to Gmail's 35 MB limit.
- * - `app_password`: Google's SMTP server with an app password, handed to GmailSmtp.
- *
- * Either way Gmail sends from the signed-in account, or from one of its verified "Send mail as"
- * addresses; any other From address is replaced by the account's own.
+ * Gmail, with a choice of sign-in method: "Sign in with Google" (`oneclick`/`own`) sends through the
+ * Gmail API as a raw RFC 822 message built by PHPMailer (so `phpmailer_init` still applies); `app_password`
+ * hands off to GmailSmtp. Either way Gmail sends from the signed-in account or a verified "Send mail as" address.
  */
 class Gmail extends AbstractApiMailer {
 
@@ -40,11 +33,8 @@ class Gmail extends AbstractApiMailer {
 	const SEND_URL = 'https://gmail.googleapis.com/upload/gmail/v1/users/me/messages/send?uploadType=media';
 
 	/**
-	 * Describes the provider and its connection fields.
-	 *
-	 * `oauth` tells the connection form to show the "Sign in with Google" control while the sign-in
-	 * fields apply; the fields marked `hidden` are filled by that sign-in, never typed, and those
-	 * marked `advanced` (the site owner's own Google app) sit in that control's collapsed section.
+	 * Describes the provider and its connection fields. `oauth` shows the "Sign in with Google" control;
+	 * `hidden` fields are filled by that sign-in, never typed; `advanced` ones sit in its collapsed section.
 	 *
 	 * @return array
 	 */
@@ -52,8 +42,7 @@ class Gmail extends AbstractApiMailer {
 		$one_click = GoogleOAuth::one_click_available();
 		$google    = array( GoogleOAuth::MODE_ONE_CLICK, GoogleOAuth::MODE_OWN );
 
-		// Shown as cards, "Sign in with Google" first. Until VuloLabs' connect service is set up, that
-		// card signs in through the site owner's own Google app.
+		// Shown as cards, "Sign in with Google" first; until VuloLabs' connect service is set up, that card signs in through the owner's own Google app.
 		$sign_in = array(
 			'value' => $one_click ? GoogleOAuth::MODE_ONE_CLICK : GoogleOAuth::MODE_OWN,
 			'label' => __( 'Sign in with Google', 'vulomail' ),
@@ -179,8 +168,7 @@ class Gmail extends AbstractApiMailer {
 
 			Smtp::compose( $mailer, $message );
 
-			// Built, never sent from here. The sendmail flavour keeps the To, Subject and Bcc headers
-			// in the message, which the Gmail API reads its recipients from (it removes Bcc itself).
+			// Built, never sent from here; sendmail flavour keeps To/Subject/Bcc headers, which the Gmail API reads recipients from (it strips Bcc itself).
 			$mailer->Mailer = 'sendmail'; // phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase -- PHPMailer's API.
 			$mailer->preSend();
 

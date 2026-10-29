@@ -27,6 +27,7 @@
 
 	dd {
 		margin: 0;
+		min-width: 0;
 		overflow-wrap: anywhere;
 	}
 }
@@ -96,11 +97,458 @@
 	overflow-wrap: anywhere;
 }
 
-// The "what to do" line under a diagnostics result.
-.vulomail-check-fix {
-	display: block;
-	margin-top: 0.375rem;
+// Log detail popup (Logs.tsx): status line, From/To route card, delivery details, message body.
+.vulomail-log-statusline {
+	display: flex;
+	align-items: center;
+	gap: 0.625rem;
+	margin: 0 0 1rem;
+	font-size: 0.8125rem;
+	color: var(--sub-text-color);
+}
+
+.vulomail-log-route {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));
+	gap: 0.75rem;
+	margin: 0 0 1rem;
+	padding: 0.875rem;
+	border: 0.063rem solid var(--border-color);
+	border-radius: 0.75rem;
+	background: var(--background-color);
+}
+
+.vulomail-log-party {
+	display: flex;
+	gap: 0.625rem;
+	align-items: center;
+	min-width: 0;
+}
+
+.vulomail-log-avatar {
+	display: grid;
+	flex-shrink: 0;
+	width: 2.25rem;
+	height: 2.25rem;
+	border-radius: 999px;
+	place-items: center;
+	font-size: 0.8125rem;
+	font-weight: 600;
+	background: var(--background-white);
+	color: var(--sub-text-color);
+
+	&.is-from {
+		background: var(--background-primary);
+		color: var(--color-primary);
+	}
+}
+
+.vulomail-log-copy-row {
+	display: flex;
+	align-items: center;
+	gap: 0.5rem;
+
+	code {
+		flex: 1;
+		min-width: 0;
+		overflow: hidden;
+		text-overflow: ellipsis;
+		white-space: nowrap;
+	}
+
+	> :last-child {
+		flex-shrink: 0;
+	}
+}
+
+.vulomail-log-message {
+	margin: 0 0 1rem;
+	border: 0.063rem solid var(--border-color);
+	border-radius: 0.75rem;
+	overflow: hidden;
+
+	.vulomail-message-body {
+		margin: 0;
+		border: none;
+		border-radius: 0;
+	}
+}
+
+.vulomail-log-message-bar {
+	padding: 0.625rem 0.875rem;
+	border-bottom: 0.063rem solid var(--border-color);
+	background: var(--background-color);
+	font-size: 0.8125rem;
+	font-weight: 600;
 	color: var(--text-color);
+}
+
+// Diagnostics screen (Tools.tsx). Severity has its own universal red/amber/green/blue, not the
+// theme's brand palette, so these are fixed rather than drawn from --color-primary.
+.vulomail-diag-summary {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 1.75rem;
+	margin-bottom: 1.25rem;
+	padding-bottom: 1.25rem;
+	border-bottom: 0.063rem solid var(--border-color);
+}
+
+.vulomail-diag-summary-text {
+	display: flex;
+	flex: 1 1 17.5rem;
+	flex-direction: column;
+	gap: 0.875rem;
+	min-width: 0;
+}
+
+.vulomail-diag-status {
+	display: inline-flex;
+	align-self: flex-start;
+	align-items: center;
+	gap: 0.375rem;
+	height: 1.625rem;
+	padding: 0 0.625rem;
+	border-radius: 999px;
+	background: #fef3f2;
+	color: #b42318;
+	font-size: 0.75rem;
+	font-weight: 600;
+}
+
+.vulomail-diag-status-dot {
+	width: 0.375rem;
+	height: 0.375rem;
+	border-radius: 999px;
+	background: #d92d20;
+}
+
+.vulomail-diag-summary.is-warning {
+	.vulomail-diag-status {
+		background: #fffaeb;
+		color: #b54708;
+	}
+
+	.vulomail-diag-status-dot {
+		background: #dc6803;
+	}
+}
+
+.vulomail-diag-summary.is-good {
+	.vulomail-diag-status {
+		background: #ecfdf3;
+		color: #067647;
+	}
+
+	.vulomail-diag-status-dot {
+		background: #079455;
+	}
+}
+
+.vulomail-diag-verdict {
+	margin: 0;
+	font-size: 1.125rem;
+	font-weight: 600;
+	color: var(--text-color);
+}
+
+.vulomail-diag-bar {
+	display: flex;
+	width: 100%;
+	gap: 0.1875rem;
+	height: 0.5rem;
+	border-radius: 999px;
+	overflow: hidden;
+
+	span {
+		flex-shrink: 0;
+		min-width: 0;
+	}
+
+	.is-red {
+		background: #d92d20;
+	}
+
+	.is-amber {
+		background: #f79009;
+	}
+
+	.is-green {
+		background: #12b76a;
+	}
+}
+
+.vulomail-diag-stats {
+	display: grid;
+	flex: 1 1 22.5rem;
+	grid-template-columns: repeat(3, minmax(0, 1fr));
+	gap: 0.75rem;
+}
+
+.vulomail-diag-stat {
+	border-radius: 0.75rem;
+	padding: 0.875rem 1rem;
+
+	&.is-red {
+		background: #fef3f2;
+	}
+
+	&.is-amber {
+		background: #fffaeb;
+	}
+
+	&.is-green {
+		background: #ecfdf3;
+	}
+}
+
+.vulomail-diag-stat-number {
+	display: block;
+	font-size: 1.75rem;
+	line-height: 2rem;
+	font-weight: 700;
+
+	.is-red & {
+		color: #b42318;
+	}
+
+	.is-amber & {
+		color: #b54708;
+	}
+
+	.is-green & {
+		color: #067647;
+	}
+}
+
+.vulomail-diag-stat-label {
+	font-size: 0.8125rem;
+	font-weight: 500;
+
+	.is-red & {
+		color: #912018;
+	}
+
+	.is-amber & {
+		color: #93370d;
+	}
+
+	.is-green & {
+		color: #05603a;
+	}
+}
+
+// One severity group ("Fix these first" / "Needs attention" / "For your information" / "Passed").
+.vulomail-diag-group + .vulomail-diag-group {
+	margin-top: 1.5rem;
+}
+
+.vulomail-diag-group-title {
+	margin: 0 0 0.75rem;
+	font-size: 0.8125rem;
+	font-weight: 600;
+	letter-spacing: 0.02em;
+	text-transform: uppercase;
+	color: var(--sub-text-color);
+}
+
+// A "Fix these first"/"Needs attention" card: icon tile, title row with its own action, description,
+// then a boxed "what to do" tip.
+.vulomail-diag-card {
+	display: flex;
+	gap: 1rem;
+	align-items: flex-start;
+	padding: 1.25rem;
+	border: 0.063rem solid var(--border-color);
+	border-radius: 0.875rem;
+	background: var(--background-white);
+
+	+ .vulomail-diag-card {
+		margin-top: 0.75rem;
+	}
+
+	&.is-error {
+		border-color: #fecdca;
+	}
+
+	&.is-warning {
+		border-color: #fedf89;
+	}
+}
+
+.vulomail-diag-ico {
+	display: grid;
+	flex-shrink: 0;
+	width: 2.25rem;
+	height: 2.25rem;
+	border-radius: 0.625rem;
+	place-items: center;
+	background: var(--background-color);
+	color: var(--sub-text-color);
+
+	.is-error & {
+		background: #fef3f2;
+		color: #d92d20;
+	}
+
+	.is-warning & {
+		background: #fffaeb;
+		color: #dc6803;
+	}
+
+	&.is-info {
+		background: #eff8ff;
+		color: #1570ef;
+	}
+}
+
+.vulomail-diag-body {
+	display: flex;
+	flex: 1;
+	flex-direction: column;
+	gap: 0.625rem;
+	min-width: 0;
+}
+
+.vulomail-diag-row {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	justify-content: space-between;
+	gap: 0.625rem;
+}
+
+.vulomail-diag-title {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 0.625rem;
+
+	strong {
+		font-size: 1rem;
+		font-weight: 600;
+		color: var(--text-color);
+	}
+}
+
+.vulomail-diag-desc {
+	margin: 0;
+	color: var(--sub-text-color);
+	overflow-wrap: anywhere;
+}
+
+.vulomail-diag-fix {
+	display: flex;
+	align-items: flex-start;
+	gap: 0.625rem;
+	padding: 0.75rem 0.875rem;
+	border-radius: 0.625rem;
+	background: var(--background-color);
+
+	.adminfont-lightbulb {
+		flex: none;
+		margin-top: 0.125rem;
+		color: var(--color-primary);
+	}
+
+	p {
+		margin: 0;
+		color: var(--text-color);
+	}
+}
+
+// "For your information" cards: a side-by-side grid, no urgency styling.
+.vulomail-diag-info-grid {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(20rem, 1fr));
+	gap: 0.75rem;
+}
+
+.vulomail-diag-info {
+	display: flex;
+	flex-direction: column;
+	gap: 0.625rem;
+	padding: 1.125rem;
+	border: 0.063rem solid var(--border-color);
+	border-radius: 0.875rem;
+	background: var(--background-white);
+}
+
+.vulomail-diag-info-head {
+	display: flex;
+	align-items: center;
+	gap: 0.625rem;
+
+	strong {
+		flex: 1;
+		font-size: 0.9375rem;
+		font-weight: 600;
+		color: var(--text-color);
+	}
+}
+
+.vulomail-diag-note {
+	margin: 0;
+	font-size: 0.8125rem;
+	color: var(--sub-text-color);
+}
+
+// Passed checks: a compact grid of rows, nothing more to do about any of them.
+.vulomail-diag-passed {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(18.75rem, 1fr));
+	overflow: hidden;
+	border: 0.063rem solid var(--border-color);
+	border-radius: 0.875rem;
+	background: var(--background-white);
+}
+
+.vulomail-diag-pass {
+	display: flex;
+	gap: 0.75rem;
+	align-items: flex-start;
+	padding: 1rem 1.125rem;
+	border-bottom: 0.063rem solid var(--border-color);
+
+	strong {
+		display: block;
+		color: var(--text-color);
+	}
+
+	span {
+		display: block;
+		margin-top: 0.125rem;
+		font-size: 0.8125rem;
+		color: var(--sub-text-color);
+	}
+}
+
+.vulomail-diag-tick {
+	display: grid;
+	flex-shrink: 0;
+	width: 1.5rem;
+	height: 1.5rem;
+	border-radius: 999px;
+	place-items: center;
+	background: #ecfdf3;
+	color: #079455;
+}
+
+.vulomail-diag-stamp {
+	font-size: 0.8125rem;
+	color: var(--sub-text-color);
+}
+
+@media (max-width: 600px) {
+	.vulomail-diag-stats {
+		grid-template-columns: 1fr;
+	}
+
+	.vulomail-diag-card {
+		padding: 1rem;
+		gap: 0.75rem;
+	}
 }
 
 // Day-grouped timeline (Dashboard → Recent failures). Mirrors VuloPilot's "Recent activity" list:
@@ -634,4 +1082,11 @@
 		font-size: 0.8125rem;
 		color: var(--sub-text-color);
 	}
+}
+
+// zyra's lightbox popup footer is pinned with position: fixed and only gets flow clearance in the
+// "slide" variants, so the log detail popup's body needs its own bottom padding or the footer
+// permanently covers the last of its content.
+.vulomail-log-popup [data-position='lightbox'] .popup-body {
+	padding-bottom: 4.5rem;
 }

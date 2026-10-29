@@ -144,8 +144,7 @@ class Logs extends Controller {
 			),
 		);
 
-		// Replaced by `opened`, `clicked` and `tracking`. The token is what a tracked email's links
-		// carry, and never leaves the server.
+		// Replaced by `opened`, `clicked` and `tracking`; the token never leaves the server.
 		unset(
 			$row['tracking_token'],
 			$row['track_opens'],
@@ -241,8 +240,7 @@ class Logs extends Controller {
 	}
 
 	/**
-	 * Turns a calendar day from the date-range filter into a UTC datetime, read in the site's own
-	 * timezone (the one the log's dates are shown in).
+	 * Turns a calendar day from the date-range filter into a UTC datetime, read in the site's own timezone.
 	 *
 	 * @param mixed  $day  Raw request value, expected as `Y-m-d`.
 	 * @param string $time `H:i:s` within that day.
@@ -261,10 +259,8 @@ class Logs extends Controller {
 	}
 
 	/**
-	 * Adds `opened` and `clicked` to a log row: 'yes', 'no', or 'not_tracked'. Only a delivered email
-	 * gets `track_*` flags, so a failed email or text message reads 'not_tracked'. A click counts as
-	 * an open - the reader must have opened the email to click, even if their mail app blocked the
-	 * pixel.
+	 * Adds `opened` and `clicked` to a log row: 'yes', 'no', or 'not_tracked' (failed/SMS rows, with no
+	 * `track_*` flags). A click counts as an open even if the mail app blocked the pixel.
 	 *
 	 * @param array $row Log row with its tracking columns.
 	 * @return array

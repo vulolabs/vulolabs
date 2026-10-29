@@ -10,9 +10,7 @@ namespace VuloMail\Email\Mailers;
 defined( 'ABSPATH' ) || exit;
 
 /**
- * Google Workspace over SMTP. Workspace mail runs on the same servers as Gmail, so this is GmailSmtp
- * under its own label and connection name - listed separately because Gmail and Google Workspace are
- * two distinct options for the person choosing a provider.
+ * Google Workspace over SMTP - runs on the same servers as Gmail, so this is GmailSmtp under its own label/connection name.
  */
 class GoogleWorkspaceSmtp extends GmailSmtp {
 

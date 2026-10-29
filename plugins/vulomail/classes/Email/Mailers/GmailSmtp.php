@@ -10,13 +10,8 @@ namespace VuloMail\Email\Mailers;
 defined( 'ABSPATH' ) || exit;
 
 /**
- * Gmail over SMTP, with the host, port and encryption fixed to Google's own - only the address and
- * an app password are asked for. Needs 2-Step Verification switched on and an app password generated
- * at myaccount.google.com/apppasswords; the normal account password will not authenticate here.
- *
- * GoogleWorkspaceSmtp extends this with the same host and fields under its own, separate provider
- * entry, since Gmail and Google Workspace are listed as two distinct options. The Gmail provider
- * itself (Gmail) hands its app-password connections to this class.
+ * Gmail over SMTP: host/port/encryption fixed to Google's own, only address + app password asked for.
+ * GoogleWorkspaceSmtp extends this under its own provider entry; Gmail hands app-password connections here too.
  */
 class GmailSmtp extends Smtp {
 

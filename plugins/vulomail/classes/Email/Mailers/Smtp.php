@@ -139,8 +139,7 @@ class Smtp implements MailerInterface {
 	}
 
 	/**
-	 * Fills a PHPMailer instance with a message, then lets other plugins adjust it through
-	 * `phpmailer_init`. Also used to build the raw email the Gmail API sends.
+	 * Fills a PHPMailer instance with a message, then fires `phpmailer_init`. Also used to build the raw email the Gmail API sends.
 	 *
 	 * @param object  $mailer  PHPMailer instance.
 	 * @param Message $message Message.
@@ -179,9 +178,7 @@ class Smtp implements MailerInterface {
 			$mailer->addAttachment( $path, $name );
 		}
 
-		// Other plugins adjust content here (WooCommerce adds the plain-text part of a multipart
-		// email, for example). The transport is applied afterwards so none of them can redirect
-		// the message to a different server.
+		// Other plugins adjust content here (e.g. WooCommerce's plain-text part); transport is applied after, so none can redirect the message.
 		do_action_ref_array( 'phpmailer_init', array( &$mailer ) ); // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound -- core hook, fired for parity with wp_mail().
 	}
 

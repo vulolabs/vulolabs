@@ -10,11 +10,8 @@ namespace VuloMail\Security;
 defined( 'ABSPATH' ) || exit;
 
 /**
- * Encrypts provider credentials at rest and masks them for display.
- *
- * The key is derived from WordPress's auth salt (wp-config.php) plus a random value stored in the
- * database, so neither a database dump nor the config file alone is enough to read a credential.
- * Define VULOMAIL_ENCRYPTION_KEY in wp-config.php to supply the secret half yourself.
+ * Encrypts provider credentials at rest and masks them for display. Key is derived from WordPress's
+ * auth salt plus a random stored value, so neither a database dump nor wp-config.php alone is enough to read a credential. Override with VULOMAIL_ENCRYPTION_KEY.
  */
 class Secrets {
 

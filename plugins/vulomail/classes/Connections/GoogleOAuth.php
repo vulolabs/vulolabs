@@ -16,18 +16,11 @@ use VuloMail\Utill;
 defined( 'ABSPATH' ) || exit;
 
 /**
- * "Sign in with Google" for the Gmail connection.
- *
- * Two modes share one flow (authorization code with PKCE, single-use state):
- *
- * - `oneclick`: VuloLabs' Google connect service (VULOMAIL_GOOGLE_CONNECT_URL) holds the
- *   Google-approved OAuth app. It exposes `/authorize` and `/token` with Google's own request and
- *   response shapes, minus the client credentials, which never reach the site.
- * - `own`: the site owner's own Google Cloud OAuth client, talking to Google directly.
- *
- * Only `gmail.send` (plus `openid email`, to show which account is connected) is requested: the site
- * can send as the account, never read its mail. The refresh token is stored encrypted on the
- * connection; access tokens are cached encrypted for just under their lifetime.
+ * "Sign in with Google" for the Gmail connection. Two modes share one flow (authorization code with
+ * PKCE, single-use state): `oneclick` goes through VuloLabs' Google connect service
+ * (VULOMAIL_GOOGLE_CONNECT_URL, client credentials never reach the site); `own` is the site owner's
+ * Google Cloud OAuth client talking to Google directly. Only `gmail.send` + `openid email` is requested.
+ * Refresh token stored encrypted on the connection; access tokens cached encrypted until just before expiry.
  */
 class GoogleOAuth {
 
@@ -108,8 +101,7 @@ class GoogleOAuth {
 	}
 
 	/**
-	 * Where Google (or the connect service) sends the browser back to. In own mode this exact
-	 * address must be listed under "Authorized redirect URIs" in the Google Cloud client.
+	 * Where Google (or the connect service) sends the browser back; in own mode it must be listed under "Authorized redirect URIs" in the Google Cloud client.
 	 *
 	 * @return string
 	 */
@@ -191,8 +183,7 @@ class GoogleOAuth {
 	}
 
 	/**
-	 * Finishes a sign-in: checks the state, exchanges the code and stores the refresh token on the
-	 * connection.
+	 * Finishes a sign-in: checks the state, exchanges the code and stores the refresh token on the connection.
 	 *
 	 * @param string $state State from the callback.
 	 * @param string $code  Authorization code.
@@ -390,8 +381,7 @@ class GoogleOAuth {
 	}
 
 	/**
-	 * The `email` claim of an ID token. The token came straight from the token endpoint over TLS,
-	 * which OpenID Connect accepts in place of checking its signature.
+	 * The `email` claim of an ID token, trusted because it came straight from the token endpoint over TLS.
 	 *
 	 * @param string $id_token JWT.
 	 * @return string

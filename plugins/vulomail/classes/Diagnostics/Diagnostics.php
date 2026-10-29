@@ -14,10 +14,7 @@ use VuloMail\Utill;
 defined( 'ABSPATH' ) || exit;
 
 /**
- * Read-only health checks for the Tools → Diagnostics screen.
- *
- * Nothing here sends a message or changes a setting. Every result that is not "good" says what to do
- * about it (`fix`) and, where a screen can solve it, links there (`action`).
+ * Read-only health checks for the Tools → Diagnostics screen. Every non-"good" result says what to do (`fix`) and, where a screen can solve it, links there (`action`).
  */
 class Diagnostics {
 
@@ -237,8 +234,7 @@ class Diagnostics {
 			return null;
 		}
 
-		// Cached so reopening the screen doesn't repeat lookups; failures cache shorter, so a
-		// retry isn't stuck waiting on every visit.
+		// Cached so reopening the screen doesn't repeat lookups; failures cache shorter so a retry isn't stuck waiting.
 		$cache_key = 'vulomail_dns_' . md5( $host );
 		$cached    = get_transient( $cache_key );
 
@@ -325,8 +321,7 @@ class Diagnostics {
 	}
 
 	/**
-	 * Works out what actually happens to a wp_mail() call on this site: VuloMail sends it, another
-	 * plugin takes it, or it falls through to WordPress's built-in mailer and PHP's mail().
+	 * Works out what happens to a wp_mail() call: VuloMail sends it, another plugin takes it, or it falls through to PHP's mail().
 	 *
 	 * @return array
 	 */
@@ -414,7 +409,7 @@ class Diagnostics {
 		$mail = self::describe_php_mail( self::php_mail_environment() );
 
 		if ( 'disabled' === $mail['state'] ) {
-			return self::result( 'wp_mail', $label, 'error', $why . ' ' . __( 'wp_mail() falls back to PHP\'s mail() function, and that function is disabled on this server. Email from this site is not being sent.', 'vulomail' ), $fix, $go );
+			return self::result( 'wp_mail', $label, 'error', $why . ' ' . __( 'wp_mail() falls back to PHP\'s mail(), which is disabled on this server — nothing from this site is being sent.', 'vulomail' ), $fix, $go );
 		}
 
 		if ( 'no_transport' === $mail['state'] ) {
@@ -423,7 +418,7 @@ class Diagnostics {
 				$label,
 				'error',
 				/* translators: %s: path of the missing mail program. */
-				$why . ' ' . sprintf( __( 'wp_mail() falls back to PHP\'s mail() function, but this server has no mail program to hand messages to (%s was not found). Email from this site is not being sent.', 'vulomail' ), $mail['detail'] ),
+				$why . ' ' . sprintf( __( 'wp_mail() falls back to PHP\'s mail(), but this server has no mail program to hand messages to (%s was not found) — nothing from this site is being sent.', 'vulomail' ), $mail['detail'] ),
 				$fix,
 				$go
 			);
@@ -434,7 +429,7 @@ class Diagnostics {
 			$label,
 			'warning',
 			/* translators: %s: how PHP mail() hands messages on, e.g. a sendmail path. */
-			$why . ' ' . sprintf( __( 'wp_mail() uses WordPress\'s built-in mailer and PHP\'s mail() function (%s). Email sent this way is not authenticated, so it is often rejected or put in spam, and many hosts limit or block it.', 'vulomail' ), $mail['detail'] ),
+			$why . ' ' . sprintf( __( 'wp_mail() falls back to PHP\'s mail() (%s), which is not authenticated — email sent this way is often rejected or marked spam, and many hosts limit or block it.', 'vulomail' ), $mail['detail'] ),
 			$fix,
 			$go
 		);
@@ -560,8 +555,7 @@ class Diagnostics {
 	}
 
 	/**
-	 * Turns a file path into something a site owner recognises: the plugin's name when the file
-	 * belongs to a plugin, otherwise its path inside the WordPress folder.
+	 * Turns a file path into something a site owner recognises: a plugin's name, or its path inside WordPress.
 	 *
 	 * @param string $file Normalised file path.
 	 * @return string
@@ -646,7 +640,7 @@ class Diagnostics {
 					$label,
 					'error',
 					/* translators: 1: number of emails, 2: time span such as "5 mins", 3: error message. */
-					sprintf( __( 'The last %1$d emails all failed. Email is not going out. Latest error, %2$s ago: %3$s', 'vulomail' ), $summary['total'], $ago, $error ),
+					sprintf( __( 'The last %1$d emails all failed — nothing is going out. Latest error, %2$s ago: %3$s', 'vulomail' ), $summary['total'], $ago, $error ),
 					$repair,
 					$logs
 				);
@@ -657,7 +651,7 @@ class Diagnostics {
 				$label,
 				'warning',
 				/* translators: 1: time span such as "5 mins", 2: error message, 3: failed count, 4: number of emails checked. */
-				sprintf( __( 'The most recent email failed %1$s ago: %2$s (%3$d of the last %4$d failed.)', 'vulomail' ), $ago, $error, $summary['failed'], $summary['total'] ),
+				sprintf( __( 'The most recent email failed %1$s ago: %2$s (%3$d of the last %4$d failed).', 'vulomail' ), $ago, $error, $summary['failed'], $summary['total'] ),
 				$repair,
 				$logs
 			);
@@ -804,7 +798,7 @@ class Diagnostics {
 			__( 'Connections', 'vulomail' ),
 			'error',
 			/* translators: %s: connection names. */
-			sprintf( __( 'Incomplete: %s. A required field is empty, or its saved credential can no longer be read (this happens when the site\'s security salts change). Nothing is sent through an incomplete connection.', 'vulomail' ), implode( ', ', $broken ) ),
+			sprintf( __( 'Incomplete: %s. A required field is empty, or its saved credential can no longer be read (this happens when the site\'s security salts change) — nothing is sent through it until fixed.', 'vulomail' ), implode( ', ', $broken ) ),
 			__( 'Edit each connection listed, fill in the empty fields and re-enter its password or API key, then save and send a test.', 'vulomail' ),
 			self::to_tab( __( 'Open connections', 'vulomail' ), 'settings&subtab=connections' )
 		);

@@ -147,8 +147,7 @@ final class VuloMail {
 		$this->container['tracking']->register_endpoint();
 
 		/**
-		 * Fires once VuloMail has booted. Integrations should wait for this before calling the
-		 * public API (classes/Integrations/functions.php).
+		 * Fires once VuloMail has booted. Integrations should wait for this before calling the public API.
 		 */
 		do_action( 'vulomail_loaded' );
 	}

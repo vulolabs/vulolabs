@@ -140,6 +140,13 @@ const observedRange = (first: string, last: string): string => {
 	return first === last ? first : `${first} – ${last}`;
 };
 
+/** Splits a `"Name" <address>` header into its parts; falls back to treating the whole value as both. */
+const parseAddress = (value: string): { name: string; address: string } => {
+	const match = value.match(/^"?([^"<]*)"?\s*<([^>]+)>$/);
+
+	return match ? { name: match[1].trim() || match[2], address: match[2] } : { name: value, address: value };
+};
+
 const Logs = () => {
 	const [channel, setChannel] = useState('all');
 	const [query, setQuery] = useState<TableQuery>({ paged: 1, per_page: 10 });
@@ -232,6 +239,17 @@ const Logs = () => {
 			})
 			.catch((e) => notify('error', errorMessage(e)))
 			.finally(() => setIsBusy(false));
+	};
+
+	const copyMessageId = () => {
+		if (!detail?.message_id) {
+			return;
+		}
+
+		navigator.clipboard
+			?.writeText(detail.message_id)
+			.then(() => notify('success', __('Provider ID copied.', 'vulomail')))
+			.catch(() => notify('error', __('Could not copy. Select the ID and copy it yourself.', 'vulomail')));
 	};
 
 	const clearAll = () => {
@@ -407,26 +425,67 @@ const Logs = () => {
 				width={42}
 				height="auto"
 				position="lightbox"
+				className="vulomail-log-popup"
 				header={{
 					icon: 'sms' === detail?.channel ? 'send' : 'mail',
 					title: 'sms' === detail?.channel ? __('Text message', 'vulomail') : detail?.subject || __('Email', 'vulomail'),
 				}}
+				footer={
+					detail && (
+						<ButtonInput
+							buttons={[
+								{
+									text: __('Delete entry', 'vulomail'),
+									icon: 'delete',
+									color: 'border-red',
+									disabled: isBusy,
+									onClick: deleteOne,
+								},
+								{
+									text: __('Resend', 'vulomail'),
+									icon: 'send',
+									color: 'purple',
+									disabled: isBusy || !detail.can_resend,
+									onClick: resend,
+								},
+							]}
+						/>
+					)
+				}
 			>
 				{detail && (
 					<div className="vulomail-popup-body">
+						<div className="vulomail-log-statusline">
+							{statusBadge(detail)}
+							<span>{displayDate(detail)}</span>
+						</div>
+						{detail.headers.From ? (
+							<div className="vulomail-log-route">
+								{[
+									{ kind: 'from', label: __('From', 'vulomail'), ...parseAddress(detail.headers.From) },
+									{ kind: 'to', label: __('To', 'vulomail'), name: detail.recipients, address: detail.recipients },
+								].map((party) => (
+									<div className="vulomail-log-party" key={party.kind}>
+										<span className={`vulomail-log-avatar is-${party.kind}`} aria-hidden="true">
+											{party.name.charAt(0).toUpperCase()}
+										</span>
+										<div className="vulomail-log-cell">
+											<span className="vulomail-log-secondary">{party.label}</span>
+											<span className="vulomail-log-primary">{party.name}</span>
+											{party.address !== party.name && (
+												<span className="vulomail-log-secondary">{party.address}</span>
+											)}
+										</div>
+									</div>
+								))}
+							</div>
+						) : (
+							<dl className="vulomail-detail">
+								<dt>{__('To', 'vulomail')}</dt>
+								<dd>{detail.recipients}</dd>
+							</dl>
+						)}
 						<dl className="vulomail-detail">
-							<dt>{__('Status', 'vulomail')}</dt>
-							<dd>{statusBadge(detail)}</dd>
-							<dt>{__('Date', 'vulomail')}</dt>
-							<dd>{displayDate(detail)}</dd>
-							<dt>{__('To', 'vulomail')}</dt>
-							<dd>{detail.recipients}</dd>
-							{detail.headers.From && (
-								<>
-									<dt>{__('From', 'vulomail')}</dt>
-									<dd>{detail.headers.From}</dd>
-								</>
-							)}
 							<dt>{__('Sent with', 'vulomail')}</dt>
 							<dd>{providerLabel(detail.provider) || '—'}</dd>
 							{detail.source && (
@@ -444,7 +503,16 @@ const Logs = () => {
 							{detail.message_id && (
 								<>
 									<dt>{__('Provider ID', 'vulomail')}</dt>
-									<dd>{detail.message_id}</dd>
+									<dd className="vulomail-log-copy-row">
+										<code>{detail.message_id}</code>
+										<ButtonInput
+											buttons={{
+												text: __('Copy', 'vulomail'),
+												icon: 'copy',
+												onClick: copyMessageId,
+											}}
+										/>
+									</dd>
 								</>
 							)}
 						</dl>
@@ -549,8 +617,11 @@ const Logs = () => {
 							/>
 						)}
 						{detail.has_body ? (
-							// Shown as text, never rendered as HTML: a logged email body is untrusted content.
-							<pre className="vulomail-message-body">{detail.body}</pre>
+							<div className="vulomail-log-message">
+								{detail.subject && <div className="vulomail-log-message-bar">{detail.subject}</div>}
+								{/* Shown as text, never rendered as HTML: a logged email body is untrusted content. */}
+								<pre className="vulomail-message-body">{detail.body}</pre>
+							</div>
 						) : (
 							<NoticeComponent
 								displayPosition="inline-notice"
@@ -566,25 +637,6 @@ const Logs = () => {
 								)}
 							/>
 						)}
-						<div className="vulomail-form-footer">
-							<ButtonInput
-								buttons={[
-									{
-										text: __('Delete entry', 'vulomail'),
-										icon: 'delete',
-										color: 'border-red',
-										disabled: isBusy,
-										onClick: deleteOne,
-									},
-									{
-										text: __('Resend', 'vulomail'),
-										icon: 'send',
-										disabled: isBusy || !detail.can_resend,
-										onClick: resend,
-									},
-								]}
-							/>
-						</div>
 					</div>
 				)}
 			</PopupComponent>

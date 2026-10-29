@@ -56,11 +56,8 @@ class Settings extends Controller {
 	}
 
 	/**
-	 * Merges posted keys into stored settings; unknown keys are ignored, every value validated by
-	 * Settings\Settings.
-	 *
-	 * Accepts a flat `{ key: value }` body, or the `{ setting, settingName }` body zyra's auto-saving
-	 * settings form sends, unpacked by from_form_values().
+	 * Merges posted keys into stored settings; unknown keys are ignored, every value validated by Settings\Settings.
+	 * Accepts a flat `{ key: value }` body, or zyra's auto-saving form's `{ setting, settingName }` body, unpacked by from_form_values().
 	 *
 	 * @param \WP_REST_Request $request Request.
 	 * @return \WP_REST_Response|\WP_Error
