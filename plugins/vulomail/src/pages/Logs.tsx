@@ -1,5 +1,6 @@
 /* global vulomailAppLocalizer */
 import { Fragment, useCallback, useEffect, useState } from 'react';
+import type { ReactNode } from 'react';
 import { useLocation } from 'react-router-dom';
 import { __, _n, sprintf } from '@wordpress/i18n';
 import {
@@ -147,6 +148,20 @@ const parseAddress = (value: string): { name: string; address: string } => {
 	return match ? { name: match[1].trim() || match[2], address: match[2] } : { name: value, address: value };
 };
 
+/** A logged message body, as text, with any http(s) links made clickable. Never rendered as HTML. */
+const linkify = (text: string): ReactNode[] =>
+	text
+		.split(/(https?:\/\/[^\s<>"]+)/g)
+		.map((part, index) =>
+			index % 2 ? (
+				<a key={index} href={part} target="_blank" rel="noreferrer">
+					{part}
+				</a>
+			) : (
+				part
+			)
+		);
+
 const Logs = () => {
 	const [channel, setChannel] = useState('all');
 	const [query, setQuery] = useState<TableQuery>({ paged: 1, per_page: 10 });
@@ -155,6 +170,7 @@ const Logs = () => {
 	const [error, setError] = useState('');
 	const [reload, setReload] = useState(0);
 	const [detail, setDetail] = useState<LogDetail | null>(null);
+	const [messageView, setMessageView] = useState<'preview' | 'raw'>('preview');
 	const [confirmClear, setConfirmClear] = useState(false);
 	const [isBusy, setIsBusy] = useState(false);
 
@@ -166,7 +182,10 @@ const Logs = () => {
 	useEffect(() => {
 		if (linkedLogId && /^\d+$/.test(linkedLogId)) {
 			apiGet<LogDetail>(`logs/${linkedLogId}`)
-				.then(setDetail)
+				.then((row) => {
+					setDetail(row);
+					setMessageView('preview');
+				})
 				.catch((e) => notify('error', errorMessage(e)));
 		}
 	}, [linkedLogId]);
@@ -203,7 +222,10 @@ const Logs = () => {
 
 	const openDetail = (row: LogRow) => {
 		apiGet<LogDetail>(`logs/${row.id}`)
-			.then(setDetail)
+			.then((detailRow) => {
+				setDetail(detailRow);
+				setMessageView('preview');
+			})
 			.catch((e) => notify('error', errorMessage(e)));
 	};
 
@@ -486,6 +508,12 @@ const Logs = () => {
 							</dl>
 						)}
 						<dl className="vulomail-detail">
+							{'email' === detail.channel && detail.subject && (
+								<>
+									<dt>{__('Subject', 'vulomail')}</dt>
+									<dd>{detail.subject}</dd>
+								</>
+							)}
 							<dt>{__('Sent with', 'vulomail')}</dt>
 							<dd>{providerLabel(detail.provider) || '—'}</dd>
 							{detail.source && (
@@ -617,11 +645,43 @@ const Logs = () => {
 							/>
 						)}
 						{detail.has_body ? (
-							<div className="vulomail-log-message">
-								{detail.subject && <div className="vulomail-log-message-bar">{detail.subject}</div>}
-								{/* Shown as text, never rendered as HTML: a logged email body is untrusted content. */}
-								<pre className="vulomail-message-body">{detail.body}</pre>
-							</div>
+							<section>
+								<div className="vulomail-log-message-head">
+									<h4 className="vulomail-section-title">{__('Message', 'vulomail')}</h4>
+									<div className="vulomail-log-seg" role="tablist" aria-label={__('Message view', 'vulomail')}>
+										{(
+											[
+												['preview', __('Preview', 'vulomail')],
+												['raw', __('Plain text', 'vulomail')],
+											] as const
+										).map(([value, label]) => (
+											<button
+												key={value}
+												type="button"
+												role="tab"
+												aria-selected={value === messageView}
+												onClick={() => setMessageView(value)}
+											>
+												{label}
+											</button>
+										))}
+									</div>
+								</div>
+								<div className="vulomail-log-message">
+									{detail.subject && (
+										<div className="vulomail-log-message-bar">
+											{__('Subject:', 'vulomail')} <strong>{detail.subject}</strong>
+										</div>
+									)}
+									{/* Never rendered as HTML: a logged message body is untrusted content, so "preview" only
+									    linkifies plain text rather than interpreting any markup in it. */}
+									{'raw' === messageView ? (
+										<pre className="vulomail-message-body">{detail.body}</pre>
+									) : (
+										<div className="vulomail-message-body">{linkify(detail.body ?? '')}</div>
+									)}
+								</div>
+							</section>
 						) : (
 							<NoticeComponent
 								displayPosition="inline-notice"

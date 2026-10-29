@@ -425,7 +425,7 @@ const Tools = () => {
 
 								{bySeverity('error').length > 0 && (
 									<div className="vulomail-diag-group">
-										<h3 className="vulomail-diag-group-title">{GROUP_TITLE.error}</h3>
+										<h3 className="vulomail-section-title">{GROUP_TITLE.error}</h3>
 										{bySeverity('error').map((check) => (
 											<IssueCard key={check.id} check={check} />
 										))}
@@ -434,7 +434,7 @@ const Tools = () => {
 
 								{bySeverity('warning').length > 0 && (
 									<div className="vulomail-diag-group">
-										<h3 className="vulomail-diag-group-title">{GROUP_TITLE.warning}</h3>
+										<h3 className="vulomail-section-title">{GROUP_TITLE.warning}</h3>
 										{bySeverity('warning').map((check) => (
 											<IssueCard key={check.id} check={check} />
 										))}
@@ -443,7 +443,7 @@ const Tools = () => {
 
 								{bySeverity('info').length > 0 && (
 									<div className="vulomail-diag-group">
-										<h3 className="vulomail-diag-group-title">{GROUP_TITLE.info}</h3>
+										<h3 className="vulomail-section-title">{GROUP_TITLE.info}</h3>
 										<div className="vulomail-diag-info-grid">
 											{bySeverity('info').map((check) => (
 												<InfoCard key={check.id} check={check} />
@@ -454,7 +454,7 @@ const Tools = () => {
 
 								{bySeverity('good').length > 0 && (
 									<div className="vulomail-diag-group">
-										<h3 className="vulomail-diag-group-title">{GROUP_TITLE.good}</h3>
+										<h3 className="vulomail-section-title">{GROUP_TITLE.good}</h3>
 										<div className="vulomail-diag-passed">
 											{bySeverity('good').map((check) => (
 												<div className="vulomail-diag-pass" key={check.id}>
