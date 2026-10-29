@@ -8,7 +8,7 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-10-10T10:50:17+00:00\n"
+"POT-Creation-Date: 2026-10-27T12:58:25+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.12.0\n"
 "X-Domain: vulomail\n"
@@ -20,7 +20,7 @@ msgstr ""
 
 #. Plugin URI of the plugin
 #: vulomail.php
-msgid "https://vulolabs.com/vulomail/"
+msgid "https://vulomail.com/"
 msgstr ""
 
 #. Description of the plugin
@@ -70,7 +70,9 @@ msgid "Provider"
 msgstr ""
 
 #: classes/Connections/ConnectionRepository.php:166
-#: classes/Rest/Connections.php:104
+#: classes/Connections/GoogleOAuth.php:142
+#: classes/Connections/GoogleOAuth.php:227
+#: classes/Rest/Connections.php:167
 #: classes/Rest/Tools.php:105
 #: classes/Rest/Tools.php:164
 msgid "That connection no longer exists."
@@ -78,6 +80,62 @@ msgstr ""
 
 #: classes/Connections/ConnectionRepository.php:176
 msgid "Unknown provider."
+msgstr ""
+
+#: classes/Connections/GoogleOAuth.php:148
+msgid "This connection uses an app password. Choose a \"Sign in with Google\" method, save, then sign in."
+msgstr ""
+
+#: classes/Connections/GoogleOAuth.php:154
+msgid "Enter your Google Client ID and Client Secret, save, then sign in."
+msgstr ""
+
+#: classes/Connections/GoogleOAuth.php:212
+msgid "That sign-in link has expired. Open the Gmail connection and click \"Sign in with Google\" again."
+msgstr ""
+
+#: classes/Connections/GoogleOAuth.php:219
+msgid "Google sign-in was cancelled, so the Gmail connection was not changed."
+msgstr ""
+
+#: classes/Connections/GoogleOAuth.php:220
+msgid "Google did not complete the sign-in. Please try again."
+msgstr ""
+
+#: classes/Connections/GoogleOAuth.php:249
+msgid "VuloMail needs permission to send email for you. Sign in again and leave \"Send email on your behalf\" ticked."
+msgstr ""
+
+#: classes/Connections/GoogleOAuth.php:253
+msgid "Google did not grant lasting access. Remove VuloMail under \"Third-party apps\" in your Google account, then sign in again."
+msgstr ""
+
+#. translators: %s: Gmail address.
+#: classes/Connections/GoogleOAuth.php:278
+#, php-format
+msgid "Connected to Google as %s."
+msgstr ""
+
+#: classes/Connections/GoogleOAuth.php:279
+msgid "Connected to Google."
+msgstr ""
+
+#: classes/Connections/GoogleOAuth.php:294
+msgid "This Gmail connection is not signed in. Open it and click \"Sign in with Google\"."
+msgstr ""
+
+#: classes/Connections/GoogleOAuth.php:371
+msgid "Google no longer accepts this connection's sign-in: access was removed, the password changed, or it expired. Open the Gmail connection and click \"Sign in with Google\" again."
+msgstr ""
+
+#: classes/Connections/GoogleOAuth.php:373
+msgid "Google did not accept the Client ID or Client Secret. Check them in the Gmail connection."
+msgstr ""
+
+#. translators: %s: error text from Google.
+#: classes/Connections/GoogleOAuth.php:377
+#, php-format
+msgid "Google refused the sign-in: %s"
 msgstr ""
 
 #: classes/Diagnostics/Diagnostics.php:65
@@ -506,20 +564,128 @@ msgstr ""
 msgid "The provider rejected the message (HTTP %1$d): %2$s"
 msgstr ""
 
-#: classes/Email/Dispatcher.php:106
+#: classes/Email/Dispatcher.php:115
 msgid "No email connection is configured."
 msgstr ""
 
-#: classes/Email/Dispatcher.php:157
+#: classes/Email/Dispatcher.php:169
 msgid "This connection uses a provider that is no longer available."
 msgstr ""
 
-#: classes/Email/Dispatcher.php:159
+#: classes/Email/Dispatcher.php:171
 msgid "The message has no valid recipient."
 msgstr ""
 
-#: classes/Email/Dispatcher.php:166
+#: classes/Email/Dispatcher.php:178
 msgid "The email provider adapter failed unexpectedly."
+msgstr ""
+
+#: classes/Email/Mailers/AmazonSesSmtp.php:51
+msgid "Amazon SES"
+msgstr ""
+
+#: classes/Email/Mailers/AmazonSesSmtp.php:52
+msgid "Sends through Amazon SES's SMTP interface."
+msgstr ""
+
+#: classes/Email/Mailers/AmazonSesSmtp.php:56
+#: classes/Email/Mailers/AmazonWorkmailSmtp.php:54
+msgid "AWS region"
+msgstr ""
+
+#: classes/Email/Mailers/AmazonSesSmtp.php:60
+msgid "For example us-east-1 or eu-west-1 - must match the region SES is verified in."
+msgstr ""
+
+#: classes/Email/Mailers/AmazonSesSmtp.php:64
+msgid "SMTP username"
+msgstr ""
+
+#: classes/Email/Mailers/AmazonSesSmtp.php:67
+msgid "Not your AWS access key. <a href=\"https://console.aws.amazon.com/ses/home#/smtp\" target=\"_blank\" rel=\"noopener noreferrer\">Create SMTP credentials</a> in the SES console."
+msgstr ""
+
+#: classes/Email/Mailers/AmazonSesSmtp.php:71
+msgid "SMTP password"
+msgstr ""
+
+#: classes/Email/Mailers/AmazonWorkmailSmtp.php:49
+msgid "Amazon WorkMail"
+msgstr ""
+
+#: classes/Email/Mailers/AmazonWorkmailSmtp.php:50
+msgid "Sends through Amazon WorkMail's SMTP server."
+msgstr ""
+
+#: classes/Email/Mailers/AmazonWorkmailSmtp.php:58
+msgid "Must match the region your WorkMail organization is in. <a href=\"https://console.aws.amazon.com/workmail/home\" target=\"_blank\" rel=\"noopener noreferrer\">Open the WorkMail console</a>."
+msgstr ""
+
+#: classes/Email/Mailers/AmazonWorkmailSmtp.php:62
+msgid "WorkMail address"
+msgstr ""
+
+#: classes/Email/Mailers/AmazonWorkmailSmtp.php:68
+#: classes/Email/Mailers/Microsoft365Smtp.php:58
+#: classes/Email/Mailers/MigaduSmtp.php:58
+#: classes/Email/Mailers/NamecheapSmtp.php:58
+#: classes/Email/Mailers/OutlookSmtp.php:58
+#: classes/Email/Mailers/PurelymailSmtp.php:58
+#: classes/Email/Mailers/RackspaceSmtp.php:58
+#: classes/Email/Mailers/Smtp.php:106
+#: classes/Email/Mailers/TitanSmtp.php:58
+#: classes/Email/Mailers/ZohoSmtp.php:58
+msgid "Password"
+msgstr ""
+
+#: classes/Email/Mailers/AolSmtp.php:47
+msgid "AOL Mail"
+msgstr ""
+
+#: classes/Email/Mailers/AolSmtp.php:48
+msgid "Sends through AOL Mail's SMTP server."
+msgstr ""
+
+#: classes/Email/Mailers/AolSmtp.php:52
+msgid "AOL address"
+msgstr ""
+
+#: classes/Email/Mailers/AolSmtp.php:58
+#: classes/Email/Mailers/FastmailSmtp.php:58
+#: classes/Email/Mailers/Gmail.php:76
+#: classes/Email/Mailers/Gmail.php:114
+#: classes/Email/Mailers/GmailSmtp.php:64
+#: classes/Email/Mailers/YahooSmtp.php:58
+#: classes/Email/Mailers/YandexSmtp.php:58
+msgid "App password"
+msgstr ""
+
+#: classes/Email/Mailers/AolSmtp.php:62
+msgid "Your normal password will not work here. <a href=\"https://help.aol.co.uk/articles/Create-and-manage-app-password\" target=\"_blank\" rel=\"noopener noreferrer\">Generate an app password</a>, from your AOL Account Security page."
+msgstr ""
+
+#: classes/Email/Mailers/Bird.php:28
+msgid "Bird"
+msgstr ""
+
+#: classes/Email/Mailers/Bird.php:29
+msgid "Bird (formerly MessageBird) email API."
+msgstr ""
+
+#: classes/Email/Mailers/Bird.php:33
+msgid "Access key"
+msgstr ""
+
+#: classes/Email/Mailers/Bird.php:37
+msgid "<a href=\"https://bird.com/dashboard/w/api-keys\" target=\"_blank\" rel=\"noopener noreferrer\">Create one in Bird</a>, under Developers → API keys."
+msgstr ""
+
+#: classes/Email/Mailers/Bird.php:41
+msgid "Workspace region"
+msgstr ""
+
+#: classes/Email/Mailers/Bird.php:44
+msgid "The region prefix shown with your access key, for example us1 or eu1."
 msgstr ""
 
 #: classes/Email/Mailers/Brevo.php:30
@@ -531,15 +697,227 @@ msgid "Brevo (formerly Sendinblue) transactional email API."
 msgstr ""
 
 #: classes/Email/Mailers/Brevo.php:35
+#: classes/Email/Mailers/ElasticEmail.php:35
+#: classes/Email/Mailers/Emailit.php:35
+#: classes/Email/Mailers/Mailercloud.php:35
 #: classes/Email/Mailers/Mailgun.php:38
+#: classes/Email/Mailers/Mailjet.php:35
+#: classes/Email/Mailers/Mandrill.php:35
+#: classes/Email/Mailers/Netcore.php:35
+#: classes/Email/Mailers/Resend.php:35
 #: classes/Email/Mailers/SendGrid.php:35
+#: classes/Email/Mailers/SendLayer.php:35
+#: classes/Email/Mailers/Smtp2Go.php:35
+#: classes/Email/Mailers/SocketLabs.php:42
+#: classes/Email/Mailers/SparkPost.php:38
+#: classes/Email/Mailers/Sweego.php:35
 #: classes/Sms/Gateways/Clickatell.php:34
 #: classes/Sms/Gateways/Vonage.php:34
 msgid "API key"
 msgstr ""
 
 #: classes/Email/Mailers/Brevo.php:39
-msgid "A v3 API key from SMTP & API in your Brevo account."
+msgid "A v3 API key from SMTP & API in your Brevo account. <a href=\"https://app.brevo.com/settings/keys/api\" target=\"_blank\" rel=\"noopener noreferrer\">Create one in Brevo</a>."
+msgstr ""
+
+#: classes/Email/Mailers/CloudflareSmtp.php:50
+msgid "Cloudflare Email Sending"
+msgstr ""
+
+#: classes/Email/Mailers/CloudflareSmtp.php:51
+msgid "Sends through Cloudflare's Email Sending SMTP relay. Your sending domain must already be onboarded for Email Sending on the account that owns the token."
+msgstr ""
+
+#: classes/Email/Mailers/CloudflareSmtp.php:55
+#: classes/Email/Mailers/MailerSend.php:35
+#: classes/Email/Mailers/Mailtrap.php:35
+msgid "API token"
+msgstr ""
+
+#: classes/Email/Mailers/CloudflareSmtp.php:59
+msgid "<a href=\"https://dash.cloudflare.com/\" target=\"_blank\" rel=\"noopener noreferrer\">Open the Cloudflare dashboard</a>, under Email → Email Routing → Email Sending."
+msgstr ""
+
+#: classes/Email/Mailers/ElasticEmail.php:30
+msgid "Elastic Email"
+msgstr ""
+
+#: classes/Email/Mailers/ElasticEmail.php:31
+msgid "Elastic Email transactional API."
+msgstr ""
+
+#: classes/Email/Mailers/ElasticEmail.php:39
+msgid "<a href=\"https://elasticemail.com/account#/settings/new/manage-api\" target=\"_blank\" rel=\"noopener noreferrer\">Create one in Elastic Email</a>, under Settings → API."
+msgstr ""
+
+#: classes/Email/Mailers/Emailit.php:30
+msgid "Emailit"
+msgstr ""
+
+#: classes/Email/Mailers/Emailit.php:31
+msgid "Emailit transactional email API."
+msgstr ""
+
+#: classes/Email/Mailers/Emailit.php:39
+msgid "Create an API-type credential in your workspace. <a href=\"https://app.emailit.com\" target=\"_blank\" rel=\"noopener noreferrer\">Open Emailit</a>."
+msgstr ""
+
+#: classes/Email/Mailers/FastmailSmtp.php:47
+msgid "Fastmail"
+msgstr ""
+
+#: classes/Email/Mailers/FastmailSmtp.php:48
+msgid "Sends through Fastmail's SMTP server."
+msgstr ""
+
+#: classes/Email/Mailers/FastmailSmtp.php:52
+msgid "Fastmail address"
+msgstr ""
+
+#: classes/Email/Mailers/FastmailSmtp.php:62
+msgid "<a href=\"https://app.fastmail.com/settings/security/devicekeys\" target=\"_blank\" rel=\"noopener noreferrer\">Generate one in Fastmail</a>, under Settings → Password & Security → App passwords."
+msgstr ""
+
+#: classes/Email/Mailers/Gmail.php:59
+#: assets/js/index.js:1
+msgid "Sign in with Google"
+msgstr ""
+
+#: classes/Email/Mailers/Gmail.php:61
+msgid "Connect your Google account in one click. No password is stored."
+msgstr ""
+
+#: classes/Email/Mailers/Gmail.php:62
+msgid "Connect your Google account. No password is stored; needs a one-time Google Cloud setup, shown step by step."
+msgstr ""
+
+#: classes/Email/Mailers/Gmail.php:68
+msgid "Recommended"
+msgstr ""
+
+#: classes/Email/Mailers/Gmail.php:77
+msgid "Your Gmail address and a 16-character app password from your Google account."
+msgstr ""
+
+#: classes/Email/Mailers/Gmail.php:85
+msgid "My own Google app"
+msgstr ""
+
+#: classes/Email/Mailers/Gmail.php:86
+msgid "Sign in with Google through a Google Cloud app you manage. For advanced setups."
+msgstr ""
+
+#: classes/Email/Mailers/Gmail.php:92
+#: classes/Email/Mailers/GmailSmtp.php:53
+msgid "Gmail"
+msgstr ""
+
+#: classes/Email/Mailers/Gmail.php:93
+msgid "Send from your Gmail address, by signing in with Google or with an app password."
+msgstr ""
+
+#: classes/Email/Mailers/Gmail.php:98
+msgid "How do you want to connect?"
+msgstr ""
+
+#: classes/Email/Mailers/Gmail.php:107
+#: classes/Email/Mailers/GmailSmtp.php:58
+msgid "Gmail address"
+msgstr ""
+
+#: classes/Email/Mailers/Gmail.php:119
+#: classes/Email/Mailers/GmailSmtp.php:68
+msgid "Needs 2-Step Verification switched on; your normal password will not work here. <a href=\"https://myaccount.google.com/apppasswords\" target=\"_blank\" rel=\"noopener noreferrer\">Create an app password</a>."
+msgstr ""
+
+#: classes/Email/Mailers/Gmail.php:123
+#: classes/Email/Mailers/SendPulse.php:37
+msgid "Client ID"
+msgstr ""
+
+#: classes/Email/Mailers/Gmail.php:128
+msgid "From your Google Cloud OAuth client (type \"Web application\"). <a href=\"https://console.cloud.google.com/apis/credentials\" target=\"_blank\" rel=\"noopener noreferrer\">Open Google Cloud credentials</a>"
+msgstr ""
+
+#: classes/Email/Mailers/Gmail.php:132
+msgid "Client Secret"
+msgstr ""
+
+#: classes/Email/Mailers/Gmail.php:141
+#: assets/js/index.js:1
+msgid "Google account"
+msgstr ""
+
+#: classes/Email/Mailers/Gmail.php:148
+msgid "Google sign-in"
+msgstr ""
+
+#: classes/Email/Mailers/GmailSmtp.php:54
+msgid "Sends through Google's SMTP server using an app password."
+msgstr ""
+
+#: classes/Email/Mailers/GoogleWorkspaceSmtp.php:26
+msgid "Google Workspace"
+msgstr ""
+
+#: classes/Email/Mailers/IcloudSmtp.php:47
+msgid "iCloud Mail"
+msgstr ""
+
+#: classes/Email/Mailers/IcloudSmtp.php:48
+msgid "Sends through Apple's iCloud Mail SMTP server."
+msgstr ""
+
+#: classes/Email/Mailers/IcloudSmtp.php:52
+msgid "iCloud address"
+msgstr ""
+
+#: classes/Email/Mailers/IcloudSmtp.php:58
+msgid "App-specific password"
+msgstr ""
+
+#: classes/Email/Mailers/IcloudSmtp.php:62
+msgid "Your normal Apple ID password will not work here. <a href=\"https://appleid.apple.com\" target=\"_blank\" rel=\"noopener noreferrer\">Generate an app-specific password</a>, under Sign-In and Security."
+msgstr ""
+
+#: classes/Email/Mailers/Mailercloud.php:30
+msgid "Mailercloud"
+msgstr ""
+
+#: classes/Email/Mailers/Mailercloud.php:31
+msgid "Mailercloud transactional Email API."
+msgstr ""
+
+#: classes/Email/Mailers/Mailercloud.php:39
+msgid "<a href=\"https://app.mailercloud.com\" target=\"_blank\" rel=\"noopener noreferrer\">Open Mailercloud</a>, under Account → API Integrations."
+msgstr ""
+
+#: classes/Email/Mailers/Maileroo.php:30
+msgid "Maileroo"
+msgstr ""
+
+#: classes/Email/Mailers/Maileroo.php:31
+msgid "Maileroo transactional email API."
+msgstr ""
+
+#: classes/Email/Mailers/Maileroo.php:35
+msgid "Sending key"
+msgstr ""
+
+#: classes/Email/Mailers/Maileroo.php:39
+msgid "<a href=\"https://app.maileroo.com/login\" target=\"_blank\" rel=\"noopener noreferrer\">Open your domain in Maileroo</a>, then its Sending Keys page."
+msgstr ""
+
+#: classes/Email/Mailers/MailerSend.php:30
+msgid "MailerSend"
+msgstr ""
+
+#: classes/Email/Mailers/MailerSend.php:31
+msgid "MailerSend transactional email API."
+msgstr ""
+
+#: classes/Email/Mailers/MailerSend.php:39
+msgid "Needs the \"Email: full access\" or \"Email: send\" permission. <a href=\"https://app.mailersend.com\" target=\"_blank\" rel=\"noopener noreferrer\">Create one in MailerSend</a>, under Settings → API Tokens."
 msgstr ""
 
 #: classes/Email/Mailers/Mailgun.php:33
@@ -551,7 +929,7 @@ msgid "Mailgun transactional email API."
 msgstr ""
 
 #: classes/Email/Mailers/Mailgun.php:42
-msgid "A sending key for your domain is enough."
+msgid "A sending key for your domain is enough. <a href=\"https://app.mailgun.com/settings/api_security/api_keys\" target=\"_blank\" rel=\"noopener noreferrer\">Find it in Mailgun</a>, under Account Settings → API Keys."
 msgstr ""
 
 #: classes/Email/Mailers/Mailgun.php:46
@@ -563,19 +941,138 @@ msgid "For example mg.example.com"
 msgstr ""
 
 #: classes/Email/Mailers/Mailgun.php:53
+#: classes/Email/Mailers/SparkPost.php:46
 msgid "Region"
 msgstr ""
 
 #: classes/Email/Mailers/Mailgun.php:59
+#: classes/Email/Mailers/SparkPost.php:52
 msgid "US"
 msgstr ""
 
 #: classes/Email/Mailers/Mailgun.php:63
+#: classes/Email/Mailers/SparkPost.php:56
 msgid "EU"
 msgstr ""
 
 #: classes/Email/Mailers/Mailgun.php:82
 msgid "The Mailgun sending domain is not a valid domain name."
+msgstr ""
+
+#: classes/Email/Mailers/Mailjet.php:30
+msgid "Mailjet"
+msgstr ""
+
+#: classes/Email/Mailers/Mailjet.php:31
+msgid "Mailjet transactional email API."
+msgstr ""
+
+#: classes/Email/Mailers/Mailjet.php:38
+msgid "<a href=\"https://app.mailjet.com/account/apikeys\" target=\"_blank\" rel=\"noopener noreferrer\">Find both keys in Mailjet</a>, under Account Settings → API Key Management."
+msgstr ""
+
+#: classes/Email/Mailers/Mailjet.php:42
+msgid "Secret key"
+msgstr ""
+
+#: classes/Email/Mailers/Mailtrap.php:30
+msgid "Mailtrap"
+msgstr ""
+
+#: classes/Email/Mailers/Mailtrap.php:31
+msgid "Mailtrap transactional Email Sending API."
+msgstr ""
+
+#: classes/Email/Mailers/Mailtrap.php:39
+msgid "Needs admin permission on the sending domain. <a href=\"https://mailtrap.io/api-tokens\" target=\"_blank\" rel=\"noopener noreferrer\">Create one in Mailtrap</a>, under Settings → API Tokens."
+msgstr ""
+
+#: classes/Email/Mailers/Mandrill.php:30
+msgid "Mandrill"
+msgstr ""
+
+#: classes/Email/Mailers/Mandrill.php:31
+msgid "Mandrill (Mailchimp Transactional) API."
+msgstr ""
+
+#: classes/Email/Mailers/Mandrill.php:39
+msgid "Requires a paid Mailchimp plan with Transactional Email enabled. <a href=\"https://mandrillapp.com/settings\" target=\"_blank\" rel=\"noopener noreferrer\">Create one in Mandrill</a>, under SMTP & API Info."
+msgstr ""
+
+#: classes/Email/Mailers/Microsoft365Smtp.php:47
+msgid "Microsoft 365"
+msgstr ""
+
+#: classes/Email/Mailers/Microsoft365Smtp.php:48
+msgid "Sends through Microsoft 365's business SMTP server."
+msgstr ""
+
+#: classes/Email/Mailers/Microsoft365Smtp.php:52
+msgid "Microsoft 365 address"
+msgstr ""
+
+#: classes/Email/Mailers/Microsoft365Smtp.php:62
+msgid "An app password if multi-factor authentication is on; your admin must also allow it and allow SMTP AUTH. <a href=\"https://mysignins.microsoft.com/security-info\" target=\"_blank\" rel=\"noopener noreferrer\">Manage sign-in security</a>, under Add method → App password."
+msgstr ""
+
+#: classes/Email/Mailers/MigaduSmtp.php:47
+msgid "Migadu"
+msgstr ""
+
+#: classes/Email/Mailers/MigaduSmtp.php:48
+msgid "Sends through Migadu's SMTP server."
+msgstr ""
+
+#: classes/Email/Mailers/MigaduSmtp.php:52
+msgid "Migadu address"
+msgstr ""
+
+#: classes/Email/Mailers/MigaduSmtp.php:62
+msgid "Your Migadu account password. <a href=\"https://admin.migadu.com\" target=\"_blank\" rel=\"noopener noreferrer\">Manage your account</a>."
+msgstr ""
+
+#: classes/Email/Mailers/NamecheapSmtp.php:47
+msgid "Namecheap Private Email"
+msgstr ""
+
+#: classes/Email/Mailers/NamecheapSmtp.php:48
+msgid "Sends through Namecheap Private Email's SMTP server."
+msgstr ""
+
+#: classes/Email/Mailers/NamecheapSmtp.php:52
+msgid "Private Email address"
+msgstr ""
+
+#: classes/Email/Mailers/NamecheapSmtp.php:62
+msgid "Your Private Email mailbox password. <a href=\"https://privateemail.com\" target=\"_blank\" rel=\"noopener noreferrer\">Manage your mailbox</a>."
+msgstr ""
+
+#: classes/Email/Mailers/Netcore.php:30
+msgid "Netcore Email API"
+msgstr ""
+
+#: classes/Email/Mailers/Netcore.php:31
+msgid "Netcore (formerly Pepipost) transactional email API v5."
+msgstr ""
+
+#: classes/Email/Mailers/Netcore.php:39
+msgid "<a href=\"https://email.netcorecloud.com\" target=\"_blank\" rel=\"noopener noreferrer\">Log in to Netcore</a>, then Settings → Integrations → API."
+msgstr ""
+
+#: classes/Email/Mailers/OutlookSmtp.php:47
+msgid "Outlook.com"
+msgstr ""
+
+#: classes/Email/Mailers/OutlookSmtp.php:48
+msgid "Sends through Microsoft's personal-account SMTP server."
+msgstr ""
+
+#: classes/Email/Mailers/OutlookSmtp.php:52
+msgid "Outlook.com address"
+msgstr ""
+
+#: classes/Email/Mailers/OutlookSmtp.php:62
+msgid "An app password if 2-step verification is on. <a href=\"https://account.microsoft.com/security\" target=\"_blank\" rel=\"noopener noreferrer\">Manage security settings</a>, under Advanced security options → App passwords."
 msgstr ""
 
 #: classes/Email/Mailers/Postmark.php:30
@@ -590,12 +1087,61 @@ msgstr ""
 msgid "Server API token"
 msgstr ""
 
-#: classes/Email/Mailers/Postmark.php:42
+#: classes/Email/Mailers/Postmark.php:39
+msgid "<a href=\"https://account.postmarkapp.com/servers\" target=\"_blank\" rel=\"noopener noreferrer\">Open your server in Postmark</a>, then its API Tokens tab."
+msgstr ""
+
+#: classes/Email/Mailers/Postmark.php:43
 msgid "Message stream"
 msgstr ""
 
-#: classes/Email/Mailers/Postmark.php:45
+#: classes/Email/Mailers/Postmark.php:46
 msgid "The stream ID to send through. \"outbound\" is the default transactional stream."
+msgstr ""
+
+#: classes/Email/Mailers/PurelymailSmtp.php:47
+msgid "Purelymail"
+msgstr ""
+
+#: classes/Email/Mailers/PurelymailSmtp.php:48
+msgid "Sends through Purelymail's SMTP server."
+msgstr ""
+
+#: classes/Email/Mailers/PurelymailSmtp.php:52
+msgid "Purelymail address"
+msgstr ""
+
+#: classes/Email/Mailers/PurelymailSmtp.php:62
+msgid "Your Purelymail account password. <a href=\"https://purelymail.com/manage\" target=\"_blank\" rel=\"noopener noreferrer\">Manage your account</a>."
+msgstr ""
+
+#: classes/Email/Mailers/RackspaceSmtp.php:47
+msgid "Rackspace Email"
+msgstr ""
+
+#: classes/Email/Mailers/RackspaceSmtp.php:48
+msgid "Sends through Rackspace Email's SMTP server."
+msgstr ""
+
+#: classes/Email/Mailers/RackspaceSmtp.php:52
+msgid "Rackspace Email address"
+msgstr ""
+
+#: classes/Email/Mailers/RackspaceSmtp.php:62
+msgid "Your Rackspace Email mailbox password. <a href=\"https://login.rackspace.com\" target=\"_blank\" rel=\"noopener noreferrer\">Manage your account</a>."
+msgstr ""
+
+#: classes/Email/Mailers/Resend.php:30
+#: assets/js/index.js:1
+msgid "Resend"
+msgstr ""
+
+#: classes/Email/Mailers/Resend.php:31
+msgid "Resend transactional email API."
+msgstr ""
+
+#: classes/Email/Mailers/Resend.php:39
+msgid "A sending-only key is enough. <a href=\"https://resend.com/api-keys\" target=\"_blank\" rel=\"noopener noreferrer\">Create one in Resend</a>."
 msgstr ""
 
 #: classes/Email/Mailers/SendGrid.php:30
@@ -607,7 +1153,39 @@ msgid "Twilio SendGrid transactional email API."
 msgstr ""
 
 #: classes/Email/Mailers/SendGrid.php:39
-msgid "Needs the \"Mail Send\" permission."
+msgid "Needs the \"Mail Send\" permission. <a href=\"https://app.sendgrid.com/settings/api_keys\" target=\"_blank\" rel=\"noopener noreferrer\">Create one in SendGrid</a>."
+msgstr ""
+
+#: classes/Email/Mailers/SendLayer.php:30
+msgid "SendLayer"
+msgstr ""
+
+#: classes/Email/Mailers/SendLayer.php:31
+msgid "SendLayer transactional email API."
+msgstr ""
+
+#: classes/Email/Mailers/SendLayer.php:39
+msgid "<a href=\"https://sendlayer.com/docs/managing-api-keys/\" target=\"_blank\" rel=\"noopener noreferrer\">Find it in SendLayer</a>, under Settings → API Keys."
+msgstr ""
+
+#: classes/Email/Mailers/SendPulse.php:32
+msgid "SendPulse"
+msgstr ""
+
+#: classes/Email/Mailers/SendPulse.php:33
+msgid "SendPulse SMTP API."
+msgstr ""
+
+#: classes/Email/Mailers/SendPulse.php:40
+msgid "From Account → API, under Client credentials. <a href=\"https://login.sendpulse.com/settings/#api\" target=\"_blank\" rel=\"noopener noreferrer\">Open it in SendPulse</a>."
+msgstr ""
+
+#: classes/Email/Mailers/SendPulse.php:44
+msgid "Client secret"
+msgstr ""
+
+#: classes/Email/Mailers/SendPulse.php:76
+msgid "Could not authenticate with SendPulse."
 msgstr ""
 
 #: classes/Email/Mailers/Smtp.php:55
@@ -654,8 +1232,140 @@ msgstr ""
 msgid "Username"
 msgstr ""
 
-#: classes/Email/Mailers/Smtp.php:106
-msgid "Password"
+#: classes/Email/Mailers/Smtp2Go.php:30
+msgid "SMTP2GO"
+msgstr ""
+
+#: classes/Email/Mailers/Smtp2Go.php:31
+msgid "SMTP2GO transactional email API."
+msgstr ""
+
+#: classes/Email/Mailers/Smtp2Go.php:39
+msgid "Make sure Email Send is enabled for the key. <a href=\"https://app.smtp2go.com\" target=\"_blank\" rel=\"noopener noreferrer\">Create one in SMTP2GO</a>, under Sending → API Keys."
+msgstr ""
+
+#: classes/Email/Mailers/SocketLabs.php:30
+msgid "SocketLabs"
+msgstr ""
+
+#: classes/Email/Mailers/SocketLabs.php:31
+msgid "SocketLabs Injection API."
+msgstr ""
+
+#: classes/Email/Mailers/SocketLabs.php:35
+msgid "Server ID"
+msgstr ""
+
+#: classes/Email/Mailers/SocketLabs.php:38
+msgid "The 4 or 5 digit number shown on your server dashboard. <a href=\"https://cp.socketlabs.com/login\" target=\"_blank\" rel=\"noopener noreferrer\">Log in to SocketLabs</a>."
+msgstr ""
+
+#: classes/Email/Mailers/SocketLabs.php:46
+msgid "Under Configuration → Key Manager."
+msgstr ""
+
+#: classes/Email/Mailers/SparkPost.php:33
+msgid "SparkPost"
+msgstr ""
+
+#: classes/Email/Mailers/SparkPost.php:34
+msgid "SparkPost transactional email API."
+msgstr ""
+
+#: classes/Email/Mailers/SparkPost.php:42
+msgid "Shown only once when created. <a href=\"https://app.sparkpost.com/account/api-keys\" target=\"_blank\" rel=\"noopener noreferrer\">Create one in SparkPost</a>."
+msgstr ""
+
+#: classes/Email/Mailers/Sweego.php:30
+msgid "Sweego"
+msgstr ""
+
+#: classes/Email/Mailers/Sweego.php:31
+msgid "Sweego email and SMS API."
+msgstr ""
+
+#: classes/Email/Mailers/Sweego.php:39
+msgid "From the Email section of your dashboard. Shown only once. <a href=\"https://app.sweego.io\" target=\"_blank\" rel=\"noopener noreferrer\">Open Sweego</a>."
+msgstr ""
+
+#: classes/Email/Mailers/TitanSmtp.php:47
+msgid "Titan Email"
+msgstr ""
+
+#: classes/Email/Mailers/TitanSmtp.php:48
+msgid "Sends through Titan Email's SMTP server."
+msgstr ""
+
+#: classes/Email/Mailers/TitanSmtp.php:52
+msgid "Titan address"
+msgstr ""
+
+#: classes/Email/Mailers/TitanSmtp.php:62
+msgid "Your Titan Email account password. <a href=\"https://app.titan.email\" target=\"_blank\" rel=\"noopener noreferrer\">Manage your account</a>."
+msgstr ""
+
+#: classes/Email/Mailers/YahooSmtp.php:47
+msgid "Yahoo Mail"
+msgstr ""
+
+#: classes/Email/Mailers/YahooSmtp.php:48
+msgid "Sends through Yahoo Mail's SMTP server."
+msgstr ""
+
+#: classes/Email/Mailers/YahooSmtp.php:52
+msgid "Yahoo address"
+msgstr ""
+
+#: classes/Email/Mailers/YahooSmtp.php:62
+msgid "Your normal password will not work here. <a href=\"https://help.yahoo.com/kb/account/sln15241.html\" target=\"_blank\" rel=\"noopener noreferrer\">Generate an app password</a>, under Account Security → External connections."
+msgstr ""
+
+#: classes/Email/Mailers/YandexSmtp.php:47
+msgid "Yandex Mail"
+msgstr ""
+
+#: classes/Email/Mailers/YandexSmtp.php:48
+msgid "Sends through Yandex Mail's SMTP server."
+msgstr ""
+
+#: classes/Email/Mailers/YandexSmtp.php:52
+msgid "Yandex address"
+msgstr ""
+
+#: classes/Email/Mailers/YandexSmtp.php:62
+msgid "Yandex requires an app password for third-party mail clients. <a href=\"https://id.yandex.com/security\" target=\"_blank\" rel=\"noopener noreferrer\">Create one</a>, under App passwords. New passwords take 2-3 hours to become active."
+msgstr ""
+
+#: classes/Email/Mailers/ZeptoMail.php:30
+msgid "ZeptoMail"
+msgstr ""
+
+#: classes/Email/Mailers/ZeptoMail.php:31
+msgid "Zoho ZeptoMail transactional email API."
+msgstr ""
+
+#: classes/Email/Mailers/ZeptoMail.php:35
+msgid "Send mail token"
+msgstr ""
+
+#: classes/Email/Mailers/ZeptoMail.php:39
+msgid "Generated in your Mail Agent once a verified domain is added. <a href=\"https://www.zoho.com/zeptomail/help/dashboard.html\" target=\"_blank\" rel=\"noopener noreferrer\">Find it in ZeptoMail</a>, under the Mail Agent's Setup Info → API tab."
+msgstr ""
+
+#: classes/Email/Mailers/ZohoSmtp.php:47
+msgid "Zoho Mail"
+msgstr ""
+
+#: classes/Email/Mailers/ZohoSmtp.php:48
+msgid "Sends through Zoho Mail's SMTP server."
+msgstr ""
+
+#: classes/Email/Mailers/ZohoSmtp.php:52
+msgid "Zoho Mail address"
+msgstr ""
+
+#: classes/Email/Mailers/ZohoSmtp.php:62
+msgid "An app-specific password if two-factor authentication is on. <a href=\"https://accounts.zoho.com/home\" target=\"_blank\" rel=\"noopener noreferrer\">Open your Zoho account</a>, under Security → App Passwords."
 msgstr ""
 
 #: classes/Integrations/functions.php:73
@@ -666,24 +1376,24 @@ msgstr ""
 msgid "The email could not be sent."
 msgstr ""
 
-#: classes/Rest/Controller.php:28
+#: classes/Rest/Controller.php:29
 msgid "You are not allowed to manage VuloMail."
 msgstr ""
 
 #: classes/Rest/Logs.php:113
-#: classes/Rest/Logs.php:162
+#: classes/Rest/Logs.php:198
 msgid "That log entry no longer exists."
 msgstr ""
 
-#: classes/Rest/Logs.php:145
+#: classes/Rest/Logs.php:181
 msgid "No log entries were selected."
 msgstr ""
 
-#: classes/Rest/Logs.php:166
+#: classes/Rest/Logs.php:202
 msgid "This message can't be resent because its content or recipients were not stored."
 msgstr ""
 
-#: classes/Rest/Logs.php:203
+#: classes/Rest/Logs.php:239
 msgid "Message resent."
 msgstr ""
 
@@ -1082,16 +1792,80 @@ msgstr ""
 msgid "an unknown address"
 msgstr ""
 
-#: classes/Utill.php:104
+#: classes/Utill.php:140
 msgid "Today"
 msgstr ""
 
-#: classes/Utill.php:108
+#: classes/Utill.php:144
 msgid "Yesterday"
 msgstr ""
 
 #: assets/js/index.js:1
 msgid "Something went wrong. Please try again."
+msgstr ""
+
+#: assets/js/index.js:1
+msgid "The address this email was sent from isn't a real email address, so it was refused. Enter a real sender email, ideally one on your own domain or the one your email service uses."
+msgstr ""
+
+#: assets/js/index.js:1
+msgid "The sender address isn't a real email address."
+msgstr ""
+
+#: assets/js/index.js:1
+msgid "Set the sender email"
+msgstr ""
+
+#: assets/js/index.js:1
+msgid "VuloMail couldn't reach the email service. Check the server address and port in your email connection. If they are right, ask your hosting company whether outgoing email is blocked."
+msgstr ""
+
+#: assets/js/index.js:1
+msgid "Couldn't reach the email service."
+msgstr ""
+
+#: assets/js/index.js:1
+msgid "Check your connection"
+msgstr ""
+
+#: assets/js/index.js:1
+msgid "Google didn't accept this connection's sign-in. Open the Gmail connection and click \"Sign in again\"."
+msgstr ""
+
+#: assets/js/index.js:1
+msgid "The Google sign-in needs renewing."
+msgstr ""
+
+#: assets/js/index.js:1
+msgid "Your website's server can't send email by itself. This is common and nothing is broken. To fix it, connect an email service, such as Gmail, Outlook, your hosting company's SMTP or a service like SendGrid, and VuloMail will send your email through it."
+msgstr ""
+
+#: assets/js/index.js:1
+msgid "Your server can't send email on its own."
+msgstr ""
+
+#: assets/js/index.js:1
+msgid "Set up an email connection"
+msgstr ""
+
+#: assets/js/index.js:1
+msgid "The email service didn't accept the login details. Check the username and password, or the API key, saved in your email connection."
+msgstr ""
+
+#: assets/js/index.js:1
+msgid "The email service rejected the login details."
+msgstr ""
+
+#: assets/js/index.js:1
+msgid "The email service won't send from this sender address. Use an address your email service has verified as the sender email."
+msgstr ""
+
+#: assets/js/index.js:1
+msgid "The email service won't send from this address."
+msgstr ""
+
+#: assets/js/index.js:1
+msgid "Change the sender email"
 msgstr ""
 
 #: assets/js/index.js:1
@@ -1183,6 +1957,18 @@ msgid "Sent"
 msgstr ""
 
 #: assets/js/index.js:1
+msgid "Not tracked"
+msgstr ""
+
+#: assets/js/index.js:1
+msgid "Yes"
+msgstr ""
+
+#: assets/js/index.js:1
+msgid "No"
+msgstr ""
+
+#: assets/js/index.js:1
 msgid "OK"
 msgstr ""
 
@@ -1257,6 +2043,104 @@ msgid "Send test"
 msgstr ""
 
 #: assets/js/index.js:1
+msgid "Not connected"
+msgstr ""
+
+#. translators: %s: Gmail address.
+#: assets/js/index.js:1
+#, js-format
+msgid "Connected as %s"
+msgstr ""
+
+#: assets/js/index.js:1
+msgid "Connected"
+msgstr ""
+
+#: assets/js/index.js:1
+msgid "Email is sent from this account. Sign in again to switch accounts."
+msgstr ""
+
+#: assets/js/index.js:1
+msgid "Sign in with the Google account your site's email should come from."
+msgstr ""
+
+#: assets/js/index.js:1
+msgid "Sign in again"
+msgstr ""
+
+#: assets/js/index.js:1
+msgid "First set up your Google app under \"Advanced\": follow the steps, then paste its Client ID and Client Secret."
+msgstr ""
+
+#: assets/js/index.js:1
+msgid "Advanced: use your own Google app"
+msgstr ""
+
+#: assets/js/index.js:1
+msgid "Set up your Google app (one time, about 5 minutes)"
+msgstr ""
+
+#: assets/js/index.js:1
+msgid "Create a Google Cloud project"
+msgstr ""
+
+#: assets/js/index.js:1
+msgid " (any name, for example \"My site email\")."
+msgstr ""
+
+#: assets/js/index.js:1
+msgid "Turn on the Gmail API"
+msgstr ""
+
+#: assets/js/index.js:1
+msgid " for that project."
+msgstr ""
+
+#: assets/js/index.js:1
+msgid "Set up the consent screen"
+msgstr ""
+
+#: assets/js/index.js:1
+msgid ": choose \"External\", fill in the app name and your email, then under Audience click \"Publish app\". While it stays in \"Testing\", Google signs you out every 7 days."
+msgstr ""
+
+#: assets/js/index.js:1
+msgid "Create an OAuth client"
+msgstr ""
+
+#: assets/js/index.js:1
+msgid " of type \"Web application\", and add this as an Authorized redirect URI:"
+msgstr ""
+
+#: assets/js/index.js:1
+msgid "Copy"
+msgstr ""
+
+#: assets/js/index.js:1
+msgid "Redirect URI copied."
+msgstr ""
+
+#: assets/js/index.js:1
+msgid "Could not copy. Select the address and copy it yourself."
+msgstr ""
+
+#: assets/js/index.js:1
+msgid "Paste the Client ID and Client Secret above, save, then click \"Sign in with Google\". Google may warn that the app isn't verified: it is your own app, so choose \"Advanced\" and continue."
+msgstr ""
+
+#: assets/js/index.js:1
+msgid "Google only accepts redirect addresses that start with https://. Switch your site to HTTPS before signing in."
+msgstr ""
+
+#: assets/js/index.js:1
+msgid "On"
+msgstr ""
+
+#: assets/js/index.js:1
+msgid "Off"
+msgstr ""
+
+#: assets/js/index.js:1
 msgid "Leave unchanged to keep the saved value"
 msgstr ""
 
@@ -1270,6 +2154,20 @@ msgstr ""
 
 #: assets/js/index.js:1
 msgid "Connection enabled"
+msgstr ""
+
+#: assets/js/index.js:1
+msgid "Off: kept, but nothing is sent through it."
+msgstr ""
+
+#. translators: %s: provider name, e.g. SMTP.
+#: assets/js/index.js:1
+#, js-format
+msgid "%s details"
+msgstr ""
+
+#: assets/js/index.js:1
+msgid "Credentials are encrypted before they are saved."
 msgstr ""
 
 #: assets/js/index.js:1
@@ -1306,14 +2204,6 @@ msgstr ""
 
 #: assets/js/index.js:1
 msgid "Leave empty to use the default. Placeholders:"
-msgstr ""
-
-#: assets/js/index.js:1
-msgid "On"
-msgstr ""
-
-#: assets/js/index.js:1
-msgid "Off"
 msgstr ""
 
 #: assets/js/index.js:1
@@ -1363,6 +2253,22 @@ msgid "Remove as backup"
 msgstr ""
 
 #: assets/js/index.js:1
+msgid "Disable"
+msgstr ""
+
+#: assets/js/index.js:1
+msgid "Enable"
+msgstr ""
+
+#: assets/js/index.js:1
+msgid "Connection disabled."
+msgstr ""
+
+#: assets/js/index.js:1
+msgid "Connection enabled."
+msgstr ""
+
+#: assets/js/index.js:1
 msgid "Test"
 msgstr ""
 
@@ -1403,11 +2309,19 @@ msgid "Your connection is saved but not in use yet. Choose \"Set as primary\" to
 msgstr ""
 
 #: assets/js/index.js:1
+msgid "Your connection is saved but switched off or missing a field. Fix or enable it below, then choose \"Set as primary\"."
+msgstr ""
+
+#: assets/js/index.js:1
 msgid "Edit connection"
 msgstr ""
 
 #: assets/js/index.js:1
-msgid "Add connection"
+msgid "Connect the SMS gateway your text messages are sent through."
+msgstr ""
+
+#: assets/js/index.js:1
+msgid "Connect the email service your site's email is sent through."
 msgstr ""
 
 #: assets/js/index.js:1
@@ -1622,6 +2536,30 @@ msgstr ""
 
 #: assets/js/index.js:1
 msgid "Older entries are deleted automatically. 0 keeps them until you delete them."
+msgstr ""
+
+#: assets/js/index.js:1
+msgid "Engagement tracking"
+msgstr ""
+
+#: assets/js/index.js:1
+msgid "See whether HTML emails are opened and their links clicked, in the Logs. Tracking is stored in the delivery log, so it needs the log switched on, and it never applies to plain-text email or text messages. Opens and clicks are estimates: some mail apps block images, others and security scanners load images or follow links on their own."
+msgstr ""
+
+#: assets/js/index.js:1
+msgid "Open tracking"
+msgstr ""
+
+#: assets/js/index.js:1
+msgid "Adds an invisible 1×1 image to each HTML email and records when it is loaded. No IP address or device details are kept."
+msgstr ""
+
+#: assets/js/index.js:1
+msgid "Click tracking"
+msgstr ""
+
+#: assets/js/index.js:1
+msgid "Sends links through this site before the reader reaches the page, and records which link was clicked. Unsubscribe, password reset, sign-in, mailto: and tel: links are never changed."
 msgstr ""
 
 #: assets/js/index.js:1
@@ -1871,6 +2809,14 @@ msgid "Status"
 msgstr ""
 
 #: assets/js/index.js:1
+msgid "Opened"
+msgstr ""
+
+#: assets/js/index.js:1
+msgid "Clicked"
+msgstr ""
+
+#: assets/js/index.js:1
 msgid "View"
 msgstr ""
 
@@ -1912,14 +2858,46 @@ msgstr ""
 msgid "Attempt %1$d: %2$s accepted the message."
 msgstr ""
 
-#. translators: 1: attempt number, 2: provider name, 3: error message.
+#. translators: 1: attempt number, 2: provider name.
 #: assets/js/index.js:1
 #, js-format
-msgid "Attempt %1$d: %2$s failed. %3$s"
+msgid "Attempt %1$d: %2$s failed."
 msgstr ""
 
 #: assets/js/index.js:1
-msgid "Message content was not stored. Turn on \"Store message content\" under Settings to keep it for new messages and allow resending."
+msgid "Opens"
+msgstr ""
+
+#: assets/js/index.js:1
+msgid "Clicks"
+msgstr ""
+
+#. translators: 1: number of observed opens or clicks, 2: first and last dates.
+#: assets/js/index.js:1
+#, js-format
+msgid "%1$d observed · %2$s"
+msgstr ""
+
+#: assets/js/index.js:1
+msgid "Clicked links"
+msgstr ""
+
+#. translators: 1: number of clicks on this link, 2: first and last click dates.
+#: assets/js/index.js:1
+#, js-format
+msgid "%1$d click · %2$s"
+msgid_plural "%1$d clicks · %2$s"
+msgstr[0] ""
+msgstr[1] ""
+
+#: assets/js/index.js:1
+msgid "Opens and clicks are estimates. Some mail apps block images, so an open can go unseen; others, and security scanners, load images or follow links on their own, so some opens and clicks are not a person."
+msgstr ""
+
+#. translators: 1: opening link tag to Settings → Logging & Privacy, 2: closing link tag.
+#: assets/js/index.js:1
+#, js-format
+msgid "Message content was not stored. Turn on \"Store message content\" under %1$sSettings → Logging & Privacy%2$s to keep it for new messages and allow resending."
 msgstr ""
 
 #: assets/js/index.js:1
@@ -1928,10 +2906,6 @@ msgstr ""
 
 #: assets/js/index.js:1
 msgid "Log entry deleted."
-msgstr ""
-
-#: assets/js/index.js:1
-msgid "Resend"
 msgstr ""
 
 #: assets/js/index.js:1

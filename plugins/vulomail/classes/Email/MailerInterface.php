@@ -12,10 +12,7 @@ use VuloMail\Delivery\Result;
 defined( 'ABSPATH' ) || exit;
 
 /**
- * Contract for an email provider adapter.
- *
- * Adapters are constructed with `( array $config, \VuloMail\Security\HttpClient $http )`, where
- * $config holds the connection's settings with secrets already decrypted.
+ * Contract for an email provider adapter. Constructed with `( array $config, \VuloMail\Security\HttpClient $http )`, $config holding the connection's settings with secrets already decrypted.
  */
 interface MailerInterface {
 
@@ -32,8 +29,7 @@ interface MailerInterface {
 	public static function definition();
 
 	/**
-	 * Sends one message. Must not throw: failures are returned as a failed Result whose message
-	 * contains no credentials.
+	 * Sends one message. Must not throw: failures return as a failed Result with no credentials in it.
 	 *
 	 * @param Message $message Message to send.
 	 * @return Result

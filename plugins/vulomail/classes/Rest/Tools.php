@@ -53,8 +53,7 @@ class Tools extends Controller {
 	}
 
 	/**
-	 * Sends a test email, either through the live routing (the path every other email takes) or
-	 * through one named connection.
+	 * Sends a test email, through the live routing (the path every other email takes) or one named connection.
 	 *
 	 * @param \WP_REST_Request $request Request.
 	 * @return \WP_REST_Response|\WP_Error
@@ -131,7 +130,7 @@ class Tools extends Controller {
 	}
 
 	/**
-	 * Sends a test SMS through the live routing or through one named connection.
+	 * Sends a test SMS through the live routing or one named connection.
 	 *
 	 * @param \WP_REST_Request $request Request.
 	 * @return \WP_REST_Response|\WP_Error

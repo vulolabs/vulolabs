@@ -43,9 +43,9 @@ class ConnectionRepository {
 	}
 
 	/**
-	 * Get every stored connection.
+	 * Every stored connection.
 	 *
-	 * @return array<string, array> Connection id => stored record (secrets still encrypted).
+	 * @return array<string, array> Connection id => record (secrets still encrypted).
 	 */
 	public function all() {
 		$stored = get_option( Utill::CONNECTIONS_KEY, array() );
@@ -54,7 +54,7 @@ class ConnectionRepository {
 	}
 
 	/**
-	 * Get one connection by id.
+	 * One connection by id.
 	 *
 	 * @param string $id Connection id.
 	 * @return array|null Stored record.
@@ -149,10 +149,7 @@ class ConnectionRepository {
 	}
 
 	/**
-	 * Creates or updates a connection.
-	 *
-	 * A secret field left empty, or still holding its mask, keeps the stored value: the UI never has
-	 * the real secret to send back.
+	 * Creates or updates a connection. A secret left empty or still holding its mask keeps the stored value.
 	 *
 	 * @param array $input Raw input: id (optional), channel, provider, label, enabled, settings.
 	 * @return array|\WP_Error The stored record.
@@ -268,7 +265,7 @@ class ConnectionRepository {
 	}
 
 	/**
-	 * A field with a `show_if` rule only applies while that other field has the given value.
+	 * A field with a `show_if` rule only applies while that other field matches the given value(s).
 	 *
 	 * @param array $field  Field definition.
 	 * @param array $config Current settings.
@@ -280,7 +277,8 @@ class ConnectionRepository {
 		}
 
 		foreach ( $field['show_if'] as $key => $expected ) {
-			if ( ( $config[ $key ] ?? null ) != $expected ) { // phpcs:ignore Universal.Operators.StrictComparisons.LooseNotEqual -- toggles are stored as bools, schema values may be scalars.
+			// Loose: toggles are stored as bools, schema values may be scalars.
+			if ( ! in_array( $config[ $key ] ?? null, (array) $expected, false ) ) { // phpcs:ignore WordPress.PHP.StrictInArray.FoundNonStrictFalse
 				return false;
 			}
 		}

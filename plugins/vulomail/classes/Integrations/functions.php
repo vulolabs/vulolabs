@@ -2,9 +2,8 @@
 /**
  * VuloMail public integration API.
  *
- * These functions are the supported way for other plugins to send through VuloMail. They are
- * versioned by VULOMAIL_API_VERSION and documented in docs/developer/INTEGRATION-API.md. Guard calls with
- * `function_exists( 'vulomail_send_sms' )` so your plugin keeps working without VuloMail.
+ * Supported way for other plugins to send through VuloMail. Versioned by VULOMAIL_API_VERSION, documented in
+ * docs/developer/INTEGRATION-API.md. Guard calls with `function_exists( 'vulomail_send_sms' )`.
  *
  * @package VuloMail
  */
@@ -51,9 +50,7 @@ if ( ! function_exists( 'vulomail_send_email' ) ) {
 	/**
 	 * Sends an email.
 	 *
-	 * This is wp_mail() with a labelled log entry and a real error on failure. With no email
-	 * connection configured the message goes out through WordPress's own mailer, so calling this
-	 * is always safe.
+	 * This is wp_mail() with a labelled log entry and a real error on failure; with no email connection configured it goes out through WordPress's own mailer, so calling this is always safe.
 	 *
 	 * @since 1.0.0
 	 *
@@ -102,8 +99,7 @@ if ( ! function_exists( 'vulomail_send_sms' ) ) {
 	 *
 	 * @since 1.0.0
 	 *
-	 * @param string $to      Recipient. International format (+14155550123), or a national number
-	 *                        when a default country code is set in VuloMail.
+	 * @param string $to      Recipient. International format (+14155550123), or national with a default country code set.
 	 * @param string $message Message text. HTML is stripped.
 	 * @param array  $args    Optional. `source` (string): your plugin's slug, shown in the delivery log.
 	 * @return true|WP_Error

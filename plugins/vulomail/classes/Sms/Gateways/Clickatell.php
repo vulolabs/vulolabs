@@ -20,7 +20,7 @@ class Clickatell extends AbstractGateway {
 	const ENDPOINT = 'https://platform.clickatell.com/messages';
 
 	/**
-	 * Describes the gateway and its connection fields.
+	 * Gateway and connection field descriptions.
 	 *
 	 * @return array
 	 */
@@ -49,7 +49,7 @@ class Clickatell extends AbstractGateway {
 	/**
 	 * Sends one text message.
 	 *
-	 * @param string $to   Recipient in E.164 format.
+	 * @param string $to   Recipient, E.164.
 	 * @param string $body Message text.
 	 * @return Result
 	 */
@@ -83,7 +83,7 @@ class Clickatell extends AbstractGateway {
 
 		$first = $response['json']['messages'][0] ?? array();
 
-		// A 202 can still carry a per-message rejection.
+		// 202 can still carry a per-message rejection.
 		if ( isset( $first['accepted'] ) && ! $first['accepted'] ) {
 			return $this->failure( $response, (string) ( $first['errorCode'] ?? 'rejected' ), (string) ( $first['errorDescription'] ?? $first['error'] ?? '' ) );
 		}

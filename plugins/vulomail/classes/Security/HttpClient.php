@@ -10,10 +10,8 @@ namespace VuloMail\Security;
 defined( 'ABSPATH' ) || exit;
 
 /**
- * The one place provider adapters make outbound HTTP requests from.
- *
- * Requests are HTTPS-only, never follow redirects (a redirect would forward the credential to another
- * host) and go through wp_safe_remote_request() so private and loopback addresses are refused.
+ * The one place provider adapters make outbound HTTP requests from. HTTPS-only, never follows redirects
+ * (would forward the credential to another host), and goes through wp_safe_remote_request() so private/loopback addresses are refused.
  */
 class HttpClient {
 

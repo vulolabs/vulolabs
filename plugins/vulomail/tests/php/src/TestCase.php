@@ -28,6 +28,13 @@ abstract class TestCase extends PHPUnitTestCase {
 	protected $options = array();
 
 	/**
+	 * In-memory transients.
+	 *
+	 * @var array
+	 */
+	protected $transients = array();
+
+	/**
 	 * Sets up Brain Monkey and a fresh test container before each test.
 	 *
 	 * @return void
@@ -37,6 +44,7 @@ abstract class TestCase extends PHPUnitTestCase {
 		Monkey\setUp();
 
 		$this->options                      = array();
+		$this->transients                   = array();
 		$GLOBALS['vulomail_test_container'] = new \stdClass();
 
 		Functions\when( 'get_option' )->alias(
@@ -56,6 +64,26 @@ abstract class TestCase extends PHPUnitTestCase {
 				if ( ! array_key_exists( $key, $this->options ) ) {
 					$this->options[ $key ] = $value;
 				}
+
+				return true;
+			}
+		);
+
+		Functions\when( 'get_transient' )->alias(
+			function ( $key ) {
+				return $this->transients[ $key ] ?? false;
+			}
+		);
+		Functions\when( 'set_transient' )->alias(
+			function ( $key, $value ) {
+				$this->transients[ $key ] = $value;
+
+				return true;
+			}
+		);
+		Functions\when( 'delete_transient' )->alias(
+			function ( $key ) {
+				unset( $this->transients[ $key ] );
 
 				return true;
 			}
@@ -133,6 +161,18 @@ abstract class TestCase extends PHPUnitTestCase {
 				return substr( str_pad( 'id' . $counter, $length, 'x' ), 0, $length );
 			}
 		);
+	}
+
+	/**
+	 * Reads the query arguments of a URL.
+	 *
+	 * @param string $url URL.
+	 * @return array
+	 */
+	protected static function query_args( $url ) {
+		parse_str( (string) parse_url( $url, PHP_URL_QUERY ), $args ); // phpcs:ignore WordPress.WP.AlternativeFunctions.parse_url_parse_url
+
+		return $args;
 	}
 
 	/**

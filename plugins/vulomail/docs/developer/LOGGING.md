@@ -59,3 +59,25 @@ List rows omit `body`; it is fetched per row by `GET /logs/{id}`.
 | `created_at_day` | "Today", "Yesterday", or the date |
 
 The admin app shows these and does no date formatting of its own. The date-range filter sends calendar days (`YYYY-MM-DD`); `Rest\Logs::day_boundary()` reads them in the site's timezone and converts to UTC.
+
+## 6. Open and click tracking
+
+Off by default (`track_opens`, `track_clicks`), and only ever applied while `log_enabled` is on, because the counts live on the log row. Implemented by `Email\Tracking` (`classes/Email/Tracking.php`).
+
+**Which messages.** HTML email (`Message::is_html()`) that VuloMail delivers through a connection, including one its connections failed and handed back to WordPress's mailer (`WpMailInterceptor::track_handed_back()` on `phpmailer_init`). Plain-text email, SMS, test sends, and mail VuloMail is only observing are never changed. `vulomail_email_tracking` can switch either kind off for one message.
+
+**Once per message.** `Dispatcher::send()` calls `Tracking::prepare()` before the failover loop: it sets `$message->tracking` (`token`, `opens`, `clicks`) and returns a tracked copy for the mailers. Every attempt and the WordPress hand-back send the same copy under the same token. The log stores the original body, so **Resend** goes through `wp_mail()` again and gets a new token. `prepare()` never throws; on any error the message goes out untracked. The token is logged only for a message that was delivered.
+
+**Rewriting** (`Tracking::rewrite()`, deterministic for a body and token):
+
+- Opens: a 1×1 image just before the last `</body>`, or at the end of a fragment.
+- Clicks: every `<a href>` whose link `is_trackable()`: `http`/`https` with a host, no template placeholders, not already tracked, not matching `SENSITIVE_PATTERN` (unsubscribe, password reset, sign-in, confirmation, one-time codes) and not marked `data-vulomail-notrack`. `vulomail_track_link` can exclude more. Only the `href` value changes.
+
+**Endpoint** (`Tracking::handle_request()` on `init`, priority 1): `/?vulomail_open={token}` returns a GIF; `/?vulomail_click={token}&n={position}&u={base64url link}&s={hmac}` redirects. The signature is an HMAC of token, position and link keyed with `wp_salt( 'auth' )`, so the redirect only goes to the email's own link (no open redirect) and keeps working after the row is pruned. Anything that fails verification redirects to the home page and records nothing. Only `GET` requests are counted (scanners often probe with `HEAD`). No IP address or user agent is read or stored.
+
+**Recording.** `LogRepository::find_by_token()` (indexed), then `record_open()` / `record_click()` as single `UPDATE ... SET count = count + 1` statements; a click also upserts its `vulomail_log_links` row. Opens are recorded only when `track_opens` applied, clicks only when `track_clicks` did, and only on `sent` rows.
+
+**Reporting.** `Rest\Logs::with_engagement()` adds `opened` and `clicked` (`yes`, `no`, `not_tracked`) to list and detail responses. A click counts as an open. The detail adds `tracking` (counts, display dates, clicked links) and leaves out the token.
+
+The numbers are estimates: images can be blocked (missed opens) or fetched by mail-privacy proxies and scanners (opens and clicks that weren't a person). The admin screens say so.
+

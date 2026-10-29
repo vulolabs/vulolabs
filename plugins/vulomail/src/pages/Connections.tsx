@@ -15,7 +15,9 @@ import { ButtonInput } from '@zyra/inputs';
 import ConnectionForm from './ConnectionForm';
 import { apiDelete, apiGet, apiPost } from '../services/api';
 import { errorMessage, notify } from '../services/notify';
-import type { Connection, ConnectionsPayload, Routing } from '../services/types';
+import type { Connection, ConnectionsPayload, Routing, Settings as SettingsShape } from '../services/types';
+
+const ROUTING_KEYS: (keyof Routing)[] = ['email_primary', 'email_backup', 'sms_primary', 'sms_backup'];
 
 type Channel = 'email' | 'sms';
 
@@ -57,6 +59,23 @@ const Connections = () => {
 		apiGet<ConnectionsPayload>('connections')
 			.then(setPayload)
 			.catch((e) => setError(errorMessage(e)));
+	}, []);
+
+	// Back from "Sign in with Google": say how it went, then drop the result from the address so a
+	// reload doesn't repeat it.
+	useEffect(() => {
+		const params = new URLSearchParams(window.location.hash.replace(/^#/, ''));
+		const outcome = params.get('google');
+
+		if (!outcome) {
+			return;
+		}
+
+		notify('connected' === outcome ? 'success' : 'error', params.get('google_message') ?? '', 'vulomail-google');
+
+		params.delete('google');
+		params.delete('google_message');
+		window.history.replaceState(null, '', `${window.location.pathname}${window.location.search}#${params.toString()}`);
 	}, []);
 
 	const confirmDelete = () => {
@@ -107,11 +126,31 @@ const Connections = () => {
 			changes[backupKey] = '';
 		}
 
+		const previousRouting = payload.routing;
+
 		setPayload({ ...payload, routing: { ...payload.routing, ...changes } });
 
-		apiPost('settings', changes)
-			.then(() => notify('success', __('Routing updated.', 'vulomail')))
-			.catch((e) => notify('error', errorMessage(e)));
+		apiPost<Partial<SettingsShape>>('settings', changes)
+			.then((saved) => {
+				// The server is the source of truth: a routing slot it rejected (e.g. the
+				// connection failed validation) must not be left looking set on screen.
+				setPayload((current) =>
+					current
+						? {
+								...current,
+								routing: ROUTING_KEYS.reduce(
+									(routing, key) => ({ ...routing, [key]: saved[key] ?? routing[key] }),
+									current.routing
+								),
+						  }
+						: current
+				);
+				notify('success', __('Routing updated.', 'vulomail'));
+			})
+			.catch((e) => {
+				setPayload((current) => (current ? { ...current, routing: previousRouting } : current));
+				notify('error', errorMessage(e));
+			});
 	};
 
 	/** Switches a connection on or off, without opening the edit form. */
@@ -152,7 +191,7 @@ const Connections = () => {
 							__('Missing: %s', 'vulomail'),
 							item.missing.join(', ')
 					  )}`
-					: item.provider_label,
+					: [item.provider_label, item.settings.account_email].filter(Boolean).join(' · '),
 				control: (
 					<ButtonInput
 						buttons={[

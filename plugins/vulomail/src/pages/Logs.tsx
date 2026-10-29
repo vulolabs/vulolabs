@@ -1,7 +1,8 @@
 /* global vulomailAppLocalizer */
-import { useCallback, useEffect, useState } from 'react';
+import { Fragment, useCallback, useEffect, useState } from 'react';
+import type { ReactNode } from 'react';
 import { useLocation } from 'react-router-dom';
-import { __, sprintf } from '@wordpress/i18n';
+import { __, _n, sprintf } from '@wordpress/i18n';
 import {
 	AnalyticsComponent,
 	BadgeComponent,
@@ -17,7 +18,8 @@ import { ButtonInput, ToggleInput } from '@zyra/inputs';
 import { TableCard } from '@zyra/table';
 import { apiDelete, apiGet, apiPost } from '../services/api';
 import { errorMessage, notify } from '../services/notify';
-import { displayDate, providerLabel } from '../services/types';
+import { displayDate, providerLabel, settingsUrl } from '../services/types';
+import { errorNoticeHtml } from '../services/errorHelp';
 import type { Attempt } from '../services/types';
 
 interface LogRow {
@@ -33,7 +35,29 @@ interface LogRow {
 	error_message: string | null;
 	created_at: string;
 	created_at_display?: string;
+	opened: Engagement;
+	clicked: Engagement;
 	[key: string]: unknown;
+}
+
+/** Whether an email was opened or clicked; 'not_tracked' when tracking didn't apply to it. */
+type Engagement = 'yes' | 'no' | 'not_tracked';
+
+interface TrackedLink {
+	url: string;
+	click_count: number;
+	first_clicked_at: string;
+	last_clicked_at: string;
+}
+
+interface Tracking {
+	open_count: number;
+	first_opened_at: string;
+	last_opened_at: string;
+	click_count: number;
+	first_clicked_at: string;
+	last_clicked_at: string;
+	links: TrackedLink[];
 }
 
 interface LogDetail extends LogRow {
@@ -44,6 +68,7 @@ interface LogDetail extends LogRow {
 	error_code: string;
 	attempts: Attempt[];
 	headers: Record<string, string>;
+	tracking: Tracking;
 }
 
 interface LogList {
@@ -100,6 +125,43 @@ const statusBadge = (row: Pick<LogRow, 'status' | 'used_fallback'>) => {
 	);
 };
 
+const engagementBadge = (value: Engagement) =>
+	'not_tracked' === value ? (
+		<span className="vulomail-log-secondary">{__('Not tracked', 'vulomail')}</span>
+	) : (
+		<BadgeComponent color={'yes' === value ? 'green' : 'gray'} text={'yes' === value ? __('Yes', 'vulomail') : __('No', 'vulomail')} />
+	);
+
+/** "First – last" for a pair of display dates, or a dash when nothing was observed. */
+const observedRange = (first: string, last: string): string => {
+	if (!first) {
+		return '—';
+	}
+
+	return first === last ? first : `${first} – ${last}`;
+};
+
+/** Splits a `"Name" <address>` header into its parts; falls back to treating the whole value as both. */
+const parseAddress = (value: string): { name: string; address: string } => {
+	const match = value.match(/^"?([^"<]*)"?\s*<([^>]+)>$/);
+
+	return match ? { name: match[1].trim() || match[2], address: match[2] } : { name: value, address: value };
+};
+
+/** A logged message body, as text, with any http(s) links made clickable. Never rendered as HTML. */
+const linkify = (text: string): ReactNode[] =>
+	text
+		.split(/(https?:\/\/[^\s<>"]+)/g)
+		.map((part, index) =>
+			index % 2 ? (
+				<a key={index} href={part} target="_blank" rel="noreferrer">
+					{part}
+				</a>
+			) : (
+				part
+			)
+		);
+
 const Logs = () => {
 	const [channel, setChannel] = useState('all');
 	const [query, setQuery] = useState<TableQuery>({ paged: 1, per_page: 10 });
@@ -108,6 +170,7 @@ const Logs = () => {
 	const [error, setError] = useState('');
 	const [reload, setReload] = useState(0);
 	const [detail, setDetail] = useState<LogDetail | null>(null);
+	const [messageView, setMessageView] = useState<'preview' | 'raw'>('preview');
 	const [confirmClear, setConfirmClear] = useState(false);
 	const [isBusy, setIsBusy] = useState(false);
 
@@ -119,7 +182,10 @@ const Logs = () => {
 	useEffect(() => {
 		if (linkedLogId && /^\d+$/.test(linkedLogId)) {
 			apiGet<LogDetail>(`logs/${linkedLogId}`)
-				.then(setDetail)
+				.then((row) => {
+					setDetail(row);
+					setMessageView('preview');
+				})
 				.catch((e) => notify('error', errorMessage(e)));
 		}
 	}, [linkedLogId]);
@@ -156,7 +222,10 @@ const Logs = () => {
 
 	const openDetail = (row: LogRow) => {
 		apiGet<LogDetail>(`logs/${row.id}`)
-			.then(setDetail)
+			.then((detailRow) => {
+				setDetail(detailRow);
+				setMessageView('preview');
+			})
 			.catch((e) => notify('error', errorMessage(e)));
 	};
 
@@ -192,6 +261,17 @@ const Logs = () => {
 			})
 			.catch((e) => notify('error', errorMessage(e)))
 			.finally(() => setIsBusy(false));
+	};
+
+	const copyMessageId = () => {
+		if (!detail?.message_id) {
+			return;
+		}
+
+		navigator.clipboard
+			?.writeText(detail.message_id)
+			.then(() => notify('success', __('Provider ID copied.', 'vulomail')))
+			.catch(() => notify('error', __('Could not copy. Select the ID and copy it yourself.', 'vulomail')));
 	};
 
 	const clearAll = () => {
@@ -318,6 +398,14 @@ const Logs = () => {
 									label: __('Status', 'vulomail'),
 									render: (row: LogRow) => statusBadge(row),
 								},
+								opened: {
+									label: __('Opened', 'vulomail'),
+									render: (row: LogRow) => engagementBadge(row.opened),
+								},
+								clicked: {
+									label: __('Clicked', 'vulomail'),
+									render: (row: LogRow) => engagementBadge(row.clicked),
+								},
 								id: {
 									label: '',
 									render: (row: LogRow) => (
@@ -359,24 +447,71 @@ const Logs = () => {
 				width={42}
 				height="auto"
 				position="lightbox"
+				className="vulomail-log-popup"
 				header={{
 					icon: 'sms' === detail?.channel ? 'send' : 'mail',
 					title: 'sms' === detail?.channel ? __('Text message', 'vulomail') : detail?.subject || __('Email', 'vulomail'),
 				}}
+				footer={
+					detail && (
+						<ButtonInput
+							buttons={[
+								{
+									text: __('Delete entry', 'vulomail'),
+									icon: 'delete',
+									color: 'border-red',
+									disabled: isBusy,
+									onClick: deleteOne,
+								},
+								{
+									text: __('Resend', 'vulomail'),
+									icon: 'send',
+									color: 'purple',
+									disabled: isBusy || !detail.can_resend,
+									onClick: resend,
+								},
+							]}
+						/>
+					)
+				}
 			>
 				{detail && (
 					<div className="vulomail-popup-body">
+						<div className="vulomail-log-statusline">
+							{statusBadge(detail)}
+							<span>{displayDate(detail)}</span>
+						</div>
+						{detail.headers.From ? (
+							<div className="vulomail-log-route">
+								{[
+									{ kind: 'from', label: __('From', 'vulomail'), ...parseAddress(detail.headers.From) },
+									{ kind: 'to', label: __('To', 'vulomail'), name: detail.recipients, address: detail.recipients },
+								].map((party) => (
+									<div className="vulomail-log-party" key={party.kind}>
+										<span className={`vulomail-log-avatar is-${party.kind}`} aria-hidden="true">
+											{party.name.charAt(0).toUpperCase()}
+										</span>
+										<div className="vulomail-log-cell">
+											<span className="vulomail-log-secondary">{party.label}</span>
+											<span className="vulomail-log-primary">{party.name}</span>
+											{party.address !== party.name && (
+												<span className="vulomail-log-secondary">{party.address}</span>
+											)}
+										</div>
+									</div>
+								))}
+							</div>
+						) : (
+							<dl className="vulomail-detail">
+								<dt>{__('To', 'vulomail')}</dt>
+								<dd>{detail.recipients}</dd>
+							</dl>
+						)}
 						<dl className="vulomail-detail">
-							<dt>{__('Status', 'vulomail')}</dt>
-							<dd>{statusBadge(detail)}</dd>
-							<dt>{__('Date', 'vulomail')}</dt>
-							<dd>{displayDate(detail)}</dd>
-							<dt>{__('To', 'vulomail')}</dt>
-							<dd>{detail.recipients}</dd>
-							{detail.headers.From && (
+							{'email' === detail.channel && detail.subject && (
 								<>
-									<dt>{__('From', 'vulomail')}</dt>
-									<dd>{detail.headers.From}</dd>
+									<dt>{__('Subject', 'vulomail')}</dt>
+									<dd>{detail.subject}</dd>
 								</>
 							)}
 							<dt>{__('Sent with', 'vulomail')}</dt>
@@ -396,7 +531,16 @@ const Logs = () => {
 							{detail.message_id && (
 								<>
 									<dt>{__('Provider ID', 'vulomail')}</dt>
-									<dd>{detail.message_id}</dd>
+									<dd className="vulomail-log-copy-row">
+										<code>{detail.message_id}</code>
+										<ButtonInput
+											buttons={{
+												text: __('Copy', 'vulomail'),
+												icon: 'copy',
+												onClick: copyMessageId,
+											}}
+										/>
+									</dd>
 								</>
 							)}
 						</dl>
@@ -414,51 +558,145 @@ const Logs = () => {
 													index + 1,
 													providerLabel(attempt.provider)
 											  )
-											: sprintf(
-													/* translators: 1: attempt number, 2: provider name, 3: error message. */
-													__('Attempt %1$d: %2$s failed. %3$s', 'vulomail'),
-													index + 1,
-													providerLabel(attempt.provider),
-													attempt.error_message
+											: errorNoticeHtml(
+													attempt,
+													detail.channel,
+													sprintf(
+														/* translators: 1: attempt number, 2: provider name. */
+														__('Attempt %1$d: %2$s failed.', 'vulomail'),
+														index + 1,
+														providerLabel(attempt.provider)
+													) + ' '
 											  )
 									}
 								/>
 							))}
+						{('not_tracked' !== detail.opened || 'not_tracked' !== detail.clicked) && (
+							<>
+								<dl className="vulomail-detail">
+									{[
+										{
+											state: detail.opened,
+											label: __('Opened', 'vulomail'),
+											countLabel: __('Opens', 'vulomail'),
+											count: detail.tracking.open_count,
+											first: detail.tracking.first_opened_at,
+											last: detail.tracking.last_opened_at,
+										},
+										{
+											state: detail.clicked,
+											label: __('Clicked', 'vulomail'),
+											countLabel: __('Clicks', 'vulomail'),
+											count: detail.tracking.click_count,
+											first: detail.tracking.first_clicked_at,
+											last: detail.tracking.last_clicked_at,
+										},
+									].map((item) => (
+										<Fragment key={item.label}>
+											<dt>{item.label}</dt>
+											<dd>{engagementBadge(item.state)}</dd>
+											{'not_tracked' !== item.state && (
+												<>
+													<dt>{item.countLabel}</dt>
+													<dd>
+														{sprintf(
+															/* translators: 1: number of observed opens or clicks, 2: first and last dates. */
+															__('%1$d observed · %2$s', 'vulomail'),
+															item.count,
+															observedRange(item.first, item.last)
+														)}
+													</dd>
+												</>
+											)}
+										</Fragment>
+									))}
+									{detail.tracking.links.map((link, index) => (
+										<Fragment key={`${link.url}-${index}`}>
+											<dt>{0 === index ? __('Clicked links', 'vulomail') : ''}</dt>
+											<dd className="vulomail-log-cell">
+												<span className="vulomail-log-primary">{link.url}</span>
+												<span className="vulomail-log-secondary">
+													{sprintf(
+														/* translators: 1: number of clicks on this link, 2: first and last click dates. */
+														_n('%1$d click · %2$s', '%1$d clicks · %2$s', link.click_count, 'vulomail'),
+														link.click_count,
+														observedRange(link.first_clicked_at, link.last_clicked_at)
+													)}
+												</span>
+											</dd>
+										</Fragment>
+									))}
+								</dl>
+								<NoticeComponent
+									displayPosition="inline-notice"
+									type="info"
+									message={__(
+										'Opens and clicks are estimates. Some mail apps block images, so an open can go unseen; others, and security scanners, load images or follow links on their own, so some opens and clicks are not a person.',
+										'vulomail'
+									)}
+								/>
+							</>
+						)}
 						{detail.attempts.length <= 1 && detail.error_message && (
-							<NoticeComponent displayPosition="inline-notice" type="error" message={detail.error_message} />
+							<NoticeComponent
+								displayPosition="inline-notice"
+								type="error"
+								message={errorNoticeHtml(detail, detail.channel)}
+							/>
 						)}
 						{detail.has_body ? (
-							// Shown as text, never rendered as HTML: a logged email body is untrusted content.
-							<pre className="vulomail-message-body">{detail.body}</pre>
+							<section>
+								<div className="vulomail-log-message-head">
+									<h4 className="vulomail-section-title">{__('Message', 'vulomail')}</h4>
+									<div className="vulomail-log-seg" role="tablist" aria-label={__('Message view', 'vulomail')}>
+										{(
+											[
+												['preview', __('Preview', 'vulomail')],
+												['raw', __('Plain text', 'vulomail')],
+											] as const
+										).map(([value, label]) => (
+											<button
+												key={value}
+												type="button"
+												role="tab"
+												aria-selected={value === messageView}
+												onClick={() => setMessageView(value)}
+											>
+												{label}
+											</button>
+										))}
+									</div>
+								</div>
+								<div className="vulomail-log-message">
+									{detail.subject && (
+										<div className="vulomail-log-message-bar">
+											{__('Subject:', 'vulomail')} <strong>{detail.subject}</strong>
+										</div>
+									)}
+									{/* Never rendered as HTML: a logged message body is untrusted content, so "preview" only
+									    linkifies plain text rather than interpreting any markup in it. */}
+									{'raw' === messageView ? (
+										<pre className="vulomail-message-body">{detail.body}</pre>
+									) : (
+										<div className="vulomail-message-body">{linkify(detail.body ?? '')}</div>
+									)}
+								</div>
+							</section>
 						) : (
 							<NoticeComponent
 								displayPosition="inline-notice"
 								type="info"
-								message={__(
-									'Message content was not stored. Turn on "Store message content" under Settings to keep it for new messages and allow resending.',
-									'vulomail'
+								message={sprintf(
+									/* translators: 1: opening link tag to Settings → Logging & Privacy, 2: closing link tag. */
+									__(
+										'Message content was not stored. Turn on "Store message content" under %1$sSettings → Logging & Privacy%2$s to keep it for new messages and allow resending.',
+										'vulomail'
+									),
+									`<a href="${settingsUrl('logging')}">`,
+									'</a>'
 								)}
 							/>
 						)}
-						<div className="vulomail-form-footer">
-							<ButtonInput
-								buttons={[
-									{
-										text: __('Delete entry', 'vulomail'),
-										icon: 'delete',
-										color: 'border-red',
-										disabled: isBusy,
-										onClick: deleteOne,
-									},
-									{
-										text: __('Resend', 'vulomail'),
-										icon: 'send',
-										disabled: isBusy || !detail.can_resend,
-										onClick: resend,
-									},
-								]}
-							/>
-						</div>
 					</div>
 				)}
 			</PopupComponent>

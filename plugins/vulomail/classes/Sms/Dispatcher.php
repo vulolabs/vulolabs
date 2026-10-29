@@ -70,7 +70,7 @@ class Dispatcher {
 	}
 
 	/**
-	 * Usable connections in the order they are tried: primary, then backup.
+	 * Usable connections, tried in order: primary, then backup.
 	 *
 	 * @return array<int, array>
 	 */
@@ -89,9 +89,9 @@ class Dispatcher {
 	}
 
 	/**
-	 * Whether VuloMail can send an SMS right now.
+	 * Whether an SMS can be sent right now.
 	 *
-	 * @return bool Whether an SMS can be sent right now.
+	 * @return bool
 	 */
 	public function is_ready() {
 		return (bool) $this->settings->get( 'sms_enabled' ) && (bool) $this->chain();
@@ -100,10 +100,10 @@ class Dispatcher {
 	/**
 	 * Sends a text message through the chain.
 	 *
-	 * @param string $to     Recipient number; national numbers use the default country code.
+	 * @param string $to     Recipient; national numbers use the default country code.
 	 * @param string $body   Message text.
-	 * @param string $source Slug of the sender, for the log.
-	 * @return Result Final outcome, with ->attempts filled in.
+	 * @param string $source Sender slug, for the log.
+	 * @return Result Final outcome, ->attempts filled in.
 	 */
 	public function send( $to, $body, $source = '' ) {
 		$number = PhoneNumber::normalize( $to, (string) $this->settings->get( 'sms_country_code' ) );
@@ -170,10 +170,10 @@ class Dispatcher {
 	}
 
 	/**
-	 * Sends through one specific connection, with no failover and no logging.
+	 * Sends through one specific connection; no failover, no logging.
 	 *
 	 * @param array  $connection Stored connection record.
-	 * @param string $number     Recipient in E.164 format.
+	 * @param string $number     Recipient, E.164.
 	 * @param string $body       Message text.
 	 * @return Result
 	 */

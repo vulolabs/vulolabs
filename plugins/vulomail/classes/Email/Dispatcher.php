@@ -50,18 +50,27 @@ class Dispatcher {
 	private $logger;
 
 	/**
+	 * Open and click tracking.
+	 *
+	 * @var Tracking
+	 */
+	private $tracking;
+
+	/**
 	 * Constructor.
 	 *
 	 * @param Settings             $settings    Plugin settings.
 	 * @param ConnectionRepository $connections Saved connections.
 	 * @param ProviderRegistry     $providers   Provider adapters.
 	 * @param Logger               $logger      Delivery log.
+	 * @param Tracking|null        $tracking    Open and click tracking.
 	 */
-	public function __construct( Settings $settings, ConnectionRepository $connections, ProviderRegistry $providers, Logger $logger ) {
+	public function __construct( Settings $settings, ConnectionRepository $connections, ProviderRegistry $providers, Logger $logger, $tracking = null ) {
 		$this->settings    = $settings;
 		$this->connections = $connections;
 		$this->providers   = $providers;
 		$this->logger      = $logger;
+		$this->tracking    = $tracking instanceof Tracking ? $tracking : new Tracking( $settings );
 	}
 
 	/**
@@ -96,17 +105,18 @@ class Dispatcher {
 	 * Sends a message through the chain.
 	 *
 	 * @param Message $message     Message to send.
-	 * @param bool    $log_failure Whether to log a failure. The wp_mail() interceptor passes false when a
-	 *                             failed message will be handed back to WordPress's own mailer, and logs
-	 *                             the combined outcome itself. A success is always logged here.
+	 * @param bool    $log_failure Whether to log a failure; wp_mail() interceptor passes false when it will log the combined outcome itself.
 	 * @return Result Final outcome, with ->attempts filled in.
 	 */
 	public function send( Message $message, $log_failure = true ) {
 		$attempts = array();
 		$final    = Result::fail( 'not_configured', __( 'No email connection is configured.', 'vulomail' ) );
+		$chain    = $this->chain();
+		// Tracked once per message, so a failover delivers the same copy under the same token.
+		$outgoing = $chain ? $this->tracking->prepare( $message ) : $message;
 
-		foreach ( $this->chain() as $index => $connection ) {
-			$final      = $this->send_via( $connection, $message );
+		foreach ( $chain as $index => $connection ) {
+			$final      = $this->send_via( $connection, $outgoing );
 			$attempts[] = $final->to_array();
 
 			if ( $final->success ) {
@@ -143,8 +153,7 @@ class Dispatcher {
 	}
 
 	/**
-	 * Sends through one specific connection, with no failover and no logging. Used by send() and by
-	 * the "send test email" tool.
+	 * Sends through one connection, no failover, no logging. Used by send() and "send test email".
 	 *
 	 * @param array   $connection Stored connection record.
 	 * @param Message $message    Message to send.
@@ -161,8 +170,7 @@ class Dispatcher {
 			try {
 				$result = $mailer->send( $message );
 			} catch ( \Throwable $e ) {
-				// Adapters are meant to return failures; a third-party one that throws must not take
-				// down the request that happened to send an email.
+				// Adapters must return failures, not throw; don't let one take down the request.
 				$result = Result::fail( 'adapter_exception', __( 'The email provider adapter failed unexpectedly.', 'vulomail' ) );
 			}
 		}

@@ -34,6 +34,8 @@ These work together. The counts follow the channel, date range and search.
 | **Message** | The subject (or "Text message") and who it was sent to |
 | **Sent** | Date and time, then the provider and what sent it. Click the heading to sort |
 | **Status** | **Sent**, **Sent via backup** or **Failed** |
+| **Opened** | **Yes**, **No**, or **Not tracked** (tracking was off, the message failed, or it is a text message). A click counts as an open |
+| **Clicked** | **Yes**, **No**, or **Not tracked** |
 
 "What sent it" is the plugin or theme that created the message, for example `woocommerce`, or `core` for WordPress itself.
 
@@ -46,6 +48,7 @@ Dates use the date format, time format and timezone from WordPress's **Settings 
 - If more than one connection was tried, each attempt is listed with its result.
 - If the message failed, the reason is shown.
 - The message text is shown only if you have switched on **Store message content** (see below).
+- For a tracked email: the first and last open, the number of opens, the first and last click, the number of clicks, and each clicked link with its own count.
 
 | Button | What it does |
 |---|---|
@@ -68,6 +71,17 @@ Dates use the date format, time format and timezone from WordPress's **Settings 
 | **Keep entries for** | Days before an entry is deleted automatically. `0` keeps entries until you delete them | Shorten it to hold less personal data; lengthen it to keep a longer history |
 
 The log is stored in your own WordPress database and never leaves your site.
+
+### Open and click tracking
+
+| Setting | What it does | Why you might change it |
+|---|---|---|
+| **Open tracking** | Adds an invisible image to each HTML email and records when it is loaded | To see whether order or account emails are being read |
+| **Click tracking** | Sends each link through your site first and records which one was clicked | To see which links people use |
+
+Both are off until you switch them on, and both need **Keep a log of sent and failed messages**. They only apply to HTML email sent through a VuloMail connection; plain-text email and text messages are never changed. Unsubscribe, password reset, sign-in, `mailto:` and `tel:` links are never rewritten. No IP address or device details are kept, and nothing is sent to another service.
+
+**The numbers are estimates.** Some mail apps block images, so an open can go unseen. Others, and security scanners, load images or follow links on their own, so some opens and clicks were not a person.
 
 ## Related
 

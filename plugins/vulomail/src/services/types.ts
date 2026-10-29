@@ -7,8 +7,22 @@ export interface ProviderField {
 	secret?: boolean;
 	default?: string | number | boolean;
 	help?: string;
-	options?: { value: string; label: string }[];
-	show_if?: Record<string, string | number | boolean>;
+	options?: {
+		value: string;
+		label: string;
+		desc?: string;
+		icon?: string;
+		badgeText?: string;
+		badgeColor?: string;
+	}[];
+	/** 'cards': a select drawn as a row of option cards, across the whole form. */
+	display?: 'cards';
+	/** Field => required value, or a list of allowed values. */
+	show_if?: Record<string, string | number | boolean | (string | number)[]>;
+	/** Filled by a sign-in flow, never typed: not drawn as an input. */
+	hidden?: boolean;
+	/** Drawn inside the sign-in panel's collapsed "Advanced" section instead of the field list. */
+	advanced?: boolean;
 }
 
 export interface ProviderDefinition {
@@ -17,6 +31,8 @@ export interface ProviderDefinition {
 	label: string;
 	desc: string;
 	fields: ProviderField[];
+	/** Set when the provider signs in with an OAuth flow instead of a typed credential. */
+	oauth?: 'google';
 }
 
 export interface SmsTriggerDefinition {
@@ -74,6 +90,8 @@ export interface Settings {
 	log_content: boolean;
 	mask_recipients: boolean;
 	log_retention_days: number;
+	track_opens: boolean;
+	track_clicks: boolean;
 	keep_data_uninstall: 'keep_data' | 'delete_everything';
 }
 
@@ -84,6 +102,8 @@ export interface Attempt {
 	message_id: string;
 	error_code: string;
 	error_message: string;
+	/** Set by the log detail: whether this failure is the one to explain (see Rest\Controller::with_causes()). */
+	is_cause?: boolean;
 }
 
 export interface TestResult {
@@ -104,6 +124,9 @@ export const providerLabel = (id: string): string => {
 			?.label ?? id
 	);
 };
+
+/** Admin address of one Settings sub-tab. */
+export const settingsUrl = (subtab: string): string => `?page=vulomail#&tab=settings&subtab=${subtab}`;
 
 /**
  * A log row's date as the site is set up to show it. The server formats `created_at_display` with

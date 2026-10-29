@@ -24,7 +24,8 @@ class Utill {
 	 * @var array<string, string>
 	 */
 	const TABLES = array(
-		'log' => 'vulomail_logs',
+		'log'      => 'vulomail_logs',
+		'log_link' => 'vulomail_log_links',
 	);
 
 	/**
@@ -45,6 +46,7 @@ class Utill {
 	const OTHER_SETTINGS = array(
 		'run_installer'     => 'vulomail_run_installer',
 		'plugin_db_version' => 'vulomail_plugin_db_version',
+		'db_schema_version' => 'vulomail_db_schema_version',
 	);
 
 	/**
@@ -56,8 +58,41 @@ class Utill {
 	const CHANNEL_SMS   = 'sms';
 
 	/**
-	 * Formats a stored UTC datetime the way the site is set up to show dates: Settings → General's
-	 * date format, time format and timezone, in the site's language.
+	 * Shape of random_token(): 128 random bits, hex-encoded.
+	 */
+	const TOKEN_PATTERN = '/^[a-f0-9]{32}$/';
+
+	/**
+	 * An unguessable token for links and one-time states.
+	 *
+	 * @return string 32 hex characters.
+	 */
+	public static function random_token() {
+		return bin2hex( random_bytes( 16 ) );
+	}
+
+	/**
+	 * URL-safe base64 without padding (RFC 4648 §5), for values carried in URLs.
+	 *
+	 * @param string $bytes Raw bytes.
+	 * @return string
+	 */
+	public static function base64url_encode( $bytes ) {
+		return rtrim( strtr( base64_encode( (string) $bytes ), '+/', '-_' ), '=' ); // phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.obfuscation_base64_encode -- transport encoding, not obfuscation.
+	}
+
+	/**
+	 * Reverses base64url_encode().
+	 *
+	 * @param string $encoded URL-safe base64.
+	 * @return string|false False when it isn't valid base64.
+	 */
+	public static function base64url_decode( $encoded ) {
+		return base64_decode( strtr( (string) $encoded, '-_', '+/' ), true ); // phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.obfuscation_base64_decode -- transport encoding, not obfuscation.
+	}
+
+	/**
+	 * Formats a stored UTC datetime per Settings → General's date/time format and timezone.
 	 *
 	 * @param string $utc_datetime UTC `Y-m-d H:i:s`.
 	 * @return string
@@ -83,7 +118,7 @@ class Utill {
 			$timestamp = strtotime( $row['created_at'] . ' UTC' );
 
 			$rows[ $index ]['created_at_display'] = self::format_datetime( (string) $row['created_at'] );
-			// For day-grouped lists: the time on its own, and the day as "Today", "Yesterday" or a date.
+			// For day-grouped lists: time alone, and day as "Today"/"Yesterday"/a date.
 			$rows[ $index ]['created_at_time'] = false === $timestamp ? '' : wp_date( get_option( 'time_format' ), $timestamp );
 			$rows[ $index ]['created_at_day']  = false === $timestamp ? '' : self::day_label( $timestamp );
 		}

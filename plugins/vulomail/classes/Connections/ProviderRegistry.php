@@ -82,7 +82,7 @@ class ProviderRegistry {
 				'mailercloud'      => Mailers\Mailercloud::class,
 				'sweego'           => Mailers\Sweego::class,
 				'emailit'          => Mailers\Emailit::class,
-				'gmail'            => Mailers\GmailSmtp::class,
+				'gmail'            => Mailers\Gmail::class,
 				'google_workspace' => Mailers\GoogleWorkspaceSmtp::class,
 				'outlook'          => Mailers\OutlookSmtp::class,
 				'microsoft365'     => Mailers\Microsoft365Smtp::class,
@@ -144,9 +144,9 @@ class ProviderRegistry {
 	}
 
 	/**
-	 * Get every provider definition.
+	 * Every provider definition, both channels.
 	 *
-	 * @return array<int, array> Every provider definition, both channels.
+	 * @return array<int, array>
 	 */
 	public function definitions() {
 		$definitions = array();

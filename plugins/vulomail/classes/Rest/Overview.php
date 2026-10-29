@@ -76,13 +76,20 @@ class Overview extends Controller {
 				'per_page' => 5,
 			)
 		);
+		$attempts = VuloMail()->logs->attempts( array_column( $failures['data'], 'id' ) );
+		$failures = array_map(
+			static function ( $row ) use ( $attempts ) {
+				return self::with_cause( $row, $attempts[ (int) $row['id'] ] ?? array() );
+			},
+			$failures['data']
+		);
 
 		return rest_ensure_response(
 			array(
 				'days'            => $days,
 				'email'           => array_merge( $totals[ Utill::CHANNEL_EMAIL ], $this->channel_state( VuloMail()->email, 'email_enabled' ) ),
 				'sms'             => array_merge( $totals[ Utill::CHANNEL_SMS ], $this->channel_state( VuloMail()->sms, 'sms_enabled' ) ),
-				'recent_failures' => Utill::with_display_dates( $failures['data'] ),
+				'recent_failures' => Utill::with_display_dates( $failures ),
 				'logging'         => (bool) VuloMail()->settings->get( 'log_enabled' ),
 				'sms_alerts'      => $this->sms_alerts(),
 			)
@@ -90,7 +97,35 @@ class Overview extends Controller {
 	}
 
 	/**
-	 * How many SMS alerts this site can use, and how many are switched on.
+	 * Adds `cause`: provider, error code and error text - the attempt marked by with_causes(), or the row's own error when none is recorded.
+	 *
+	 * @param array $row      Failed log row from LogRepository::query().
+	 * @param array $attempts The row's attempts.
+	 * @return array
+	 */
+	private static function with_cause( array $row, array $attempts ) {
+		$row['cause'] = array(
+			'provider'      => (string) $row['provider'],
+			'error_code'    => (string) $row['error_code'],
+			'error_message' => (string) $row['error_message'],
+		);
+
+		foreach ( array_reverse( self::with_causes( $attempts ) ) as $attempt ) {
+			if ( $attempt['is_cause'] ) {
+				$row['cause'] = array(
+					'provider'      => (string) ( $attempt['provider'] ?? '' ),
+					'error_code'    => (string) ( $attempt['error_code'] ?? '' ),
+					'error_message' => (string) ( $attempt['error_message'] ?? '' ),
+				);
+				break;
+			}
+		}
+
+		return $row;
+	}
+
+	/**
+	 * How many SMS alerts are available, and how many are on.
 	 *
 	 * @return array{enabled: int, available: int}
 	 */

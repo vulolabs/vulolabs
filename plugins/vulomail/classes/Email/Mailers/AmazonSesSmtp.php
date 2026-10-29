@@ -10,9 +10,7 @@ namespace VuloMail\Email\Mailers;
 defined( 'ABSPATH' ) || exit;
 
 /**
- * Amazon SES over SMTP. The AWS Access Key / Secret Key pair used everywhere else in AWS does not
- * work here - SES has its own, separate SMTP username and password, generated from the SES console
- * ("SMTP settings" → "Create SMTP credentials"), which is what this connection needs.
+ * Amazon SES over SMTP. Needs SES's own SMTP username/password ("SMTP settings" → "Create SMTP credentials"), not the AWS Access/Secret Key pair.
  */
 class AmazonSesSmtp extends Smtp {
 

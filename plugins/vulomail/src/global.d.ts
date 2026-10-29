@@ -16,6 +16,8 @@ declare global {
 		text_domain: string;
 		admin_email: string;
 		default_from: string;
+		/** Address Google returns to after "Sign in with Google"; listed in the own-app steps. */
+		google_redirect_uri: string;
 		providers: ProviderDefinition[];
 		sms_triggers: SmsTriggerDefinition[];
 		/** WordPress's date format in zyra's token syntax. */

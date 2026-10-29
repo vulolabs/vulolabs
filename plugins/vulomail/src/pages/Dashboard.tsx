@@ -15,6 +15,8 @@ import { ButtonInput, ToggleInput } from '@zyra/inputs';
 import { apiGet } from '../services/api';
 import { errorMessage } from '../services/notify';
 import { providerLabel } from '../services/types';
+import { errorHelp } from '../services/errorHelp';
+import type { Failure } from '../services/errorHelp';
 
 interface ChannelState {
 	sent: number;
@@ -38,6 +40,8 @@ interface Overview {
 		recipients: string;
 		subject: string;
 		error_message: string;
+		/** The failure to explain: the connection's, when WordPress's own mailer only ran after it. */
+		cause: Failure;
 		created_at: string;
 		created_at_display?: string;
 		created_at_time?: string;
@@ -77,6 +81,7 @@ const FailureTimeline = ({ rows }: { rows: FailureRow[] }) => {
 					{day.label && <div className="vulomail-timeline-heading">{day.label}</div>}
 					{day.rows.map((row) => {
 						const isSms = 'sms' === row.channel;
+						const help = errorHelp(row.cause, row.channel);
 
 						return (
 							<div
@@ -110,7 +115,19 @@ const FailureTimeline = ({ rows }: { rows: FailureRow[] }) => {
 												text={isSms ? __('SMS', 'vulomail') : __('Email', 'vulomail')}
 											/>
 										</div>
-										<div className="desc">{row.error_message}</div>
+										<div className="desc">{row.cause.error_message}</div>
+										{help && (
+											<div className="desc vulomail-error-help">
+												{help.short}{' '}
+												<a
+													className="vulomail-error-help-link"
+													href={help.href}
+													onClick={(event) => event.stopPropagation()}
+												>
+													{help.linkLabel}
+												</a>
+											</div>
+										)}
 									</div>
 									<span className="vulomail-timeline-meta">
 										{[row.recipients, providerLabel(row.provider)].filter(Boolean).join(' · ')}

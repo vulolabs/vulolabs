@@ -12,8 +12,7 @@ use VuloMail\Settings\Settings;
 defined( 'ABSPATH' ) || exit;
 
 /**
- * Turns wp_mail() arguments into a Message, resolving headers and defaults the way core does so a
- * message looks the same whichever connection ends up delivering it.
+ * Turns wp_mail() arguments into a Message, resolving headers and defaults the way core does so the message looks the same whichever connection delivers it.
  */
 class MessageFactory {
 
@@ -117,8 +116,7 @@ class MessageFactory {
 	}
 
 	/**
-	 * Applies the configured sender address: always when forced, otherwise only in place of core's
-	 * default (or an invalid address), so a plugin that sets its own From keeps it.
+	 * Applies the configured sender address: always when forced, else only in place of core's default (or an invalid one).
 	 *
 	 * @param string $from_email Address resolved so far.
 	 * @return string
@@ -134,7 +132,7 @@ class MessageFactory {
 	}
 
 	/**
-	 * Applies the configured sender name: always when forced, otherwise only in place of core's default.
+	 * Applies the configured sender name: always when forced, else only in place of core's default.
 	 *
 	 * @param string $from_name Name resolved so far.
 	 * @return string
@@ -165,8 +163,7 @@ class MessageFactory {
 	}
 
 	/**
-	 * Parses `a@b.c`, `Name <a@b.c>`, a comma-separated string of those, or an array of them.
-	 * Invalid addresses are dropped.
+	 * Parses `a@b.c`, `Name <a@b.c>`, a comma-separated string of those, or an array. Drops invalid ones.
 	 *
 	 * @param string|array $input Address input.
 	 * @return array<int, array{email: string, name: string}>
@@ -188,7 +185,7 @@ class MessageFactory {
 				$entry = trim( $matches[2] );
 			}
 
-			// Header injection guard: an address or name never spans lines.
+			// Injection guard: address/name must never span lines.
 			if ( '' === $entry || preg_match( '/[\r\n]/', $entry . $name ) || ! is_email( $entry ) ) {
 				continue;
 			}
@@ -232,7 +229,7 @@ class MessageFactory {
 			$name  = trim( $name );
 			$value = trim( $value );
 
-			// A header name is a token; anything else is malformed or an injection attempt.
+			// Header name must be a token; anything else is malformed or an injection attempt.
 			if ( ! preg_match( '/^[A-Za-z0-9\-]+$/', $name ) || preg_match( '/[\r\n]/', $value ) ) {
 				continue;
 			}

@@ -56,12 +56,8 @@ class Settings extends Controller {
 	}
 
 	/**
-	 * Merges the posted keys into the stored settings; unknown keys are ignored and every value is
-	 * validated by Settings\Settings.
-	 *
-	 * Two request shapes are accepted: a flat `{ key: value }` body, and the `{ setting, settingName }`
-	 * body zyra's auto-saving settings form sends, whose field values are unpacked by
-	 * from_form_values().
+	 * Merges posted keys into stored settings; unknown keys are ignored, every value validated by Settings\Settings.
+	 * Accepts a flat `{ key: value }` body, or zyra's auto-saving form's `{ setting, settingName }` body, unpacked by from_form_values().
 	 *
 	 * @param \WP_REST_Request $request Request.
 	 * @return \WP_REST_Response|\WP_Error
@@ -78,7 +74,7 @@ class Settings extends Controller {
 		$error = $this->validate( $input );
 
 		if ( $error ) {
-			// The settings form shows the message from a normal response; it has no error path.
+			// The form has no error path; it shows the message from a normal response instead.
 			return $is_form
 				? rest_ensure_response(
 					array(
@@ -97,8 +93,7 @@ class Settings extends Controller {
 			return rest_ensure_response( $after );
 		}
 
-		// The form autosaves when a sub-tab opens, even with nothing edited, so a save is only
-		// announced when something changed.
+		// The form autosaves on every sub-tab open, even unedited; only announce it when it changed.
 		return rest_ensure_response(
 			array(
 				'success' => true,
@@ -118,7 +113,7 @@ class Settings extends Controller {
 			return new \WP_Error( 'vulomail_invalid_email', __( 'The sender email is not a valid email address, so it was not saved.', 'vulomail' ), array( 'status' => 400 ) );
 		}
 
-		// A routing slot may only point at an existing connection of the matching channel.
+		// A routing slot may only point at an existing connection of the same channel.
 		foreach ( array( 'email_primary', 'email_backup', 'sms_primary', 'sms_backup' ) as $slot ) {
 			if ( empty( $input[ $slot ] ) ) {
 				continue;
@@ -137,9 +132,9 @@ class Settings extends Controller {
 	/**
 	 * Unpacks settings-form field values into flat settings.
 	 *
-	 * - A toggle group arrives as `{ setting_name: { enable: bool }, ... }` under a field key of its
-	 *   own; each inner key is the real setting.
-	 * - A group whose key starts with `sms_triggers` holds alerts' on/off state, keyed by alert id.
+	 * - A toggle group arrives as `{ setting_name: { enable: bool }, ... }`; each inner key is the
+	 *   real setting.
+	 * - A key starting with `sms_triggers` holds alerts' on/off state, keyed by alert id.
 	 * - `sms_template_{id}` holds one alert's message template.
 	 *
 	 * @param array $form Field key => value.
@@ -164,7 +159,7 @@ class Settings extends Controller {
 		foreach ( $form as $key => $value ) {
 			$key = (string) $key;
 
-			// The alerts' on/off state arrives in one or more groups: `sms_triggers`, `sms_triggers_woocommerce`...
+			// Alerts' on/off state arrives in one or more groups: `sms_triggers`, `sms_triggers_woocommerce`...
 			if ( 0 === strpos( $key, 'sms_triggers' ) ) {
 				foreach ( is_array( $value ) ? $value : array() as $id => $row ) {
 					$id = sanitize_key( (string) $id );

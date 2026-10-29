@@ -98,6 +98,9 @@ class Logger {
 			)
 		);
 
+		// Tracking is only kept for a message that went out: a failed one has no opens to count.
+		$tracking = $result->success && is_array( $message->tracking ) ? $message->tracking : null;
+
 		return $this->write(
 			Utill::CHANNEL_EMAIL,
 			$message->all_recipients(),
@@ -106,9 +109,12 @@ class Logger {
 			$result,
 			$used_fallback,
 			array(
-				'headers'     => wp_json_encode( $headers ),
-				'attachments' => count( $message->attachments ),
-				'source'      => $message->source,
+				'headers'        => wp_json_encode( $headers ),
+				'attachments'    => count( $message->attachments ),
+				'source'         => $message->source,
+				'tracking_token' => $tracking ? (string) $tracking['token'] : '',
+				'track_opens'    => $tracking && ! empty( $tracking['opens'] ) ? 1 : 0,
+				'track_clicks'   => $tracking && ! empty( $tracking['clicks'] ) ? 1 : 0,
 			)
 		);
 	}
@@ -160,8 +166,7 @@ class Logger {
 				'used_fallback' => $used_fallback ? 1 : 0,
 				'recipients'    => implode( ', ', $recipients ),
 				'subject'       => mb_substr( wp_strip_all_tags( $subject ), 0, 255 ),
-				// Message content is personal data and may carry reset links or codes, so it is only
-				// stored when the site owner has opted in.
+				// Message content is personal data; only stored when the site owner has opted in.
 				'body'          => $this->settings->get( 'log_content' ) ? $body : null,
 				'message_id'    => $result->message_id,
 				'error_code'    => $result->error_code,

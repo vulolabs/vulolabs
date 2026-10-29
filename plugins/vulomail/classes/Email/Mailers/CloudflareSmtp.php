@@ -10,9 +10,7 @@ namespace VuloMail\Email\Mailers;
 defined( 'ABSPATH' ) || exit;
 
 /**
- * Cloudflare Email Sending over SMTP. Cloudflare's own SMTP relay authenticates with a fixed
- * username - the literal string "api_token" - and the API token as the password, so only the token
- * is ever asked for.
+ * Cloudflare Email Sending over SMTP. Relay auth is fixed: username "api_token", password the API token - only the token is asked for.
  */
 class CloudflareSmtp extends Smtp {
 

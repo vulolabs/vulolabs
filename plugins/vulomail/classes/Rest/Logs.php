@@ -95,7 +95,7 @@ class Logs extends Controller {
 			)
 		);
 
-		$result['data'] = Utill::with_display_dates( $result['data'] );
+		$result['data'] = array_map( array( self::class, 'with_engagement' ), Utill::with_display_dates( $result['data'] ) );
 
 		return rest_ensure_response( $result );
 	}
@@ -117,10 +117,45 @@ class Logs extends Controller {
 		$headers  = json_decode( (string) $row['headers'], true );
 
 		$row['created_at_display'] = Utill::format_datetime( (string) $row['created_at'] );
-		$row['attempts']           = is_array( $attempts ) ? $attempts : array();
+		$row['attempts']           = self::with_causes( is_array( $attempts ) ? $attempts : array() );
 		$row['headers']            = is_array( $headers ) ? $headers : array();
 		$row['has_body']           = null !== $row['body'];
 		$row['can_resend']         = $this->can_resend( $row );
+
+		$row = self::with_engagement( $row );
+
+		$row['tracking'] = array(
+			'open_count'       => (int) $row['open_count'],
+			'first_opened_at'  => self::display_or_empty( $row['first_opened_at'] ),
+			'last_opened_at'   => self::display_or_empty( $row['last_opened_at'] ),
+			'click_count'      => (int) $row['click_count'],
+			'first_clicked_at' => self::display_or_empty( $row['first_clicked_at'] ),
+			'last_clicked_at'  => self::display_or_empty( $row['last_clicked_at'] ),
+			'links'            => 'not_tracked' === $row['clicked'] ? array() : array_map(
+				static function ( $link ) {
+					return array(
+						'url'              => (string) $link['url'],
+						'click_count'      => (int) $link['click_count'],
+						'first_clicked_at' => self::display_or_empty( $link['first_clicked_at'] ),
+						'last_clicked_at'  => self::display_or_empty( $link['last_clicked_at'] ),
+					);
+				},
+				VuloMail()->logs->links( (int) $row['id'] )
+			),
+		);
+
+		// Replaced by `opened`, `clicked` and `tracking`; the token never leaves the server.
+		unset(
+			$row['tracking_token'],
+			$row['track_opens'],
+			$row['track_clicks'],
+			$row['open_count'],
+			$row['click_count'],
+			$row['first_opened_at'],
+			$row['last_opened_at'],
+			$row['first_clicked_at'],
+			$row['last_clicked_at']
+		);
 
 		return rest_ensure_response( $row );
 	}
@@ -149,8 +184,7 @@ class Logs extends Controller {
 	}
 
 	/**
-	 * Sends a logged message again. Only possible when its content was stored and its recipients
-	 * weren't masked.
+	 * Sends a logged message again. Needs its content stored and its recipients unmasked.
 	 *
 	 * @param \WP_REST_Request $request Request.
 	 * @return \WP_REST_Response|\WP_Error
@@ -206,8 +240,7 @@ class Logs extends Controller {
 	}
 
 	/**
-	 * Turns a calendar day from the date-range filter into a UTC datetime. The day is read in the
-	 * site's own timezone, the same one the log's dates are shown in.
+	 * Turns a calendar day from the date-range filter into a UTC datetime, read in the site's own timezone.
 	 *
 	 * @param mixed  $day  Raw request value, expected as `Y-m-d`.
 	 * @param string $time `H:i:s` within that day.
@@ -223,6 +256,33 @@ class Logs extends Controller {
 		$local = date_create( $day . ' ' . $time, wp_timezone() );
 
 		return $local ? $local->setTimezone( new \DateTimeZone( 'UTC' ) )->format( 'Y-m-d H:i:s' ) : '';
+	}
+
+	/**
+	 * Adds `opened` and `clicked` to a log row: 'yes', 'no', or 'not_tracked' (failed/SMS rows, with no
+	 * `track_*` flags). A click counts as an open even if the mail app blocked the pixel.
+	 *
+	 * @param array $row Log row with its tracking columns.
+	 * @return array
+	 */
+	private static function with_engagement( array $row ) {
+		$opens  = (int) $row['open_count'];
+		$clicks = (int) $row['click_count'];
+
+		$row['opened']  = (int) $row['track_opens'] ? ( $opens + $clicks > 0 ? 'yes' : 'no' ) : 'not_tracked';
+		$row['clicked'] = (int) $row['track_clicks'] ? ( $clicks > 0 ? 'yes' : 'no' ) : 'not_tracked';
+
+		return $row;
+	}
+
+	/**
+	 * A stored UTC datetime in the site's format, or '' when it is empty.
+	 *
+	 * @param string|null $utc_datetime UTC `Y-m-d H:i:s`.
+	 * @return string
+	 */
+	private static function display_or_empty( $utc_datetime ) {
+		return empty( $utc_datetime ) ? '' : Utill::format_datetime( (string) $utc_datetime );
 	}
 
 	/**
