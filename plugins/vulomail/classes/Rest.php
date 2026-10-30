@@ -37,6 +37,7 @@ class Rest {
 			'connections' => new Rest\Connections(),
 			'logs'        => new Rest\Logs(),
 			'tools'       => new Rest\Tools(),
+			'templates'   => new Rest\Templates(),
 		);
 
 		foreach ( (array) apply_filters( 'vulomail_rest_controllers', array() ) as $key => $controller ) {

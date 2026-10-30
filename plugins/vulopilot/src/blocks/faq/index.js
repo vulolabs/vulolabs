@@ -6,6 +6,8 @@ import {
 	RichText,
 	InspectorControls,
 	useSettings,
+	MediaUpload,
+	MediaUploadCheck,
 	// eslint-disable-next-line camelcase
 	__experimentalBorderControl as BorderControl,
 } from '@wordpress/block-editor';
@@ -25,8 +27,6 @@ import {
 	__experimentalUnitControl as UnitControl,
 } from '@wordpress/components';
 import metadata from './block.json';
-import FaqAccordion from './FaqAccordion';
-import { buildFaqStyleVars } from './faqStyleVars';
 import {
 	DEFAULT_FAQ_STYLE,
 	APPEARANCE_PRESETS,
@@ -132,24 +132,20 @@ registerBlockType( metadata.name, {
 		// single-open accordion-of-rows look) - `null` once the user collapses every row.
 		const [ openQuestionIndex, setOpenQuestionIndex ] = useState( 0 );
 		const style = mergeFaqStyle( attributes.style );
-		const styleVars = buildFaqStyleVars( attributes );
 		const blockProps = useBlockProps();
 
-		const settings = {
-			layoutMode,
-			allowMultipleOpen,
-			initialOpenIndex,
-			iconStyle,
-			iconPosition,
-			headingLevel,
-			animationEnabled,
-		};
-
-		const updateQuestion = ( index, field, value ) => {
+		/** One or more fields on a single question row, merged in one write - needed (not two
+		 * separate `updateQuestion()` calls) for the image picker's `imageId`+`imageUrl` pair,
+		 * since two `setAttributes()` calls in the same handler would both read the same stale
+		 * `questions` closure and the second would silently drop the first's change. */
+		const patchQuestion = ( index, patch ) => {
 			const next = questions.slice();
-			next[ index ] = { ...next[ index ], [ field ]: value };
+			next[ index ] = { ...next[ index ], ...patch };
 			setAttributes( { questions: next } );
 		};
+
+		const updateQuestion = ( index, field, value ) =>
+			patchQuestion( index, { [ field ]: value } );
 
 		const addRow = () =>
 			setAttributes( {
@@ -677,28 +673,121 @@ registerBlockType( metadata.name, {
 				</InspectorControls>
 
 				<div { ...blockProps }>
-					<FaqAccordion
-						items={ questions }
-						renderQuestion={ ( item ) => (
-							<RichText.Content
-								tagName="span"
-								value={ item.question }
-							/>
+					<div className="vulopilot-faq-editor">
+						{ 0 === questions.length && (
+							<p className="vulopilot-faq-editor-empty">
+								{ __(
+									'Add a question below to get started.',
+									'vulopilot'
+								) }
+							</p>
 						) }
-						renderAnswer={ ( item ) => (
-							<RichText.Content
-								tagName="div"
-								value={ item.answer }
-							/>
-						) }
-						settings={ settings }
-						styleVars={ styleVars }
-						groupName="editor-preview"
-						emptyMessage={ __(
-							'Add a question from the Content tab in the sidebar to get started.',
-							'vulopilot'
-						) }
-					/>
+						{ questions.map( ( item, index ) => (
+							<div
+								className={ `vulopilot-faq-editor-card${ item.hidden ? ' is-hidden' : '' }` }
+								key={ index }
+							>
+								<div className="vulopilot-faq-editor-card__header">
+									<RichText
+										tagName="p"
+										className="vulopilot-faq-editor-card__question"
+										placeholder={ __( 'Question', 'vulopilot' ) }
+										value={ item.question }
+										onChange={ ( value ) =>
+											updateQuestion( index, 'question', value )
+										}
+									/>
+									<div className="vulopilot-faq-editor-card__actions">
+										<Button
+											icon={ item.hidden ? 'hidden' : 'visibility' }
+											label={
+												item.hidden
+													? __( 'Show on frontend', 'vulopilot' )
+													: __( 'Hide from frontend', 'vulopilot' )
+											}
+											showTooltip
+											size="small"
+											onClick={ () =>
+												updateQuestion( index, 'hidden', ! item.hidden )
+											}
+										/>
+										<Button
+											icon="trash"
+											label={ __( 'Delete question', 'vulopilot' ) }
+											showTooltip
+											isDestructive
+											size="small"
+											onClick={ () => removeRow( index ) }
+										/>
+									</div>
+								</div>
+								<RichText
+									tagName="div"
+									className="vulopilot-faq-editor-card__answer"
+									placeholder={ __( 'Answer', 'vulopilot' ) }
+									value={ item.answer }
+									onChange={ ( value ) =>
+										updateQuestion( index, 'answer', value )
+									}
+								/>
+								{ item.imageUrl && (
+									<img
+										className="vulopilot-faq-editor-card__image-preview"
+										src={ item.imageUrl }
+										alt=""
+									/>
+								) }
+								<div className="vulopilot-faq-editor-card__image-row">
+									<MediaUploadCheck>
+										<MediaUpload
+											onSelect={ ( media ) =>
+												patchQuestion( index, {
+													imageId: media.id,
+													imageUrl: media.url,
+												} )
+											}
+											allowedTypes={ [ 'image' ] }
+											value={ item.imageId }
+											render={ ( { open } ) => (
+												<Button
+													variant="primary"
+													size="small"
+													onClick={ open }
+												>
+													{ item.imageUrl
+														? __( 'Replace image', 'vulopilot' )
+														: __( 'Add Image', 'vulopilot' ) }
+												</Button>
+											) }
+										/>
+									</MediaUploadCheck>
+									{ item.imageUrl && (
+										<Button
+											variant="tertiary"
+											isDestructive
+											size="small"
+											onClick={ () =>
+												patchQuestion( index, {
+													imageId: 0,
+													imageUrl: '',
+												} )
+											}
+										>
+											{ __( 'Remove image', 'vulopilot' ) }
+										</Button>
+									) }
+								</div>
+							</div>
+						) ) }
+						<Button
+							className="vulopilot-faq-editor-add"
+							variant="primary"
+							icon="plus-alt2"
+							onClick={ addRow }
+						>
+							{ __( 'Add New FAQ', 'vulopilot' ) }
+						</Button>
+					</div>
 				</div>
 			</>
 		);

@@ -397,6 +397,94 @@
 // Editor-only chrome below - never rendered by FaqRenderer.php, so it can't affect the frontend's
 // own byte-identical copy of the rules above.
 
+// The canvas's own Rank Math-style repeater (index.js) - one light-grey container holding a white
+// card per question, fully independent of the `.vulopilot-faq__*`/`--faq-*` accordion rules above
+// (those style the real frontend `<details>` markup; this is editor-only authoring chrome and
+// deliberately never reuses that styling or those custom properties).
+.vulopilot-faq-editor {
+	display: flex;
+	flex-direction: column;
+	gap: 0.75rem;
+	padding: 1.25rem;
+	background: #f0f1f4;
+	border-radius: 0.75rem;
+}
+
+.vulopilot-faq-editor-empty {
+	margin: 0;
+	color: #6b7280;
+	font-style: italic;
+}
+
+.vulopilot-faq-editor-card {
+	background: #fff;
+	border-radius: 0.5rem;
+	box-shadow: 0 0.0625rem 0.1875rem rgba(0, 0, 0, 0.08);
+	padding: 1rem;
+
+	&.is-hidden {
+		opacity: 0.55;
+	}
+}
+
+.vulopilot-faq-editor-card__header {
+	display: flex;
+	align-items: flex-start;
+	justify-content: space-between;
+	gap: 0.75rem;
+}
+
+.vulopilot-faq-editor-card__question {
+	flex: 1;
+	margin: 0;
+	font-size: 1.0625rem;
+	font-weight: 700;
+	color: #1f2937;
+}
+
+.vulopilot-faq-editor-card__actions {
+	flex-shrink: 0;
+	display: flex;
+	gap: 0.375rem;
+
+	.components-button {
+		border-radius: 50%;
+		background: #f0f1f4;
+
+		&.is-destructive {
+			background: #fbe2e2;
+			color: #c0121f;
+		}
+	}
+}
+
+.vulopilot-faq-editor-card__answer {
+	margin: 0.5rem 0 0;
+	color: #4b5563;
+	font-size: 0.9375rem;
+	line-height: 1.6;
+}
+
+.vulopilot-faq-editor-card__image-preview {
+	display: block;
+	margin-top: 0.75rem;
+	max-width: 12rem;
+	max-height: 8rem;
+	border-radius: 0.375rem;
+	object-fit: cover;
+}
+
+.vulopilot-faq-editor-card__image-row {
+	display: flex;
+	justify-content: flex-end;
+	gap: 0.5rem;
+	margin-top: 0.75rem;
+}
+
+.vulopilot-faq-editor-add {
+	align-self: flex-start;
+}
+
 // Appearance preset picker (index.js's own Style tab, `APPEARANCE_PRESETS`) - 3 real buttons, each
 // a small illustrative swatch + label, selected state highlighted by a real theme-color border.
 // Purely editor chrome, never rendered by FaqRenderer.php.

@@ -95,7 +95,7 @@
 		"react-sortablejs": "^6.1.4",
 		"recharts": "^3.8.1",
 		"sortablejs": "^1.15.6",
-		"@multivendorx/zyra": "^1.0.56"
+		"@multivendorx/zyra": "link:/home/techmonastic/Desktop/zyra/packages/bundle"
 	},
 	"devDependencies": {
 		"wireit": "^0.14.12"

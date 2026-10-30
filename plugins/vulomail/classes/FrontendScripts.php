@@ -120,6 +120,13 @@ class FrontendScripts {
 				'default_from'   => Email\MessageFactory::default_from_email(),
 				'providers'      => VuloMail()->providers->definitions(),
 				'sms_triggers'   => self::sms_trigger_definitions(),
+				// Other plugins (e.g. MultiVendorX, CatalogX) register
+				// themselves here on `plugins_loaded` when active, each as
+				// `{ plugin, label, rest_namespace }` — the Email
+				// Templates screen reads this to know which plugins' own
+				// `GET {rest_namespace}/email-templates` to list, without
+				// vulomail storing any of that data itself.
+				'email_sources'  => apply_filters( 'vulomail_email_sources', array() ),
 				// Settings → General → Date Format, in the token syntax zyra's date picker uses.
 				'date_format_js' => self::convert_date_format_to_js( (string) get_option( 'date_format' ) ),
 				// zyra's settings form locks a field whose `dependentPlugin` isn't in this list.

@@ -77,7 +77,9 @@ class FormRepository {
 			$params[] = $args['status'];
 		}
 
-		$where_sql = implode( ' AND ', $where );
+		$where = array_merge( $where, $this->plugin_clauses( (string) ( $args['plugin'] ?? '' ), $params ) );
+
+		$where_sql = implode( ' AND ', array_merge( $where, $this->hidden_template_clauses( $params ) ) );
 		$per_page  = (int) ( $args['per_page'] ?? 0 );
 		$per_page  = $per_page > 0 ? min( 100, $per_page ) : 10;
 		$offset    = ( max( 1, (int) ( $args['page'] ?? 1 ) ) - 1 ) * $per_page;
@@ -101,13 +103,120 @@ class FormRepository {
 	}
 
 	/**
+	 * The oldest form made from a template, 0 when there is none.
+	 *
+	 * @param string $template Template id.
+	 * @return int
+	 */
+	public function id_for_template( $template ) {
+		global $wpdb;
+
+		if ( '' === $template ) {
+			return 0;
+		}
+
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+		return (int) $wpdb->get_var( $wpdb->prepare( 'SELECT id FROM %i WHERE form_schema LIKE %s ORDER BY id ASC LIMIT 1', $this->table(), '%' . $wpdb->esc_like( '"template":' . wp_json_encode( $template ) ) . '%' ) );
+	}
+
+	/**
+	 * Conditions for the plugin filter of the list: '' for every form, 'vuloform' for the forms that
+	 * belong to no plugin, or a plugin's name for the forms made from its templates.
+	 *
+	 * @param string $plugin Filter value.
+	 * @param array  $params Query values; the conditions' values are appended.
+	 * @return string[]
+	 */
+	private function plugin_clauses( $plugin, array &$params ) {
+		global $wpdb;
+
+		$plugins = Templates::plugins();
+
+		if ( '' === $plugin || 'all' === $plugin ) {
+			return array();
+		}
+
+		$like = static function ( $id ) use ( $wpdb ) {
+			return '%' . $wpdb->esc_like( '"template":' . wp_json_encode( $id ) ) . '%';
+		};
+
+		if ( 'vuloform' === $plugin ) {
+			$clauses = array();
+
+			foreach ( array_merge( array(), ...array_values( $plugins ) ) as $id ) {
+				$clauses[] = 'form_schema NOT LIKE %s';
+				$params[]  = $like( $id );
+			}
+
+			return $clauses;
+		}
+
+		$ids = $plugins[ $plugin ] ?? array();
+
+		if ( ! $ids ) {
+			// A plugin that is not offering templates has no forms in the list.
+			return array( '1=0' );
+		}
+
+		$or = array();
+
+		foreach ( $ids as $id ) {
+			$or[]     = 'form_schema LIKE %s';
+			$params[] = $like( $id );
+		}
+
+		return array( '(' . implode( ' OR ', $or ) . ')' );
+	}
+
+	/**
+	 * Ids of every form made from a template.
+	 *
+	 * @param string $template Template id.
+	 * @return int[]
+	 */
+	public function ids_for_template( $template ) {
+		global $wpdb;
+
+		if ( '' === $template ) {
+			return array();
+		}
+
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+		return array_map( 'intval', (array) $wpdb->get_col( $wpdb->prepare( 'SELECT id FROM %i WHERE form_schema LIKE %s', $this->table(), '%' . $wpdb->esc_like( '"template":' . wp_json_encode( $template ) ) . '%' ) ) );
+	}
+
+	/**
+	 * Conditions that leave out forms made from a template of a plugin that is switched off. The
+	 * forms are kept, and come back when the plugin does.
+	 *
+	 * @param array $params Query values; the conditions' values are appended.
+	 * @return string[]
+	 */
+	private function hidden_template_clauses( array &$params ) {
+		global $wpdb;
+
+		$clauses = array();
+
+		foreach ( Templates::unavailable() as $id ) {
+			$clauses[] = 'form_schema NOT LIKE %s';
+			$params[]  = '%' . $wpdb->esc_like( '"template":' . wp_json_encode( $id ) ) . '%';
+		}
+
+		return $clauses;
+	}
+
+	/**
 	 * @return array<int, array{id: string, title: string}> Published forms, for the block and shortcode pickers.
 	 */
 	public function published() {
 		global $wpdb;
 
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
-		$rows = $wpdb->get_results( $wpdb->prepare( 'SELECT id, title FROM %i WHERE status = %s ORDER BY title ASC LIMIT 500', $this->table(), 'published' ), ARRAY_A );
+		$params  = array( $this->table(), 'published' );
+		$clauses = $this->hidden_template_clauses( $params );
+		$extra   = $clauses ? ' AND ' . implode( ' AND ', $clauses ) : '';
+
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- $extra holds only the fixed fragments built above.
+		$rows = $wpdb->get_results( $wpdb->prepare( "SELECT id, title FROM %i WHERE status = %s{$extra} ORDER BY title ASC LIMIT 500", $params ), ARRAY_A );
 
 		return $rows ? $rows : array();
 	}
@@ -198,7 +307,18 @@ class FormRepository {
 		unset( $this->cache[ (int) $id ] );
 
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
-		return (bool) $wpdb->delete( $this->table(), array( 'id' => (int) $id ) );
+		$deleted = (bool) $wpdb->delete( $this->table(), array( 'id' => (int) $id ) );
+
+		if ( $deleted ) {
+			/**
+			 * Fires after a form is deleted.
+			 *
+			 * @param int $id Form id.
+			 */
+			do_action( 'vuloform_form_deleted', (int) $id );
+		}
+
+		return $deleted;
 	}
 
 	/**

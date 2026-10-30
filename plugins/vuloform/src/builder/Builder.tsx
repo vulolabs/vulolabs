@@ -9,7 +9,7 @@ import { errorMessage, notify } from '../services/notify';
 import type { Field, Form, FormSettings as Settings } from '../services/types';
 import Canvas from './Canvas';
 import Inspector from './Inspector';
-import { createField, uniqueKey } from './fields';
+import { createField, lockOf, uniqueKey } from './fields';
 import FormSettings, { lastSection, openSettingsGroup } from './FormSettings';
 import Share from './Share';
 import Switch from '../components/Switch';
@@ -463,6 +463,7 @@ const Builder = ({ formId }: { formId: number }) => {
 			{'fields' === tab && (
 				<div className="vuloform-builder-panes">
 					<Canvas
+						template={present.settings.template}
 						fields={present.fields}
 						selectedId={selectedId}
 						onSelect={setSelectedId}
@@ -484,6 +485,11 @@ const Builder = ({ formId }: { formId: number }) => {
 						}}
 						onDelete={(id) => {
 							const removed = present.fields.find((field) => field.id === id);
+
+							// A field the template needs (such as the store name) can't be removed.
+							if (removed && false === lockOf(present.settings.template, removed).delete) {
+								return;
+							}
 
 							// Rules that looked at the deleted field go with it; undo brings both back.
 							commit({
@@ -526,6 +532,7 @@ const Builder = ({ formId }: { formId: number }) => {
 						}
 					/>
 					<Inspector
+						template={present.settings.template}
 						field={selected}
 						fields={present.fields}
 						onChange={(changed) => commit({ fields: present.fields.map((field) => (field.id === changed.id ? changed : field)) })}

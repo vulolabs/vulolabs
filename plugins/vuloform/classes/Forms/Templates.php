@@ -188,6 +188,33 @@ class Templates {
 				),
 				'submit' => __( 'Register', 'vuloform' ),
 			),
+			'registration' => array(
+				'title'  => __( 'Registration form', 'vuloform' ),
+				'desc'   => __( 'Account details for a new member, with consent.', 'vuloform' ),
+				'icon'   => 'person',
+				'fields' => array(
+					self::field( 'text', __( 'First name', 'vuloform' ), array( 'required' => true, 'width' => 50 ) ),
+					self::field( 'text', __( 'Last name', 'vuloform' ), array( 'required' => true, 'width' => 50 ) ),
+					$email,
+					$phone,
+					self::field( 'date', __( 'Date of birth', 'vuloform' ) ),
+					self::field(
+						'radio',
+						__( 'Gender', 'vuloform' ),
+						array( 'options' => self::options( array( __( 'Female', 'vuloform' ), __( 'Male', 'vuloform' ), __( 'Other', 'vuloform' ), __( 'Prefer not to say', 'vuloform' ) ) ) )
+					),
+					self::field( 'address', __( 'Address', 'vuloform' ) ),
+					self::field(
+						'consent',
+						__( 'Terms', 'vuloform' ),
+						array(
+							'required'     => true,
+							'consent_text' => __( 'I agree to the terms and conditions.', 'vuloform' ),
+						)
+					),
+				),
+				'submit' => __( 'Register', 'vuloform' ),
+			),
 			'job'        => array(
 				'title'  => __( 'Job application', 'vuloform' ),
 				'desc'   => __( 'Applicant details with a CV upload.', 'vuloform' ),
@@ -289,34 +316,158 @@ class Templates {
 		$out = array();
 
 		foreach ( $templates as $id => $template ) {
-			$settings = Schema::default_settings();
-
-			if ( isset( $template['submit'] ) ) {
-				$settings['submit_label'] = $template['submit'];
-			}
-
-			// Every template tells the site admin about a submission out of the box.
-			$settings['notifications'][] = self::admin_notification( 'email' );
-
-			$out[ $id ] = array(
-				'title'  => $template['title'],
-				'desc'   => $template['desc'],
-				'icon'   => $template['icon'],
-				'schema' => Schema::sanitize(
-					array(
-						'fields'   => $template['fields'],
-						'settings' => $settings,
-					)
-				),
-			);
+			$out[ $id ] = self::entry( $id, $template );
 		}
 
 		/**
 		 * Filters the starter templates.
 		 *
-		 * @param array $out Template id => title, desc, icon, schema.
+		 * A plugin's template adds `plugin` (the plugin's name, shown as a tag). Build its entry with
+		 * Templates::entry(). It is only offered while the plugin is active, and forms made from it
+		 * are hidden while it isn't.
+		 *
+		 * @param array $out Template id => title, desc, icon, plugin, schema.
 		 */
-		return (array) apply_filters( 'vuloform_templates', $out );
+		$out = (array) apply_filters( 'vuloform_templates', $out );
+
+		self::remember_plugin_templates( $out );
+
+		return $out;
+	}
+
+	/**
+	 * A template as the picker and the REST API use it, from its plain definition.
+	 *
+	 * @param string $id       Template id.
+	 * @param array  $template title, desc, icon, fields, and optionally submit and plugin.
+	 * @return array{title: string, desc: string, icon: string, plugin: string, schema: array}
+	 */
+	public static function entry( $id, array $template ) {
+		$settings             = Schema::default_settings();
+		$settings['template'] = $id;
+
+		if ( isset( $template['submit'] ) ) {
+			$settings['submit_label'] = $template['submit'];
+		}
+
+		// Every template tells the site admin about a submission out of the box.
+		$settings['notifications'][] = self::admin_notification( 'email' );
+
+		return array(
+			'title'  => $template['title'],
+			'desc'   => $template['desc'],
+			'icon'   => $template['icon'],
+			'plugin' => (string) ( $template['plugin'] ?? '' ),
+			// One form per site: the picker opens the existing one instead of making another.
+			'single' => ! empty( $template['single'] ),
+			'schema' => Schema::sanitize(
+				array(
+					'fields'   => $template['fields'],
+					'settings' => $settings,
+				)
+			),
+		);
+	}
+
+	/**
+	 * Option remembering which templates belong to a plugin (id => plugin name), so their forms can
+	 * be told apart from the rest once the plugin is switched off.
+	 */
+	const PLUGIN_TEMPLATES_OPTION = 'vuloform_plugin_templates';
+
+	/**
+	 * @param array $templates Current templates.
+	 * @return void
+	 */
+	private static function remember_plugin_templates( array $templates ) {
+		$known = (array) get_option( self::PLUGIN_TEMPLATES_OPTION, array() );
+		$next  = $known;
+
+		foreach ( $templates as $id => $template ) {
+			if ( ! empty( $template['plugin'] ) ) {
+				$next[ $id ] = (string) $template['plugin'];
+			}
+		}
+
+		if ( $next !== $known ) {
+			update_option( self::PLUGIN_TEMPLATES_OPTION, $next, false );
+		}
+	}
+
+	/**
+	 * Plugins that offer templates right now, with the ids of their templates.
+	 *
+	 * @return array<string, string[]> Plugin name => template ids.
+	 */
+	public static function plugins() {
+		$out = array();
+
+		foreach ( self::all() as $id => $template ) {
+			if ( ! empty( $template['plugin'] ) ) {
+				$out[ $template['plugin'] ][] = $id;
+			}
+		}
+
+		return $out;
+	}
+
+	/**
+	 * Fields a template needs to keep, by template id then field key. A locked field is always
+	 * required (`required`) and/or can't be removed from the form (`delete` => false). A plugin adds
+	 * its own with the `vuloform_template_locked_fields` filter; the builder enforces them.
+	 *
+	 * @return array<string, array<string, array{required?: bool, delete?: bool}>>
+	 */
+	public static function locked_fields() {
+		/**
+		 * Filters the fields a template locks.
+		 *
+		 * @param array $locked Template id => field key => array( 'required' => bool, 'delete' => bool ).
+		 */
+		return (array) apply_filters( 'vuloform_template_locked_fields', array() );
+	}
+
+	/**
+	 * Forms that can't be deleted, because something depends on them (a plugin's registration form,
+	 * for example). A plugin adds its form's id with the `vuloform_protected_forms` filter.
+	 *
+	 * @return int[]
+	 */
+	public static function protected_form_ids() {
+		return array_values( array_unique( array_filter( array_map( 'absint', (array) apply_filters( 'vuloform_protected_forms', array() ) ) ) ) );
+	}
+
+	/**
+	 * Ids of plugin templates that are not offered right now, because their plugin is off.
+	 *
+	 * @return string[]
+	 */
+	public static function unavailable() {
+		$known = array_keys( (array) get_option( self::PLUGIN_TEMPLATES_OPTION, array() ) );
+
+		return $known ? array_values( array_diff( $known, array_keys( self::all() ) ) ) : array();
+	}
+
+	/**
+	 * The builder's field library for each template that has its own, keyed by template id. A form
+	 * started from any other template (or none) gets the standard library.
+	 *
+	 * Each group is `id`, `label` and `items`. An item is a field type id, or an array describing a
+	 * ready-made field: `id`, `type`, `label`, `icon`, and optionally `key`, `placeholder` and
+	 * `unique` (it can be added only once).
+	 *
+	 * @return array<string, array<int, array{id: string, label: string, items: array}>>
+	 */
+	public static function palettes() {
+		$palettes = array(
+		);
+
+		/**
+		 * Filters the template field libraries.
+		 *
+		 * @param array $palettes Template id => groups.
+		 */
+		return (array) apply_filters( 'vuloform_template_palettes', $palettes );
 	}
 
 	/**
@@ -345,7 +496,7 @@ class Templates {
 	 * @param array  $extra Other field settings.
 	 * @return array
 	 */
-	private static function field( $type, $label, array $extra = array() ) {
+	public static function field( $type, $label, array $extra = array() ) {
 		return array_merge(
 			array(
 				'type'  => $type,
@@ -359,7 +510,7 @@ class Templates {
 	 * @param string[] $labels Option labels; each is also its value.
 	 * @return array
 	 */
-	private static function options( array $labels ) {
+	public static function options( array $labels ) {
 		$options = array();
 
 		foreach ( $labels as $label ) {

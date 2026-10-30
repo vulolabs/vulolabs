@@ -95,7 +95,7 @@ const StatWidget: React.FC<StatWidgetProps> = ({
 							text: config.title,
 							extra: config.getExtra?.(summary),
 							progress: config.getNumber(summary),
-							colorClass: 'red-color'
+							colorClass: 'zyra-red-color'
 						},
 					]}
 				/>

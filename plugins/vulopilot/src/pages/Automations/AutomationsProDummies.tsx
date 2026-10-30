@@ -5,7 +5,25 @@ import { BlurredProContent } from '../../components/UpgradeToProOverlay';
 
 interface AutomationsDummyProps {
 	onClick: () => void;
+	/** Once Pro itself is licensed, the only remaining reason `vulopilot_automations_panel`
+	 * doesn't resolve is the Workflow Automation module being off - the overlay needs to say
+	 * that, not "Upgrade to Pro" (see Automations.tsx's own docblock on this prop). */
+	isModuleGate?: boolean;
 }
+
+/** Shared copy both dummy cards below pass to `BlurredProContent`. */
+const moduleGateCopy = (isModuleGate?: boolean) =>
+	isModuleGate
+		? {
+				icon: 'unlock',
+				title: __('Enable Workflow Automation module', 'vulopilot'),
+				desc: __(
+					'Turn the Workflow Automation module on from Settings → Modules to see this here.',
+					'vulopilot'
+				),
+				buttonText: __('Enable module', 'vulopilot'),
+			}
+		: {};
 
 
 const AGENT_DUMMY_ROWS: { name: string; task: string; progress: number }[] = [
@@ -37,9 +55,13 @@ const OVERVIEW_DUMMY_CARDS: { title: string; icon: string; desc: string; action:
 	},
 ];
 
-export const AutomationsOverviewDummy = ({ onClick }: AutomationsDummyProps) => (
+export const AutomationsOverviewDummy = ({ onClick, isModuleGate }: AutomationsDummyProps) => (
 	<ColumnComponent>
-		<BlurredProContent contentClassName="automations-overview-dummy" onClick={onClick}>
+		<BlurredProContent
+			contentClassName="automations-overview-dummy"
+			onClick={onClick}
+			{...moduleGateCopy(isModuleGate)}
+		>
 			{/* Same real `AnalyticsComponent variant="dashboard"` shape (zyra Storybook's
 			`Components/AnalyticsComponent/Dashboard` story) `AutomationsStatusCard.tsx`'s own
 			"Automation status" tiles already use - each tile's real headline renders in `number`
@@ -92,9 +114,13 @@ const AI_ACTIVITY_DUMMY_ROWS: { title: string; time: string }[] = [
 	{ title: __('Fixed 14 metadata issues', 'vulopilot'), time: __('2 hours ago', 'vulopilot') },
 ];
 
-export const AutomationsAiActivityDummy = ({ onClick }: AutomationsDummyProps) => (
+export const AutomationsAiActivityDummy = ({ onClick, isModuleGate }: AutomationsDummyProps) => (
 	<CardComponent title={__('Automation Activity', 'vulopilot')} titleIcon="ai">
-		<BlurredProContent contentClassName="automations-activity-dummy" onClick={onClick}>
+		<BlurredProContent
+			contentClassName="automations-activity-dummy"
+			onClick={onClick}
+			{...moduleGateCopy(isModuleGate)}
+		>
 			<ul className="automation-ai-activity" aria-hidden="true">
 				{AI_ACTIVITY_DUMMY_ROWS.map((row) => (
 					<li key={row.title} className="automation-ai-activity-row">

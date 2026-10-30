@@ -508,6 +508,52 @@
 	}
 }
 
+// A real on/off switch — `ToggleInput` is a segmented choice control (two
+// labelled pill buttons), not a boolean switch, so the Email Templates
+// screen's "On" column uses this instead.
+.vulomail-switch {
+	position: relative;
+	display: inline-block;
+	width: 2.5rem;
+	height: 1.375rem;
+	flex-shrink: 0;
+
+	input {
+		opacity: 0;
+		width: 0;
+		height: 0;
+	}
+
+	.vulomail-switch-track {
+		position: absolute;
+		inset: 0;
+		background: var(--border-color, #ccc);
+		border-radius: 1.375rem;
+		cursor: pointer;
+		transition: background 0.15s ease;
+
+		&::before {
+			content: '';
+			position: absolute;
+			height: 1.063rem;
+			width: 1.063rem;
+			left: 0.156rem;
+			bottom: 0.156rem;
+			background: #fff;
+			border-radius: 50%;
+			transition: transform 0.15s ease;
+		}
+	}
+
+	input:checked + .vulomail-switch-track {
+		background: var(--color-primary);
+	}
+
+	input:checked + .vulomail-switch-track::before {
+		transform: translateX(1.125rem);
+	}
+}
+
 .vulomail-alert-message {
 	display: flex;
 	flex-direction: column;
@@ -526,5 +572,223 @@
 	.vulomail-alert-message-hint {
 		font-size: 0.8125rem;
 		color: var(--sub-text-color);
+	}
+}
+
+// Email Templates: the list of every email, grouped by section.
+.vulomail-emails {
+	width: 100%;
+	padding: 1.25rem 0;
+
+	&-title {
+		margin: 0 0 0.5rem;
+		font-size: 1.75rem;
+		font-weight: 700;
+	}
+
+	&-lead {
+		max-width: 38rem;
+		margin: 0 0 1rem;
+		color: var(--sub-text-color);
+	}
+
+	&-stats {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 1rem;
+		margin: 0 0 1.5rem;
+		font-size: 0.8125rem;
+
+		span::before {
+			display: inline-block;
+			width: 0.4rem;
+			height: 0.4rem;
+			margin-right: 0.35rem;
+			border-radius: 50%;
+			background: var(--color-primary);
+			content: '';
+		}
+
+		span:first-child::before {
+			display: none;
+		}
+
+		.is-customer::before {
+			background: #2563eb;
+		}
+
+		.is-admin::before {
+			background: #b45309;
+		}
+	}
+
+	&-toolbar {
+		display: flex;
+		flex-wrap: nowrap;
+		gap: 0.75rem;
+		align-items: center;
+		margin-bottom: 2rem;
+	}
+
+	// zyra's own inputs draw the field; these only size them in the toolbar.
+	&-search {
+		flex: 1 1 8rem;
+		min-width: 8rem;
+	}
+
+	&-select {
+		flex: 0 0 11rem;
+	}
+
+	&-tabs {
+		display: flex;
+		flex: none;
+		gap: 0.25rem;
+		padding: 0.25rem;
+		border-radius: 0.625rem;
+		background: var(--background-color);
+
+		button {
+			padding: 0.4rem 0.85rem;
+			border: 0;
+			border-radius: 0.5rem;
+			background: none;
+			color: var(--sub-text-color);
+			font: inherit;
+			font-weight: 600;
+			cursor: pointer;
+
+			span {
+				margin-left: 0.2rem;
+				opacity: 0.6;
+				font-weight: 500;
+			}
+
+			&.is-active {
+				background: var(--background-white);
+				color: var(--text-color);
+				box-shadow: 0 0.063rem 0.125rem rgba(16, 24, 40, 0.12);
+			}
+		}
+	}
+
+	&-note {
+		color: var(--sub-text-color);
+	}
+
+	&-section {
+		margin-bottom: 2rem;
+
+		> header {
+			display: flex;
+			align-items: baseline;
+			justify-content: space-between;
+			margin-bottom: 0.5rem;
+
+			h3 {
+				margin: 0;
+				font-size: 0.9375rem;
+
+				span {
+					margin-left: 0.4rem;
+					color: var(--sub-text-color);
+					font-size: 0.8125rem;
+					font-weight: 400;
+				}
+			}
+
+			button {
+				border: 0;
+				background: none;
+				color: var(--sub-text-color);
+				font: inherit;
+				font-size: 0.8125rem;
+				cursor: pointer;
+			}
+		}
+
+		ul {
+			margin: 0;
+			padding: 0;
+			overflow: hidden;
+			border: 0.063rem solid var(--border-color);
+			border-radius: 0.75rem;
+			background: var(--background-white);
+			list-style: none;
+		}
+
+		li {
+			display: flex;
+			gap: 1rem;
+			align-items: center;
+			margin: 0;
+			padding: 0.875rem 1.25rem;
+
+			+ li {
+				border-top: 0.063rem solid var(--border-color);
+			}
+		}
+	}
+
+	&-text {
+		display: flex;
+		flex: 1;
+		flex-direction: column;
+		gap: 0.15rem;
+		min-width: 0;
+
+		strong {
+			font-size: 0.9375rem;
+
+			em {
+				margin-left: 0.5rem;
+				padding: 0.05rem 0.4rem;
+				border: 0.063rem solid var(--border-color);
+				border-radius: 0.25rem;
+				color: var(--sub-text-color);
+				font-size: 0.6875rem;
+				font-style: normal;
+				font-weight: 500;
+			}
+		}
+
+		span {
+			color: var(--sub-text-color);
+			font-size: 0.8125rem;
+		}
+	}
+
+	&-pill {
+		padding: 0.2rem 0.65rem;
+		border-radius: 999px;
+		font-size: 0.75rem;
+		font-weight: 600;
+		background: color-mix(in srgb, var(--color-primary) 10%, var(--background-white));
+		color: var(--color-primary);
+
+		&.is-customer {
+			background: #e8effd;
+			color: #2563eb;
+		}
+
+		&.is-admin {
+			background: #fdf1e1;
+			color: #b45309;
+		}
+	}
+
+	&-edit {
+		padding: 0.5rem 1rem;
+		border: 0.063rem solid var(--border-color);
+		border-radius: 0.5rem;
+		background: var(--background-white);
+		color: var(--text-color);
+		font: inherit;
+		font-weight: 600;
+		cursor: pointer;
+
+		&:hover {
+			border-color: var(--color-primary);
+		}
 	}
 }

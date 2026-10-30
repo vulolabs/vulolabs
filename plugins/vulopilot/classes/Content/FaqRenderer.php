@@ -285,6 +285,13 @@ class FaqRenderer {
 				continue;
 			}
 
+			// The editor's own per-item visibility toggle (`hidden`) - a row kept for later
+			// re-use without deleting it, so it must reach neither the visible markup nor the
+			// JSON-LD while toggled off.
+			if ( ! empty( $row['hidden'] ) ) {
+				continue;
+			}
+
 			$question = isset( $row['question'] ) ? trim( wp_kses_post( (string) $row['question'] ) ) : '';
 			$answer   = isset( $row['answer'] ) ? trim( wp_kses_post( (string) $row['answer'] ) ) : '';
 

@@ -2,8 +2,8 @@ import type { ReactNode } from 'react';
 import { __, sprintf } from '@wordpress/i18n';
 import { ReactSortable } from 'react-sortablejs';
 import { BadgeComponent } from '@zyra/components';
-import type { Field } from '../services/types';
-import { createField, fieldType, fieldTypes } from './fields';
+import type { Field, PaletteItem as Preset } from '../services/types';
+import { createField, fieldType, lockOf, paletteGroups } from './fields';
 
 interface CanvasProps {
 	fields: Field[];
@@ -16,6 +16,8 @@ interface CanvasProps {
 	onDuplicate: (id: string) => void;
 	// eslint-disable-next-line no-unused-vars
 	onDelete: (id: string) => void;
+	/** Id of the form's template, which can have a field library of its own. */
+	template?: string;
 	/** Shown under the fields: what belongs to the form as a whole but is managed alongside them. */
 	footer?: ReactNode;
 }
@@ -25,6 +27,9 @@ interface PaletteItem {
 	id: string;
 	paletteType: string;
 }
+
+const presetOf = (groups: ReturnType<typeof paletteGroups>, id: string): Preset | undefined =>
+	groups.flatMap((group) => group.items).find((item) => item.id === id);
 
 const GROUPS: { id: string; label: string }[] = [
 	{ id: 'basic', label: __('Questions', 'vuloform') },
@@ -41,20 +46,37 @@ const SORT_GROUP = 'vuloform-fields';
  * it), which appends it after the selected field. Fields are reordered by dragging their handle or
  * with the Move up / Move down buttons, so everything works without a pointer.
  */
-const Canvas = ({ fields, selectedId, onChange, onSelect, onDuplicate, onDelete, footer }: CanvasProps) => {
-	const add = (type: string) => {
-		const field = createField(type, fields);
+const Canvas = ({ fields, selectedId, onChange, onSelect, onDuplicate, onDelete, template, footer }: CanvasProps) => {
+	const groups = paletteGroups(template, GROUPS);
+
+	// A library item with a key and a pin or a once-only flag describes a field that is fixed: it
+	// is found on the form again by that key.
+	const keyed = groups.flatMap((group) => group.items).filter((item) => item.key && (item.pin || item.unique));
+	const pinOf = (field: Field) => keyed.find((item) => item.key === field.key)?.pin;
+	const isOnceOnly = (field: Field) => keyed.some((item) => item.key === field.key && item.unique);
+
+	/** Pinned fields back at the top and bottom, whatever order they arrived in. */
+	const normalize = (list: Field[]): Field[] => [
+		...list.filter((field) => 'top' === pinOf(field)),
+		...list.filter((field) => !pinOf(field)),
+		...list.filter((field) => 'bottom' === pinOf(field)),
+	];
+
+	const add = (id: string) => {
+		const preset = presetOf(groups, id);
+		const field = createField(preset?.type ?? id, fields, preset);
 		const index = fields.findIndex((item) => item.id === selectedId);
 		const next = [...fields];
 
 		next.splice(index >= 0 ? index + 1 : next.length, 0, field);
-		onChange(next, field.id);
+		onChange(normalize(next), field.id);
 	};
 
 	const move = (index: number, delta: number) => {
 		const target = index + delta;
 
-		if (target < 0 || target >= fields.length) {
+		// A pinned field stays where it is, and nothing is moved past one.
+		if (target < 0 || target >= fields.length || pinOf(fields[index]) || pinOf(fields[target])) {
 			return;
 		}
 
@@ -71,7 +93,15 @@ const Canvas = ({ fields, selectedId, onChange, onSelect, onDuplicate, onDelete,
 
 		list.forEach((item) => {
 			if ('paletteType' in item) {
-				const field = createField(item.paletteType as string, [...fields, ...next]);
+				const paletteId = item.paletteType as string;
+				const preset = presetOf(groups, paletteId);
+
+				// A once-only field already on the form is not added a second time.
+				if (preset?.unique && preset.key && [...fields, ...next].some((existing) => existing.key === preset.key)) {
+					return;
+				}
+
+				const field = createField(preset?.type ?? paletteId, [...fields, ...next], preset);
 
 				added = field.id;
 				next.push(field);
@@ -86,10 +116,11 @@ const Canvas = ({ fields, selectedId, onChange, onSelect, onDuplicate, onDelete,
 			}
 		});
 
-		const changed = added || next.length !== fields.length || next.some((field, index) => field.id !== fields[index]?.id);
+		const ordered = normalize(next);
+		const changed = added || ordered.length !== fields.length || ordered.some((field, index) => field.id !== fields[index]?.id);
 
 		if (changed) {
-			onChange(next, added || undefined);
+			onChange(ordered, added || undefined);
 		}
 	};
 
@@ -106,10 +137,8 @@ const Canvas = ({ fields, selectedId, onChange, onSelect, onDuplicate, onDelete,
 					</span>
 				</div>
 				<div className="vuloform-palette-body">
-				{GROUPS.map((group) => {
-					const items: PaletteItem[] = fieldTypes()
-						.filter((type) => type.group === group.id)
-						.map((type) => ({ id: `palette-${type.id}`, paletteType: type.id }));
+				{groups.map((group) => {
+					const items: PaletteItem[] = group.items.map((item) => ({ id: `palette-${item.id}`, paletteType: item.id }));
 
 					return (
 						<div className="vuloform-palette-group" key={group.id}>
@@ -121,18 +150,20 @@ const Canvas = ({ fields, selectedId, onChange, onSelect, onDuplicate, onDelete,
 								group={{ name: SORT_GROUP, pull: 'clone', put: false }}
 								className="vuloform-palette-items"
 							>
-								{items.map((item) => {
-									const type = fieldType(item.paletteType);
+								{group.items.map((item) => {
+									// A once-only item is used up as soon as a field has its key.
+									const used = Boolean(item.unique && item.key && fields.some((field) => field.key === item.key));
 
 									return (
 										<button
 											type="button"
 											className="vuloform-palette-item"
 											key={item.id}
-											onClick={() => add(item.paletteType)}
+											disabled={used}
+											onClick={() => add(item.id)}
 										>
-											<i className={`adminfont-${type?.icon}`} aria-hidden="true" />
-											<span>{type?.label}</span>
+											<i className={`adminfont-${item.icon}`} aria-hidden="true" />
+											<span>{item.label}</span>
 										</button>
 									);
 								})}
@@ -155,12 +186,15 @@ const Canvas = ({ fields, selectedId, onChange, onSelect, onDuplicate, onDelete,
 					setList={handleSetList}
 					group={{ name: SORT_GROUP, pull: false, put: true }}
 					handle=".vuloform-card-handle"
+					filter=".is-pinned"
 					animation={150}
 					className={`vuloform-canvas-list${0 === fields.length ? ' is-empty' : ''}`}
 				>
 					{fields.map((field, index) => {
 						const type = fieldType(field.type);
 						const isBreak = 'page_break' === field.type;
+						const pin = pinOf(field);
+						const neighbour = (offset: number) => fields[index + offset];
 
 						if (isBreak) {
 							page++;
@@ -171,10 +205,14 @@ const Canvas = ({ fields, selectedId, onChange, onSelect, onDuplicate, onDelete,
 								key={field.id}
 								className={`vuloform-card vuloform-card-w${field.width}${field.id === selectedId ? ' is-selected' : ''}${
 									isBreak ? ' is-break' : ''
-								}`}
+								}${pin ? ' is-pinned' : ''}`}
 							>
-								<span className="vuloform-card-handle" title={__('Drag to reorder', 'vuloform')} aria-hidden="true">
-									<i className="adminfont-drag" />
+								<span
+									className="vuloform-card-handle"
+									title={pin ? ('top' === pin ? __('Always at the top of the form', 'vuloform') : __('Always at the bottom of the form', 'vuloform')) : __('Drag to reorder', 'vuloform')}
+									aria-hidden="true"
+								>
+									<i className={pin ? 'adminfont-lock' : 'adminfont-drag'} />
 								</span>
 								<button type="button" className="vuloform-card-body" onClick={() => onSelect(field.id)}>
 									<i className={`adminfont-${type?.icon ?? 'lock'}`} aria-hidden="true" />
@@ -187,7 +225,7 @@ const Canvas = ({ fields, selectedId, onChange, onSelect, onDuplicate, onDelete,
 														page
 												  )
 												: field.label || type?.label}
-											{field.required && (
+											{(field.required || lockOf(template, field).required) && (
 												<span className="vuloform-card-required" title={__('Required', 'vuloform')}>
 													{' '}
 													*
@@ -204,7 +242,7 @@ const Canvas = ({ fields, selectedId, onChange, onSelect, onDuplicate, onDelete,
 									<button
 										type="button"
 										onClick={() => move(index, -1)}
-										disabled={0 === index}
+										disabled={0 === index || Boolean(pin) || Boolean(neighbour(-1) && pinOf(neighbour(-1)))}
 										aria-label={sprintf(
 											/* translators: %s: field label. */
 											__('Move %s up', 'vuloform'),
@@ -216,7 +254,7 @@ const Canvas = ({ fields, selectedId, onChange, onSelect, onDuplicate, onDelete,
 									<button
 										type="button"
 										onClick={() => move(index, 1)}
-										disabled={index === fields.length - 1}
+										disabled={index === fields.length - 1 || Boolean(pin) || Boolean(neighbour(1) && pinOf(neighbour(1)))}
 										aria-label={sprintf(
 											/* translators: %s: field label. */
 											__('Move %s down', 'vuloform'),
@@ -225,29 +263,33 @@ const Canvas = ({ fields, selectedId, onChange, onSelect, onDuplicate, onDelete,
 									>
 										<i className="adminfont-arrow-down" aria-hidden="true" />
 									</button>
-									<button
-										type="button"
-										onClick={() => onDuplicate(field.id)}
-										aria-label={sprintf(
-											/* translators: %s: field label. */
-											__('Duplicate %s', 'vuloform'),
-											field.label
-										)}
-									>
-										<i className="adminfont-copy" aria-hidden="true" />
-									</button>
-									<button
-										type="button"
-										className="is-danger"
-										onClick={() => onDelete(field.id)}
-										aria-label={sprintf(
-											/* translators: %s: field label. */
-											__('Delete %s', 'vuloform'),
-											field.label
-										)}
-									>
-										<i className="adminfont-delete" aria-hidden="true" />
-									</button>
+									{!isOnceOnly(field) && (
+										<button
+											type="button"
+											onClick={() => onDuplicate(field.id)}
+											aria-label={sprintf(
+												/* translators: %s: field label. */
+												__('Duplicate %s', 'vuloform'),
+												field.label
+											)}
+										>
+											<i className="adminfont-copy" aria-hidden="true" />
+										</button>
+									)}
+									{false !== lockOf(template, field).delete && (
+										<button
+											type="button"
+											className="is-danger"
+											onClick={() => onDelete(field.id)}
+											aria-label={sprintf(
+												/* translators: %s: field label. */
+												__('Delete %s', 'vuloform'),
+												field.label
+											)}
+										>
+											<i className="adminfont-delete" aria-hidden="true" />
+										</button>
+									)}
 								</span>
 							</div>
 						);

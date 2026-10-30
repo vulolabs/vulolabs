@@ -114,3 +114,19 @@ if ( ! function_exists( 'vulomail_send_sms' ) ) {
 		return $result->success ? true : $result->to_wp_error();
 	}
 }
+
+if ( ! function_exists( 'vulomail_register_email_template' ) ) {
+	/**
+	 * Registers an email template, like register_block_type() registers a block. Call it on or after
+	 * `init`, or add the template with the `vulomail_email_templates` filter instead.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param string $name Namespaced name, such as `my-plugin/order-shipped`.
+	 * @param array  $args Template arguments; see \VuloMail\Templates\Registry.
+	 * @return bool False for an invalid name.
+	 */
+	function vulomail_register_email_template( $name, array $args = array() ) {
+		return \VuloMail\Templates\Registry::register( $name, $args );
+	}
+}

@@ -4,7 +4,6 @@ import path from 'path';
 
 const targetFiles = [
 	'dist',
-	'.wireit',
 	'.cache'
 ];
 

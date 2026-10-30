@@ -7,6 +7,28 @@ export interface FieldType {
 	supports: string[];
 }
 
+/** A ready-made field in a template's field library. */
+export interface PaletteItem {
+	id: string;
+	type: string;
+	label: string;
+	icon: string;
+	key?: string;
+	placeholder?: string;
+	/** Can be added only once. */
+	unique?: boolean;
+	/** Added as a required field. */
+	required?: boolean;
+	/** Kept at the top or bottom of the form, and not movable. Needs `key`. */
+	pin?: 'top' | 'bottom';
+}
+
+export interface PaletteGroup {
+	id: string;
+	label: string;
+	items: (PaletteItem | string)[];
+}
+
 export interface Option {
 	label: string;
 	value: string;
@@ -87,6 +109,8 @@ export interface Webhook {
 }
 
 export interface FormSettings {
+	/** Id of the template the form was started from; picks the field library. */
+	template?: string;
 	submit_label: string;
 	next_label: string;
 	previous_label: string;

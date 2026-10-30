@@ -802,7 +802,7 @@ const BrokenLinksSection = () => {
 																	100
 																)
 																: 0,
-														colorClass: 'green-color',
+														colorClass: 'zyra-green-color',
 													},
 													{
 														icon: 'attachment',
@@ -817,7 +817,7 @@ const BrokenLinksSection = () => {
 																	100
 																)
 																: 0,
-														colorClass: 'blue-color',
+														colorClass: 'zyra-blue-color',
 													},
 												]}
 											/>

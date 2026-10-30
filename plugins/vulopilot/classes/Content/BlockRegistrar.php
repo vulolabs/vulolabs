@@ -126,11 +126,17 @@ class BlockRegistrar {
 			return;
 		}
 
+		// `filemtime()`, not `VuloPilot()->version` - the plugin version doesn't bump on every
+		// dev rebuild, so a fixed `?ver=<version>` query string let the browser cache this file's
+		// URL indefinitely across rebuilds that changed its real content, confirmed live (a hard
+		// refresh didn't bust it either - some browsers don't re-validate an iframe's own
+		// sub-resource cache the same way they do the top document's). The real mtime changes on
+		// every real rebuild, so the URL - and therefore the cache entry - changes with it.
 		wp_enqueue_style(
 			$handle,
 			VuloPilot()->plugin_url . 'assets/styles/public/vulopilot-blocks.min.css',
 			array(),
-			VuloPilot()->version
+			(string) filemtime( $style_path )
 		);
 	}
 }

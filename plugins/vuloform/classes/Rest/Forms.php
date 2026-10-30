@@ -31,6 +31,7 @@ class Forms extends Controller {
 		$this->route( '/forms/(?P<id>\d+)', \WP_REST_Server::CREATABLE, 'update_item' );
 		$this->route( '/forms/(?P<id>\d+)', \WP_REST_Server::DELETABLE, 'delete_item' );
 		$this->route( '/forms/(?P<id>\d+)/duplicate', \WP_REST_Server::CREATABLE, 'duplicate_item' );
+		$this->route( '/forms/bulk-delete', \WP_REST_Server::CREATABLE, 'bulk_delete' );
 		$this->route( '/forms/preview', \WP_REST_Server::CREATABLE, 'preview' );
 	}
 
@@ -43,11 +44,21 @@ class Forms extends Controller {
 			array(
 				'search'   => sanitize_text_field( (string) $request->get_param( 'search' ) ),
 				'status'   => sanitize_key( (string) $request->get_param( 'status' ) ),
+				'plugin'   => sanitize_text_field( (string) $request->get_param( 'plugin' ) ),
 				'page'     => absint( $request->get_param( 'page' ) ),
 				'per_page' => absint( $request->get_param( 'per_page' ) ),
 			)
 		);
-		$counts = VuloForm()->submissions->counts_by_form();
+		$counts    = VuloForm()->submissions->counts_by_form();
+		$protected = Templates::protected_form_ids();
+		$single    = array();
+
+		// Forms of a one-per-site template can't be copied.
+		foreach ( Templates::all() as $template_id => $template ) {
+			if ( ! empty( $template['single'] ) ) {
+				$single = array_merge( $single, VuloForm()->forms->ids_for_template( $template_id ) );
+			}
+		}
 
 		foreach ( $result['data'] as $index => $row ) {
 			$form_counts = $counts[ (int) $row['id'] ] ?? array(
@@ -56,12 +67,60 @@ class Forms extends Controller {
 			);
 
 			$result['data'][ $index ]['id']                 = (int) $row['id'];
+			$result['data'][ $index ]['protected']          = in_array( (int) $row['id'], $protected, true );
+			$result['data'][ $index ]['single']             = in_array( (int) $row['id'], $single, true );
 			$result['data'][ $index ]['submissions']        = $form_counts['total'];
 			$result['data'][ $index ]['unread']             = $form_counts['unread'];
 			$result['data'][ $index ]['updated_at_display'] = Utill::format_datetime( $row['updated_at'] );
 		}
 
+		$result['categories'] = $this->categories();
+
 		return rest_ensure_response( $result );
+	}
+
+	/**
+	 * The list's filter tabs: every form, the forms of VuloForm itself, and one tab per plugin that
+	 * offers templates, each with its count.
+	 *
+	 * @return array<int, array{value: string, label: string, count: int}>
+	 */
+	private function categories() {
+		$total      = (int) VuloForm()->forms->query( array( 'per_page' => 1 ) )['total'];
+		$categories = array();
+		$in_plugins = 0;
+
+		foreach ( array_keys( Templates::plugins() ) as $name ) {
+			$count       = (int) VuloForm()->forms->query(
+				array(
+					'plugin'   => $name,
+					'per_page' => 1,
+				)
+			)['total'];
+			$in_plugins += $count;
+
+			$categories[] = array(
+				'value' => $name,
+				'label' => $name,
+				'count' => $count,
+			);
+		}
+
+		return array_merge(
+			array(
+				array(
+					'value' => 'all',
+					'label' => __( 'All', 'vuloform' ),
+					'count' => $total,
+				),
+				array(
+					'value' => 'vuloform',
+					'label' => 'VuloForm',
+					'count' => max( 0, $total - $in_plugins ),
+				),
+			),
+			$categories
+		);
 	}
 
 	/**
@@ -86,6 +145,12 @@ class Forms extends Controller {
 		} else {
 			// A blank form still tells the site admin about each submission, like the templates do.
 			$schema['settings']['notifications'][] = Templates::admin_notification();
+		}
+
+		$taken = $this->single_template_form( Schema::sanitize( $schema )['settings']['template'] );
+
+		if ( $taken ) {
+			return $taken;
 		}
 
 		$id = VuloForm()->forms->create( $title, $schema, 'draft' );
@@ -171,6 +236,57 @@ class Forms extends Controller {
 			return $this->not_found();
 		}
 
+		if ( in_array( $id, Templates::protected_form_ids(), true ) ) {
+			return $this->protected_error();
+		}
+
+		$this->remove( $id );
+
+		return rest_ensure_response( array( 'deleted' => true ) );
+	}
+
+	/**
+	 * Deletes several forms. Protected forms are skipped and counted, not treated as an error.
+	 *
+	 * @param \WP_REST_Request $request Request.
+	 * @return \WP_REST_Response
+	 */
+	public function bulk_delete( $request ) {
+		$input     = (array) $request->get_json_params();
+		$ids       = array_slice( array_unique( array_filter( array_map( 'absint', (array) ( $input['ids'] ?? array() ) ) ) ), 0, 100 );
+		$protected = Templates::protected_form_ids();
+		$deleted   = 0;
+		$skipped   = 0;
+
+		foreach ( $ids as $id ) {
+			if ( ! VuloForm()->forms->get( $id ) ) {
+				continue;
+			}
+
+			if ( in_array( $id, $protected, true ) ) {
+				++$skipped;
+				continue;
+			}
+
+			$this->remove( $id );
+			++$deleted;
+		}
+
+		return rest_ensure_response(
+			array(
+				'deleted' => $deleted,
+				'skipped' => $skipped,
+			)
+		);
+	}
+
+	/**
+	 * Deletes a form with its submissions and their files.
+	 *
+	 * @param int $id Form id.
+	 * @return void
+	 */
+	private function remove( $id ) {
 		// In batches, so a form with a large history can't run the request out of memory.
 		do {
 			$ids = VuloForm()->submissions->ids_where( 'form_id', $id, 200 );
@@ -181,8 +297,43 @@ class Forms extends Controller {
 		} while ( $ids );
 
 		VuloForm()->forms->delete( $id );
+	}
 
-		return rest_ensure_response( array( 'deleted' => true ) );
+	/**
+	 * @return \WP_Error
+	 */
+	private function protected_error() {
+		return new \WP_Error( 'vuloform_form_protected', __( 'This form is needed by a plugin and cannot be deleted.', 'vuloform' ), array( 'status' => 403 ) );
+	}
+
+	/**
+	 * An error when the template allows one form per site and that form exists.
+	 *
+	 * @param string $template Template id.
+	 * @return \WP_Error|null
+	 */
+	private function single_template_form( $template ) {
+		$templates = Templates::all();
+
+		if ( '' === $template || empty( $templates[ $template ]['single'] ) ) {
+			return null;
+		}
+
+		$existing = VuloForm()->forms->id_for_template( $template );
+
+		if ( ! $existing ) {
+			return null;
+		}
+
+		return new \WP_Error(
+			'vuloform_template_exists',
+			/* translators: %s: template name. */
+			sprintf( __( 'A "%s" form already exists. There can be only one.', 'vuloform' ), $templates[ $template ]['title'] ),
+			array(
+				'status'  => 409,
+				'form_id' => $existing,
+			)
+		);
 	}
 
 	/**
@@ -190,6 +341,13 @@ class Forms extends Controller {
 	 * @return \WP_REST_Response|\WP_Error
 	 */
 	public function duplicate_item( $request ) {
+		$source = VuloForm()->forms->get( absint( $request['id'] ) );
+		$taken  = $source ? $this->single_template_form( (string) ( $source['schema']['settings']['template'] ?? '' ) ) : null;
+
+		if ( $taken ) {
+			return $taken;
+		}
+
 		$id = VuloForm()->forms->duplicate( absint( $request['id'] ) );
 
 		return $id ? rest_ensure_response( $this->payload( $id ) ) : $this->not_found();

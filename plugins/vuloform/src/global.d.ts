@@ -1,4 +1,4 @@
-import type { FieldType, FormSettings } from './services/types';
+import type { FieldType, FormSettings, PaletteGroup } from './services/types';
 
 declare global {
 	/**
@@ -14,7 +14,10 @@ declare global {
 		admin_email: string;
 		date_format_js: string;
 		field_types: FieldType[];
-		templates: { id: string; title: string; desc: string; icon: string; fields: number }[];
+		templates: { id: string; title: string; desc: string; icon: string; plugin?: string; exists?: number; fields: number }[];
+		palettes: Record<string, PaletteGroup[]>;
+		/** Template id => field key => what is locked about that field. */
+		locked: Record<string, Record<string, { required?: boolean; delete?: boolean }>>;
 		default_settings: FormSettings;
 		file_types: string[];
 		name_parts: Record<string, string>;

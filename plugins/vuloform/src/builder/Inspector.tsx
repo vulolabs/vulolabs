@@ -10,7 +10,7 @@ import {
 	TextInput,
 } from '@zyra/inputs';
 import type { Field, Option, Rule } from '../services/types';
-import { explainFormula, fieldType, slug, supports, uniqueKey } from './fields';
+import { explainFormula, fieldType, lockOf, slug, supports, uniqueKey } from './fields';
 import { inspectorSections } from '../services/slots';
 
 // Tags a starting value may contain; the form replaces them when it is shown (DynamicValues.php).
@@ -24,6 +24,8 @@ const DYNAMIC_TAGS = [
 ];
 
 interface InspectorProps {
+	/** Id of the form's template, which can lock fields. */
+	template?: string;
 	field: Field | undefined;
 	fields: Field[];
 	// eslint-disable-next-line no-unused-vars
@@ -80,6 +82,86 @@ const storedOpen = (): string[] => {
 };
 
 /** One setting: a small label, its control, and an optional hint underneath. */
+/** Text as it is typed, not as HTML stores it: `&amp;` shows as `&`. The server cleans the saved value. */
+const decodeEntities = (value: string): string => {
+	const area = document.createElement('textarea');
+
+	area.innerHTML = value;
+
+	return area.value;
+};
+
+const escapeHtml = (value: string): string =>
+	value.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+
+/**
+ * Adds a link to a text without typing HTML: select the words in the text above (or type them here),
+ * give the address, and the link is put in place of the selection.
+ */
+const AddLink = ({
+	textareaId,
+	value,
+	onChange,
+}: {
+	textareaId: string;
+	value: string;
+	// eslint-disable-next-line no-unused-vars
+	onChange: (value: string) => void;
+}) => {
+	const [words, setWords] = useState('');
+	const [address, setAddress] = useState('');
+
+	const insert = () => {
+		const area = document.getElementById(textareaId) as HTMLTextAreaElement | null;
+		const start = area?.selectionStart ?? value.length;
+		const end = area?.selectionEnd ?? value.length;
+		const label = (words.trim() || value.slice(start, end)).trim();
+		let href = address.trim();
+
+		if (!label || !href) {
+			return;
+		}
+
+		// A bare address such as example.com/terms becomes https://example.com/terms.
+		if (!/^(https?:\/\/|mailto:|tel:|\/|#)/i.test(href)) {
+			href = `https://${href}`;
+		}
+
+		const link = `<a href="${escapeHtml(href)}" target="_blank" rel="noopener">${escapeHtml(label)}</a>`;
+
+		onChange(value.slice(0, start) + link + value.slice(end));
+		setWords('');
+		setAddress('');
+	};
+
+	return (
+		<>
+			<TextInput
+				id="vuloform-inspector-link-words"
+				name="link_words"
+				value={words}
+				placeholder={__('Words to link, or select them above', 'vuloform')}
+				onChange={(next) => setWords(String(next))}
+			/>
+			<TextInput
+				id="vuloform-inspector-link-address"
+				name="link_address"
+				value={address}
+				placeholder={__('Address, for example example.com/terms', 'vuloform')}
+				onChange={(next) => setAddress(String(next))}
+			/>
+			<ButtonInput
+				buttons={{
+					text: __('Add link', 'vuloform'),
+					icon: 'link',
+					color: 'purple',
+					onClick: insert,
+				}}
+			/>
+		</>
+	);
+};
+
 const Control = ({
 	label,
 	desc,
@@ -118,11 +200,14 @@ const SwitchRow = ({
 	label,
 	desc,
 	checked,
+	locked,
 	onChange,
 }: {
 	label: string;
 	desc?: string;
 	checked: boolean;
+	/** The setting can't be changed. */
+	locked?: boolean;
 	// eslint-disable-next-line no-unused-vars
 	onChange: (checked: boolean) => void;
 }) => (
@@ -136,6 +221,7 @@ const SwitchRow = ({
 			role="switch"
 			aria-checked={checked}
 			className={`vuloform-switch${checked ? ' is-on' : ''}`}
+			disabled={locked}
 			onClick={() => onChange(!checked)}
 		>
 			<span aria-hidden="true" />
@@ -176,7 +262,7 @@ const Segmented = ({
 /**
  * Settings for the selected field. Only the controls that apply to its type are shown.
  */
-const Inspector = ({ field, fields, onChange, onAddField }: InspectorProps) => {
+const Inspector = ({ template, field, fields, onChange, onAddField }: InspectorProps) => {
 	const [open, setOpen] = useState<string[]>(storedOpen);
 
 	const toggle = (id: string) => {
@@ -438,8 +524,9 @@ const Inspector = ({ field, fields, onChange, onAddField }: InspectorProps) => {
 					<div className="vuloform-inspector-section vuloform-inspector-required">
 						<SwitchRow
 							label={__('Required', 'vuloform')}
-							desc={requiredDesc}
-							checked={field.required}
+							desc={lockOf(template, field).required ? __('This field is always required.', 'vuloform') : requiredDesc}
+							checked={field.required || Boolean(lockOf(template, field).required)}
+							locked={Boolean(lockOf(template, field).required)}
 							onChange={(required) => set({ required })}
 						/>
 					</div>
@@ -562,7 +649,24 @@ const Inspector = ({ field, fields, onChange, onAddField }: InspectorProps) => {
 										name="consent_text"
 										rowNumber={3}
 										usePlainText
-										value={text('consent_text')}
+										value={decodeEntities(text('consent_text'))}
+										onChange={(value) =>
+											set({ consent_text: value })
+										}
+									/>
+								</Control>
+							)}
+							{'consent' === field.type && (
+								<Control
+									label={__('Add a link', 'vuloform')}
+									desc={__(
+										'Select words in the text above, or type them here, then give the address they should open. The link opens in a new tab.',
+										'vuloform'
+									)}
+								>
+									<AddLink
+										textareaId={id('consent_text')}
+										value={decodeEntities(text('consent_text'))}
 										onChange={(value) =>
 											set({ consent_text: value })
 										}

@@ -144,8 +144,8 @@ const ShowProPopup: React.FC<PopupProps> = (props) => {
 	if (props.vulocloud) {
 		return (
 			<div className="popup-wrapper">
-				<div className="popup-header orange-bg">
-					<i className="adminfont-lock orange-bg" />
+				<div className="popup-header zyra-orange-bg">
+					<i className="adminfont-lock zyra-orange-bg" />
 				</div>
 				<div className="popup-body">
 					<div className="module-name">

@@ -143,7 +143,7 @@ const VuloCloudAiPanel = () => {
 					) : (
 						<div className="common-card">
 							<div className="common-card-header">
-								<i className="common-card-icon adminfont-ai orange" />
+								<i className="common-card-icon adminfont-ai zyra-orange" />
 								<div className="common-card-content">
 									<div className="common-card-title">
 										{ __( 'VuloCloud AI', 'vulocart' ) }

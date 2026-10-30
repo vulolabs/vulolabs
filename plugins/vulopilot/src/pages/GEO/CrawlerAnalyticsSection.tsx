@@ -201,12 +201,16 @@ const CrawlerAnalyticsSection = ({
 						desc={__('How many robots.txt/sitemap crawl-health checks currently pass.', 'vulopilot')}
 					>
 						{checklist.length === 0 ? (
-							<div className="desc">
-								{__(
-									'Turn on the SEO module to see robots.txt/sitemap crawl-health checks here.',
+							<ModuleGuardComponent
+								icon="error"
+								title={__('Technical SEO module is turned off', 'vulopilot')}
+								desc={__(
+									'Turn the Technical SEO module back on from Settings → Modules to see robots.txt/sitemap crawl-health checks here.',
 									'vulopilot'
 								)}
-							</div>
+								buttonText={__('Go to Settings → Modules', 'vulopilot')}
+								buttonLink={`${vulopilotAppLocalizer.admin_url}#&tab=settings&subtab=modules&module=technical-seo`}
+							/>
 						) : (
 							<>
 								<div className="overall-score-wrapper">
