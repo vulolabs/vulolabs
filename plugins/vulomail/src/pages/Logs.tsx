@@ -648,24 +648,15 @@ const Logs = () => {
 							<section>
 								<div className="vulomail-log-message-head">
 									<h4 className="vulomail-section-title">{__('Message', 'vulomail')}</h4>
-									<div className="vulomail-log-seg" role="tablist" aria-label={__('Message view', 'vulomail')}>
-										{(
-											[
-												['preview', __('Preview', 'vulomail')],
-												['raw', __('Plain text', 'vulomail')],
-											] as const
-										).map(([value, label]) => (
-											<button
-												key={value}
-												type="button"
-												role="tab"
-												aria-selected={value === messageView}
-												onClick={() => setMessageView(value)}
-											>
-												{label}
-											</button>
-										))}
-									</div>
+									<ToggleInput
+										variant="pill"
+										value={messageView}
+										onChange={(value) => setMessageView(value as 'preview' | 'raw')}
+										options={[
+											{ key: 'preview', value: 'preview', label: __('Preview', 'vulomail') },
+											{ key: 'raw', value: 'raw', label: __('Plain text', 'vulomail') },
+										]}
+									/>
 								</div>
 								<div className="vulomail-log-message">
 									{detail.subject && (

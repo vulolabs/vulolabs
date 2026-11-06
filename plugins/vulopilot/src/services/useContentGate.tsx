@@ -1,7 +1,7 @@
 /* global vulopilotAppLocalizer */
-import { useState, type KeyboardEvent, type ReactNode } from 'react';
+import { useState, type ReactNode } from 'react';
 import { __, sprintf } from '@wordpress/i18n';
-import { PopupComponent } from '@zyra/components';
+import { ModuleGuardComponent, PopupComponent } from '@zyra/components';
 import { ButtonInput } from '@zyra/inputs';
 import ShowProPopup from '../components/Popup/Popup';
 import DummyDataNotice from '../components/DummyDataNotice';
@@ -122,26 +122,30 @@ export const useContentGate = (
 			);
 		}
 
+		// Same canonical "module is turned off" empty state every other module-gated
+		// card in this codebase uses (BrandVisibilityTab.tsx/SeoTab.tsx/
+		// AiCopilotGuard.tsx/…, all real `ModuleGuardComponent` usages) - a plain
+		// informational state with a real link to Settings → Modules, not blurred
+		// dummy content behind a click-through (that treatment is 'pro'/'vulocloud'
+		// only, see the branch above - a module a site owner can just switch on for
+		// free doesn't need an upsell-style preview to justify itself).
+		const moduleName = MODULE_CATALOG_BY_ID.get(moduleId ?? '')?.name ?? moduleId ?? '';
+
 		return (
-			<div className="content-gate">
-				<div className="content-gate-tag">{renderTag()}</div>
-				{/* Module: the caller's own dummy preview, plus the shared * "This is dummy data" notice (DummyDataNotice). */}
-				{dummyContent}
-				<DummyDataNotice />
-				{/* Covers the whole section (tag + dummy content) so a click * anywhere within it activates. */}
-				<div
-					className="content-gate-click-overlay"
-					role="button"
-					tabIndex={0}
-					aria-label={sprintf(
-						/* translators: %s: module display name. */
-						__('Activate %s', 'vulopilot'),
-						MODULE_CATALOG_BY_ID.get(moduleId ?? '')?.name ?? moduleId ?? ''
-					)}
-					onClick={handleActivate}
-					onKeyDown={handleSectionKeyDown}
-				/>
-			</div>
+			<ModuleGuardComponent
+				icon="error"
+				title={sprintf(
+					/* translators: %s is the real module's own display name. */
+					__('%s module is turned off', 'vulopilot'),
+					moduleName
+				)}
+				desc={__(
+					'Turn this module back on from Settings → Modules to see real, live data here.',
+					'vulopilot'
+				)}
+				buttonText={__('Go to Settings → Modules', 'vulopilot')}
+				buttonLink={`${vulopilotAppLocalizer.admin_url}#&tab=settings&subtab=modules&module=${moduleId}`}
+			/>
 		);
 	};
 

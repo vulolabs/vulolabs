@@ -287,7 +287,7 @@ const Connections = () => {
 			});
 		}
 
-		return (
+		return (			
 			<div className="settings-section-group" key={channel.id}>
 				<div className="settings-left-section">
 					<SectionComponent icon={channel.icon} title={channel.title} desc={channel.desc} />
@@ -331,7 +331,9 @@ const Connections = () => {
 
 	return (
 		<>
-			{CHANNELS.map(renderChannel)}
+			<FormGroupWrapperComponent>
+				{CHANNELS.map(renderChannel)}
+			</FormGroupWrapperComponent>
 			<PopupComponent
 				open={Boolean(editing)}
 				onClose={() => setEditing(null)}

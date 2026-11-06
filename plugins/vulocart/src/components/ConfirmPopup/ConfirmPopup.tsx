@@ -18,7 +18,7 @@ export function ConfirmPopup( { open, title, message, confirmText, onConfirm, on
 	return (
 		<PopupComponent position="lightbox" open={ open } onClose={ onCancel } width={ 31.25 } height="auto">
 			<div className="popup-confirm">
-				<i className="popup-icon adminfont-suspended admin-badge red"></i>
+				<i className="popup-icon adminfont-suspended admin-badge zyra-red"></i>
 				<div className="title">{ title }</div>
 				<div className="desc">{ message }</div>
 				<ButtonInput

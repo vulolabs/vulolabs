@@ -69,6 +69,7 @@ class Schema {
 	 */
 	public static function default_settings() {
 		return array(
+			'template'          => '',
 			'submit_label'      => __( 'Submit', 'vuloform' ),
 			'next_label'        => __( 'Next', 'vuloform' ),
 			'previous_label'    => __( 'Back', 'vuloform' ),
@@ -596,6 +597,7 @@ class Schema {
 		$style    = $raw['style'];
 
 		$settings = array(
+			'template'          => sanitize_key( (string) $raw['template'] ),
 			'submit_label'      => self::text_or( $raw['submit_label'], $defaults['submit_label'] ),
 			'next_label'        => self::text_or( $raw['next_label'], $defaults['next_label'] ),
 			'previous_label'    => self::text_or( $raw['previous_label'], $defaults['previous_label'] ),

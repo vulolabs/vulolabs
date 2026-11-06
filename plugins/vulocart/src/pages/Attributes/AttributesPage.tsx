@@ -305,7 +305,7 @@ export function AttributesPage() {
 							<div className="tag-wrapper">
 								{ managing && managing.values.length === 0 && <span className="desc">{ __( 'No values yet.', 'vulocart' ) }</span> }
 								{ managing?.values.map( ( value ) => (
-									<span key={ value.id } className="admin-badge blue">
+									<span key={ value.id } className="admin-badge zyra-blue">
 										{ value.value }{ ' ' }
 										<a
 											href="#remove"

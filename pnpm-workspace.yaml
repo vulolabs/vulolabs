@@ -19,6 +19,3 @@ onlyBuiltDependencies:
   - '@parcel/watcher'
   - fs-ext-extra-prebuilt
   - unrs-resolver
-
-patchedDependencies:
-  react-drag-listview@2.0.0: patches/react-drag-listview@2.0.0.patch
