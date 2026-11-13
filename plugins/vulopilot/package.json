@@ -88,20 +88,20 @@
 		}
 	},
 	"dependencies": {
-		"@multivendorx/zyra": "^1.0.56",
+		"@multivendorx/zyra": "^1.0.63",
 		"@wordpress/element": "wp-6.6",
-		"@wordpress/hooks": "^4.46.0",
+		"@wordpress/hooks": "^4.57.0",
 		"@wordpress/i18n": "wp-6.6",
-		"axios": "^1.16.1",
+		"axios": "^1.21.1",
 		"react": "19.2.6",
 		"react-dom": "19.2.6",
-		"react-router-dom": "^7.15.1",
+		"react-router-dom": "^7.18.5",
 		"react-sortablejs": "^6.1.4",
-		"recharts": "^3.8.1",
-		"sortablejs": "^1.15.6"
+		"recharts": "^3.10.1",
+		"sortablejs": "^1.15.7"
 	},
 	"devDependencies": {
 		"@wordpress/jest-preset-default": "^13.0.0",
-		"wireit": "^0.14.12"
+		"wireit": "^0.14.13"
 	}
 }

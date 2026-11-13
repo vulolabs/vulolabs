@@ -136,16 +136,44 @@ class Findings extends \WP_REST_Controller {
      * @inheritDoc
      */
     public function get_items( $request ) {
+        return $this->prepare_get_items_response( $request->get_params(), $request );
+    }
+
+    /**
+     * List findings (REST or ability).
+     *
+     * @param array                 $payload Request params.
+     * @param \WP_REST_Request|null $request Request object, if any.
+     * @return \WP_REST_Response|\WP_Error
+     */
+    public function prepare_get_items_response( $payload, $request = null ) {
+        $payload = wp_parse_args(
+            $payload,
+            array(
+                'page'        => 0,
+                'per_page'    => 0,
+                'category'    => '',
+                'severity'    => '',
+                'status'      => '',
+                'search'      => '',
+                'scanner_id'  => '',
+                'priority'    => '',
+                'object_type' => '',
+                'orderby'     => '',
+                'order'       => '',
+            )
+        );
+
         $repository = new FindingRepository();
 
-        $category    = sanitize_key( (string) $request->get_param( 'category' ) );
-        $severity    = sanitize_key( (string) $request->get_param( 'severity' ) );
-        $status      = sanitize_key( (string) $request->get_param( 'status' ) );
-        $search      = sanitize_text_field( (string) $request->get_param( 'search' ) );
-        $scanner_ids = $this->parse_comma_separated_list( $request->get_param( 'scanner_id' ) );
-        $priority    = sanitize_key( (string) $request->get_param( 'priority' ) );
+        $category    = sanitize_key( (string) $payload['category'] );
+        $severity    = sanitize_key( (string) $payload['severity'] );
+        $status      = sanitize_key( (string) $payload['status'] );
+        $search      = sanitize_text_field( (string) $payload['search'] );
+        $scanner_ids = $this->parse_comma_separated_list( $payload['scanner_id'] );
+        $priority    = sanitize_key( (string) $payload['priority'] );
         // One scanner_id can legitimately report several unrelated `object_type`s as separate groups (FindingRepository::get_finding_groups()'s own `GROUP BY scanner_id, category, object_type` - e.g. WordPressHealthScanner's site_health_test findings vs its own wordpress_inactive_plugins findings, both scanner_id 'wordpress-health').
-        $object_type = sanitize_key( (string) $request->get_param( 'object_type' ) );
+        $object_type = sanitize_key( (string) $payload['object_type'] );
 
         if ( '' !== $severity && ! Severity::is_valid( $severity ) ) {
             return new \WP_Error( 'vulopilot_invalid_severity', __( 'Invalid severity filter.', 'vulopilot' ), array( 'status' => 400 ) );
@@ -159,16 +187,16 @@ class Findings extends \WP_REST_Controller {
 
         $result                  = $repository->find_all(
             array(
-                'page'        => absint( $request->get_param( 'page' ) ) ?: 1,
-                'per_page'    => absint( $request->get_param( 'per_page' ) ) ?: 20,
+                'page'        => absint( $payload['page'] ) ?: 1,
+                'per_page'    => absint( $payload['per_page'] ) ?: 20,
                 'category'    => $category,
                 'severity'    => $severity_filter,
                 'status'      => 'all' === $status ? '' : $status,
                 'search'      => $search,
                 'scanner_id'  => $scanner_ids ?? '',
                 'object_type' => $object_type,
-                'orderby'     => sanitize_key( (string) $request->get_param( 'orderby' ) ),
-                'order'       => sanitize_key( (string) $request->get_param( 'order' ) ),
+                'orderby'     => sanitize_key( (string) $payload['orderby'] ),
+                'order'       => sanitize_key( (string) $payload['order'] ),
             )
         );
         $result['status_counts'] = $repository->get_status_counts( '' !== $category ? $category : null, $scanner_ids );
@@ -367,8 +395,27 @@ class Findings extends \WP_REST_Controller {
      * @inheritDoc
      */
     public function update_item( $request ) {
-        $id     = absint( $request->get_param( 'id' ) );
-        $status = sanitize_key( (string) $request->get_param( 'status' ) );
+        return $this->prepare_update_item_response( $request->get_params(), $request );
+    }
+
+    /**
+     * Update a finding's status (REST or ability).
+     *
+     * @param array                 $payload Request params.
+     * @param \WP_REST_Request|null $request Request object, if any.
+     * @return \WP_REST_Response|\WP_Error
+     */
+    public function prepare_update_item_response( $payload, $request = null ) {
+        $payload = wp_parse_args(
+            $payload,
+            array(
+                'id'     => 0,
+                'status' => '',
+            )
+        );
+
+        $id     = absint( $payload['id'] );
+        $status = sanitize_key( (string) $payload['status'] );
 
         $allowed_statuses = array( 'open', 'resolved', 'ignored', 'snoozed' );
 

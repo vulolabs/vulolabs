@@ -69,9 +69,33 @@ class Scans extends \WP_REST_Controller {
 	 * @inheritDoc Accepts comma-separated `scanner_id` and/or `category` params (merged together) plus `orderby`/`order`, so callers can scope results without paging client-side.
 	 */
 	public function get_items( $request ) {
+		return $this->prepare_get_items_response( $request->get_params(), $request );
+	}
+
+	/**
+	 * List past scan runs (REST or ability).
+	 *
+	 * @param array                 $payload Request params.
+	 * @param \WP_REST_Request|null $request Request object, if any.
+	 * @return \WP_REST_Response
+	 */
+	public function prepare_get_items_response( $payload, $request = null ) {
+		$payload = wp_parse_args(
+			$payload,
+			array(
+				'page'       => 0,
+				'per_page'   => 0,
+				'status'     => '',
+				'scanner_id' => '',
+				'category'   => '',
+				'orderby'    => '',
+				'order'      => '',
+			)
+		);
+
 		$repository  = new ScanRepository();
-		$scanner_ids = $this->parse_comma_separated_list( $request->get_param( 'scanner_id' ) ) ?? array();
-		$categories  = $this->parse_comma_separated_list( $request->get_param( 'category' ) );
+		$scanner_ids = $this->parse_comma_separated_list( $payload['scanner_id'] ) ?? array();
+		$categories  = $this->parse_comma_separated_list( $payload['category'] );
 
 		if ( $categories ) {
 			// The shared, already-populated registry.
@@ -87,12 +111,12 @@ class Scans extends \WP_REST_Controller {
 		return rest_ensure_response(
 			$repository->find_all(
 				array(
-					'page'       => absint( $request->get_param( 'page' ) ) ? absint( $request->get_param( 'page' ) ) : 1,
-					'per_page'   => absint( $request->get_param( 'per_page' ) ) ? absint( $request->get_param( 'per_page' ) ) : 20,
-					'status'     => sanitize_key( (string) $request->get_param( 'status' ) ),
+					'page'       => absint( $payload['page'] ) ? absint( $payload['page'] ) : 1,
+					'per_page'   => absint( $payload['per_page'] ) ? absint( $payload['per_page'] ) : 20,
+					'status'     => sanitize_key( (string) $payload['status'] ),
 					'scanner_id' => $scanner_ids ? $scanner_ids : '',
-					'orderby'    => sanitize_key( (string) $request->get_param( 'orderby' ) ),
-					'order'      => sanitize_key( (string) $request->get_param( 'order' ) ),
+					'orderby'    => sanitize_key( (string) $payload['orderby'] ),
+					'order'      => sanitize_key( (string) $payload['order'] ),
 				)
 			)
 		);
@@ -104,8 +128,28 @@ class Scans extends \WP_REST_Controller {
 	 * @inheritDoc
 	 */
 	public function create_item( $request ) {
-		$force      = 'scheduled' !== sanitize_key( (string) $request->get_param( 'trigger_type' ) );
-		$categories = $this->parse_comma_separated_list( $request->get_param( 'category' ) );
+		return $this->prepare_create_item_response( $request->get_params(), $request );
+	}
+
+	/**
+	 * Queue a scan run (REST or ability).
+	 *
+	 * @param array                 $payload Request params.
+	 * @param \WP_REST_Request|null $request Request object, if any.
+	 * @return \WP_REST_Response
+	 */
+	public function prepare_create_item_response( $payload, $request = null ) {
+		$payload = wp_parse_args(
+			$payload,
+			array(
+				'trigger_type' => '',
+				'category'     => '',
+				'scanner_id'   => '',
+			)
+		);
+
+		$force      = 'scheduled' !== sanitize_key( (string) $payload['trigger_type'] );
+		$categories = $this->parse_comma_separated_list( $payload['category'] );
 		$registry   = VuloPilot()->scanner_registry;
 
 		if ( $categories ) {
@@ -115,7 +159,7 @@ class Scans extends \WP_REST_Controller {
 				$scanner_ids = array_merge( $scanner_ids, array_keys( $registry->get_scanners_by_category( $category ) ) );
 			}
 		} else {
-			$scanner_id = sanitize_key( (string) $request->get_param( 'scanner_id' ) );
+			$scanner_id = sanitize_key( (string) $payload['scanner_id'] );
 
 			$scanner_ids = ( '' === $scanner_id || 'all' === $scanner_id )
 				? array_keys( $registry->get_all_scanners() )
@@ -140,6 +184,17 @@ class Scans extends \WP_REST_Controller {
 	 * @return \WP_REST_Response
 	 */
 	public function get_status( $request ) {
+		return $this->prepare_get_status_response( $request->get_params(), $request );
+	}
+
+	/**
+	 * Scan queue status (REST or ability).
+	 *
+	 * @param array                 $payload Request params.
+	 * @param \WP_REST_Request|null $request Request object, if any.
+	 * @return \WP_REST_Response
+	 */
+	public function prepare_get_status_response( $payload, $request = null ) {
 		return rest_ensure_response( VuloPilot()->scan_runner->get_queue_status() );
 	}
 

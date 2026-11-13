@@ -5,7 +5,7 @@
 **Requires at least:** 6.7  
 **Tested up to:** 7.1.3  
 **Requires PHP:** 8.1  
-**Stable tag:** 1.0.0  
+**Stable tag:** 1.0.1  
 **License:** GPLv2 or later  
 **License URI:** https://www.gnu.org/licenses/gpl-2.0.html  
 
@@ -464,6 +464,21 @@ Supported one-click fixes require approval. If you enable Pro automation, review
 
 ## Changelog ##
 
+### 1.0.1 ###
+
+* Added - Import SEO data from Yoast SEO, Rank Math, All in One SEO and ThinkRank.
+* Added - 0-100 SEO score for every post, with tips in the post editor.
+* Added - Bulk Dismiss and Sort by for the 404 Log.
+* Added - Surrounding text snippet for each broken link.
+* Added - Default and Card styles for the FAQ block.
+* Fixed - Redesigned XML sitemap page.
+* Fixed - Simpler FAQ block sidebar.
+* Fixed - 404 Log removes URLs that no longer return 404.
+* Fixed - Bulk Dismiss no longer stops partway.
+* Fixed - Broken Links tab showing empty with broken links present.
+* Fixed - Duplicate rows in Broken Links and Broken Images.
+* Fixed - FAQ and Table of Contents styles missing in the block editor.
+
 ### 1.0.0 ###
 
 * Initial release.
@@ -483,6 +498,10 @@ Supported one-click fixes require approval. If you enable Pro automation, review
 * Dashboard with website health scores and detailed findings.
 
 ## Upgrade Notice ##
+
+### 1.0.1 ###
+
+Fixes the 404 Log, Broken Links and Broken Images tables, updates the FAQ block styles and the XML sitemap page, and adds bulk dismiss and sorting to the 404 Log.
 
 ### 1.0.0 ###
 

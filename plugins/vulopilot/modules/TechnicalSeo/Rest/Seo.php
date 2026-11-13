@@ -231,9 +231,21 @@ class Seo extends \WP_REST_Controller {
 	}
 
 	/**
-	 * @return \WP_REST_Response
+	 * @param \WP_REST_Request $request Full request object.
+	 * @return \WP_REST_Response|\WP_Error
 	 */
-	public function get_score() {
+	public function get_score( $request ) {
+		return $this->prepare_get_score_response( $request->get_params(), $request );
+	}
+
+	/**
+	 * SEO score (REST or ability).
+	 *
+	 * @param array                 $payload Request params.
+	 * @param \WP_REST_Request|null $request Request object, if any.
+	 * @return \WP_REST_Response|\WP_Error
+	 */
+	public function prepare_get_score_response( $payload = array(), $request = null ) {
 		$findings          = new FindingRepository();
 		$all_scanner_ids   = array_merge( ...array_values( self::CATEGORY_SCANNER_IDS ) );
 		$overall_breakdown = $findings->get_severity_breakdown_for_scanner_ids( $all_scanner_ids );
@@ -319,11 +331,21 @@ class Seo extends \WP_REST_Controller {
 	}
 
 	/**
-	 * Pages that need attention, for the "What should I fix first?" section.
-	 *
-	 * @return \WP_REST_Response
+	 * @param \WP_REST_Request $request Full request object.
+	 * @return \WP_REST_Response|\WP_Error
 	 */
-	public function get_pages_needing_attention() {
+	public function get_pages_needing_attention( $request ) {
+		return $this->prepare_get_pages_needing_attention_response( $request->get_params(), $request );
+	}
+
+	/**
+	 * Pages needing SEO attention (REST or ability).
+	 *
+	 * @param array                 $payload Request params.
+	 * @param \WP_REST_Request|null $request Request object, if any.
+	 * @return \WP_REST_Response|\WP_Error
+	 */
+	public function prepare_get_pages_needing_attention_response( $payload = array(), $request = null ) {
 		$findings        = new FindingRepository();
 		$all_scanner_ids = array_merge( ...array_values( self::CATEGORY_SCANNER_IDS ) );
 

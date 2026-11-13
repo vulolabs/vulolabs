@@ -481,4 +481,24 @@ class Utill {
 
 		return array_values( array_filter( $urls ) );
 	}
+
+	/**
+	 * An ability's execute_callback must return plain data, not a REST response object.
+	 *
+	 * @param mixed $response Whatever a prepare_*_response() method returned.
+	 * @return mixed
+	 */
+	public static function ability_response( $response ) {
+		return $response instanceof \WP_REST_Response ? $response->get_data() : $response;
+	}
+
+	/**
+	 * Shared permission check for every VuloPilot ability.
+	 *
+	 * @param array $input Ability input.
+	 * @return bool
+	 */
+	public static function ability_permissions_check( $input ) {
+		return current_user_can( 'manage_options' );
+	}
 }

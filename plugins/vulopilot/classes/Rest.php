@@ -55,6 +55,21 @@ class Rest {
 	 * @return void
 	 */
 	public function register_routes(): void {
+		foreach ( $this->build_controllers() as $controller ) {
+			$controller->register_routes();
+		}
+	}
+
+	/**
+	 * Instantiates every controller once (own + filtered-in), keyed by id.
+	 *
+	 * @return array
+	 */
+	private function build_controllers(): array {
+		if ( $this->controllers ) {
+			return $this->controllers;
+		}
+
 		$this->controllers = array(
 			'dashboard'                   => new DashboardRest\Dashboard(),
 			'dashboard_layout'            => new DashboardRest\DashboardLayout(),
@@ -110,8 +125,16 @@ class Rest {
 			}
 		}
 
-		foreach ( $this->controllers as $controller ) {
-			$controller->register_routes();
-		}
+		return $this->controllers;
+	}
+
+	/**
+	 * Resolves a controller by key (e.g. `VuloPilot()->rest->scans`) so abilities can reuse its prepare_*_response() methods outside a REST request.
+	 *
+	 * @param string $key Controller key.
+	 * @return \WP_REST_Controller|null
+	 */
+	public function __get( $key ) {
+		return $this->build_controllers()[ $key ] ?? null;
 	}
 }

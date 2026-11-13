@@ -68,9 +68,21 @@ class BrandIntelligence extends \WP_REST_Controller {
 	}
 
 	/**
-	 * @return \WP_REST_Response
+	 * @param \WP_REST_Request $request Full request object.
+	 * @return \WP_REST_Response|\WP_Error
 	 */
-	public function get_score() {
+	public function get_score( $request ) {
+		return $this->prepare_get_score_response( $request->get_params(), $request );
+	}
+
+	/**
+	 * Brand score (REST or ability).
+	 *
+	 * @param array                 $payload Request params.
+	 * @param \WP_REST_Request|null $request Request object, if any.
+	 * @return \WP_REST_Response|\WP_Error
+	 */
+	public function prepare_get_score_response( $payload = array(), $request = null ) {
 		$findings = new FindingRepository();
 
 		$trust_breakdown     = $findings->get_severity_breakdown_for_scanner_ids( self::TRUST_SCANNER_IDS );

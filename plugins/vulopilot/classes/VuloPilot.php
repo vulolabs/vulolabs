@@ -145,6 +145,9 @@ final class VuloPilot {
 
 		$this->container['rest'] = new Rest();
 
+		// WordPress Abilities API - what the MCP Adapter exposes to MCP clients.
+		$this->container['abilities'] = new Abilities\Abilities();
+
 		$this->container['ai_request_sender'] = new \VuloPilot\AiAssistant\AiRequestSender();
 
 		$this->container['ai_action_registry'] = new AiCopilot\ActionRegistry();

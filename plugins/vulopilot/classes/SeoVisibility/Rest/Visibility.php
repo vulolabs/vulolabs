@@ -151,9 +151,9 @@ class Visibility extends \WP_REST_Controller {
 	 * @return \WP_REST_Response
 	 */
 	public function get_score() {
-		$seo_data   = ( new Seo() )->get_score()->get_data();
-		$geo_data   = ( new Geo() )->get_score()->get_data();
-		$brand_data = ( new BrandIntelligence() )->get_score()->get_data();
+		$seo_data   = ( new Seo() )->prepare_get_score_response()->get_data();
+		$geo_data   = ( new Geo() )->prepare_get_score_response()->get_data();
+		$brand_data = ( new BrandIntelligence() )->prepare_get_score_response()->get_data();
 		$crawl_data = ( new CrawlerTraffic() )->get_analytics( new \WP_REST_Request() )->get_data();
 
 		$areas = array(

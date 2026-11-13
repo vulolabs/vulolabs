@@ -163,26 +163,24 @@ registerBlockType( metadata.name, {
 
 		const UNSAFE_KEYS = [ '__proto__', 'prototype', 'constructor' ];
 
-		/** One `style.<path>` write - `path` e.g. `'question.color'` or `'container.padding'`. Every call site passes a fixed string literal (see call sites below), but keys are still checked against `UNSAFE_KEYS` before being used to index into `next`. */
+		/** One `style.<section>.<key>` write - `path` e.g. `'question.color'`. Built with spreads rather than a recursive walk so the write can only ever create own properties on fresh objects. */
 		const updateStyle = ( path, value ) => {
-			const parts = path.split( '.' );
+			const [ section, key ] = path.split( '.' );
 
-			if ( parts.some( ( part ) => UNSAFE_KEYS.includes( part ) ) ) {
+			if ( ! section || ! key || UNSAFE_KEYS.includes( section ) || UNSAFE_KEYS.includes( key ) ) {
 				return;
 			}
 
-			const next = JSON.parse( JSON.stringify( style ) );
-			let cursor = next;
+			const current = style[ section ];
+			const sectionValue =
+				'object' === typeof current && null !== current ? current : {};
 
-			for ( let i = 0; i < parts.length - 1; i++ ) {
-				if ( 'object' !== typeof cursor[ parts[ i ] ] || null === cursor[ parts[ i ] ] ) {
-					cursor[ parts[ i ] ] = {};
-				}
-				cursor = cursor[ parts[ i ] ];
-			}
-
-			cursor[ parts[ parts.length - 1 ] ] = value;
-			setAttributes( { style: next } );
+			setAttributes( {
+				style: {
+					...style,
+					[ section ]: { ...sectionValue, [ key ]: value },
+				},
+			} );
 		};
 
 		/** Writes an `APPEARANCE_PRESETS` entry's own `style` bundle straight into the real `style` attribute (see that file's own docblock for why a preset is a real write, not a CSS-only default). */

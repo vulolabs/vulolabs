@@ -20,6 +20,7 @@ class Module {
 
 	/** Module constructor. */
 	public function __construct() {
+		new Abilities();
 		add_filter( 'vulopilot_scanner_sources', array( $this, 'register_scanners' ) );
 	}
 

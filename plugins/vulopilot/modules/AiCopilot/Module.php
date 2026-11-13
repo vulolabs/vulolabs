@@ -19,5 +19,7 @@ defined( 'ABSPATH' ) || exit;
 class Module {
 
 	/** Module constructor. */
-	public function __construct() {}
+	public function __construct() {
+		new Abilities();
+	}
 }
