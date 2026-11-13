@@ -28,6 +28,7 @@ class Module {
 
 	/** Module constructor. */
 	public function __construct() {
+		new Abilities();
 		$this->extractor = new EntityExtractor();
 
 		add_action( 'save_post', array( $this, 'clear_cache' ) );

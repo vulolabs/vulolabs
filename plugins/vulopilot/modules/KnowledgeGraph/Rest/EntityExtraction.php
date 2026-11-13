@@ -94,9 +94,21 @@ class EntityExtraction extends \WP_REST_Controller {
 	}
 
 	/**
-	 * @inheritDoc
+	 * @param \WP_REST_Request $request Full request object.
+	 * @return \WP_REST_Response|\WP_Error
 	 */
 	public function get_items( $request ) {
+		return $this->prepare_get_items_response( $request->get_params(), $request );
+	}
+
+	/**
+	 * Extracted site entities (REST or ability).
+	 *
+	 * @param array                 $payload Request params.
+	 * @param \WP_REST_Request|null $request Request object, if any.
+	 * @return \WP_REST_Response|\WP_Error
+	 */
+	public function prepare_get_items_response( $payload = array(), $request = null ) {
 		$data = $this->extractor->extract_all();
 
 		// `edit_url` is a real, per-viewer capability check (`current_user_can( 'edit_user',... )`).

@@ -71,14 +71,25 @@ class GeoAnalysis extends \WP_REST_Controller {
 
 	/**
 	 * @param \WP_REST_Request $request Full request object.
-	 * @return \WP_REST_Response
+	 * @return \WP_REST_Response|\WP_Error
 	 */
 	public function get_top_pages( $request ) {
-		$requested_limit = absint( $request->get_param( 'limit' ) );
+		return $this->prepare_get_top_pages_response( $request->get_params(), $request );
+	}
+
+	/**
+	 * Top/bottom pages by open GEO findings (REST or ability).
+	 *
+	 * @param array                 $payload Request params.
+	 * @param \WP_REST_Request|null $request Request object, if any.
+	 * @return \WP_REST_Response|\WP_Error
+	 */
+	public function prepare_get_top_pages_response( $payload = array(), $request = null ) {
+		$requested_limit = absint( ( $payload['limit'] ?? null ) );
 		$limit           = min( 20, max( 1, $requested_limit ? $requested_limit : 5 ) );
-		$scanner_ids     = $this->parse_scanner_ids( $request );
+		$scanner_ids     = $this->parse_scanner_ids( (string) ( $payload['scanner_ids'] ?? '' ) );
 		// `scope=all` ranks by open findings of any category, not just GEO.
-		$sitewide = 'all' === $request->get_param( 'scope' );
+		$sitewide = 'all' === ( $payload['scope'] ?? null );
 		$counts   = ( new FindingRepository() )->count_by_column(
 			'object_ref',
 			$sitewide
@@ -237,8 +248,8 @@ class GeoAnalysis extends \WP_REST_Controller {
 	 * @param \WP_REST_Request $request Full request object.
 	 * @return string[] Sanitized scanner ids, empty if the param was absent/empty.
 	 */
-	private function parse_scanner_ids( \WP_REST_Request $request ): array {
-		$raw = (string) $request->get_param( 'scanner_ids' );
+	private function parse_scanner_ids( $request ): array {
+		$raw = $request instanceof \WP_REST_Request ? (string) $request->get_param( 'scanner_ids' ) : (string) $request;
 
 		if ( '' === $raw ) {
 			return array();

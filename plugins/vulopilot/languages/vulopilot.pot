@@ -1,21 +1,22 @@
 # Copyright (c) 2026 VuloLabs Inc. All Rights Reserved.
 msgid ""
 msgstr ""
-"Project-Id-Version: VuloPilot 1.0.0\n"
+"Project-Id-Version: VuloPilot 1.0.1\n"
 "Report-Msgid-Bugs-To: https://vulopilot.com/contact/\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-11-03T08:27:29+00:00\n"
+"POT-Creation-Date: 2026-11-13T06:12:26+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.12.0\n"
 "X-Domain: vulopilot\n"
 
 #. Plugin Name of the plugin
 #: vulopilot.php
-#: classes/Content/BlockRegistrar.php:43
+#: classes/Abilities/Abilities.php:66
+#: classes/Content/BlockRegistrar.php:40
 msgid "VuloPilot"
 msgstr ""
 
@@ -39,114 +40,244 @@ msgstr ""
 msgid "https://vulolabs.com/"
 msgstr ""
 
-#: classes/Accessibility/AccessibilityScanner.php:39
-#: classes/Admin.php:138
-#: modules/AiCopilot/Rest/Copilot.php:625
+#: classes/Abilities/Abilities.php:67
+msgid "VuloPilot site scanning, findings, and automation abilities."
+msgstr ""
+
+#: classes/Abilities/AbilitiesApi/Automations.php:32
+msgid "Get Automations"
+msgstr ""
+
+#: classes/Abilities/AbilitiesApi/Automations.php:33
+msgid "List VuloPilot automations with their status and last/next run details."
+msgstr ""
+
+#: classes/Abilities/AbilitiesApi/Automations.php:40
+msgid "One of enabled, disabled, draft."
+msgstr ""
+
+#: classes/Abilities/AbilitiesApi/Automations.php:44
+msgid "Search automations by name."
+msgstr ""
+
+#: classes/Abilities/AbilitiesApi/Automations.php:48
+#: classes/Abilities/AbilitiesApi/Findings.php:64
+#: classes/Abilities/AbilitiesApi/Scans.php:52
+#: modules/AiCopilot/Abilities.php:53
+msgid "Page number. Defaults to 1."
+msgstr ""
+
+#: classes/Abilities/AbilitiesApi/Automations.php:52
+#: classes/Abilities/AbilitiesApi/Findings.php:68
+#: classes/Abilities/AbilitiesApi/Scans.php:56
+#: modules/AiCopilot/Abilities.php:57
+msgid "Rows per page. Defaults to 20."
+msgstr ""
+
+#: classes/Abilities/AbilitiesApi/Dashboard.php:32
+msgid "Get Dashboard Summary"
+msgstr ""
+
+#: classes/Abilities/AbilitiesApi/Dashboard.php:33
+msgid "VuloPilot site overview: overall and per-category scores, open findings by severity, automations, AI usage, and site snapshot."
+msgstr ""
+
+#: classes/Abilities/AbilitiesApi/Findings.php:32
+msgid "Get Findings"
+msgstr ""
+
+#: classes/Abilities/AbilitiesApi/Findings.php:33
+msgid "List VuloPilot scan findings (issues) with severity, status, category, and scanner filters."
+msgstr ""
+
+#: classes/Abilities/AbilitiesApi/Findings.php:40
+msgid "Finding category (e.g. seo, performance, security, geo)."
+msgstr ""
+
+#: classes/Abilities/AbilitiesApi/Findings.php:44
+msgid "One of critical, high, medium, low, info."
+msgstr ""
+
+#: classes/Abilities/AbilitiesApi/Findings.php:48
+msgid "One of high, medium, low. Ignored when severity is given."
+msgstr ""
+
+#: classes/Abilities/AbilitiesApi/Findings.php:52
+msgid "One of open, resolved, ignored, snoozed, all."
+msgstr ""
+
+#: classes/Abilities/AbilitiesApi/Findings.php:56
+#: classes/Abilities/AbilitiesApi/Scans.php:40
+msgid "Comma-separated scanner ids."
+msgstr ""
+
+#: classes/Abilities/AbilitiesApi/Findings.php:60
+msgid "Free-text search."
+msgstr ""
+
+#: classes/Abilities/AbilitiesApi/Findings.php:82
+msgid "Update Finding"
+msgstr ""
+
+#: classes/Abilities/AbilitiesApi/Findings.php:83
+msgid "Change a VuloPilot finding's status (open, resolved, ignored, snoozed)."
+msgstr ""
+
+#: classes/Abilities/AbilitiesApi/Findings.php:90
+msgid "Finding ID."
+msgstr ""
+
+#: classes/Abilities/AbilitiesApi/Findings.php:94
+msgid "New status: open, resolved, ignored, or snoozed."
+msgstr ""
+
+#: classes/Abilities/AbilitiesApi/Scans.php:32
+msgid "Get Scans"
+msgstr ""
+
+#: classes/Abilities/AbilitiesApi/Scans.php:33
+msgid "List past VuloPilot scan runs, optionally filtered by scanner, category, or status."
+msgstr ""
+
+#: classes/Abilities/AbilitiesApi/Scans.php:44
+msgid "Comma-separated scanner categories (e.g. seo, performance, security)."
+msgstr ""
+
+#: classes/Abilities/AbilitiesApi/Scans.php:48
+msgid "Scan status filter."
+msgstr ""
+
+#: classes/Abilities/AbilitiesApi/Scans.php:70
+msgid "Run Scan"
+msgstr ""
+
+#: classes/Abilities/AbilitiesApi/Scans.php:71
+msgid "Queue a VuloPilot scan for every scanner, one scanner, or every scanner in the given categories."
+msgstr ""
+
+#: classes/Abilities/AbilitiesApi/Scans.php:78
+msgid "A scanner id, or \"all\". Ignored when category is given."
+msgstr ""
+
+#: classes/Abilities/AbilitiesApi/Scans.php:82
+msgid "Comma-separated scanner categories to run."
+msgstr ""
+
+#: classes/Abilities/AbilitiesApi/Scans.php:97
+msgid "Get Scan Status"
+msgstr ""
+
+#: classes/Abilities/AbilitiesApi/Scans.php:98
+msgid "Current state of the VuloPilot scan queue."
+msgstr ""
+
+#: classes/Accessibility/AccessibilityScanner.php:37
+#: classes/Admin.php:130
+#: modules/AiCopilot/Rest/Copilot.php:525
 #: assets/js/index.js:1
 #: assets/js/index.js:17
 msgid "Accessibility"
 msgstr ""
 
 #. translators: %s is the post/page title.
-#: classes/Accessibility/AccessibilityScanner.php:80
+#: classes/Accessibility/AccessibilityScanner.php:78
 #, php-format
 msgid "Content contains its own <h1>: %s"
 msgstr ""
 
-#: classes/Accessibility/AccessibilityScanner.php:85
+#: classes/Accessibility/AccessibilityScanner.php:83
 msgid "Your theme already shows this page's title as an H1 heading. The content below also has a heading set to \"Heading 1\", so the page ends up with two H1s. Screen reader users navigate by jumping between heading levels, and two H1s breaks that structure - it's like a document having two \"Chapter 1\"s. Fix: in the editor, change that content heading to \"Heading 2\" (or lower), or use \"Fix with AI\" below to have it demoted automatically."
 msgstr ""
 
-#: classes/Accessibility/AriaAttributesScanner.php:40
+#: classes/Accessibility/AriaAttributesScanner.php:37
 msgid "ARIA Attributes"
 msgstr ""
 
 #. translators: 1: number of elements missing a role attribute, 2: the post/page title.
-#: classes/Accessibility/AriaAttributesScanner.php:77
+#: classes/Accessibility/AriaAttributesScanner.php:74
 #, php-format
 msgid "%1$d interactive element(s) missing a role attribute: %2$s"
 msgstr ""
 
-#: classes/Accessibility/AriaAttributesScanner.php:83
+#: classes/Accessibility/AriaAttributesScanner.php:80
 msgid "A <div> or <span> with a click handler but no role attribute is invisible to screen readers as an interactive element."
 msgstr ""
 
-#: classes/Accessibility/FormLabelsScanner.php:40
+#: classes/Accessibility/FormLabelsScanner.php:37
 msgid "Form Labels"
 msgstr ""
 
 #. translators: 1: number of unlabeled form fields, 2: the post/page title.
-#: classes/Accessibility/FormLabelsScanner.php:77
+#: classes/Accessibility/FormLabelsScanner.php:74
 #, php-format
 msgid "%1$d unlabeled form field(s): %2$s"
 msgstr ""
 
-#: classes/Accessibility/FormLabelsScanner.php:83
+#: classes/Accessibility/FormLabelsScanner.php:80
 msgid "Every <input>/<textarea>/<select> needs an associated <label>, aria-label, or aria-labelledby so screen reader users know what it is for."
 msgstr ""
 
-#: classes/Accessibility/KeyboardAccessibilityScanner.php:39
+#: classes/Accessibility/KeyboardAccessibilityScanner.php:37
 msgid "Keyboard Accessibility"
 msgstr ""
 
 #. translators: 1: number of elements with a positive tabindex, 2: the post/page title.
-#: classes/Accessibility/KeyboardAccessibilityScanner.php:76
+#: classes/Accessibility/KeyboardAccessibilityScanner.php:74
 #, php-format
 msgid "%1$d element(s) with a positive tabindex: %2$s"
 msgstr ""
 
-#: classes/Accessibility/KeyboardAccessibilityScanner.php:82
+#: classes/Accessibility/KeyboardAccessibilityScanner.php:80
 msgid "A tabindex of 1 or higher pulls an element out of the page's natural keyboard tab order and inserts it at a fixed position - this almost always produces a confusing, unpredictable focus jump rather than the intended fix. Use tabindex=\"0\" (join the natural order) or remove it entirely (WCAG 2.4.3)."
 msgstr ""
 
-#: classes/Accessibility/MissingAltTextRule.php:39
+#: classes/Accessibility/MissingAltTextRule.php:38
 msgid "Missing image alt text"
 msgstr ""
 
-#: classes/Accessibility/MissingAltTextRule.php:111
+#: classes/Accessibility/MissingAltTextRule.php:110
 msgid "Generate an ALT text suggestion"
 msgstr ""
 
 #. translators: %s is the finding's own title, e.g. "Image missing alt text: photo.jpg".
-#: classes/Accessibility/MissingAltTextRule.php:114
+#: classes/Accessibility/MissingAltTextRule.php:113
 #, php-format
 msgid "AI can draft alt text for this image based on what it shows: %s"
 msgstr ""
 
-#: classes/Accessibility/WcagScanner.php:56
+#: classes/Accessibility/WcagScanner.php:52
 msgid "WCAG Scanner"
 msgstr ""
 
 #. translators: 1: number of ambiguous links, 2: the post/page title.
-#: classes/Accessibility/WcagScanner.php:99
+#: classes/Accessibility/WcagScanner.php:95
 #, php-format
 msgid "%1$d link(s) with generic, out-of-context text: %2$s"
 msgstr ""
 
-#: classes/Accessibility/WcagScanner.php:105
+#: classes/Accessibility/WcagScanner.php:101
 msgid "A link reading only \"click here\" or \"read more\" makes no sense out of context - screen reader users who navigate by a page's link list can't tell them apart. Link text should describe its own destination (WCAG 2.4.4)."
 msgstr ""
 
-#: classes/Admin.php:106
+#: classes/Admin.php:99
 msgid "Dashboard"
 msgstr ""
 
-#: classes/Admin.php:111
+#: classes/Admin.php:104
 #: assets/js/index.js:1
 #: assets/js/index.js:17
 msgid "AI Copilot"
 msgstr ""
 
-#: classes/Admin.php:116
+#: classes/Admin.php:109
 #: assets/js/index.js:1
 #: assets/js/index.js:9
 #: assets/js/index.js:17
 msgid "SEO & Visibility"
 msgstr ""
 
-#: classes/Admin.php:121
-#: modules/TechnicalSeo/Rest/Seo.php:670
-#: assets/js/block/faq/index.js:1
+#: classes/Admin.php:114
+#: modules/TechnicalSeo/Rest/Seo.php:685
 #: assets/js/index.js:1
 #: assets/js/index.js:5
 #: assets/js/index.js:9
@@ -155,164 +286,161 @@ msgstr ""
 msgid "Content"
 msgstr ""
 
-#: classes/Admin.php:126
-#: classes/Performance/PerformanceScanner.php:37
-#: modules/AiCopilot/Rest/Copilot.php:623
+#: classes/Admin.php:119
+#: classes/Performance/PerformanceScanner.php:33
+#: modules/AiCopilot/Rest/Copilot.php:523
 #: assets/js/index.js:9
 #: assets/js/index.js:17
 msgid "Performance"
 msgstr ""
 
-#: classes/Admin.php:133
-#: classes/Admin.php:307
+#: classes/Admin.php:125
+#: classes/Admin.php:290
 #: assets/js/index.js:1
 #: assets/js/index.js:9
 #: assets/js/index.js:17
 msgid "Site Health"
 msgstr ""
 
-#: classes/Admin.php:145
-#: modules/AiCopilot/Rest/Copilot.php:624
+#: classes/Admin.php:136
+#: modules/AiCopilot/Rest/Copilot.php:524
 #: assets/js/index.js:1
 #: assets/js/index.js:9
 #: assets/js/index.js:17
 msgid "Security"
 msgstr ""
 
-#: classes/Admin.php:150
+#: classes/Admin.php:141
 #: assets/js/index.js:1
 #: assets/js/index.js:17
 msgid "Commerce"
 msgstr ""
 
-#: classes/Admin.php:155
+#: classes/Admin.php:146
 #: assets/js/index.js:1
 #: assets/js/index.js:17
 msgid "Automations"
 msgstr ""
 
-#: classes/Admin.php:162
+#: classes/Admin.php:152
 #: assets/js/index.js:1
 #: assets/js/index.js:9
 msgid "Reports"
 msgstr ""
 
-#: classes/Admin.php:168
+#: classes/Admin.php:158
 #: assets/js/block/faq/index.js:1
 #: assets/js/index.js:17
 msgid "Settings"
 msgstr ""
 
-#: classes/Admin.php:305
+#: classes/Admin.php:288
 #: assets/js/index.js:1
 #: assets/js/index.js:9
 #: assets/js/post-editor.js:1
 msgid "AI Visibility"
 msgstr ""
 
-#: classes/Admin.php:306
+#: classes/Admin.php:289
 #: assets/js/index.js:1
 msgid "SEO & Content"
 msgstr ""
 
-#: classes/Admin.php:308
+#: classes/Admin.php:291
 msgid "Tools"
 msgstr ""
 
-#: classes/AiAssistant/AiCreditsConnection.php:108
-#: modules/AiCopilot/Services/AiCreditGatewayClient.php:47
+#: classes/AiAssistant/AiCreditsConnection.php:111
 msgid "This site is not connected to VuloCloud AI Credits."
 msgstr ""
 
 #. translators: %s: underlying error message.
-#: classes/AiAssistant/AiCreditsConnection.php:119
-#: classes/AiAssistant/AiCreditsConnection.php:348
-#: modules/AiCopilot/Services/AiCreditGatewayClient.php:74
+#: classes/AiAssistant/AiCreditsConnection.php:122
+#: classes/AiAssistant/AiCreditsConnection.php:385
 #, php-format
 msgid "Could not reach VuloCloud: %s"
 msgstr ""
 
-#: classes/AiAssistant/AiCreditsConnection.php:129
+#: classes/AiAssistant/AiCreditsConnection.php:132
 msgid "Could not refresh your AI credit balance."
 msgstr ""
 
 #. translators: %d: HTTP status code.
-#: classes/AiAssistant/AiCreditsConnection.php:226
+#: classes/AiAssistant/AiCreditsConnection.php:229
 #, php-format
 msgid "Connect broker returned a non-JSON response (HTTP %d)."
 msgstr ""
 
-#: classes/AiAssistant/AiCreditsConnection.php:235
+#: classes/AiAssistant/AiCreditsConnection.php:238
 msgid "Connect broker could not complete the connection."
 msgstr ""
 
-#: classes/AiAssistant/AiCreditsConnection.php:309
+#: classes/AiAssistant/AiCreditsConnection.php:354
 #: classes/AiAssistant/Rest/VuloCloudAiConnection.php:86
-#: modules/AiCopilot/Services/AiCreditGatewayClient.php:41
 #: assets/js/index.js:1
 #: assets/js/index.js:17
 msgid "VuloCloud isn’t configured for this build yet."
 msgstr ""
 
-#: classes/AiAssistant/AiCreditsConnection.php:315
+#: classes/AiAssistant/AiCreditsConnection.php:360
 msgid "This site is not connected to VuloCloud."
 msgstr ""
 
-#: classes/AiAssistant/AiCreditsConnection.php:359
-#: modules/AiCopilot/Services/AiCreditGatewayClient.php:85
+#: classes/AiAssistant/AiCreditsConnection.php:396
 msgid "VuloCloud returned an unexpected response."
 msgstr ""
 
-#: classes/AiAssistant/AiCreditsConnection.php:366
+#: classes/AiAssistant/AiCreditsConnection.php:403
 msgid "Your Organization hasn’t configured an AI key yet."
 msgstr ""
 
-#: classes/AiAssistant/AiCreditsConnection.php:373
+#: classes/AiAssistant/AiCreditsConnection.php:410
 msgid "This site's VuloCloud connection was revoked. Please reconnect under Settings → Connections."
 msgstr ""
 
-#: classes/AiAssistant/AiCreditsConnection.php:378
-#: classes/AiAssistant/AiCreditsConnection.php:383
-#: modules/AiCopilot/Services/AiCreditGatewayClient.php:109
+#: classes/AiAssistant/AiCreditsConnection.php:419
+#: classes/AiAssistant/AiCreditsConnection.php:424
 msgid "VuloCloud could not process this AI request right now."
 msgstr ""
 
-#: classes/AiAssistant/AiCreditsConnection.php:401
-#: classes/Utill/VuloPilotException.php:185
-#: modules/AiCopilot/ActionRunner.php:168
+#: classes/AiAssistant/AiCreditsConnection.php:442
+#: classes/Utill/VuloPilotException.php:163
 #: assets/js/index.js:1
 msgid "You don’t have enough credits to complete this request."
 msgstr ""
 
 #. translators: %d: HTTP status code.
-#: classes/AiAssistant/AiCreditsConnection.php:492
+#: classes/AiAssistant/AiCreditsConnection.php:534
 #, php-format
 msgid "VuloCloud returned a non-JSON response (HTTP %d)."
 msgstr ""
 
-#: classes/AiAssistant/AiRequestSender.php:89
-#: modules/AiCopilot/ActionRunner.php:148
+#: classes/AiAssistant/AiRequestSender.php:128
+msgid "The AI could not finish this reply, so nothing was saved from it. Please try again."
+msgstr ""
+
+#: classes/AiAssistant/AiRequestSender.php:144
 msgid "No AI connection is configured."
 msgstr ""
 
 #. translators: %d is the maximum allowed prompt length in characters.
-#: classes/AiAssistant/AiRequestSender.php:121
+#: classes/AiAssistant/AiRequestSender.php:199
 #, php-format
 msgid "This request is too long to send to the AI service (limit: %d characters)."
 msgstr ""
 
-#: classes/AiAssistant/AiRequestSender.php:131
+#: classes/AiAssistant/AiRequestSender.php:209
 msgid "This request appears to contain a credential and was blocked before sending."
 msgstr ""
 
 #. translators: %d: requests-per-minute limit.
-#: classes/AiAssistant/AiRequestSender.php:198
+#: classes/AiAssistant/AiRequestSender.php:261
 #, php-format
 msgid "AI rate limit reached (%d requests/minute)."
 msgstr ""
 
-#: classes/AiAssistant/ConnectBrokerCallbackHandler.php:29
-#: classes/Settings/GoogleSearchConsoleOAuthCallbackHandler.php:29
+#: classes/AiAssistant/ConnectBrokerCallbackHandler.php:26
+#: classes/Settings/GoogleSearchConsoleOAuthCallbackHandler.php:26
 msgid "You do not have permission to do this."
 msgstr ""
 
@@ -320,26 +448,26 @@ msgstr ""
 msgid "Snooze the finding"
 msgstr ""
 
-#: classes/Automations/Actions/SnoozeFindingAction.php:67
+#: classes/Automations/Actions/SnoozeFindingAction.php:66
 msgid "This recommendation is not tied to a specific object; nothing to snooze."
 msgstr ""
 
-#: classes/Automations/Actions/SnoozeFindingAction.php:80
+#: classes/Automations/Actions/SnoozeFindingAction.php:79
 msgid "No matching open finding was found."
 msgstr ""
 
 #. translators: %d is the finding's own row id.
-#: classes/Automations/Actions/SnoozeFindingAction.php:92
+#: classes/Automations/Actions/SnoozeFindingAction.php:91
 #, php-format
 msgid "Finding #%d snoozed."
 msgstr ""
 
-#: classes/Automations/Actions/SnoozeFindingAction.php:95
+#: classes/Automations/Actions/SnoozeFindingAction.php:94
 msgid "Could not update the finding."
 msgstr ""
 
 #: classes/Automations/AutomationScheduler.php:60
-#: classes/SiteHealth/BackupScheduler.php:36
+#: classes/SiteHealth/BackupScheduler.php:34
 msgid "Once Weekly"
 msgstr ""
 
@@ -347,346 +475,319 @@ msgstr ""
 msgid "Once Monthly"
 msgstr ""
 
-#: classes/Automations/AutomationScheduler.php:191
+#: classes/Automations/AutomationScheduler.php:189
 msgid "No report delivery extension is active."
 msgstr ""
 
-#: classes/Automations/AutomationScheduler.php:195
+#: classes/Automations/AutomationScheduler.php:193
 msgid "No recipient configured, or the report failed to generate."
 msgstr ""
 
-#: classes/Automations/AutomationsRunRepository.php:274
+#: classes/Automations/AutomationsRunRepository.php:268
 msgid "Deleted automation"
 msgstr ""
 
-#: classes/Automations/BuiltinAutomationSeeder.php:74
+#: classes/Automations/BuiltinAutomationSeeder.php:73
 #: assets/js/index.js:9
 msgid "Run Full Site Scan"
 msgstr ""
 
-#: classes/Automations/BuiltinAutomationSeeder.php:89
+#: classes/Automations/BuiltinAutomationSeeder.php:88
 #: assets/js/index.js:9
 msgid "Send Visibility Report"
 msgstr ""
 
-#: classes/Automations/Rest/Automations.php:142
-#: classes/Automations/Rest/Automations.php:227
+#: classes/Automations/Rest/Automations.php:161
+#: classes/Automations/Rest/Automations.php:246
 msgid "Automation not found."
 msgstr ""
 
-#: classes/Automations/Rest/Automations.php:151
+#: classes/Automations/Rest/Automations.php:170
 msgid "Invalid automation status."
 msgstr ""
 
-#: classes/Automations/Rest/Automations.php:168
-#: classes/Content/Rest/Redirects.php:208
+#: classes/Automations/Rest/Automations.php:187
+#: classes/Content/Rest/Redirects.php:205
 msgid "Nothing to update."
 msgstr ""
 
-#: classes/Automations/Rest/Automations.php:172
+#: classes/Automations/Rest/Automations.php:191
 msgid "Could not update this automation."
 msgstr ""
 
-#: classes/Automations/Rest/Automations.php:195
+#: classes/Automations/Rest/Automations.php:214
 msgid "This automation's schedule can't be edited here."
 msgstr ""
 
-#: classes/Automations/Rest/Automations.php:201
+#: classes/Automations/Rest/Automations.php:220
 msgid "Invalid schedule frequency."
 msgstr ""
 
-#: classes/Automations/Rest/Automations.php:245
+#: classes/Automations/Rest/Automations.php:264
 msgid "Manually running an automation isn't supported yet - automations currently only fire from their own configured trigger."
 msgstr ""
 
-#: classes/Content/FaqOpportunityRule.php:39
+#: classes/Content/FaqOpportunityRule.php:38
 msgid "Add an FAQ section"
 msgstr ""
 
-#: classes/Content/FaqOpportunityRule.php:113
+#: classes/Content/FaqOpportunityRule.php:111
 msgid "Ask AI to draft an FAQ section"
 msgstr ""
 
 #. translators: %s is the finding's own title.
-#: classes/Content/FaqOpportunityRule.php:116
+#: classes/Content/FaqOpportunityRule.php:114
 #, php-format
 msgid "Question-phrased headings are more likely to be lifted directly into an AI answer engine's response: %s"
 msgstr ""
 
-#: classes/Content/MissingSummaryBlockRule.php:39
+#: classes/Content/MissingSummaryBlockRule.php:38
 msgid "Add a summary block"
 msgstr ""
 
-#: classes/Content/MissingSummaryBlockRule.php:113
+#: classes/Content/MissingSummaryBlockRule.php:111
 msgid "Ask AI to write a summary block"
 msgstr ""
 
 #. translators: %s is the finding's own title.
-#: classes/Content/MissingSummaryBlockRule.php:116
+#: classes/Content/MissingSummaryBlockRule.php:114
 #, php-format
 msgid "A short upfront summary makes this content easier for AI answer engines to extract a direct answer from: %s"
 msgstr ""
 
-#: classes/Content/NotFoundScanner.php:38
+#: classes/Content/NotFoundScanner.php:37
 msgid "404 Detection"
 msgstr ""
 
 #. translators: %s is the post/page title.
-#: classes/Content/NotFoundScanner.php:93
+#: classes/Content/NotFoundScanner.php:92
 #, php-format
 msgid "Published content returns a 404: %s"
 msgstr ""
 
-#: classes/Content/NotFoundScanner.php:98
+#: classes/Content/NotFoundScanner.php:97
 msgid "This page is published but its own URL does not resolve - often caused by a permalink structure or rewrite rule change."
 msgstr ""
 
-#: classes/Content/RedirectAnalysisScanner.php:44
+#: classes/Content/RedirectAnalysisScanner.php:38
 msgid "Redirect Analysis"
 msgstr ""
 
-#: classes/Content/RedirectAnalysisScanner.php:103
+#: classes/Content/RedirectAnalysisScanner.php:97
 msgid "Homepage redirect did not resolve within the checked hop limit"
 msgstr ""
 
 #. translators: %d is the number of redirect hops.
-#: classes/Content/RedirectAnalysisScanner.php:106
+#: classes/Content/RedirectAnalysisScanner.php:100
 #, php-format
 msgid "Homepage redirects through %d hops before resolving"
 msgstr ""
 
-#: classes/Content/RedirectAnalysisScanner.php:111
+#: classes/Content/RedirectAnalysisScanner.php:105
 msgid "Long or looping redirect chains slow down every visit and hurt search engine crawling."
 msgstr ""
 
-#: classes/Content/Rest/ContentAssistant.php:79
+#: classes/Content/Rest/ContentAssistant.php:71
 msgid "Enable the AI Copilot module to use the AI Content Assistant."
 msgstr ""
 
-#: classes/Content/Rest/ContentAssistant.php:99
-#: modules/AiCopilot/Rest/Copilot.php:157
+#: classes/Content/Rest/ContentAssistant.php:91
+#: modules/AiCopilot/Rest/Copilot.php:135
 msgid "Message cannot be empty."
 msgstr ""
 
 #. translators: %s is the exception's own real message, e.g. "No AI connection is configured."
-#: classes/Content/Rest/ContentAssistant.php:124
-#: modules/AiCopilot/ContentCreationOrchestrator.php:110
-#: modules/AiCopilot/Rest/Copilot.php:194
+#: classes/Content/Rest/ContentAssistant.php:156
+#: modules/AiCopilot/ContentCreationOrchestrator.php:61
+#: modules/AiCopilot/Rest/Copilot.php:376
 #, php-format
 msgid "%s Connect this site to VuloCloud in Settings → Connections."
 msgstr ""
 
-#. translators: %s is the site's own real name (get_bloginfo('name')).
-#: classes/Content/Rest/ContentAssistant.php:169
-#, php-format
-msgid ""
-"You are the intake assistant for the \"Content\" chat inside the WordPress plugin VuloPilot, on the site \"%s\". Your job this turn is to move the conversation toward either (a) creating one of 3 specific kinds of real WordPress content, or (b) simply answering the user when that's what they actually want.\n"
-"\n"
-"The 3 kinds of WordPress content you can create. For each, collect the fields in the order listed - a field being listed after the first one does NOT mean it's skippable; ask about each one, one at a time, unless the user already stated it somewhere in the conversation:\n"
-"1. \"generate-blog\" - a blog post or article. Collect, in order: topic (what it's about), word_count (target word count), tone (e.g. Professional/Friendly/Informative/Casual).\n"
-"\n"
-"Rules:\n"
-"- Ask for exactly ONE missing field at a time, as a short natural question, following the collection order above. Never ask about a field already given anywhere earlier in this conversation - check the whole conversation, not just the latest message, before asking. Never ask more than 3 questions total for one request.\n"
-"- If the user changed their mind about something, use their latest answer, not an earlier one.\n"
-"- Only skip a field if the user's messages already gave it, or if they explicitly say they don't have a preference for it. Do not stop early just because the first, most-obvious field (e.g. the topic) is known - still ask about the remaining ones in order.\n"
-"- A field can be given implicitly inside natural phrasing, not just as an explicit \"field: value\" statement - e.g. \"a casual blog post about X\" already gives both topic and tone (casual); \"a 500-word post\" or \"500 words\" gives word_count. Recognize these the same as an explicit answer, and don't ask about them again.\n"
-"- If the request doesn't match any of the 3 kinds (e.g. an email, a social caption, general advice, or editing something that already exists, which you have no way to identify from chat), have a short exchange to understand what's actually needed (purpose, audience, tone - whatever is relevant), then write the content yourself as a normal reply. Never claim it was created or saved - there is no WordPress content type for it.\n"
-"- If the request is an AUDIT/ANALYSIS of existing content rather than creating something new (e.g. \"find missing FAQ pages\", \"what SEO issues do I have\", \"check my content for gaps\"), don't send the user outside the plugin to a generic crawler or competitor research - VuloPilot itself already has real features for exactly this, and this chat should name the relevant one and tell them where to find it, briefly, then offer to help write whatever new content that audit turns up: SEO & Visibility → Issues (open SEO/technical findings), Content → Content Gap Analysis (missing topics/pages versus your site's own coverage), or Site Health (broader technical checks). Never claim to have run the audit yourself - you have no access to it from this chat.\n"
-"- If the user is just asking a question rather than requesting new content, answer it directly and helpfully. Use plain text or Markdown, never HTML.\n"
-"\n"
-"Worked example for \"generate-blog\" (the same collect-one-at-a-time pattern and their own field lists above):\n"
-"User: \"Write a blog\" → {\"status\":\"question\",\"message\":\"Sure! What should the blog be about?\"}\n"
-"User: \"AI in eCommerce\" → {\"status\":\"question\",\"message\":\"Great - how many words would you like?\"}\n"
-"User: \"1500 words\" → {\"status\":\"question\",\"message\":\"What tone would you prefer? For example: Professional, Friendly, Informative, or Casual.\"}\n"
-"User: \"Professional\" → {\"status\":\"ready_action\",\"action_id\":\"generate-blog\",\"input\":{\"topic\":\"AI in eCommerce\",\"word_count\":1500,\"tone\":\"Professional\"}}\n"
-"\n"
-"But if a message already gives multiple fields at once (e.g. \"Write a 1000-word blog about SEO\" gives topic and word_count together, or a fully-specified first message gives everything), only ask about whatever is still actually missing from that list - or proceed straight to ready_action if nothing is missing.\n"
-"\n"
-"Respond with ONLY raw JSON, no markdown fences, no commentary, in exactly one of these shapes:\n"
-"{\"status\":\"question\",\"message\":\"<the single next question, phrased naturally>\"}\n"
-"{\"status\":\"ready_action\",\"action_id\":\"generate-blog\",\"input\":{...only the fields listed above for that action_id...}}\n"
-"{\"status\":\"respond\",\"message\":\"<a direct answer, or fully-written content for a kind with no matching action above>\"}"
+#: classes/Content/Rest/ContentAssistant.php:167
+#: modules/AiCopilot/Rest/Copilot.php:387
+msgid "Sorry, I didn't quite catch that - could you rephrase?"
 msgstr ""
 
-#: classes/Content/Rest/NotFoundLogs.php:123
-#: classes/Content/Rest/NotFoundLogs.php:146
+#: classes/Content/Rest/NotFoundLogs.php:117
+#: classes/Content/Rest/NotFoundLogs.php:138
 msgid "Log entry not found."
 msgstr ""
 
-#: classes/Content/Rest/NotFoundLogs.php:127
+#: classes/Content/Rest/NotFoundLogs.php:121
 msgid "Could not dismiss this log entry."
 msgstr ""
 
-#: classes/Content/Rest/NotFoundLogs.php:152
+#: classes/Content/Rest/NotFoundLogs.php:144
 msgid "A target URL is required to create a redirect."
 msgstr ""
 
-#: classes/Content/Rest/NotFoundLogs.php:162
+#: classes/Content/Rest/NotFoundLogs.php:154
 msgid "A redirect for this path already exists - manage it from the Redirects table above."
 msgstr ""
 
-#: classes/Content/Rest/Redirects.php:142
+#: classes/Content/Rest/Redirects.php:139
 msgid "Both a source path and a target URL are required."
 msgstr ""
 
-#: classes/Content/Rest/Redirects.php:150
+#: classes/Content/Rest/Redirects.php:147
 msgid "A redirect for this path already exists - edit or delete the existing one instead."
 msgstr ""
 
-#: classes/Content/Rest/Redirects.php:184
-#: classes/Content/Rest/Redirects.php:229
+#: classes/Content/Rest/Redirects.php:181
+#: classes/Content/Rest/Redirects.php:226
 msgid "Redirect not found."
 msgstr ""
 
-#: classes/Content/Rest/Redirects.php:212
+#: classes/Content/Rest/Redirects.php:209
 msgid "Could not update this redirect."
 msgstr ""
 
-#: classes/Content/Rest/Redirects.php:233
+#: classes/Content/Rest/Redirects.php:230
 #: assets/js/index.js:5
 msgid "Could not delete this redirect."
 msgstr ""
 
-#: classes/Content/TableOfContentsRenderer.php:30
+#: classes/Content/TableOfContentsRenderer.php:27
 msgid "Table of Contents"
 msgstr ""
 
 #. translators: 1: deleted page/post title, 2: its old URL path, 3: Redirects tab URL.
-#: classes/Content/TrashedPostRedirector.php:100
+#: classes/Content/TrashedPostRedirector.php:95
 #, php-format
 msgid "<strong>%1$s</strong> has been deleted. VuloPilot doesn't redirect it automatically - if %2$s is still linked to elsewhere or indexed by search engines, you can <a href=\"%3$s\">add a redirect for it</a>."
 msgstr ""
 
-#: classes/Dashboard/Rest/DashboardLayout.php:79
+#: classes/Dashboard/Rest/DashboardLayout.php:76
 msgid "A widget layout array is required."
 msgstr ""
 
-#: classes/Dashboard/Rest/DashboardLayout.php:98
+#: classes/Dashboard/Rest/DashboardLayout.php:95
 msgid "No valid widgets in the submitted layout."
 msgstr ""
 
-#: classes/Migration/AllInOneSeoMigrator.php:76
+#: classes/Migration/AllInOneSeoMigrator.php:74
 msgid "All in One SEO"
 msgstr ""
 
-#: classes/Migration/RankMathMigrator.php:135
+#: classes/Migration/RankMathMigrator.php:108
 msgid "Rank Math SEO"
 msgstr ""
 
-#: classes/Migration/RankMathMigrator.php:208
-#: classes/Migration/YoastSeoMigrator.php:196
+#: classes/Migration/RankMathMigrator.php:175
+#: classes/Migration/YoastSeoMigrator.php:157
 msgid "robots.txt content was copied into VuloPilot, but a real robots.txt file still exists on your server - WordPress serves that file directly and ignores every plugin's own robots.txt output (VuloPilot's included) while it's there. Remove or rename the physical robots.txt file at your site's root for VuloPilot's version to take effect."
 msgstr ""
 
-#: classes/Migration/Rest.php:109
+#: classes/Migration/Rest.php:106
 msgid "Unknown migration source."
 msgstr ""
 
-#: classes/Migration/ThinkRankMigrator.php:149
+#: classes/Migration/ThinkRankMigrator.php:145
 msgid "ThinkRank AI SEO"
 msgstr ""
 
-#: classes/Migration/ThinkRankMigrator.php:432
+#: classes/Migration/ThinkRankMigrator.php:418
 msgid "ThinkRank writes its managed rules into the real physical robots.txt file on disk, which (if still present) is served directly by the webserver and bypasses every plugin's virtual robots.txt output, including VuloPilot's own - remove that physical file for the migrated content to actually take effect."
 msgstr ""
 
-#: classes/Migration/YoastSeoMigrator.php:127
+#: classes/Migration/YoastSeoMigrator.php:100
 msgid "Yoast SEO"
 msgstr ""
 
 #. translators: %d: Yoast's own readability score, 0-100.
-#: classes/Migration/YoastSeoMigrator.php:304
+#: classes/Migration/YoastSeoMigrator.php:260
 #, php-format
 msgid "Readability score from Yoast: %d/100."
 msgstr ""
 
-#: classes/Performance/CacheDetectionScanner.php:45
+#: classes/Performance/CacheDetectionScanner.php:42
 msgid "Cache Issues"
 msgstr ""
 
-#: classes/Performance/CacheDetectionScanner.php:65
+#: classes/Performance/CacheDetectionScanner.php:62
 msgid "No caching detected"
 msgstr ""
 
-#: classes/Performance/CacheDetectionScanner.php:68
+#: classes/Performance/CacheDetectionScanner.php:65
 msgid "No known caching plugin is active and the homepage response has no caching headers. A caching layer significantly reduces load time and server load."
 msgstr ""
 
-#: classes/Performance/CacheDetectionScanner.php:73
+#: classes/Performance/CacheDetectionScanner.php:70
 msgid "Install and activate a caching plugin (e.g. WP Super Cache, W3 Total Cache, WP Rocket)."
 msgstr ""
 
-#: classes/Performance/CacheDetectionScanner.php:74
+#: classes/Performance/CacheDetectionScanner.php:71
 msgid "If your host provides server-level caching, enable it in your hosting dashboard."
 msgstr ""
 
-#: classes/Performance/CacheDetectionScanner.php:75
+#: classes/Performance/CacheDetectionScanner.php:72
 msgid "Confirm caching is active by checking response headers for Cache-Control/ETag."
 msgstr ""
 
-#: classes/Performance/CacheDetectionScanner.php:76
+#: classes/Performance/CacheDetectionScanner.php:73
 msgid "Set a reasonable cache expiry so returning visitors get fast repeat page loads."
 msgstr ""
 
-#: classes/Performance/CdnScanner.php:45
+#: classes/Performance/CdnScanner.php:42
 #: assets/js/index.js:1
 msgid "CDN"
 msgstr ""
 
-#: classes/Performance/CdnScanner.php:65
+#: classes/Performance/CdnScanner.php:62
 msgid "No CDN detected for static assets"
 msgstr ""
 
-#: classes/Performance/CdnScanner.php:68
+#: classes/Performance/CdnScanner.php:65
 msgid "Every asset on the homepage is served directly from this server. A CDN serves images, CSS, and JavaScript from servers closer to each visitor, reducing load times worldwide."
 msgstr ""
 
-#: classes/Performance/CdnScanner.php:73
+#: classes/Performance/CdnScanner.php:70
 msgid "Sign up for a CDN (e.g. Cloudflare, BunnyCDN, StackPath) and point your DNS or media library through it."
 msgstr ""
 
-#: classes/Performance/CdnScanner.php:74
+#: classes/Performance/CdnScanner.php:71
 msgid "Alternatively, use a WordPress plugin that integrates a CDN with your media library automatically."
 msgstr ""
 
-#: classes/Performance/CdnScanner.php:75
+#: classes/Performance/CdnScanner.php:72
 msgid "Confirm static assets (images, CSS, JS) now resolve to a different host than your own site."
 msgstr ""
 
-#: classes/Performance/CdnScanner.php:76
+#: classes/Performance/CdnScanner.php:73
 msgid "Re-run this scan to confirm at least one asset is now served through the CDN."
 msgstr ""
 
-#: classes/Performance/CssOptimizationScanner.php:30
+#: classes/Performance/CssOptimizationScanner.php:29
 #: assets/js/index.js:1
 msgid "CSS Optimization"
 msgstr ""
 
 #. translators: %d is the number of un-minified stylesheets found.
-#: classes/Performance/CssOptimizationScanner.php:64
+#: classes/Performance/CssOptimizationScanner.php:63
 #, php-format
 msgid "%d un-minified stylesheet found"
 msgid_plural "%d un-minified stylesheets found"
 msgstr[0] ""
 msgstr[1] ""
 
-#: classes/Performance/CssOptimizationScanner.php:74
+#: classes/Performance/CssOptimizationScanner.php:73
 msgid "These stylesheets aren't minified and no minification plugin is active. Minifying CSS reduces file size and speeds up page rendering."
 msgstr ""
 
-#: classes/Performance/CssOptimizationScanner.php:80
+#: classes/Performance/CssOptimizationScanner.php:79
 msgid "Enable CSS minification in your caching/optimization plugin, or use a dedicated asset-optimization plugin."
 msgstr ""
 
-#: classes/Performance/CssOptimizationScanner.php:81
+#: classes/Performance/CssOptimizationScanner.php:80
 msgid "Combine multiple small stylesheets into fewer files where possible to reduce requests."
 msgstr ""
 
-#: classes/Performance/CssOptimizationScanner.php:82
+#: classes/Performance/CssOptimizationScanner.php:81
 msgid "Remove unused CSS rules from themes/plugins you don't need."
 msgstr ""
 
-#: classes/Performance/CssOptimizationScanner.php:83
+#: classes/Performance/CssOptimizationScanner.php:82
 msgid "Re-run this scan after minifying to confirm these stylesheets are no longer flagged."
 msgstr ""
 
@@ -719,549 +820,549 @@ msgstr ""
 msgid "Add font-display: swap so text stays visible while fonts load."
 msgstr ""
 
-#: classes/Performance/ImageCleanupScanner.php:42
+#: classes/Performance/ImageCleanupScanner.php:36
 #: assets/js/index.js:1
 msgid "Image Cleanup"
 msgstr ""
 
 #. translators: 1: number of unused images, 2: formatted total file size, e.g. "3.2 MB".
-#: classes/Performance/ImageCleanupScanner.php:69
+#: classes/Performance/ImageCleanupScanner.php:63
 #, php-format
 msgid "%1$d unused images found (%2$s)"
 msgstr ""
 
-#: classes/Performance/ImageCleanupScanner.php:75
+#: classes/Performance/ImageCleanupScanner.php:69
 msgid "These images are not attached to any post or page, are not used as a featured image, site icon, or logo, and were uploaded more than 30 days ago. Use the \"Image Cleanup\" quick action to remove them and reclaim disk space."
 msgstr ""
 
-#: classes/Performance/ImageCleanupScanner.php:82
+#: classes/Performance/ImageCleanupScanner.php:76
 msgid "Review the Media Library for images no longer attached to any post or page."
 msgstr ""
 
-#: classes/Performance/ImageCleanupScanner.php:83
+#: classes/Performance/ImageCleanupScanner.php:77
 msgid "Delete confirmed-unused images to free up storage and reduce backup size."
 msgstr ""
 
-#: classes/Performance/ImageCleanupScanner.php:84
+#: classes/Performance/ImageCleanupScanner.php:78
 msgid "Use a plugin (e.g. Media Cleaner) to help identify safely-removable files."
 msgstr ""
 
-#: classes/Performance/ImageCleanupScanner.php:85
+#: classes/Performance/ImageCleanupScanner.php:79
 msgid "Re-run this scan after cleanup to confirm the orphaned count has dropped."
 msgstr ""
 
-#: classes/Performance/JavaScriptOptimizationScanner.php:30
+#: classes/Performance/JavaScriptOptimizationScanner.php:29
 #: assets/js/index.js:1
 msgid "JavaScript"
 msgstr ""
 
 #. translators: %d is the number of un-minified scripts found.
-#: classes/Performance/JavaScriptOptimizationScanner.php:64
+#: classes/Performance/JavaScriptOptimizationScanner.php:63
 #, php-format
 msgid "%d un-minified script found"
 msgid_plural "%d un-minified scripts found"
 msgstr[0] ""
 msgstr[1] ""
 
-#: classes/Performance/JavaScriptOptimizationScanner.php:74
+#: classes/Performance/JavaScriptOptimizationScanner.php:73
 msgid "These scripts aren't minified and no minification plugin is active. Minifying JavaScript reduces file size and speeds up page rendering."
 msgstr ""
 
-#: classes/Performance/JavaScriptOptimizationScanner.php:80
+#: classes/Performance/JavaScriptOptimizationScanner.php:79
 msgid "Enable JavaScript minification in your caching/optimization plugin."
 msgstr ""
 
-#: classes/Performance/JavaScriptOptimizationScanner.php:81
+#: classes/Performance/JavaScriptOptimizationScanner.php:80
 msgid "Defer or async-load non-critical scripts so they don't block page rendering."
 msgstr ""
 
-#: classes/Performance/JavaScriptOptimizationScanner.php:82
+#: classes/Performance/JavaScriptOptimizationScanner.php:81
 msgid "Remove unused scripts from themes/plugins you don't need."
 msgstr ""
 
-#: classes/Performance/JavaScriptOptimizationScanner.php:83
+#: classes/Performance/JavaScriptOptimizationScanner.php:82
 msgid "Re-run this scan after minifying to confirm these scripts are no longer flagged."
 msgstr ""
 
-#: classes/Performance/LargeImagesScanner.php:41
+#: classes/Performance/LargeImagesScanner.php:36
 msgid "Large Images"
 msgstr ""
 
 #. translators: 1: image filename, 2: formatted file size, e.g. "1.4 MB".
-#: classes/Performance/LargeImagesScanner.php:90
+#: classes/Performance/LargeImagesScanner.php:85
 #, php-format
 msgid "Large image: %1$s (%2$s)"
 msgstr ""
 
-#: classes/Performance/LargeImagesScanner.php:96
+#: classes/Performance/LargeImagesScanner.php:91
 msgid "Large images slow down page loads, especially on mobile connections - consider compressing or resizing."
 msgstr ""
 
-#: classes/Performance/LargeImagesScanner.php:102
+#: classes/Performance/LargeImagesScanner.php:97
 msgid "Compress oversized images with a plugin (e.g. ShortPixel, Imagify) or before uploading."
 msgstr ""
 
-#: classes/Performance/LargeImagesScanner.php:103
+#: classes/Performance/LargeImagesScanner.php:98
 msgid "Convert large images to a modern format like WebP or AVIF."
 msgstr ""
 
-#: classes/Performance/LargeImagesScanner.php:104
+#: classes/Performance/LargeImagesScanner.php:99
 msgid "Resize images to the maximum dimension actually needed - avoid uploading full-resolution originals."
 msgstr ""
 
-#: classes/Performance/LargeImagesScanner.php:105
+#: classes/Performance/LargeImagesScanner.php:100
 msgid "Re-run this scan after optimizing to confirm the file size has dropped."
 msgstr ""
 
-#: classes/Performance/LazyLoadingScanner.php:31
+#: classes/Performance/LazyLoadingScanner.php:30
 #: assets/js/index.js:1
 msgid "Lazy Loading"
 msgstr ""
 
-#: classes/Performance/LazyLoadingScanner.php:51
+#: classes/Performance/LazyLoadingScanner.php:50
 msgid "Native lazy-loading is disabled"
 msgstr ""
 
-#: classes/Performance/LazyLoadingScanner.php:54
+#: classes/Performance/LazyLoadingScanner.php:53
 msgid "A theme or plugin has disabled WordPress's built-in lazy-loading for images, so all images now load immediately instead of only as visitors scroll to them."
 msgstr ""
 
-#: classes/Performance/LazyLoadingScanner.php:59
+#: classes/Performance/LazyLoadingScanner.php:58
 msgid "Check whether a theme or plugin is filtering wp_lazy_loading_enabled to false, and remove that filter if it isn't intentional."
 msgstr ""
 
-#: classes/Performance/LazyLoadingScanner.php:60
+#: classes/Performance/LazyLoadingScanner.php:59
 msgid "Enable lazy loading in your caching/optimization plugin if it offers the option."
 msgstr ""
 
-#: classes/Performance/LazyLoadingScanner.php:61
+#: classes/Performance/LazyLoadingScanner.php:60
 msgid "Confirm below-the-fold images include loading=\"lazy\" after re-enabling."
 msgstr ""
 
-#: classes/Performance/LazyLoadingScanner.php:62
+#: classes/Performance/LazyLoadingScanner.php:61
 msgid "Re-run this scan to confirm lazy loading is active again."
 msgstr ""
 
-#: classes/Performance/PageSpeedInsightsFetcher.php:106
+#: classes/Performance/PageSpeedInsightsFetcher.php:102
 msgid "Enter an API key first."
 msgstr ""
 
-#: classes/Performance/PageSpeedInsightsFetcher.php:115
+#: classes/Performance/PageSpeedInsightsFetcher.php:111
 msgid "Today's PageSpeed Insights API limit has already been reached."
 msgstr ""
 
-#: classes/Performance/PageSpeedInsightsFetcher.php:127
+#: classes/Performance/PageSpeedInsightsFetcher.php:123
 msgid "Could not reach Google PageSpeed Insights - check your API key and try again."
 msgstr ""
 
-#: classes/Performance/PageSpeedInsightsFetcher.php:145
+#: classes/Performance/PageSpeedInsightsFetcher.php:141
 msgid "Connected - Google PageSpeed Insights responded successfully."
 msgstr ""
 
-#: classes/Performance/PageSpeedScanner.php:154
+#: classes/Performance/PageSpeedScanner.php:143
 msgid "Page could not be loaded"
 msgstr ""
 
-#: classes/Performance/PageSpeedScanner.php:163
+#: classes/Performance/PageSpeedScanner.php:152
 msgid "Slow server response"
 msgstr ""
 
-#: classes/Performance/PageSpeedScanner.php:412
-#: classes/SeoVisibility/Rest/Schema.php:202
-#: classes/SeoVisibility/Rest/Schema.php:204
-#: classes/SeoVisibility/SchemaCoverageAnalyzer.php:141
-#: modules/KnowledgeGraph/EntityExtractor.php:178
+#: classes/Performance/PageSpeedScanner.php:395
+#: classes/SeoVisibility/Rest/Schema.php:197
+#: classes/SeoVisibility/Rest/Schema.php:199
+#: classes/SeoVisibility/SchemaCoverageAnalyzer.php:139
+#: modules/KnowledgeGraph/EntityExtractor.php:169
 #: assets/js/index.js:1
 #: assets/js/index.js:9
 msgid "Homepage"
 msgstr ""
 
-#: classes/Performance/PageSpeedScanner.php:456
+#: classes/Performance/PageSpeedScanner.php:438
 msgid "Shop"
 msgstr ""
 
-#: classes/Performance/PageSpeedScanner.php:462
+#: classes/Performance/PageSpeedScanner.php:444
 msgid "Cart"
 msgstr ""
 
-#: classes/Performance/PageSpeedScanner.php:468
+#: classes/Performance/PageSpeedScanner.php:450
 #: assets/js/index.js:9
 msgid "Checkout"
 msgstr ""
 
 #. translators: %s is a formatted byte size, e.g. "1.4 MB".
-#: classes/Performance/PerformanceScanner.php:64
+#: classes/Performance/PerformanceScanner.php:60
 #, php-format
 msgid "Autoloaded options are %s"
 msgstr ""
 
-#: classes/Performance/PerformanceScanner.php:69
+#: classes/Performance/PerformanceScanner.php:65
 msgid "Autoloaded options are loaded into memory on every page request. A large autoload footprint slows down every request site-wide."
 msgstr ""
 
-#: classes/Performance/PerformanceScanner.php:75
+#: classes/Performance/PerformanceScanner.php:71
 msgid "Identify large autoloaded options with a query monitor or plugin (e.g. Query Monitor)."
 msgstr ""
 
-#: classes/Performance/PerformanceScanner.php:76
+#: classes/Performance/PerformanceScanner.php:72
 msgid "Set autoload to \"no\" for large, non-critical options in the wp_options table."
 msgstr ""
 
-#: classes/Performance/PerformanceScanner.php:77
+#: classes/Performance/PerformanceScanner.php:73
 msgid "Remove leftover options from plugins you've since deactivated or deleted."
 msgstr ""
 
-#: classes/Performance/PerformanceScanner.php:78
+#: classes/Performance/PerformanceScanner.php:74
 msgid "Re-run this scan to confirm the autoloaded size has dropped."
 msgstr ""
 
-#: classes/Performance/Rest/CoreWebVitalsBeaconRest.php:71
+#: classes/Performance/Rest/CoreWebVitalsBeaconRest.php:64
 msgid "Too many requests."
 msgstr ""
 
-#: classes/Performance/Rest/CoreWebVitalsBeaconRest.php:81
+#: classes/Performance/Rest/CoreWebVitalsBeaconRest.php:74
 msgid "No usable metrics in this request."
 msgstr ""
 
-#: classes/Performance/Rest/EfficiencyChecks.php:88
+#: classes/Performance/Rest/EfficiencyChecks.php:86
 msgid "Page Delivery"
 msgstr ""
 
-#: classes/Performance/Rest/EfficiencyChecks.php:89
+#: classes/Performance/Rest/EfficiencyChecks.php:87
 msgid "Is WordPress avoiding unnecessary work?"
 msgstr ""
 
-#: classes/Performance/Rest/EfficiencyChecks.php:94
+#: classes/Performance/Rest/EfficiencyChecks.php:92
 msgid "WordPress Data Efficiency"
 msgstr ""
 
-#: classes/Performance/Rest/EfficiencyChecks.php:95
+#: classes/Performance/Rest/EfficiencyChecks.php:93
 msgid "Can WordPress retrieve frequently used information efficiently?"
 msgstr ""
 
-#: classes/Performance/Rest/EfficiencyChecks.php:100
+#: classes/Performance/Rest/EfficiencyChecks.php:98
 msgid "Server Processing"
 msgstr ""
 
-#: classes/Performance/Rest/EfficiencyChecks.php:101
+#: classes/Performance/Rest/EfficiencyChecks.php:99
 msgid "Can your server prepare WordPress efficiently?"
 msgstr ""
 
-#: classes/Performance/Rest/EfficiencyChecks.php:135
+#: classes/Performance/Rest/EfficiencyChecks.php:133
 #: assets/js/index.js:1
 msgid "Page caching"
 msgstr ""
 
-#: classes/Performance/Rest/EfficiencyChecks.php:136
+#: classes/Performance/Rest/EfficiencyChecks.php:134
 #: assets/js/index.js:1
 msgid "WordPress may be rebuilding pages that could otherwise be served from a saved copy."
 msgstr ""
 
-#: classes/Performance/Rest/EfficiencyChecks.php:139
-#: classes/Performance/Rest/EfficiencyChecks.php:178
-#: classes/Performance/Rest/EfficiencyChecks.php:206
-#: classes/Performance/Rest/EfficiencyChecks.php:261
+#: classes/Performance/Rest/EfficiencyChecks.php:137
+#: classes/Performance/Rest/EfficiencyChecks.php:176
+#: classes/Performance/Rest/EfficiencyChecks.php:204
+#: classes/Performance/Rest/EfficiencyChecks.php:259
 #: assets/js/index.js:9
 msgid "Working"
 msgstr ""
 
-#: classes/Performance/Rest/EfficiencyChecks.php:139
-#: classes/Performance/Rest/EfficiencyChecks.php:145
-#: classes/Performance/Rest/EfficiencyChecks.php:178
-#: classes/Performance/Rest/EfficiencyChecks.php:184
-#: classes/Performance/Rest/EfficiencyChecks.php:189
-#: classes/Performance/Rest/EfficiencyChecks.php:225
-#: classes/Performance/Rest/EfficiencyChecks.php:261
+#: classes/Performance/Rest/EfficiencyChecks.php:137
+#: classes/Performance/Rest/EfficiencyChecks.php:143
+#: classes/Performance/Rest/EfficiencyChecks.php:176
+#: classes/Performance/Rest/EfficiencyChecks.php:182
+#: classes/Performance/Rest/EfficiencyChecks.php:187
+#: classes/Performance/Rest/EfficiencyChecks.php:223
+#: classes/Performance/Rest/EfficiencyChecks.php:259
 msgid "Not detected"
 msgstr ""
 
-#: classes/Performance/Rest/EfficiencyChecks.php:140
+#: classes/Performance/Rest/EfficiencyChecks.php:138
 msgid "Page caching isn't detected"
 msgstr ""
 
-#: classes/Performance/Rest/EfficiencyChecks.php:141
+#: classes/Performance/Rest/EfficiencyChecks.php:139
 msgid "WordPress may be rebuilding pages for repeat visits."
 msgstr ""
 
-#: classes/Performance/Rest/EfficiencyChecks.php:144
+#: classes/Performance/Rest/EfficiencyChecks.php:142
 msgid "Page cache"
 msgstr ""
 
-#: classes/Performance/Rest/EfficiencyChecks.php:145
-#: classes/Performance/Rest/EfficiencyChecks.php:150
-#: classes/Performance/Rest/EfficiencyChecks.php:184
-#: classes/Performance/Rest/EfficiencyChecks.php:189
-#: classes/Performance/Rest/EfficiencyChecks.php:225
+#: classes/Performance/Rest/EfficiencyChecks.php:143
+#: classes/Performance/Rest/EfficiencyChecks.php:148
+#: classes/Performance/Rest/EfficiencyChecks.php:182
+#: classes/Performance/Rest/EfficiencyChecks.php:187
+#: classes/Performance/Rest/EfficiencyChecks.php:223
 #: assets/js/index.js:1
 msgid "Detected"
 msgstr ""
 
-#: classes/Performance/Rest/EfficiencyChecks.php:149
+#: classes/Performance/Rest/EfficiencyChecks.php:147
 msgid "Cache headers"
 msgstr ""
 
-#: classes/Performance/Rest/EfficiencyChecks.php:150
+#: classes/Performance/Rest/EfficiencyChecks.php:148
 #: assets/js/index.js:1
 msgid "None detected"
 msgstr ""
 
-#: classes/Performance/Rest/EfficiencyChecks.php:174
+#: classes/Performance/Rest/EfficiencyChecks.php:172
 #: assets/js/index.js:1
 msgid "Browser caching"
 msgstr ""
 
-#: classes/Performance/Rest/EfficiencyChecks.php:175
+#: classes/Performance/Rest/EfficiencyChecks.php:173
 #: assets/js/index.js:1
 msgid "Visitors can reuse suitable website files."
 msgstr ""
 
-#: classes/Performance/Rest/EfficiencyChecks.php:179
+#: classes/Performance/Rest/EfficiencyChecks.php:177
 msgid "Browser caching headers are missing"
 msgstr ""
 
-#: classes/Performance/Rest/EfficiencyChecks.php:180
+#: classes/Performance/Rest/EfficiencyChecks.php:178
 msgid "Visitor browsers may re-download files that could be reused."
 msgstr ""
 
-#: classes/Performance/Rest/EfficiencyChecks.php:188
+#: classes/Performance/Rest/EfficiencyChecks.php:186
 msgid "Expires header"
 msgstr ""
 
-#: classes/Performance/Rest/EfficiencyChecks.php:210
+#: classes/Performance/Rest/EfficiencyChecks.php:208
 #: assets/js/index.js:1
 msgid "Recommended"
 msgstr ""
 
-#: classes/Performance/Rest/EfficiencyChecks.php:210
+#: classes/Performance/Rest/EfficiencyChecks.php:208
 msgid "Not required"
 msgstr ""
 
-#: classes/Performance/Rest/EfficiencyChecks.php:215
-#: classes/Performance/Rest/EfficiencyChecks.php:224
+#: classes/Performance/Rest/EfficiencyChecks.php:213
+#: classes/Performance/Rest/EfficiencyChecks.php:222
 #: assets/js/index.js:1
 msgid "Persistent object cache"
 msgstr ""
 
-#: classes/Performance/Rest/EfficiencyChecks.php:216
+#: classes/Performance/Rest/EfficiencyChecks.php:214
 #: assets/js/index.js:1
 msgid "Your website may benefit from keeping frequently used WordPress data ready between visits."
 msgstr ""
 
-#: classes/Performance/Rest/EfficiencyChecks.php:220
+#: classes/Performance/Rest/EfficiencyChecks.php:218
 msgid "Persistent object cache recommended"
 msgstr ""
 
-#: classes/Performance/Rest/EfficiencyChecks.php:221
+#: classes/Performance/Rest/EfficiencyChecks.php:219
 msgid "Your site may benefit from a persistent object cache."
 msgstr ""
 
-#: classes/Performance/Rest/EfficiencyChecks.php:229
+#: classes/Performance/Rest/EfficiencyChecks.php:227
 msgid "Drop-in"
 msgstr ""
 
-#: classes/Performance/Rest/EfficiencyChecks.php:230
-#: classes/Performance/Rest/EfficiencyChecks.php:272
+#: classes/Performance/Rest/EfficiencyChecks.php:228
+#: classes/Performance/Rest/EfficiencyChecks.php:270
 #: assets/js/index.js:1
 #: assets/js/index.js:5
 #: assets/js/index.js:9
 msgid "Active"
 msgstr ""
 
-#: classes/Performance/Rest/EfficiencyChecks.php:230
+#: classes/Performance/Rest/EfficiencyChecks.php:228
 #: assets/js/index.js:1
 #: assets/js/index.js:9
 msgid "Not active"
 msgstr ""
 
-#: classes/Performance/Rest/EfficiencyChecks.php:257
+#: classes/Performance/Rest/EfficiencyChecks.php:255
 #: assets/js/index.js:1
 msgid "PHP acceleration"
 msgstr ""
 
-#: classes/Performance/Rest/EfficiencyChecks.php:258
+#: classes/Performance/Rest/EfficiencyChecks.php:256
 msgid "Your server can reuse compiled PHP code."
 msgstr ""
 
-#: classes/Performance/Rest/EfficiencyChecks.php:262
+#: classes/Performance/Rest/EfficiencyChecks.php:260
 msgid "OPcache is not enabled"
 msgstr ""
 
-#: classes/Performance/Rest/EfficiencyChecks.php:263
+#: classes/Performance/Rest/EfficiencyChecks.php:261
 msgid "Enabling OPcache can significantly improve PHP performance."
 msgstr ""
 
-#: classes/Performance/Rest/EfficiencyChecks.php:267
+#: classes/Performance/Rest/EfficiencyChecks.php:265
 #: assets/js/index.js:1
 #: assets/js/index.js:9
 msgid "Enabled"
 msgstr ""
 
-#: classes/Performance/Rest/EfficiencyChecks.php:267
+#: classes/Performance/Rest/EfficiencyChecks.php:265
 #: assets/js/index.js:1
 msgid "Disabled"
 msgstr ""
 
-#: classes/Performance/Rest/EfficiencyChecks.php:271
+#: classes/Performance/Rest/EfficiencyChecks.php:269
 #: assets/js/index.js:1
 #: assets/js/index.js:5
 #: assets/js/index.js:9
 msgid "Status"
 msgstr ""
 
-#: classes/Performance/Rest/EfficiencyChecks.php:272
+#: classes/Performance/Rest/EfficiencyChecks.php:270
 #: assets/js/index.js:1
 #: assets/js/index.js:5
 msgid "Inactive"
 msgstr ""
 
-#: classes/Performance/Rest/PerformanceActions.php:105
+#: classes/Performance/Rest/PerformanceActions.php:99
 msgid "Unknown quick action."
 msgstr ""
 
-#: classes/Performance/Rest/PerformanceActions.php:125
+#: classes/Performance/Rest/PerformanceActions.php:118
 msgid "WordPress object cache flushed."
 msgstr ""
 
 #. translators: %s is a comma-separated list of cache plugin names that were also flushed.
-#: classes/Performance/Rest/PerformanceActions.php:128
+#: classes/Performance/Rest/PerformanceActions.php:121
 #, php-format
 msgid "WordPress object cache flushed, plus: %s."
 msgstr ""
 
-#: classes/Performance/Rest/PerformanceActions.php:156
+#: classes/Performance/Rest/PerformanceActions.php:148
 msgid "No minification plugin detected - install Autoptimize, WP Rocket, or a similar plugin to enable this action."
 msgstr ""
 
 #. translators: %s is a comma-separated list of plugin names that regenerated minified assets.
-#: classes/Performance/Rest/PerformanceActions.php:164
+#: classes/Performance/Rest/PerformanceActions.php:156
 #, php-format
 msgid "Regenerated minified assets via: %s."
 msgstr ""
 
-#: classes/Performance/Rest/PerformanceActions.php:225
+#: classes/Performance/Rest/PerformanceActions.php:216
 msgid "No oversized images found to optimize."
 msgstr ""
 
 #. translators: 1: number of images optimized, 2: formatted byte size saved, e.g. "1.4 MB".
-#: classes/Performance/Rest/PerformanceActions.php:228
+#: classes/Performance/Rest/PerformanceActions.php:219
 #, php-format
 msgid "Optimized %1$d image(s), saved %2$s."
 msgstr ""
 
 #. translators: 1: number of expired transients deleted, 2: number of old post revisions deleted.
-#: classes/Performance/Rest/PerformanceActions.php:287
+#: classes/Performance/Rest/PerformanceActions.php:277
 #, php-format
 msgid "Deleted %1$d expired transients and %2$d old post revisions."
 msgstr ""
 
-#: classes/Performance/Rest/PerformanceActions.php:307
+#: classes/Performance/Rest/PerformanceActions.php:295
 msgid "No unused images found to clean up."
 msgstr ""
 
 #. translators: 1: number of images deleted, 2: formatted bytes freed, 3: number of remaining unused images not yet processed.
-#: classes/Performance/Rest/PerformanceActions.php:332
+#: classes/Performance/Rest/PerformanceActions.php:320
 #, php-format
 msgid "Deleted %1$d unused image(s), freed %2$s. %3$d more found - run again to continue."
 msgstr ""
 
 #. translators: 1: number of images deleted, 2: formatted bytes freed.
-#: classes/Performance/Rest/PerformanceActions.php:339
+#: classes/Performance/Rest/PerformanceActions.php:327
 #, php-format
 msgid "Deleted %1$d unused image(s), freed %2$s."
 msgstr ""
 
-#: classes/Performance/Rest/PerformanceActions.php:360
+#: classes/Performance/Rest/PerformanceActions.php:347
 msgid "Lazy loading was already force-enabled."
 msgstr ""
 
-#: classes/Performance/Rest/PerformanceActions.php:361
+#: classes/Performance/Rest/PerformanceActions.php:348
 msgid "Lazy loading is now force-enabled site-wide."
 msgstr ""
 
-#: classes/Performance/Rest/PerformanceActions.php:379
+#: classes/Performance/Rest/PerformanceActions.php:365
 msgid "Critical resource preloading was already enabled."
 msgstr ""
 
-#: classes/Performance/Rest/PerformanceActions.php:380
+#: classes/Performance/Rest/PerformanceActions.php:366
 msgid "Critical resource preloading is now enabled - the site logo and main stylesheet will be preloaded."
 msgstr ""
 
-#: classes/Performance/Rest/PerformanceActions.php:428
+#: classes/Performance/Rest/PerformanceActions.php:411
 msgid "Could not write browser caching rules to .htaccess - check that the file is writable."
 msgstr ""
 
-#: classes/Performance/Rest/PerformanceActions.php:434
+#: classes/Performance/Rest/PerformanceActions.php:417
 msgid "Browser caching headers are now active for CSS, JS, images, and fonts."
 msgstr ""
 
-#: classes/Performance/SlowPageScanner.php:38
+#: classes/Performance/SlowPageScanner.php:35
 #: assets/js/index.js:1
 msgid "Slow Pages"
 msgstr ""
 
 #. translators: %s is the response time in seconds, e.g. "3.42".
-#: classes/Performance/SlowPageScanner.php:74
+#: classes/Performance/SlowPageScanner.php:71
 #, php-format
 msgid "Homepage took %ss to respond"
 msgstr ""
 
-#: classes/Performance/SlowPageScanner.php:79
+#: classes/Performance/SlowPageScanner.php:76
 msgid "A slow homepage response affects every visit and is one of the biggest levers on perceived site speed."
 msgstr ""
 
-#: classes/Performance/SlowPageScanner.php:85
+#: classes/Performance/SlowPageScanner.php:82
 msgid "Enable a page caching plugin (e.g. WP Super Cache, WP Rocket) if none is active."
 msgstr ""
 
-#: classes/Performance/SlowPageScanner.php:86
+#: classes/Performance/SlowPageScanner.php:83
 msgid "Check your hosting plan's server resources - shared hosting is a common bottleneck."
 msgstr ""
 
-#: classes/Performance/SlowPageScanner.php:87
+#: classes/Performance/SlowPageScanner.php:84
 msgid "Reduce the number of active plugins that run on the homepage."
 msgstr ""
 
-#: classes/Performance/SlowPageScanner.php:88
+#: classes/Performance/SlowPageScanner.php:85
 msgid "Consider a persistent object cache (Redis/Memcached) for database-heavy pages."
 msgstr ""
 
-#: classes/Reports/Rest/History.php:449
+#: classes/Reports/Rest/History.php:441
 msgid "Could not delete this history entry."
 msgstr ""
 
-#: classes/Reports/Rest/History.php:637
-#: classes/Reports/Rest/History.php:686
-#: classes/SeoVisibility/Rest/Schema.php:188
+#: classes/Reports/Rest/History.php:625
+#: classes/Reports/Rest/History.php:674
+#: classes/SeoVisibility/Rest/Schema.php:183
 #: assets/js/index.js:1
 #: assets/js/index.js:17
 msgid "(no title)"
 msgstr ""
 
-#: classes/Reports/Rest/History.php:698
-#: classes/Reports/Rest/History.php:776
-#: classes/Reports/Rest/History.php:779
-#: classes/Utill/Findings.php:361
-#: classes/Utill/Findings.php:377
-#: classes/Utill/Findings.php:390
+#: classes/Reports/Rest/History.php:686
+#: classes/Reports/Rest/History.php:761
+#: classes/Reports/Rest/History.php:764
+#: classes/Utill/Findings.php:350
+#: classes/Utill/Findings.php:359
+#: classes/Utill/Findings.php:372
 #: assets/js/index.js:1
 #: assets/js/index.js:5
 msgid "Site-wide"
 msgstr ""
 
 #. translators: 1: extension name, 2: extension version, 3: minimum required VuloPilot version, 4: installed VuloPilot version.
-#: classes/Sdk/ExtensionManager.php:119
+#: classes/Sdk/ExtensionManager.php:114
 #, php-format
 msgid "VuloPilot: \"%1$s\" (v%2$s) requires VuloPilot %3$s or newer - you have %4$s. This extension was not loaded."
 msgstr ""
 
 #. translators: 1: extension name, 2: minimum required VuloPilot version.
-#: classes/Sdk/ExtensionManager.php:145
+#: classes/Sdk/ExtensionManager.php:140
 #, php-format
 msgid "Extension \"%1$s\" was not loaded - it requires VuloPilot %2$s or newer."
 msgstr ""
 
 #. translators: 1: extension name, 2: exception message.
-#: classes/Sdk/ExtensionManager.php:166
+#: classes/Sdk/ExtensionManager.php:161
 #, php-format
 msgid "Extension \"%1$s\" failed to register: %2$s"
 msgstr ""
@@ -1270,209 +1371,209 @@ msgstr ""
 msgid "Basic Vulnerabilities"
 msgstr ""
 
-#: classes/Security/BasicVulnerabilitiesScanner.php:99
+#: classes/Security/BasicVulnerabilitiesScanner.php:98
 msgid "WordPress version is exposed in the homepage's generator tag"
 msgstr ""
 
-#: classes/Security/BasicVulnerabilitiesScanner.php:102
+#: classes/Security/BasicVulnerabilitiesScanner.php:101
 msgid "The homepage's HTML includes a generator meta tag naming the exact WordPress version, making it easier for automated scanners to target version-specific vulnerabilities. Remove it via the `wp_head` \"wp_generator\" callback."
 msgstr ""
 
-#: classes/Security/BasicVulnerabilitiesScanner.php:134
+#: classes/Security/BasicVulnerabilitiesScanner.php:132
 msgid "The default readme.html file is publicly accessible"
 msgstr ""
 
-#: classes/Security/BasicVulnerabilitiesScanner.php:137
+#: classes/Security/BasicVulnerabilitiesScanner.php:135
 msgid "This file ships with WordPress core and reveals the installed version. Delete it or block direct access to it."
 msgstr ""
 
-#: classes/Security/BasicVulnerabilitiesScanner.php:157
+#: classes/Security/BasicVulnerabilitiesScanner.php:154
 msgid "Database table prefix is the WordPress default (\"wp_\")"
 msgstr ""
 
-#: classes/Security/BasicVulnerabilitiesScanner.php:160
+#: classes/Security/BasicVulnerabilitiesScanner.php:157
 msgid "A non-default table prefix is a small extra hurdle against certain automated SQL-injection attempts. Changing it on an existing site requires a careful, backed-up migration - this is a hardening note, not something to change casually."
 msgstr ""
 
-#: classes/Security/CoreFileIntegrityScanner.php:32
+#: classes/Security/CoreFileIntegrityScanner.php:31
 msgid "File Changes"
 msgstr ""
 
 #. translators: %s is the missing core file's path.
-#: classes/Security/CoreFileIntegrityScanner.php:75
+#: classes/Security/CoreFileIntegrityScanner.php:73
 #, php-format
 msgid "Core file is missing: %s"
 msgstr ""
 
-#: classes/Security/CoreFileIntegrityScanner.php:80
+#: classes/Security/CoreFileIntegrityScanner.php:78
 msgid "This file ships with WordPress core and normally exists on every install. A missing core file can break functionality or indicate tampering - reinstall core from the official source."
 msgstr ""
 
 #. translators: %s is the modified core file's path.
-#: classes/Security/CoreFileIntegrityScanner.php:92
+#: classes/Security/CoreFileIntegrityScanner.php:90
 #, php-format
 msgid "Core file has been modified: %s"
 msgstr ""
 
-#: classes/Security/CoreFileIntegrityScanner.php:97
+#: classes/Security/CoreFileIntegrityScanner.php:95
 msgid "This file's contents no longer match the official WordPress release for this version - either a manual edit or a sign of compromise. Compare it against a fresh core download."
 msgstr ""
 
-#: classes/Security/FirewallGuard.php:83
+#: classes/Security/FirewallGuard.php:80
 msgid "Request blocked."
 msgstr ""
 
-#: classes/Security/FirewallGuard.php:84
+#: classes/Security/FirewallGuard.php:81
 #: assets/js/index.js:1
 msgid "Forbidden"
 msgstr ""
 
-#: classes/Security/FirewallScanner.php:48
+#: classes/Security/FirewallScanner.php:46
 #: assets/js/index.js:9
 msgid "Firewall"
 msgstr ""
 
-#: classes/Security/FirewallScanner.php:82
+#: classes/Security/FirewallScanner.php:80
 msgid "These requests matched a known attack pattern (SQL injection, path traversal, or a direct PHP execution attempt inside the uploads directory) and were blocked in real time."
 msgstr ""
 
-#: classes/Security/FirewallScanner.php:83
+#: classes/Security/FirewallScanner.php:81
 msgid "These requests matched a known attack pattern but were only logged - real-time blocking is currently off. Turn on \"Enable active blocking\" in Settings → Scanning → Security to have these blocked automatically."
 msgstr ""
 
 #. translators: 1: number of requests, 2: IP address.
-#: classes/Security/FirewallScanner.php:89
+#: classes/Security/FirewallScanner.php:87
 #, php-format
 msgid "%1$d malicious requests from IP %2$s in the last 7 days"
 msgstr ""
 
 #. translators: %d is the number of matched requests.
-#: classes/Security/FirewallScanner.php:105
+#: classes/Security/FirewallScanner.php:103
 #, php-format
 msgid "%d malicious requests logged in the last 7 days"
 msgstr ""
 
 #. translators: %d is how many minutes until this IP can try again.
-#: classes/Security/LoginProtectionGuard.php:74
+#: classes/Security/LoginProtectionGuard.php:69
 #, php-format
 msgid "<strong>Error:</strong> Too many failed login attempts. Please try again in %d minutes."
 msgstr ""
 
-#: classes/Security/LoginProtectionScanner.php:40
+#: classes/Security/LoginProtectionScanner.php:39
 #: assets/js/index.js:9
 msgid "Login Protection"
 msgstr ""
 
 #. translators: 1: IP address, 2: number of failed attempts.
-#: classes/Security/LoginProtectionScanner.php:70
+#: classes/Security/LoginProtectionScanner.php:69
 #, php-format
 msgid "IP %1$s was blocked after %2$d failed login attempts"
 msgstr ""
 
 #. translators: %d is how many days this report covers.
-#: classes/Security/LoginProtectionScanner.php:78
+#: classes/Security/LoginProtectionScanner.php:77
 #, php-format
 msgid "Real login attempts logged by Login Protection in the last %d days. If this wasn't you, no action is needed - the attempts were already blocked."
 msgstr ""
 
-#: classes/Security/MalwareScanner.php:60
+#: classes/Security/MalwareScanner.php:56
 msgid "Malware & Infection Detection"
 msgstr ""
 
 #. translators: %s is the relative file path.
-#: classes/Security/MalwareScanner.php:94
+#: classes/Security/MalwareScanner.php:90
 #, php-format
 msgid "PHP file found inside the uploads directory: %s"
 msgstr ""
 
-#: classes/Security/MalwareScanner.php:99
+#: classes/Security/MalwareScanner.php:95
 msgid "The uploads directory should only ever contain media files. A PHP file here is one of the most reliable signs of a compromised site - review it immediately and remove it if you did not put it there yourself."
 msgstr ""
 
 #. translators: %s is the relative file path.
-#: classes/Security/MalwareScanner.php:114
+#: classes/Security/MalwareScanner.php:110
 #, php-format
 msgid "Suspicious code pattern found in theme file: %s"
 msgstr ""
 
 #. translators: %s is the matched backdoor/webshell signature.
-#: classes/Security/MalwareScanner.php:121
+#: classes/Security/MalwareScanner.php:117
 #, php-format
 msgid "This file contains a pattern commonly used by malware/webshells (\"%s\"). Review it immediately - if you did not add this code yourself, your site may be compromised."
 msgstr ""
 
-#: classes/Security/SslMonitoringScanner.php:40
+#: classes/Security/SslMonitoringScanner.php:36
 msgid "SSL Monitoring"
 msgstr ""
 
-#: classes/Security/SslMonitoringScanner.php:59
+#: classes/Security/SslMonitoringScanner.php:55
 msgid "Site is not served over HTTPS"
 msgstr ""
 
-#: classes/Security/SslMonitoringScanner.php:62
+#: classes/Security/SslMonitoringScanner.php:58
 msgid "Serving the site without SSL/TLS exposes visitor data in transit and is penalized by most search engines."
 msgstr ""
 
 #. translators: %s is the date the certificate expired.
-#: classes/Security/SslMonitoringScanner.php:143
+#: classes/Security/SslMonitoringScanner.php:137
 #, php-format
 msgid "SSL certificate expired on %s"
 msgstr ""
 
-#: classes/Security/SslMonitoringScanner.php:148
+#: classes/Security/SslMonitoringScanner.php:142
 msgid "Visitors and browsers will show a security warning until the certificate is renewed."
 msgstr ""
 
 #. translators: %s is the date the certificate expires.
-#: classes/Security/SslMonitoringScanner.php:164
+#: classes/Security/SslMonitoringScanner.php:158
 #, php-format
 msgid "SSL certificate expires soon: %s"
 msgstr ""
 
 #. translators: %d is the number of days remaining.
-#: classes/Security/SslMonitoringScanner.php:171
+#: classes/Security/SslMonitoringScanner.php:165
 #, php-format
 msgid "This certificate expires in %d day(s). Renew it before then to avoid a browser security warning."
 msgstr ""
 
-#: classes/Security/WeakPasswordScanner.php:48
+#: classes/Security/WeakPasswordScanner.php:47
 msgid "Weak Password Detection"
 msgstr ""
 
 #. translators: %s is the WordPress username.
-#: classes/Security/WeakPasswordScanner.php:81
+#: classes/Security/WeakPasswordScanner.php:80
 #, php-format
 msgid "Administrator \"%s\" is using a common, easily guessed password"
 msgstr ""
 
-#: classes/Security/WeakPasswordScanner.php:86
+#: classes/Security/WeakPasswordScanner.php:85
 msgid "This account's password matched an entry in a small dictionary of the most commonly used passwords. Change it immediately and enable two-factor authentication if available."
 msgstr ""
 
-#: classes/SeoVisibility/AeoSchemaScanner.php:48
+#: classes/SeoVisibility/AeoSchemaScanner.php:44
 msgid "AEO Schema Coverage"
 msgstr ""
 
 #. translators: 1: schema.org type (FAQPage/HowTo), 2: post/page title.
-#: classes/SeoVisibility/AeoSchemaScanner.php:146
+#: classes/SeoVisibility/AeoSchemaScanner.php:142
 #, php-format
 msgid "Missing %1$s schema: %2$s"
 msgstr ""
 
 #. translators: %s is the schema.org type (FAQPage/HowTo).
-#: classes/SeoVisibility/AeoSchemaScanner.php:154
+#: classes/SeoVisibility/AeoSchemaScanner.php:150
 #, php-format
 msgid "This content is already shaped like %s content (matching headings/list structure) but has no matching schema.org markup, so AI answer engines can't confidently recognize it as one."
 msgstr ""
 
 #: classes/SeoVisibility/HtmlSitemapRenderer.php:24
-#: modules/GeoAnalysis/LlmsTxtGenerator.php:142
+#: modules/GeoAnalysis/LlmsTxtGenerator.php:138
 #: assets/js/index.js:1
 msgid "Posts"
 msgstr ""
 
 #: classes/SeoVisibility/HtmlSitemapRenderer.php:25
-#: modules/GeoAnalysis/LlmsTxtGenerator.php:138
+#: modules/GeoAnalysis/LlmsTxtGenerator.php:134
 #: assets/js/index.js:1
 msgid "Pages"
 msgstr ""
@@ -1483,7 +1584,7 @@ msgid "Media"
 msgstr ""
 
 #: classes/SeoVisibility/HtmlSitemapRenderer.php:27
-#: modules/GeoAnalysis/LlmsTxtGenerator.php:146
+#: modules/GeoAnalysis/LlmsTxtGenerator.php:142
 #: assets/js/index.js:1
 #: assets/js/index.js:5
 #: assets/js/index.js:9
@@ -1560,311 +1661,311 @@ msgstr ""
 msgid "A featured image improves how this page previews when shared or displayed in some search formats: %s"
 msgstr ""
 
-#: classes/SeoVisibility/MissingMetaDescriptionRule.php:39
-#: modules/TechnicalSeo/Rest/Seo.php:616
+#: classes/SeoVisibility/MissingMetaDescriptionRule.php:38
+#: modules/TechnicalSeo/Rest/Seo.php:631
 msgid "Missing meta description"
 msgstr ""
 
-#: classes/SeoVisibility/MissingMetaDescriptionRule.php:112
+#: classes/SeoVisibility/MissingMetaDescriptionRule.php:111
 msgid "Ask AI to write a meta description"
 msgstr ""
 
 #. translators: %s is the finding's own title.
-#: classes/SeoVisibility/MissingMetaDescriptionRule.php:115
+#: classes/SeoVisibility/MissingMetaDescriptionRule.php:114
 #, php-format
 msgid "A good description improves click-through from search results: %s"
 msgstr ""
 
-#: classes/SeoVisibility/OnPageAnalyzer.php:97
+#: classes/SeoVisibility/OnPageAnalyzer.php:83
 msgid "SEO title is empty."
 msgstr ""
 
-#: classes/SeoVisibility/OnPageAnalyzer.php:101
+#: classes/SeoVisibility/OnPageAnalyzer.php:87
 msgid "SEO title is too short - search engines may show more than this."
 msgstr ""
 
-#: classes/SeoVisibility/OnPageAnalyzer.php:105
+#: classes/SeoVisibility/OnPageAnalyzer.php:91
 msgid "SEO title may be truncated in search results."
 msgstr ""
 
-#: classes/SeoVisibility/OnPageAnalyzer.php:108
+#: classes/SeoVisibility/OnPageAnalyzer.php:94
 msgid "SEO title length is good."
 msgstr ""
 
-#: classes/SeoVisibility/OnPageAnalyzer.php:121
+#: classes/SeoVisibility/OnPageAnalyzer.php:107
 msgid "Meta description is empty."
 msgstr ""
 
-#: classes/SeoVisibility/OnPageAnalyzer.php:125
+#: classes/SeoVisibility/OnPageAnalyzer.php:111
 msgid "Meta description is shorter than the recommended length."
 msgstr ""
 
-#: classes/SeoVisibility/OnPageAnalyzer.php:129
+#: classes/SeoVisibility/OnPageAnalyzer.php:115
 msgid "Meta description may be truncated in search results."
 msgstr ""
 
-#: classes/SeoVisibility/OnPageAnalyzer.php:132
+#: classes/SeoVisibility/OnPageAnalyzer.php:118
 msgid "Meta description length is good."
 msgstr ""
 
 #. translators: %d: current word count.
-#: classes/SeoVisibility/OnPageAnalyzer.php:176
+#: classes/SeoVisibility/OnPageAnalyzer.php:162
 #, php-format
 msgid "Content is %d words - good depth for search results."
 msgstr ""
 
 #. translators: 1: current word count, 2: percentage of full credit this depth earns, 3: word count the next tier up starts at.
-#: classes/SeoVisibility/OnPageAnalyzer.php:181
+#: classes/SeoVisibility/OnPageAnalyzer.php:167
 #, php-format
 msgid "Content is %1$d words - only %2$d%% of full content-depth credit. Aim for %3$d+ words."
 msgstr ""
 
-#: classes/SeoVisibility/OnPageAnalyzer.php:220
+#: classes/SeoVisibility/OnPageAnalyzer.php:204
 msgid "Focus keyword found in the SEO title."
 msgstr ""
 
-#: classes/SeoVisibility/OnPageAnalyzer.php:221
+#: classes/SeoVisibility/OnPageAnalyzer.php:205
 msgid "Focus keyword is missing from the SEO title."
 msgstr ""
 
-#: classes/SeoVisibility/OnPageAnalyzer.php:233
+#: classes/SeoVisibility/OnPageAnalyzer.php:217
 msgid "Focus keyword found in the meta description."
 msgstr ""
 
-#: classes/SeoVisibility/OnPageAnalyzer.php:234
+#: classes/SeoVisibility/OnPageAnalyzer.php:218
 msgid "Focus keyword is missing from the meta description."
 msgstr ""
 
-#: classes/SeoVisibility/OnPageAnalyzer.php:246
+#: classes/SeoVisibility/OnPageAnalyzer.php:230
 msgid "Focus keyword found in the URL."
 msgstr ""
 
-#: classes/SeoVisibility/OnPageAnalyzer.php:247
+#: classes/SeoVisibility/OnPageAnalyzer.php:231
 msgid "Focus keyword is missing from the URL."
 msgstr ""
 
-#: classes/SeoVisibility/OnPageAnalyzer.php:259
+#: classes/SeoVisibility/OnPageAnalyzer.php:243
 msgid "Focus keyword found in the content."
 msgstr ""
 
-#: classes/SeoVisibility/OnPageAnalyzer.php:260
+#: classes/SeoVisibility/OnPageAnalyzer.php:244
 msgid "Focus keyword is missing from the content."
 msgstr ""
 
-#: classes/SeoVisibility/OnPageAnalyzer.php:275
+#: classes/SeoVisibility/OnPageAnalyzer.php:259
 msgid "Focus keyword appears early in the content."
 msgstr ""
 
-#: classes/SeoVisibility/OnPageAnalyzer.php:276
+#: classes/SeoVisibility/OnPageAnalyzer.php:260
 msgid "Focus keyword does not appear in the opening paragraph."
 msgstr ""
 
-#: classes/SeoVisibility/OnPageAnalyzer.php:287
+#: classes/SeoVisibility/OnPageAnalyzer.php:271
 msgid "Content has subheadings."
 msgstr ""
 
-#: classes/SeoVisibility/OnPageAnalyzer.php:288
+#: classes/SeoVisibility/OnPageAnalyzer.php:272
 msgid "Content has no subheadings - breaking it up improves readability and scannability."
 msgstr ""
 
-#: classes/SeoVisibility/OnPageAnalyzer.php:302
+#: classes/SeoVisibility/OnPageAnalyzer.php:283
 msgid "Content contains at least one link."
 msgstr ""
 
-#: classes/SeoVisibility/OnPageAnalyzer.php:303
+#: classes/SeoVisibility/OnPageAnalyzer.php:284
 msgid "Content has no links - linking to related content or sources helps both readers and search engines."
 msgstr ""
 
-#: classes/SeoVisibility/OnPageAnalyzer.php:356
+#: classes/SeoVisibility/OnPageAnalyzer.php:335
 msgid "Content links to at least one other page on this site."
 msgstr ""
 
-#: classes/SeoVisibility/OnPageAnalyzer.php:357
+#: classes/SeoVisibility/OnPageAnalyzer.php:336
 msgid "No internal links found - link to other relevant pages on this site."
 msgstr ""
 
-#: classes/SeoVisibility/OnPageAnalyzer.php:370
+#: classes/SeoVisibility/OnPageAnalyzer.php:349
 msgid "Content links to at least one external source."
 msgstr ""
 
-#: classes/SeoVisibility/OnPageAnalyzer.php:371
+#: classes/SeoVisibility/OnPageAnalyzer.php:350
 msgid "No external links found - linking to an authoritative outside source builds trust."
 msgstr ""
 
-#: classes/SeoVisibility/OnPageAnalyzer.php:382
+#: classes/SeoVisibility/OnPageAnalyzer.php:361
 msgid "No images in this content - add at least one relevant image with descriptive alt text."
 msgstr ""
 
-#: classes/SeoVisibility/OnPageAnalyzer.php:387
+#: classes/SeoVisibility/OnPageAnalyzer.php:366
 msgid "One or more images are missing alt text."
 msgstr ""
 
-#: classes/SeoVisibility/OnPageAnalyzer.php:391
+#: classes/SeoVisibility/OnPageAnalyzer.php:370
 msgid "All images have alt text."
 msgstr ""
 
 #. translators: %s: current keyword density, as a percentage.
-#: classes/SeoVisibility/OnPageAnalyzer.php:426
+#: classes/SeoVisibility/OnPageAnalyzer.php:402
 #, php-format
 msgid "Focus keyword density is %s%% - this reads as keyword stuffing. Aim for roughly 1-1.5%%."
 msgstr ""
 
-#: classes/SeoVisibility/OnPageAnalyzer.php:437
+#: classes/SeoVisibility/OnPageAnalyzer.php:413
 msgid "Focus keyword density is very low - use it a little more naturally throughout the content."
 msgstr ""
 
-#: classes/SeoVisibility/OnPageAnalyzer.php:441
+#: classes/SeoVisibility/OnPageAnalyzer.php:417
 msgid "Focus keyword density is good."
 msgstr ""
 
-#: classes/SeoVisibility/OnPageAnalyzer.php:455
+#: classes/SeoVisibility/OnPageAnalyzer.php:431
 msgid "Focus keyword appears near the beginning of the title."
 msgstr ""
 
-#: classes/SeoVisibility/OnPageAnalyzer.php:456
+#: classes/SeoVisibility/OnPageAnalyzer.php:432
 msgid "Focus keyword appears late in the title - titles rank slightly better with it near the start."
 msgstr ""
 
-#: classes/SeoVisibility/OnPageAnalyzer.php:468
+#: classes/SeoVisibility/OnPageAnalyzer.php:443
 msgid "Title contains a number."
 msgstr ""
 
-#: classes/SeoVisibility/OnPageAnalyzer.php:469
+#: classes/SeoVisibility/OnPageAnalyzer.php:444
 msgid "Consider adding a number to the title (e.g. a year or a count) - these tend to attract more clicks."
 msgstr ""
 
-#: classes/SeoVisibility/PageTechnicalChecks.php:73
+#: classes/SeoVisibility/PageTechnicalChecks.php:66
 msgid "This page is not published."
 msgstr ""
 
-#: classes/SeoVisibility/PageTechnicalChecks.php:82
+#: classes/SeoVisibility/PageTechnicalChecks.php:75
 msgid "The site is set to discourage search engines (Settings → Reading)."
 msgstr ""
 
-#: classes/SeoVisibility/PageTechnicalChecks.php:101
+#: classes/SeoVisibility/PageTechnicalChecks.php:87
 msgid "This page is set to noindex (General tab → Robots) - deliberate, but still excluded from search results."
 msgstr ""
 
-#: classes/SeoVisibility/PageTechnicalChecks.php:109
+#: classes/SeoVisibility/PageTechnicalChecks.php:95
 msgid "This page is published and publicly indexable."
 msgstr ""
 
-#: classes/SeoVisibility/PageTechnicalChecks.php:129
+#: classes/SeoVisibility/PageTechnicalChecks.php:115
 msgid "Could not verify the live page - the request failed or timed out."
 msgstr ""
 
 #. translators: %d: real HTTP status code.
-#: classes/SeoVisibility/PageTechnicalChecks.php:139
-#: classes/SeoVisibility/PageTechnicalChecks.php:154
+#: classes/SeoVisibility/PageTechnicalChecks.php:125
+#: classes/SeoVisibility/PageTechnicalChecks.php:140
 #, php-format
 msgid "The page responded with HTTP %d."
 msgstr ""
 
 #. translators: %d: real HTTP status code.
-#: classes/SeoVisibility/PageTechnicalChecks.php:147
+#: classes/SeoVisibility/PageTechnicalChecks.php:133
 #, php-format
 msgid "The page redirects (HTTP %d) - verify the final destination is the intended one."
 msgstr ""
 
-#: classes/SeoVisibility/PageTechnicalChecks.php:170
+#: classes/SeoVisibility/PageTechnicalChecks.php:155
 msgid "Could not fetch the live page to check for a canonical tag."
 msgstr ""
 
-#: classes/SeoVisibility/PageTechnicalChecks.php:179
+#: classes/SeoVisibility/PageTechnicalChecks.php:164
 msgid "A canonical URL tag is present."
 msgstr ""
 
-#: classes/SeoVisibility/PageTechnicalChecks.php:186
+#: classes/SeoVisibility/PageTechnicalChecks.php:171
 msgid "No canonical URL tag was found on the live page."
 msgstr ""
 
-#: classes/SeoVisibility/PageTechnicalChecks.php:202
+#: classes/SeoVisibility/PageTechnicalChecks.php:186
 msgid "Could not fetch the live page to check for structured data."
 msgstr ""
 
-#: classes/SeoVisibility/PageTechnicalChecks.php:210
+#: classes/SeoVisibility/PageTechnicalChecks.php:194
 msgid "No JSON-LD structured data was found on the live page."
 msgstr ""
 
-#: classes/SeoVisibility/PageTechnicalChecks.php:234
+#: classes/SeoVisibility/PageTechnicalChecks.php:218
 msgid "Structured data was found but is not valid JSON."
 msgstr ""
 
 #. translators: %s: comma-separated real schema.org @type values found on the page.
-#: classes/SeoVisibility/PageTechnicalChecks.php:243
+#: classes/SeoVisibility/PageTechnicalChecks.php:227
 #, php-format
 msgid "Valid structured data found: %s."
 msgstr ""
 
-#: classes/SeoVisibility/PageTechnicalChecks.php:274
+#: classes/SeoVisibility/PageTechnicalChecks.php:256
 msgid "This page has not been checked for broken links yet - run a scan to verify."
 msgstr ""
 
 #. translators: %d: real number of broken links found on this page.
-#: classes/SeoVisibility/PageTechnicalChecks.php:296
+#: classes/SeoVisibility/PageTechnicalChecks.php:278
 #, php-format
 msgid "%d broken link found on this page."
 msgid_plural "%d broken links found on this page."
 msgstr[0] ""
 msgstr[1] ""
 
-#: classes/SeoVisibility/PageTechnicalChecks.php:305
+#: classes/SeoVisibility/PageTechnicalChecks.php:287
 msgid "No broken links found on this page."
 msgstr ""
 
-#: classes/SeoVisibility/PageTechnicalChecks.php:329
+#: classes/SeoVisibility/PageTechnicalChecks.php:305
 msgid "XML sitemaps are disabled - the page may still be discoverable through crawlable links, but a sitemap makes discovery more reliable."
 msgstr ""
 
 #. translators: %s: real post type name.
-#: classes/SeoVisibility/PageTechnicalChecks.php:341
+#: classes/SeoVisibility/PageTechnicalChecks.php:317
 #, php-format
 msgid "The \"%s\" post type is not included in the XML sitemap settings."
 msgstr ""
 
-#: classes/SeoVisibility/PageTechnicalChecks.php:356
+#: classes/SeoVisibility/PageTechnicalChecks.php:332
 msgid "This page is on the sitemap exclusion list."
 msgstr ""
 
-#: classes/SeoVisibility/PageTechnicalChecks.php:363
+#: classes/SeoVisibility/PageTechnicalChecks.php:339
 msgid "This page's post type is included in the XML sitemap and it is not excluded."
 msgstr ""
 
-#: classes/SeoVisibility/Rest/CrawlerTraffic.php:91
-#: modules/ContentOptimization/Rest/ContentIntelligence.php:153
+#: classes/SeoVisibility/Rest/CrawlerTraffic.php:89
+#: modules/ContentOptimization/Rest/ContentIntelligence.php:156
 msgid "Post not found."
 msgstr ""
 
-#: classes/SeoVisibility/Rest/IndexNow.php:77
+#: classes/SeoVisibility/Rest/IndexNow.php:75
 msgid "No URLs were given."
 msgstr ""
 
-#: classes/SeoVisibility/Rest/IndexNow.php:84
+#: classes/SeoVisibility/Rest/IndexNow.php:82
 msgid "No IndexNow API key yet - reload the Instant Indexing tab once to generate one."
 msgstr ""
 
-#: classes/SeoVisibility/Rest/Schema.php:147
+#: classes/SeoVisibility/Rest/Schema.php:144
 msgid "Provide a URL or post to inspect."
 msgstr ""
 
-#: classes/SeoVisibility/Rest/Schema.php:153
+#: classes/SeoVisibility/Rest/Schema.php:150
 #: assets/js/index.js:5
 msgid "Could not fetch that page. Check the URL and try again."
 msgstr ""
 
-#: classes/SeoVisibility/RobotsBlockingCrawlersRule.php:39
+#: classes/SeoVisibility/RobotsBlockingCrawlersRule.php:38
 msgid "robots.txt is blocking search engines"
 msgstr ""
 
-#: classes/SeoVisibility/RobotsBlockingCrawlersRule.php:99
+#: classes/SeoVisibility/RobotsBlockingCrawlersRule.php:97
 msgid "Review and fix robots.txt"
 msgstr ""
 
-#: classes/SeoVisibility/RobotsBlockingCrawlersRule.php:100
+#: classes/SeoVisibility/RobotsBlockingCrawlersRule.php:98
 msgid "robots.txt is currently telling every search engine not to crawl any page on this site. If unintentional, this can remove the site from search results entirely."
 msgstr ""
 
-#: classes/SeoVisibility/SchemaCoverageAnalyzer.php:164
+#: classes/SeoVisibility/SchemaCoverageAnalyzer.php:162
 msgid "Structured data"
 msgstr ""
 
@@ -1907,294 +2008,294 @@ msgstr ""
 msgid "Review rating"
 msgstr ""
 
-#: classes/SeoVisibility/SeoScoreEngine.php:361
+#: classes/SeoVisibility/SeoScoreEngine.php:333
 msgid "A title is set."
 msgstr ""
 
-#: classes/SeoVisibility/SeoScoreEngine.php:363
+#: classes/SeoVisibility/SeoScoreEngine.php:335
 msgid "No SEO title is set."
 msgstr ""
 
 #. translators: %d: real character count.
-#: classes/SeoVisibility/SeoScoreEngine.php:368
+#: classes/SeoVisibility/SeoScoreEngine.php:340
 #, php-format
 msgid "Title length (%d chars) is concise."
 msgstr ""
 
 #. translators: %d: real character count.
-#: classes/SeoVisibility/SeoScoreEngine.php:370
+#: classes/SeoVisibility/SeoScoreEngine.php:342
 #, php-format
 msgid "Title is %d characters - aim for roughly 50-60."
 msgstr ""
 
-#: classes/SeoVisibility/SeoScoreEngine.php:378
+#: classes/SeoVisibility/SeoScoreEngine.php:350
 msgid "No obvious keyword stuffing in the title."
 msgstr ""
 
-#: classes/SeoVisibility/SeoScoreEngine.php:380
+#: classes/SeoVisibility/SeoScoreEngine.php:352
 msgid "The focus keyword repeats unnaturally often in the title."
 msgstr ""
 
-#: classes/SeoVisibility/SeoScoreEngine.php:397
+#: classes/SeoVisibility/SeoScoreEngine.php:369
 msgid "Write a concise, descriptive SEO title around 50-60 characters."
 msgstr ""
 
-#: classes/SeoVisibility/SeoScoreEngine.php:411
+#: classes/SeoVisibility/SeoScoreEngine.php:381
 msgid "A meta description is set."
 msgstr ""
 
-#: classes/SeoVisibility/SeoScoreEngine.php:413
+#: classes/SeoVisibility/SeoScoreEngine.php:383
 msgid "No meta description is set."
 msgstr ""
 
 #. translators: %d: real character count.
-#: classes/SeoVisibility/SeoScoreEngine.php:418
+#: classes/SeoVisibility/SeoScoreEngine.php:388
 #, php-format
 msgid "Description length (%d chars) is appropriate."
 msgstr ""
 
 #. translators: %d: real character count.
-#: classes/SeoVisibility/SeoScoreEngine.php:420
+#: classes/SeoVisibility/SeoScoreEngine.php:390
 #, php-format
 msgid "Description is %d characters - aim for roughly 120-160."
 msgstr ""
 
-#: classes/SeoVisibility/SeoScoreEngine.php:428
+#: classes/SeoVisibility/SeoScoreEngine.php:396
 msgid "Description appears relevant to the page topic."
 msgstr ""
 
-#: classes/SeoVisibility/SeoScoreEngine.php:445
+#: classes/SeoVisibility/SeoScoreEngine.php:413
 msgid "Write a clear, 120-160 character meta description that summarizes the page."
 msgstr ""
 
-#: classes/SeoVisibility/SeoScoreEngine.php:461
+#: classes/SeoVisibility/SeoScoreEngine.php:426
 msgid "No URL slug is set."
 msgstr ""
 
-#: classes/SeoVisibility/SeoScoreEngine.php:464
+#: classes/SeoVisibility/SeoScoreEngine.php:429
 msgid "Set a short, readable URL slug."
 msgstr ""
 
-#: classes/SeoVisibility/SeoScoreEngine.php:471
+#: classes/SeoVisibility/SeoScoreEngine.php:436
 msgid "slug is only numbers"
 msgstr ""
 
-#: classes/SeoVisibility/SeoScoreEngine.php:474
+#: classes/SeoVisibility/SeoScoreEngine.php:439
 msgid "slug is unusually long"
 msgstr ""
 
-#: classes/SeoVisibility/SeoScoreEngine.php:477
+#: classes/SeoVisibility/SeoScoreEngine.php:442
 msgid "slug has repeated hyphens"
 msgstr ""
 
-#: classes/SeoVisibility/SeoScoreEngine.php:489
+#: classes/SeoVisibility/SeoScoreEngine.php:454
 msgid "The URL slug is readable and reasonably sized."
 msgstr ""
 
 #. translators: %s: comma-separated list of real issues found.
-#: classes/SeoVisibility/SeoScoreEngine.php:489
+#: classes/SeoVisibility/SeoScoreEngine.php:454
 #, php-format
 msgid "Slug issues: %s."
 msgstr ""
 
-#: classes/SeoVisibility/SeoScoreEngine.php:495
+#: classes/SeoVisibility/SeoScoreEngine.php:460
 msgid "Use a short, descriptive, hyphen-separated slug."
 msgstr ""
 
-#: classes/SeoVisibility/SeoScoreEngine.php:511
-#: classes/SeoVisibility/SeoScoreEngine.php:850
-#: classes/SeoVisibility/SeoScoreEngine.php:936
-#: classes/SeoVisibility/SeoScoreEngine.php:1009
-#: classes/SeoVisibility/SeoScoreEngine.php:1059
+#: classes/SeoVisibility/SeoScoreEngine.php:473
+#: classes/SeoVisibility/SeoScoreEngine.php:768
+#: classes/SeoVisibility/SeoScoreEngine.php:846
+#: classes/SeoVisibility/SeoScoreEngine.php:916
+#: classes/SeoVisibility/SeoScoreEngine.php:963
 msgid "No focus keyword is configured."
 msgstr ""
 
-#: classes/SeoVisibility/SeoScoreEngine.php:522
+#: classes/SeoVisibility/SeoScoreEngine.php:484
 msgid "title"
 msgstr ""
 
-#: classes/SeoVisibility/SeoScoreEngine.php:526
+#: classes/SeoVisibility/SeoScoreEngine.php:488
 msgid "description"
 msgstr ""
 
-#: classes/SeoVisibility/SeoScoreEngine.php:533
+#: classes/SeoVisibility/SeoScoreEngine.php:495
 msgid "opening paragraph"
 msgstr ""
 
-#: classes/SeoVisibility/SeoScoreEngine.php:545
+#: classes/SeoVisibility/SeoScoreEngine.php:507
 msgid "Focus keyword was not found in the title, description, or opening paragraph."
 msgstr ""
 
 #. translators: %s: comma-separated list of where the keyword was actually found.
-#: classes/SeoVisibility/SeoScoreEngine.php:546
+#: classes/SeoVisibility/SeoScoreEngine.php:508
 #, php-format
 msgid "Focus keyword found in: %s."
 msgstr ""
 
-#: classes/SeoVisibility/SeoScoreEngine.php:552
+#: classes/SeoVisibility/SeoScoreEngine.php:514
 msgid "Work the focus keyword naturally into the title, description, and opening paragraph."
 msgstr ""
 
-#: classes/SeoVisibility/SeoScoreEngine.php:578
+#: classes/SeoVisibility/SeoScoreEngine.php:535
 msgid "Content has section headings in a logical order."
 msgstr ""
 
-#: classes/SeoVisibility/SeoScoreEngine.php:594
+#: classes/SeoVisibility/SeoScoreEngine.php:551
 msgid "An H3 appears before the first H2 - heading levels should nest in order."
 msgstr ""
 
-#: classes/SeoVisibility/SeoScoreEngine.php:600
+#: classes/SeoVisibility/SeoScoreEngine.php:557
 msgid "Reorder headings so H3s sit under an H2, not before one."
 msgstr ""
 
-#: classes/SeoVisibility/SeoScoreEngine.php:610
+#: classes/SeoVisibility/SeoScoreEngine.php:567
 msgid "No section headings (H2/H3) found in the content."
 msgstr ""
 
-#: classes/SeoVisibility/SeoScoreEngine.php:616
+#: classes/SeoVisibility/SeoScoreEngine.php:573
 msgid "Break the content into sections with H2 (and H3 where needed) subheadings."
 msgstr ""
 
-#: classes/SeoVisibility/SeoScoreEngine.php:633
+#: classes/SeoVisibility/SeoScoreEngine.php:585
 msgid "Search intent alignment needs semantic/AI assessment, which this engine does not perform - not evaluated."
 msgstr ""
 
-#: classes/SeoVisibility/SeoScoreEngine.php:656
+#: classes/SeoVisibility/SeoScoreEngine.php:601
 msgid "Content usefulness/completeness needs human or AI judgment of what the reader actually needed - not evaluated."
 msgstr ""
 
-#: classes/SeoVisibility/SeoScoreEngine.php:674
+#: classes/SeoVisibility/SeoScoreEngine.php:615
 msgid "Content originality needs a duplication/similarity check this engine does not perform - not evaluated."
 msgstr ""
 
 #. translators: 1: real word count, 2: configured target word count.
-#: classes/SeoVisibility/SeoScoreEngine.php:700
+#: classes/SeoVisibility/SeoScoreEngine.php:637
 #, php-format
 msgid "Content is %1$d words (target: %2$d+)."
 msgstr ""
 
-#: classes/SeoVisibility/SeoScoreEngine.php:709
+#: classes/SeoVisibility/SeoScoreEngine.php:646
 msgid "Expand the content with real, useful detail relevant to the topic."
 msgstr ""
 
 #. translators: %d: real max paragraph length, in words.
-#: classes/SeoVisibility/SeoScoreEngine.php:740
+#: classes/SeoVisibility/SeoScoreEngine.php:673
 #, php-format
 msgid "No paragraph exceeds %d words."
 msgstr ""
 
 #. translators: 1: real count of overlong paragraphs, 2: real max paragraph length, in words.
-#: classes/SeoVisibility/SeoScoreEngine.php:754
+#: classes/SeoVisibility/SeoScoreEngine.php:687
 #, php-format
 msgid "%1$d paragraph exceeds %2$d words."
 msgid_plural "%1$d paragraphs exceed %2$d words."
 msgstr[0] ""
 msgstr[1] ""
 
-#: classes/SeoVisibility/SeoScoreEngine.php:760
+#: classes/SeoVisibility/SeoScoreEngine.php:693
 msgid "Split the longest paragraphs into shorter ones for easier reading."
 msgstr ""
 
 #. translators: %d: real word count below the configured recommendation threshold.
-#: classes/SeoVisibility/SeoScoreEngine.php:778
+#: classes/SeoVisibility/SeoScoreEngine.php:706
 #, php-format
 msgid "Article is %d words - too short to need a table of contents."
 msgstr ""
 
-#: classes/SeoVisibility/SeoScoreEngine.php:796
+#: classes/SeoVisibility/SeoScoreEngine.php:724
 msgid "A table of contents was detected."
 msgstr ""
 
 #. translators: %d: real word count above the configured recommendation threshold.
-#: classes/SeoVisibility/SeoScoreEngine.php:808
+#: classes/SeoVisibility/SeoScoreEngine.php:736
 #, php-format
 msgid "No table of contents detected on this %d-word article."
 msgstr ""
 
-#: classes/SeoVisibility/SeoScoreEngine.php:811
+#: classes/SeoVisibility/SeoScoreEngine.php:739
 msgid "Add a table of contents (e.g. the VuloPilot Table of Contents block) for long-form content."
 msgstr ""
 
-#: classes/SeoVisibility/SeoScoreEngine.php:828
+#: classes/SeoVisibility/SeoScoreEngine.php:751
 msgid "Freshness/accuracy needs real-world fact verification this engine does not perform - not evaluated."
 msgstr ""
 
-#: classes/SeoVisibility/SeoScoreEngine.php:863
+#: classes/SeoVisibility/SeoScoreEngine.php:781
 msgid "Focus keyword does not appear in the content."
 msgstr ""
 
-#: classes/SeoVisibility/SeoScoreEngine.php:869
+#: classes/SeoVisibility/SeoScoreEngine.php:787
 msgid "Use the focus keyword a few times naturally throughout the content."
 msgstr ""
 
 #. translators: %s: real keyword density percentage.
-#: classes/SeoVisibility/SeoScoreEngine.php:880
+#: classes/SeoVisibility/SeoScoreEngine.php:798
 #, php-format
 msgid "Keyword density is %s%% - on the high side."
 msgstr ""
 
-#: classes/SeoVisibility/SeoScoreEngine.php:886
+#: classes/SeoVisibility/SeoScoreEngine.php:804
 msgid "Vary the wording so the keyword appears a little less densely."
 msgstr ""
 
 #. translators: %s: real keyword density percentage.
-#: classes/SeoVisibility/SeoScoreEngine.php:896
+#: classes/SeoVisibility/SeoScoreEngine.php:814
 #, php-format
 msgid "Keyword density is %s%% - natural."
 msgstr ""
 
-#: classes/SeoVisibility/SeoScoreEngine.php:918
+#: classes/SeoVisibility/SeoScoreEngine.php:831
 msgid "Related-term/topic-coverage analysis needs semantic/NLP capability this engine does not have - not evaluated."
 msgstr ""
 
-#: classes/SeoVisibility/SeoScoreEngine.php:951
+#: classes/SeoVisibility/SeoScoreEngine.php:861
 msgid "There is no content to check keyword distribution in."
 msgstr ""
 
-#: classes/SeoVisibility/SeoScoreEngine.php:978
+#: classes/SeoVisibility/SeoScoreEngine.php:888
 msgid "Focus keyword appears across multiple parts of the content."
 msgstr ""
 
-#: classes/SeoVisibility/SeoScoreEngine.php:990
+#: classes/SeoVisibility/SeoScoreEngine.php:900
 msgid "Focus keyword is concentrated in one part of the content rather than spread naturally throughout."
 msgstr ""
 
-#: classes/SeoVisibility/SeoScoreEngine.php:993
+#: classes/SeoVisibility/SeoScoreEngine.php:903
 msgid "Mention the focus keyword naturally in more than one section."
 msgstr ""
 
 #. translators: %s: real keyword density percentage.
-#: classes/SeoVisibility/SeoScoreEngine.php:1022
+#: classes/SeoVisibility/SeoScoreEngine.php:929
 #, php-format
 msgid "Keyword density is %s%% - this reads as manipulative repetition."
 msgstr ""
 
-#: classes/SeoVisibility/SeoScoreEngine.php:1028
+#: classes/SeoVisibility/SeoScoreEngine.php:935
 msgid "Reduce how often the exact keyword phrase repeats; use natural variations instead."
 msgstr ""
 
-#: classes/SeoVisibility/SeoScoreEngine.php:1038
+#: classes/SeoVisibility/SeoScoreEngine.php:945
 msgid "No keyword stuffing detected."
 msgstr ""
 
-#: classes/SeoVisibility/SeoScoreEngine.php:1086
+#: classes/SeoVisibility/SeoScoreEngine.php:990
 msgid "No other published page targets this same focus keyword."
 msgstr ""
 
 #. translators: %d: real number of other published posts/pages targeting the same focus keyword.
-#: classes/SeoVisibility/SeoScoreEngine.php:1100
+#: classes/SeoVisibility/SeoScoreEngine.php:1004
 #, php-format
 msgid "%d other published page also targets this focus keyword."
 msgid_plural "%d other published pages also target this focus keyword."
 msgstr[0] ""
 msgstr[1] ""
 
-#: classes/SeoVisibility/SeoScoreEngine.php:1108
+#: classes/SeoVisibility/SeoScoreEngine.php:1012
 msgid "Review whether these pages should target different keywords, or consolidate them."
 msgstr ""
 
 #. translators: %d: real number of internal links found.
-#: classes/SeoVisibility/SeoScoreEngine.php:1129
+#: classes/SeoVisibility/SeoScoreEngine.php:1029
 #, php-format
 msgid "%d internal link found."
 msgid_plural "%d internal links found."
@@ -2202,16 +2303,16 @@ msgstr[0] ""
 msgstr[1] ""
 
 #. translators: %d: real number of internal links found.
-#: classes/SeoVisibility/SeoScoreEngine.php:1130
+#: classes/SeoVisibility/SeoScoreEngine.php:1030
 msgid "No internal links found."
 msgstr ""
 
-#: classes/SeoVisibility/SeoScoreEngine.php:1133
+#: classes/SeoVisibility/SeoScoreEngine.php:1033
 msgid "Link to other relevant pages on this site."
 msgstr ""
 
 #. translators: %d: real number of external links found.
-#: classes/SeoVisibility/SeoScoreEngine.php:1150
+#: classes/SeoVisibility/SeoScoreEngine.php:1048
 #, php-format
 msgid "%d external link found."
 msgid_plural "%d external links found."
@@ -2219,92 +2320,92 @@ msgstr[0] ""
 msgstr[1] ""
 
 #. translators: %d: real number of external links found.
-#: classes/SeoVisibility/SeoScoreEngine.php:1151
+#: classes/SeoVisibility/SeoScoreEngine.php:1049
 msgid "No external links found."
 msgstr ""
 
-#: classes/SeoVisibility/SeoScoreEngine.php:1154
+#: classes/SeoVisibility/SeoScoreEngine.php:1052
 msgid "Consider linking to a relevant, credible external source."
 msgstr ""
 
-#: classes/SeoVisibility/SeoScoreEngine.php:1174
+#: classes/SeoVisibility/SeoScoreEngine.php:1069
 msgid "Fix or remove the broken link(s)."
 msgstr ""
 
-#: classes/SeoVisibility/SeoScoreEngine.php:1198
+#: classes/SeoVisibility/SeoScoreEngine.php:1087
 msgid "This page has at least one image."
 msgstr ""
 
-#: classes/SeoVisibility/SeoScoreEngine.php:1213
+#: classes/SeoVisibility/SeoScoreEngine.php:1102
 msgid "No featured or inline images found - add one if a visual would help this content."
 msgstr ""
 
-#: classes/SeoVisibility/SeoScoreEngine.php:1233
-#: classes/SeoVisibility/SeoScoreEngine.php:1293
+#: classes/SeoVisibility/SeoScoreEngine.php:1120
+#: classes/SeoVisibility/SeoScoreEngine.php:1176
 msgid "No images in this content."
 msgstr ""
 
-#: classes/SeoVisibility/SeoScoreEngine.php:1255
+#: classes/SeoVisibility/SeoScoreEngine.php:1142
 msgid "Every image has an alt attribute (empty is fine for decorative images)."
 msgstr ""
 
 #. translators: %d: real count of images with no alt attribute at all.
-#: classes/SeoVisibility/SeoScoreEngine.php:1270
+#: classes/SeoVisibility/SeoScoreEngine.php:1157
 #, php-format
 msgid "%d image has no alt attribute."
 msgid_plural "%d images have no alt attribute."
 msgstr[0] ""
 msgstr[1] ""
 
-#: classes/SeoVisibility/SeoScoreEngine.php:1276
+#: classes/SeoVisibility/SeoScoreEngine.php:1163
 msgid "Add an alt attribute (can be empty for purely decorative images) to every image."
 msgstr ""
 
-#: classes/SeoVisibility/SeoScoreEngine.php:1330
+#: classes/SeoVisibility/SeoScoreEngine.php:1213
 msgid "None of this content's images are local Media Library attachments that can be inspected."
 msgstr ""
 
 #. translators: %d: real number of local images checked.
-#: classes/SeoVisibility/SeoScoreEngine.php:1343
+#: classes/SeoVisibility/SeoScoreEngine.php:1226
 #, php-format
 msgid "Checked %d local image(s); none are unusually large."
 msgstr ""
 
 #. translators: 1: real count of oversized images, 2: the size threshold in KB.
-#: classes/SeoVisibility/SeoScoreEngine.php:1361
+#: classes/SeoVisibility/SeoScoreEngine.php:1244
 #, php-format
 msgid "%1$d image is over %2$dKB."
 msgid_plural "%1$d images are over %2$dKB."
 msgstr[0] ""
 msgstr[1] ""
 
-#: classes/SeoVisibility/SeoScoreEngine.php:1371
+#: classes/SeoVisibility/SeoScoreEngine.php:1254
 msgid "Compress or resize the oversized image(s)."
 msgstr ""
 
-#: classes/SeoVisibility/SeoScoreEngine.php:1396
+#: classes/SeoVisibility/SeoScoreEngine.php:1275
 msgid "Review publish status and Settings → Reading."
 msgstr ""
 
-#: classes/SeoVisibility/SeoScoreEngine.php:1397
+#: classes/SeoVisibility/SeoScoreEngine.php:1276
 msgid "Remove the noindex override if this page should appear in search results."
 msgstr ""
 
-#: classes/SeoVisibility/SeoScoreEngine.php:1436
+#: classes/SeoVisibility/SeoScoreEngine.php:1311
 msgid "Ensure a canonical URL tag is output for this page."
 msgstr ""
 
-#: classes/SeoVisibility/SeoScoreEngine.php:1475
+#: classes/SeoVisibility/SeoScoreEngine.php:1346
 msgid "Enable XML sitemaps in Settings → Sitemap."
 msgstr ""
 
 #. translators: 1: real canonical URL character count, 2: the configured guideline length.
-#: classes/SeoVisibility/SeoScoreEngine.php:1496
+#: classes/SeoVisibility/SeoScoreEngine.php:1364
 #, php-format
 msgid "Canonical URL is %1$d characters (guideline: %2$d or fewer)."
 msgstr ""
 
-#: classes/SeoVisibility/SeoScoreEngine.php:1505
+#: classes/SeoVisibility/SeoScoreEngine.php:1373
 msgid "Consider shortening unnecessary URL components."
 msgstr ""
 
@@ -2322,93 +2423,93 @@ msgstr ""
 msgid "A search-optimized title improves click-through from search results: %s"
 msgstr ""
 
-#: classes/SeoVisibility/SitemapStylesheet.php:170
+#: classes/SeoVisibility/SitemapStylesheet.php:155
 #: assets/js/index.js:1
 msgid "XML Sitemap"
 msgstr ""
 
-#: classes/SeoVisibility/SitemapStylesheet.php:171
+#: classes/SeoVisibility/SitemapStylesheet.php:156
 msgid "This XML Sitemap is generated by VuloPilot powered by WordPress to make your content more visible for search engines."
 msgstr ""
 
 #. translators: %s: real count of child sitemaps in this index.
-#: classes/SeoVisibility/SitemapStylesheet.php:177
+#: classes/SeoVisibility/SitemapStylesheet.php:162
 #, php-format
 msgid "This XML Sitemap Index file contains %s sitemaps."
 msgstr ""
 
 #. translators: %s: real count of URLs in this sitemap.
-#: classes/SeoVisibility/SitemapStylesheet.php:182
+#: classes/SeoVisibility/SitemapStylesheet.php:167
 #, php-format
 msgid "Number of URLs in this XML Sitemap: %s."
 msgstr ""
 
-#: classes/SeoVisibility/SitemapStylesheet.php:202
+#: classes/SeoVisibility/SitemapStylesheet.php:187
 msgid "https://www.sitemaps.org/"
 msgstr ""
 
-#: classes/SeoVisibility/SitemapStylesheet.php:202
+#: classes/SeoVisibility/SitemapStylesheet.php:187
 msgid "Learn more about XML sitemaps."
 msgstr ""
 
-#: classes/SeoVisibility/SitemapStylesheet.php:209
+#: classes/SeoVisibility/SitemapStylesheet.php:194
 #: modules/TechnicalSeo/Scanners/SitemapScanner.php:38
 #: assets/js/index.js:1
 msgid "Sitemap"
 msgstr ""
 
-#: classes/SeoVisibility/SitemapStylesheet.php:209
+#: classes/SeoVisibility/SitemapStylesheet.php:194
 #: assets/js/index.js:1
 #: assets/js/index.js:5
 msgid "URL"
 msgstr ""
 
-#: classes/SeoVisibility/SitemapStylesheet.php:211
+#: classes/SeoVisibility/SitemapStylesheet.php:196
 msgid "Last Modified"
 msgstr ""
 
-#: classes/SeoVisibility/SitemapStylesheet.php:214
+#: classes/SeoVisibility/SitemapStylesheet.php:199
 msgid "Change Frequency"
 msgstr ""
 
-#: classes/SeoVisibility/SitemapStylesheet.php:217
+#: classes/SeoVisibility/SitemapStylesheet.php:202
 msgid "Priority"
 msgstr ""
 
-#: classes/Settings/GoogleAdSenseClient.php:40
-#: classes/Settings/GoogleAnalyticsClient.php:49
-#: classes/Settings/GoogleAnalyticsClient.php:97
-#: classes/Settings/GoogleAnalyticsClient.php:145
-#: classes/Settings/GoogleAnalyticsClient.php:210
-#: classes/Settings/GoogleServicesConnection.php:266
+#: classes/Settings/GoogleAdSenseClient.php:38
+#: classes/Settings/GoogleAnalyticsClient.php:43
+#: classes/Settings/GoogleAnalyticsClient.php:90
+#: classes/Settings/GoogleAnalyticsClient.php:138
+#: classes/Settings/GoogleAnalyticsClient.php:203
+#: classes/Settings/GoogleServicesConnection.php:258
 msgid "Not connected to Google."
 msgstr ""
 
-#: classes/Settings/GoogleAdSenseClient.php:64
+#: classes/Settings/GoogleAdSenseClient.php:61
 msgid "Could not fetch your AdSense accounts."
 msgstr ""
 
-#: classes/Settings/GoogleAnalyticsClient.php:65
+#: classes/Settings/GoogleAnalyticsClient.php:59
 msgid "Could not fetch your Google Analytics accounts."
 msgstr ""
 
-#: classes/Settings/GoogleAnalyticsClient.php:113
+#: classes/Settings/GoogleAnalyticsClient.php:106
 msgid "Could not fetch this property’s data streams."
 msgstr ""
 
-#: classes/Settings/GoogleAnalyticsClient.php:177
+#: classes/Settings/GoogleAnalyticsClient.php:170
 msgid "Could not fetch your Google Analytics traffic."
 msgstr ""
 
-#: classes/Settings/GoogleAnalyticsClient.php:242
+#: classes/Settings/GoogleAnalyticsClient.php:235
 msgid "Could not fetch your Google Analytics traffic sources."
 msgstr ""
 
-#: classes/Settings/GoogleOAuthBrokerClient.php:51
+#: classes/Settings/GoogleOAuthBrokerClient.php:53
 msgid "Google connect broker could not complete the token exchange."
 msgstr ""
 
-#: classes/Settings/GoogleOAuthBrokerClient.php:70
+#: classes/Settings/GoogleOAuthBrokerClient.php:71
 msgid "Google connect broker could not refresh the access token."
 msgstr ""
 
@@ -2418,367 +2519,367 @@ msgstr ""
 msgid "Google connect broker returned a non-JSON response (HTTP %d)."
 msgstr ""
 
-#: classes/Settings/GoogleServicesConnection.php:282
+#: classes/Settings/GoogleServicesConnection.php:274
 msgid "Could not fetch your Search Console properties."
 msgstr ""
 
-#: classes/Settings/Rest/GoogleServices.php:195
+#: classes/Settings/Rest/GoogleServices.php:192
 msgid "Google Connect isn’t configured for this build yet."
 msgstr ""
 
 #. translators: %s: the Google connect service's own explanation.
-#: classes/Settings/Rest/GoogleServices.php:225
+#: classes/Settings/Rest/GoogleServices.php:221
 #, php-format
 msgid "Google connect service: %s"
 msgstr ""
 
-#: classes/Settings/Rest/GoogleServices.php:228
+#: classes/Settings/Rest/GoogleServices.php:224
 msgid "The Google connect service could not start the connection. Please try again later."
 msgstr ""
 
-#: classes/Settings/Rest/GoogleServices.php:294
+#: classes/Settings/Rest/GoogleServices.php:288
 msgid "No site selected."
 msgstr ""
 
-#: classes/Settings/Rest/GoogleServices.php:305
+#: classes/Settings/Rest/GoogleServices.php:299
 msgid "That property isn’t in your Search Console account."
 msgstr ""
 
-#: classes/Settings/Rest/GoogleServices.php:334
+#: classes/Settings/Rest/GoogleServices.php:328
 msgid "No property given."
 msgstr ""
 
-#: classes/Settings/Rest/GoogleServices.php:359
+#: classes/Settings/Rest/GoogleServices.php:352
 msgid "Account, property, and data stream are all required."
 msgstr ""
 
-#: classes/Settings/Rest/GoogleServices.php:372
+#: classes/Settings/Rest/GoogleServices.php:365
 msgid "That Analytics account isn’t available."
 msgstr ""
 
-#: classes/Settings/Rest/GoogleServices.php:378
+#: classes/Settings/Rest/GoogleServices.php:371
 msgid "That Analytics property isn’t available."
 msgstr ""
 
-#: classes/Settings/Rest/GoogleServices.php:390
+#: classes/Settings/Rest/GoogleServices.php:383
 msgid "That data stream isn’t available."
 msgstr ""
 
-#: classes/Settings/Rest/GoogleServices.php:428
+#: classes/Settings/Rest/GoogleServices.php:421
 msgid "No AdSense account selected."
 msgstr ""
 
-#: classes/Settings/Rest/GoogleServices.php:440
+#: classes/Settings/Rest/GoogleServices.php:433
 msgid "That AdSense account isn’t available."
 msgstr ""
 
-#: classes/Settings/Rest/Settings.php:246
+#: classes/Settings/Rest/Settings.php:238
 #: assets/js/index.js:1
 msgid "Settings saved."
 msgstr ""
 
-#: classes/Settings/Rest/Settings.php:277
+#: classes/Settings/Rest/Settings.php:266
 #: assets/js/index.js:1
 msgid "Settings reset to defaults."
 msgstr ""
 
-#: classes/Settings/Rest/Settings.php:296
+#: classes/Settings/Rest/Settings.php:285
 #: assets/js/index.js:1
 msgid "Cache cleared."
 msgstr ""
 
-#: classes/Settings/Rest/Settings.php:313
-#: classes/Settings/Rest/Settings.php:380
+#: classes/Settings/Rest/Settings.php:302
+#: classes/Settings/Rest/Settings.php:368
 msgid "The notification email address isn't valid."
 msgstr ""
 
 #. translators: %s is the site name.
-#: classes/Settings/Rest/Settings.php:329
+#: classes/Settings/Rest/Settings.php:318
 #, php-format
 msgid "[%s] VuloPilot test email"
 msgstr ""
 
-#: classes/Settings/Rest/Settings.php:332
+#: classes/Settings/Rest/Settings.php:321
 msgid "This is a test email from VuloPilot's Notifications settings. If you received this, your notification email is configured correctly."
 msgstr ""
 
 #. translators: %s is the recipient email address.
-#: classes/Settings/Rest/Settings.php:349
+#: classes/Settings/Rest/Settings.php:337
 #, php-format
 msgid "Test email sent to %s."
 msgstr ""
 
-#: classes/Settings/Rest/Settings.php:352
-#: classes/Settings/Rest/Settings.php:448
+#: classes/Settings/Rest/Settings.php:340
+#: classes/Settings/Rest/Settings.php:436
 msgid "wp_mail() returned false - check your site's mail configuration."
 msgstr ""
 
-#: classes/Settings/Rest/Settings.php:368
+#: classes/Settings/Rest/Settings.php:356
 msgid "Sending a test report requires VuloPilot Pro."
 msgstr ""
 
-#: classes/Settings/Rest/Settings.php:411
+#: classes/Settings/Rest/Settings.php:399
 msgid "Could not generate a test report. Please try again."
 msgstr ""
 
 #. translators: %s is the site name.
-#: classes/Settings/Rest/Settings.php:427
+#: classes/Settings/Rest/Settings.php:415
 #, php-format
 msgid "[%s] Your test report is ready"
 msgstr ""
 
-#: classes/Settings/Rest/Settings.php:430
+#: classes/Settings/Rest/Settings.php:418
 msgid "This is a test report from VuloPilot's Reports settings. Sign in to your dashboard's Reports page to view and download it."
 msgstr ""
 
 #. translators: %s is the recipient email address.
-#: classes/Settings/Rest/Settings.php:445
+#: classes/Settings/Rest/Settings.php:433
 #, php-format
 msgid "Test report generated and emailed to %s."
 msgstr ""
 
-#: classes/Settings/Rest/Settings.php:488
+#: classes/Settings/Rest/Settings.php:474
 msgid "Unknown verification provider."
 msgstr ""
 
-#: classes/Settings/Rest/Settings.php:506
+#: classes/Settings/Rest/Settings.php:492
 msgid "Enter a verification code first."
 msgstr ""
 
-#: classes/Settings/Rest/Settings.php:520
+#: classes/Settings/Rest/Settings.php:506
 msgid "Could not load your homepage to check - please try again."
 msgstr ""
 
-#: classes/Settings/Rest/Settings.php:532
+#: classes/Settings/Rest/Settings.php:518
 msgid "Verification tag not found on your homepage yet - if you just saved it, clear any caching and try again."
 msgstr ""
 
-#: classes/Settings/Rest/Settings.php:543
+#: classes/Settings/Rest/Settings.php:529
 msgid "Verified - the tag is live on your homepage."
 msgstr ""
 
-#: classes/Settings/Rest/Settings.php:579
+#: classes/Settings/Rest/Settings.php:564
 msgid "AI Crawler Alerts requires VuloPilot Pro, with the AI Crawler Analytics module active."
 msgstr ""
 
-#: classes/Settings/Rest/Settings.php:590
+#: classes/Settings/Rest/Settings.php:575
 msgid "Could not send a test alert."
 msgstr ""
 
-#: classes/Settings/Rest/Settings.php:650
+#: classes/Settings/Rest/Settings.php:630
 msgid "No module id given."
 msgstr ""
 
-#: classes/SiteHealth/BackupHealthScanner.php:44
+#: classes/SiteHealth/BackupHealthScanner.php:42
 msgid "Backup Health"
 msgstr ""
 
-#: classes/SiteHealth/BackupHealthScanner.php:71
+#: classes/SiteHealth/BackupHealthScanner.php:69
 msgid "Your most recent automatic backup failed"
 msgstr ""
 
 #. translators: %s is the real error message the failed backup recorded.
-#: classes/SiteHealth/BackupHealthScanner.php:77
+#: classes/SiteHealth/BackupHealthScanner.php:75
 #, php-format
 msgid "Real error from the last backup run: %s"
 msgstr ""
 
-#: classes/SiteHealth/BackupHealthScanner.php:80
+#: classes/SiteHealth/BackupHealthScanner.php:78
 msgid "The last automatic backup run did not complete successfully. Check the Backups tab and try running one manually."
 msgstr ""
 
-#: classes/SiteHealth/BackupHealthScanner.php:100
+#: classes/SiteHealth/BackupHealthScanner.php:98
 msgid "No automatic backup has completed yet"
 msgstr ""
 
-#: classes/SiteHealth/BackupHealthScanner.php:103
+#: classes/SiteHealth/BackupHealthScanner.php:101
 msgid "Automatic backups are enabled, but none has finished successfully yet. If this persists, check the Backups tab for the real error."
 msgstr ""
 
-#: classes/SiteHealth/BackupHealthScanner.php:113
+#: classes/SiteHealth/BackupHealthScanner.php:111
 msgid "Your automatic backups are overdue"
 msgstr ""
 
 #. translators: %s is the real date/time of the last successful backup.
-#: classes/SiteHealth/BackupHealthScanner.php:118
+#: classes/SiteHealth/BackupHealthScanner.php:116
 #, php-format
 msgid "The last successful backup completed on %s - longer ago than your configured schedule allows for. Check the Backups tab."
 msgstr ""
 
-#: classes/SiteHealth/BackupManager.php:511
+#: classes/SiteHealth/BackupManager.php:499
 msgid "This backup is not available to restore."
 msgstr ""
 
-#: classes/SiteHealth/BackupManager.php:517
-#: classes/SiteHealth/Rest/Backups.php:199
+#: classes/SiteHealth/BackupManager.php:505
+#: classes/SiteHealth/Rest/Backups.php:195
 msgid "This backup's file could not be found on disk."
 msgstr ""
 
-#: classes/SiteHealth/BackupManager.php:523
+#: classes/SiteHealth/BackupManager.php:511
 msgid "Could not create a temporary directory to extract the backup into."
 msgstr ""
 
-#: classes/SiteHealth/BackupManager.php:530
+#: classes/SiteHealth/BackupManager.php:518
 msgid "Could not open this backup's archive."
 msgstr ""
 
 #. translators: %s is the real database error that stopped the restore.
-#: classes/SiteHealth/BackupManager.php:558
+#: classes/SiteHealth/BackupManager.php:546
 #, php-format
 msgid "Restore stopped partway through the database import: %s"
 msgstr ""
 
 #. translators: 1: backup id, 2: real date/time the backup was created.
-#: classes/SiteHealth/BackupManager.php:599
+#: classes/SiteHealth/BackupManager.php:587
 #, php-format
 msgid "Restored the site from backup #%1$d (created %2$s)"
 msgstr ""
 
-#: classes/SiteHealth/BackupManager.php:678
-#: classes/SiteHealth/BackupManager.php:688
-#: classes/SiteHealth/BackupManager.php:706
+#: classes/SiteHealth/BackupManager.php:666
+#: classes/SiteHealth/BackupManager.php:676
+#: classes/SiteHealth/BackupManager.php:694
 msgid "The backup refers to a table outside this site."
 msgstr ""
 
-#: classes/SiteHealth/BackupManager.php:721
+#: classes/SiteHealth/BackupManager.php:709
 msgid "The backup contains a statement this version cannot restore."
 msgstr ""
 
-#: classes/SiteHealth/BackupStorageManager.php:90
+#: classes/SiteHealth/BackupStorageManager.php:87
 msgid "The local backup file was missing before the upload could start."
 msgstr ""
 
-#: classes/SiteHealth/CoreUpdateAvailableRule.php:39
+#: classes/SiteHealth/CoreUpdateAvailableRule.php:38
 msgid "WordPress core update available"
 msgstr ""
 
-#: classes/SiteHealth/CoreUpdateAvailableRule.php:97
+#: classes/SiteHealth/CoreUpdateAvailableRule.php:96
 msgid "Update WordPress core now"
 msgstr ""
 
 #. translators: %s is the finding's own title, e.g. "WordPress core update available (6.9)".
-#: classes/SiteHealth/CoreUpdateAvailableRule.php:100
+#: classes/SiteHealth/CoreUpdateAvailableRule.php:99
 #, php-format
 msgid "Running an outdated core version increases security risk: %s"
 msgstr ""
 
-#: classes/SiteHealth/CronScanner.php:36
+#: classes/SiteHealth/CronScanner.php:33
 msgid "Cron"
 msgstr ""
 
 #. translators: %s is the cron hook name.
-#: classes/SiteHealth/CronScanner.php:68
+#: classes/SiteHealth/CronScanner.php:65
 #, php-format
 msgid "Overdue scheduled event: %s"
 msgstr ""
 
 #. translators: %s is a human-readable time difference, e.g. "2 hours".
-#: classes/SiteHealth/CronScanner.php:75
+#: classes/SiteHealth/CronScanner.php:72
 #, php-format
 msgid "This event was due %s ago and has not run - WP-Cron may not be firing."
 msgstr ""
 
-#: classes/SiteHealth/DatabaseCleanupScanner.php:44
+#: classes/SiteHealth/DatabaseCleanupScanner.php:36
 #: assets/js/index.js:1
 msgid "Database Cleanup"
 msgstr ""
 
 #. translators: 1: number of expired transients, 2: number of excess post revisions.
-#: classes/SiteHealth/DatabaseCleanupScanner.php:70
+#: classes/SiteHealth/DatabaseCleanupScanner.php:62
 #, php-format
 msgid "%1$d expired transients and %2$d excess post revisions"
 msgstr ""
 
-#: classes/SiteHealth/DatabaseCleanupScanner.php:76
+#: classes/SiteHealth/DatabaseCleanupScanner.php:68
 msgid "Expired transients and old post revisions accumulate in the database over time, slowing down queries. Use the \"Database Cleanup\" quick action to remove them."
 msgstr ""
 
-#: classes/SiteHealth/DatabaseCleanupScanner.php:83
+#: classes/SiteHealth/DatabaseCleanupScanner.php:75
 msgid "Delete expired transients with a database-cleanup plugin (e.g. WP-Optimize, Advanced Database Cleaner)."
 msgstr ""
 
-#: classes/SiteHealth/DatabaseCleanupScanner.php:84
+#: classes/SiteHealth/DatabaseCleanupScanner.php:76
 msgid "Limit future post revisions by adding define('WP_POST_REVISIONS', 5); to wp-config.php."
 msgstr ""
 
-#: classes/SiteHealth/DatabaseCleanupScanner.php:85
+#: classes/SiteHealth/DatabaseCleanupScanner.php:77
 msgid "Run a one-time cleanup to remove existing excess revisions."
 msgstr ""
 
-#: classes/SiteHealth/DatabaseCleanupScanner.php:86
+#: classes/SiteHealth/DatabaseCleanupScanner.php:78
 msgid "Schedule periodic database optimization to keep this from building up again."
 msgstr ""
 
-#: classes/SiteHealth/DatabaseScanner.php:37
+#: classes/SiteHealth/DatabaseScanner.php:33
 #: assets/js/index.js:9
 msgid "Database"
 msgstr ""
 
 #. translators: %s is the number of post revisions, formatted with thousands separators.
-#: classes/SiteHealth/DatabaseScanner.php:64
+#: classes/SiteHealth/DatabaseScanner.php:60
 #, php-format
 msgid "%s post revisions stored in the database"
 msgstr ""
 
-#: classes/SiteHealth/DatabaseScanner.php:69
+#: classes/SiteHealth/DatabaseScanner.php:65
 msgid "A large number of stored revisions increases database size and can slow down post-list and search queries."
 msgstr ""
 
-#: classes/SiteHealth/DormantPluginRule.php:39
+#: classes/SiteHealth/DormantPluginRule.php:38
 msgid "Remove or reactivate inactive plugin"
 msgstr ""
 
-#: classes/SiteHealth/DormantPluginRule.php:97
+#: classes/SiteHealth/DormantPluginRule.php:96
 msgid "Clean up an unused plugin"
 msgstr ""
 
 #. translators: %s is the finding's own title, e.g. "Inactive plugin installed: Hello Dolly".
-#: classes/SiteHealth/DormantPluginRule.php:100
+#: classes/SiteHealth/DormantPluginRule.php:99
 #, php-format
 msgid "Inactive plugins still carry known vulnerabilities and disk footprint: %s"
 msgstr ""
 
-#: classes/SiteHealth/HeavyPluginsScanner.php:35
+#: classes/SiteHealth/HeavyPluginsScanner.php:33
 msgid "Heavy Plugins"
 msgstr ""
 
 #. translators: %d is the number of active plugins.
-#: classes/SiteHealth/HeavyPluginsScanner.php:60
+#: classes/SiteHealth/HeavyPluginsScanner.php:58
 #, php-format
 msgid "%d active plugins"
 msgstr ""
 
-#: classes/SiteHealth/HeavyPluginsScanner.php:65
+#: classes/SiteHealth/HeavyPluginsScanner.php:63
 msgid "A large number of active plugins increases the odds of conflicts and can slow down every admin and frontend request."
 msgstr ""
 
-#: classes/SiteHealth/HeavyPluginsScanner.php:71
+#: classes/SiteHealth/HeavyPluginsScanner.php:69
 msgid "Audit your active plugins and deactivate any that are unused or redundant."
 msgstr ""
 
-#: classes/SiteHealth/HeavyPluginsScanner.php:72
+#: classes/SiteHealth/HeavyPluginsScanner.php:70
 msgid "Look for plugins that duplicate functionality (e.g. two SEO plugins) and keep only one."
 msgstr ""
 
-#: classes/SiteHealth/HeavyPluginsScanner.php:73
+#: classes/SiteHealth/HeavyPluginsScanner.php:71
 msgid "Check each plugin's own performance impact with Query Monitor before deciding to keep it."
 msgstr ""
 
-#: classes/SiteHealth/HeavyPluginsScanner.php:74
+#: classes/SiteHealth/HeavyPluginsScanner.php:72
 msgid "Consider a multi-feature plugin instead of several single-purpose ones where it makes sense."
 msgstr ""
 
-#: classes/SiteHealth/PhpWarningScanner.php:35
+#: classes/SiteHealth/PhpWarningScanner.php:34
 msgid "PHP Warning Detection"
 msgstr ""
 
 #. translators: 1: PHP error level (Warning, Notice, etc.), 2: the error message.
-#: classes/SiteHealth/PhpWarningScanner.php:76
+#: classes/SiteHealth/PhpWarningScanner.php:74
 #, php-format
 msgid "PHP %1$s: %2$s"
 msgstr ""
 
-#: classes/SiteHealth/PhpWarningScanner.php:82
+#: classes/SiteHealth/PhpWarningScanner.php:80
 msgid "Found in this site's own debug.log. Recurring warnings can indicate a plugin/theme compatibility issue."
 msgstr ""
 
@@ -2797,12 +2898,12 @@ msgstr ""
 msgid "Inactive plugins still occupy disk space and can carry known vulnerabilities. Remove plugins you no longer use."
 msgstr ""
 
-#: classes/SiteHealth/Rest/Backups.php:155
-#: classes/SiteHealth/Rest/Backups.php:189
+#: classes/SiteHealth/Rest/Backups.php:153
+#: classes/SiteHealth/Rest/Backups.php:185
 msgid "Backup not found."
 msgstr ""
 
-#: classes/SiteHealth/Rest/Backups.php:193
+#: classes/SiteHealth/Rest/Backups.php:189
 msgid "This backup is not ready to download yet."
 msgstr ""
 
@@ -2815,101 +2916,101 @@ msgstr ""
 msgid "Server health check"
 msgstr ""
 
-#: classes/SiteHealth/SiteAvailabilityScanner.php:35
+#: classes/SiteHealth/SiteAvailabilityScanner.php:33
 msgid "Website Availability"
 msgstr ""
 
-#: classes/SiteHealth/SiteAvailabilityScanner.php:63
+#: classes/SiteHealth/SiteAvailabilityScanner.php:61
 msgid "Website is unreachable"
 msgstr ""
 
 #. translators: %s is the underlying connection error message.
-#: classes/SiteHealth/SiteAvailabilityScanner.php:68
+#: classes/SiteHealth/SiteAvailabilityScanner.php:66
 #, php-format
 msgid "A request to the homepage failed: %s"
 msgstr ""
 
 #. translators: %d is the HTTP status code the homepage returned.
-#: classes/SiteHealth/SiteAvailabilityScanner.php:85
+#: classes/SiteHealth/SiteAvailabilityScanner.php:83
 #, php-format
 msgid "Website is returning server errors (HTTP %d)"
 msgstr ""
 
-#: classes/SiteHealth/SiteAvailabilityScanner.php:90
+#: classes/SiteHealth/SiteAvailabilityScanner.php:88
 msgid "The homepage responded with a server error instead of loading successfully - visitors are likely seeing this too."
 msgstr ""
 
 #. translators: %d is the HTTP status code the homepage returned.
-#: classes/SiteHealth/SiteAvailabilityScanner.php:106
+#: classes/SiteHealth/SiteAvailabilityScanner.php:104
 #, php-format
 msgid "Website homepage returned an unexpected status (HTTP %d)"
 msgstr ""
 
-#: classes/SiteHealth/SiteAvailabilityScanner.php:111
+#: classes/SiteHealth/SiteAvailabilityScanner.php:109
 msgid "The homepage did not return a normal success response - worth checking manually."
 msgstr ""
 
-#: classes/SiteHealth/ThemesScanner.php:31
+#: classes/SiteHealth/ThemesScanner.php:30
 msgid "Themes"
 msgstr ""
 
 #. translators: %s is the theme name.
-#: classes/SiteHealth/ThemesScanner.php:61
+#: classes/SiteHealth/ThemesScanner.php:60
 #, php-format
 msgid "Inactive theme installed: %s"
 msgstr ""
 
-#: classes/SiteHealth/ThemesScanner.php:66
+#: classes/SiteHealth/ThemesScanner.php:65
 msgid "Inactive themes still occupy disk space and can carry known vulnerabilities. Remove themes you no longer use."
 msgstr ""
 
-#: classes/SiteHealth/UpdatesScanner.php:31
+#: classes/SiteHealth/UpdatesScanner.php:30
 #: assets/js/index.js:9
 msgid "Updates"
 msgstr ""
 
 #. translators: %s is the available WordPress core version.
-#: classes/SiteHealth/UpdatesScanner.php:56
+#: classes/SiteHealth/UpdatesScanner.php:55
 #, php-format
 msgid "WordPress core update available (%s)"
 msgstr ""
 
-#: classes/SiteHealth/UpdatesScanner.php:61
+#: classes/SiteHealth/UpdatesScanner.php:60
 msgid "Running an outdated core version increases security risk and can cause plugin/theme compatibility issues."
 msgstr ""
 
 #. translators: %s is the plugin name.
-#: classes/SiteHealth/UpdatesScanner.php:74
+#: classes/SiteHealth/UpdatesScanner.php:72
 #, php-format
 msgid "Plugin update available: %s"
 msgstr ""
 
 #. translators: %s is the plugin name.
-#: classes/SiteHealth/UpdatesScanner.php:81
+#: classes/SiteHealth/UpdatesScanner.php:79
 #, php-format
 msgid "A newer version of %s is available. Keeping plugins up to date closes known security holes and fixes bugs."
 msgstr ""
 
 #. translators: %s is the theme name.
-#: classes/SiteHealth/UpdatesScanner.php:94
+#: classes/SiteHealth/UpdatesScanner.php:92
 #, php-format
 msgid "Theme update available: %s"
 msgstr ""
 
 #. translators: %s is the theme name.
-#: classes/SiteHealth/UpdatesScanner.php:101
+#: classes/SiteHealth/UpdatesScanner.php:99
 #, php-format
 msgid "A newer version of %s is available. Keeping themes up to date closes known security holes and fixes bugs."
 msgstr ""
 
-#: classes/SiteHealth/WordPressHealthScanner.php:31
+#: classes/SiteHealth/WordPressHealthScanner.php:30
 #: assets/js/index.js:1
 #: assets/js/index.js:9
 msgid "WordPress"
 msgstr ""
 
 #. translators: %d is how many installed plugins are currently deactivated.
-#: classes/SiteHealth/WordPressHealthScanner.php:105
+#: classes/SiteHealth/WordPressHealthScanner.php:103
 #, php-format
 msgid "%d inactive plugin installed"
 msgid_plural "%d inactive plugins installed"
@@ -2917,109 +3018,125 @@ msgstr[0] ""
 msgstr[1] ""
 
 #. translators: %s is a comma-separated list of inactive plugin names.
-#: classes/SiteHealth/WordPressHealthScanner.php:117
+#: classes/SiteHealth/WordPressHealthScanner.php:115
 #, php-format
 msgid "Deactivated plugins are still real files on disk and still a real attack surface if one has a known vulnerability, even while not running. Review and remove what you no longer use: %s."
 msgstr ""
 
-#: classes/SiteHealth/WordPressHealthScanner.php:162
+#: classes/SiteHealth/WordPressHealthScanner.php:159
 msgid "WordPress health check"
 msgstr ""
 
-#: classes/Utill/Findings.php:168
+#: classes/Utill/Findings.php:179
 msgid "Invalid severity filter."
 msgstr ""
 
-#: classes/Utill/Findings.php:422
+#: classes/Utill/Findings.php:423
 msgid "Invalid finding status."
 msgstr ""
 
-#: classes/Utill/Findings.php:428
+#: classes/Utill/Findings.php:429
 msgid "Finding not found."
 msgstr ""
 
-#: classes/Utill/Findings.php:440
+#: classes/Utill/Findings.php:441
 msgid "Could not update this finding."
 msgstr ""
 
-#: classes/Utill/Findings.php:462
+#: classes/Utill/Findings.php:463
 msgid "Invalid bulk finding status."
 msgstr ""
 
-#: classes/Utill/Findings.php:466
+#: classes/Utill/Findings.php:467
 msgid "No findings selected."
 msgstr ""
 
 #. translators: 1: scanner id, 2: number of findings.
-#: classes/Utill/ScanPersistenceListener.php:182
-#: classes/Utill/ScanPersistenceListener.php:218
+#: classes/Utill/ScanPersistenceListener.php:173
+#: classes/Utill/ScanPersistenceListener.php:209
 #, php-format
 msgid "Scan \"%1$s\" completed with %2$d finding(s)."
 msgstr ""
 
 #. translators: %d is the number of critical findings.
-#: classes/Utill/ScanPersistenceListener.php:273
+#: classes/Utill/ScanPersistenceListener.php:263
 #, php-format
 msgid "VuloPilot found %d critical issue(s)."
 msgstr ""
 
 #. translators: 1: site name, 2: number of critical findings.
-#: classes/Utill/ScanPersistenceListener.php:303
+#: classes/Utill/ScanPersistenceListener.php:291
 #, php-format
 msgid "[%1$s] VuloPilot found %2$d critical issue(s)"
 msgstr ""
 
-#: classes/Utill/UnresolvedCriticalFindingRule.php:33
+#: classes/Utill/UnresolvedCriticalFindingRule.php:32
 msgid "Critical issue needs attention"
 msgstr ""
 
 #. translators: %s is the finding's own title.
-#: classes/Utill/UnresolvedCriticalFindingRule.php:86
+#: classes/Utill/UnresolvedCriticalFindingRule.php:85
 #, php-format
 msgid "Critical: %s"
 msgstr ""
 
-#: classes/Utill/UnresolvedCriticalFindingRule.php:89
+#: classes/Utill/UnresolvedCriticalFindingRule.php:88
 msgid "This was flagged as critical and should be addressed as soon as possible."
 msgstr ""
 
-#: modules/AiCopilot/ActionRunner.php:323
+#: modules/AiCopilot/Abilities.php:37
+msgid "Get AI Action Runs"
+msgstr ""
+
+#: modules/AiCopilot/Abilities.php:38
+msgid "List AI Copilot action runs, optionally by status or action id."
+msgstr ""
+
+#: modules/AiCopilot/Abilities.php:45
+msgid "Run status (e.g. pending_approval, applied, rejected)."
+msgstr ""
+
+#: modules/AiCopilot/Abilities.php:49
+msgid "Registered AI action id."
+msgstr ""
+
+#: modules/AiCopilot/ActionRunner.php:233
 msgid "This action run cannot be rolled back."
 msgstr ""
 
-#: modules/AiCopilot/ActionRunner.php:367
+#: modules/AiCopilot/ActionRunner.php:275
 msgid "This action run is not awaiting approval."
 msgstr ""
 
-#: modules/AiCopilot/Actions/AddSubheadingsAction.php:44
+#: modules/AiCopilot/Actions/AddSubheadingsAction.php:42
 msgid "Add subheadings"
 msgstr ""
 
-#: modules/AiCopilot/Actions/AddSubheadingsAction.php:55
-#: modules/AiCopilot/Actions/AuditContentAction.php:64
-#: modules/AiCopilot/Actions/ImproveReadabilityAction.php:54
-#: modules/AiCopilot/Actions/WritePostContentAction.php:61
+#: modules/AiCopilot/Actions/AddSubheadingsAction.php:53
+#: modules/AiCopilot/Actions/AuditContentAction.php:63
+#: modules/AiCopilot/Actions/ImproveReadabilityAction.php:53
+#: modules/AiCopilot/Actions/WritePostContentAction.php:59
 msgid "post_id must refer to an existing post or page."
 msgstr ""
 
-#: modules/AiCopilot/Actions/AddSubheadingsAction.php:59
+#: modules/AiCopilot/Actions/AddSubheadingsAction.php:57
 msgid "This post already has subheadings - there is nothing to fix."
 msgstr ""
 
-#: modules/AiCopilot/Actions/AddSubheadingsAction.php:103
-#: modules/AiCopilot/Actions/ImproveReadabilityAction.php:99
+#: modules/AiCopilot/Actions/AddSubheadingsAction.php:96
+#: modules/AiCopilot/Actions/ImproveReadabilityAction.php:97
 msgid "The AI returned empty content."
 msgstr ""
 
-#: modules/AiCopilot/Actions/AddSubheadingsAction.php:111
+#: modules/AiCopilot/Actions/AddSubheadingsAction.php:104
 msgid "The AI returned content that looks truncated rather than the original text with headings added - rejected for safety."
 msgstr ""
 
-#: modules/AiCopilot/Actions/AddSubheadingsAction.php:117
+#: modules/AiCopilot/Actions/AddSubheadingsAction.php:110
 msgid "The AI did not add any subheadings - rejected."
 msgstr ""
 
-#: modules/AiCopilot/Actions/AddSubheadingsAction.php:126
+#: modules/AiCopilot/Actions/AddSubheadingsAction.php:119
 msgid "Add subheadings to this content"
 msgstr ""
 
@@ -3027,53 +3144,53 @@ msgstr ""
 msgid "AI content audit"
 msgstr ""
 
-#: modules/AiCopilot/Actions/AuditContentAction.php:68
+#: modules/AiCopilot/Actions/AuditContentAction.php:67
 msgid "This post needs at least some existing content to audit."
 msgstr ""
 
-#: modules/AiCopilot/Actions/AuditContentAction.php:142
+#: modules/AiCopilot/Actions/AuditContentAction.php:130
 msgid "The AI response did not match the expected audit format."
 msgstr ""
 
 #. translators: %s is the post/page title being audited.
-#: modules/AiCopilot/Actions/AuditContentAction.php:161
+#: modules/AiCopilot/Actions/AuditContentAction.php:149
 #, php-format
 msgid "AI content audit for: %s"
 msgstr ""
 
-#: modules/AiCopilot/Actions/DifferentiateDuplicateTitleAction.php:45
+#: modules/AiCopilot/Actions/DifferentiateDuplicateTitleAction.php:41
 msgid "Differentiate duplicate title"
 msgstr ""
 
-#: modules/AiCopilot/Actions/DifferentiateDuplicateTitleAction.php:64
+#: modules/AiCopilot/Actions/DifferentiateDuplicateTitleAction.php:60
 msgid "post_ids must list at least 2 posts sharing a duplicate title."
 msgstr ""
 
-#: modules/AiCopilot/Actions/DifferentiateDuplicateTitleAction.php:72
+#: modules/AiCopilot/Actions/DifferentiateDuplicateTitleAction.php:68
 msgid "The targeted duplicate post no longer exists or is not published."
 msgstr ""
 
-#: modules/AiCopilot/Actions/DifferentiateDuplicateTitleAction.php:86
+#: modules/AiCopilot/Actions/DifferentiateDuplicateTitleAction.php:82
 msgid "None of the other posts sharing this title still exist."
 msgstr ""
 
-#: modules/AiCopilot/Actions/DifferentiateDuplicateTitleAction.php:137
+#: modules/AiCopilot/Actions/DifferentiateDuplicateTitleAction.php:125
 msgid "The AI returned an empty title."
 msgstr ""
 
-#: modules/AiCopilot/Actions/DifferentiateDuplicateTitleAction.php:141
+#: modules/AiCopilot/Actions/DifferentiateDuplicateTitleAction.php:129
 msgid "The AI returned a title that is too long."
 msgstr ""
 
-#: modules/AiCopilot/Actions/DifferentiateDuplicateTitleAction.php:145
+#: modules/AiCopilot/Actions/DifferentiateDuplicateTitleAction.php:133
 msgid "The AI returned the same title unchanged - rejected."
 msgstr ""
 
-#: modules/AiCopilot/Actions/DifferentiateDuplicateTitleAction.php:150
+#: modules/AiCopilot/Actions/DifferentiateDuplicateTitleAction.php:138
 msgid "The AI returned a title that duplicates another post's title - rejected."
 msgstr ""
 
-#: modules/AiCopilot/Actions/DifferentiateDuplicateTitleAction.php:160
+#: modules/AiCopilot/Actions/DifferentiateDuplicateTitleAction.php:148
 msgid "Rewrite this page's duplicated title"
 msgstr ""
 
@@ -3085,368 +3202,368 @@ msgstr ""
 msgid "Please provide a topic of at least 5 characters."
 msgstr ""
 
-#: modules/AiCopilot/Actions/GenerateBlogAction.php:142
+#: modules/AiCopilot/Actions/GenerateBlogAction.php:118
 msgid "The AI response did not match the expected TITLE/BODY format."
 msgstr ""
 
-#: modules/AiCopilot/Actions/GenerateBlogAction.php:148
+#: modules/AiCopilot/Actions/GenerateBlogAction.php:124
 msgid "The AI returned a post body that is too short to be useful."
 msgstr ""
 
 #. translators: %s is the generated post title.
-#: modules/AiCopilot/Actions/GenerateBlogAction.php:159
+#: modules/AiCopilot/Actions/GenerateBlogAction.php:135
 #, php-format
 msgid "Create a new draft post: %s"
 msgstr ""
 
-#: modules/AiCopilot/Actions/ImproveReadabilityAction.php:43
+#: modules/AiCopilot/Actions/ImproveReadabilityAction.php:42
 msgid "Improve readability"
 msgstr ""
 
-#: modules/AiCopilot/Actions/ImproveReadabilityAction.php:58
+#: modules/AiCopilot/Actions/ImproveReadabilityAction.php:57
 msgid "This post has no content to rewrite."
 msgstr ""
 
-#: modules/AiCopilot/Actions/ImproveReadabilityAction.php:107
+#: modules/AiCopilot/Actions/ImproveReadabilityAction.php:105
 msgid "The AI returned content that looks truncated rather than rewritten - rejected for safety."
 msgstr ""
 
-#: modules/AiCopilot/Actions/ImproveReadabilityAction.php:118
+#: modules/AiCopilot/Actions/ImproveReadabilityAction.php:116
 msgid "Rewrite content for readability"
 msgstr ""
 
-#: modules/AiCopilot/Actions/WriteMetaDescriptionAction.php:44
+#: modules/AiCopilot/Actions/WriteMetaDescriptionAction.php:41
 msgid "Write meta description"
 msgstr ""
 
-#: modules/AiCopilot/Actions/WriteMetaDescriptionAction.php:65
+#: modules/AiCopilot/Actions/WriteMetaDescriptionAction.php:62
 msgid "post_id must refer to an existing post, page, or product."
 msgstr ""
 
-#: modules/AiCopilot/Actions/WriteMetaDescriptionAction.php:69
+#: modules/AiCopilot/Actions/WriteMetaDescriptionAction.php:66
 msgid "This post has no content to summarize."
 msgstr ""
 
-#: modules/AiCopilot/Actions/WriteMetaDescriptionAction.php:119
+#: modules/AiCopilot/Actions/WriteMetaDescriptionAction.php:108
 msgid "The AI returned an empty description."
 msgstr ""
 
-#: modules/AiCopilot/Actions/WriteMetaDescriptionAction.php:123
+#: modules/AiCopilot/Actions/WriteMetaDescriptionAction.php:112
 msgid "The AI returned a description that is too long."
 msgstr ""
 
 #. translators: %s is the post/page title.
-#: modules/AiCopilot/Actions/WriteMetaDescriptionAction.php:134
+#: modules/AiCopilot/Actions/WriteMetaDescriptionAction.php:123
 #, php-format
 msgid "Set meta description for %s"
 msgstr ""
 
-#: modules/AiCopilot/Actions/WritePostContentAction.php:39
+#: modules/AiCopilot/Actions/WritePostContentAction.php:38
 msgid "Write content"
 msgstr ""
 
-#: modules/AiCopilot/Actions/WritePostContentAction.php:67
+#: modules/AiCopilot/Actions/WritePostContentAction.php:65
 msgid "Please describe what to write about (at least 5 characters)."
 msgstr ""
 
-#: modules/AiCopilot/Actions/WritePostContentAction.php:113
+#: modules/AiCopilot/Actions/WritePostContentAction.php:108
 msgid "The AI returned content that is too short to be useful."
 msgstr ""
 
 #. translators: %s is the post/page title being written for.
-#: modules/AiCopilot/Actions/WritePostContentAction.php:124
+#: modules/AiCopilot/Actions/WritePostContentAction.php:119
 #, php-format
 msgid "Write content for: %s"
 msgstr ""
 
-#: modules/AiCopilot/ContentCreationOrchestrator.php:48
-msgid "Sorry, I didn't quite catch that - could you rephrase?"
+#: modules/AiCopilot/BlogIntake.php:70
+msgid "Okay, I won't create that blog post."
 msgstr ""
 
-#: modules/AiCopilot/ContentCreationOrchestrator.php:67
-msgid "I couldn't quite tell what to create - could you tell me a bit more about what you'd like?"
+#. translators: %d: minimum number of characters.
+#: modules/AiCopilot/BlogIntake.php:182
+#, php-format
+msgid "Please give a topic of at least %d characters."
 msgstr ""
 
-#: modules/AiCopilot/ContentCreationOrchestrator.php:75
-msgid "Could you tell me a bit more about what you need?"
+#. translators: 1: minimum word count, 2: maximum word count.
+#: modules/AiCopilot/BlogIntake.php:193
+#, php-format
+msgid "Please give a number between %1$d and %2$d, or say \"skip\"."
 msgstr ""
 
-#: modules/AiCopilot/ContentCreationOrchestrator.php:128
+#: modules/AiCopilot/BlogIntake.php:223
+msgid "Sure! What should the blog post be about?"
+msgstr ""
+
+#: modules/AiCopilot/BlogIntake.php:225
+msgid "How many words would you like? (You can say \"skip\".)"
+msgstr ""
+
+#: modules/AiCopilot/BlogIntake.php:227
+msgid "What tone would you prefer? For example: Professional, Friendly, Informative, or Casual. (You can say \"skip\".)"
+msgstr ""
+
+#: modules/AiCopilot/ContentCreationOrchestrator.php:79
 msgid "The content was generated but could not be saved."
 msgstr ""
 
 #. translators: %s is a content type, e.g. "blog post".
-#: modules/AiCopilot/ContentCreationOrchestrator.php:139
+#: modules/AiCopilot/ContentCreationOrchestrator.php:90
 #, php-format
 msgid "Your %s has been created successfully:"
 msgstr ""
 
-#: modules/AiCopilot/Rest/AiActionRuns.php:115
+#: modules/AiCopilot/Rest/AiActionRuns.php:112
 msgid "Enable the AI Copilot module to use AI actions."
 msgstr ""
 
-#: modules/AiCopilot/Rest/AiActionRuns.php:132
+#: modules/AiCopilot/Rest/AiActionRuns.php:129
 msgid "action_id is required."
 msgstr ""
 
-#: modules/AiCopilot/Rest/Copilot.php:136
+#: modules/AiCopilot/Rest/Copilot.php:115
 msgid "Enable the AI Copilot module to use Chat with VuloPilot."
 msgstr ""
 
-#: modules/AiCopilot/Rest/Copilot.php:360
+#: modules/AiCopilot/Rest/Copilot.php:317
 msgid "Conversation not found."
 msgstr ""
 
 #. translators: 1: e.g. "blog post", 2: the requested topic/title.
-#: modules/AiCopilot/Rest/Copilot.php:382
+#: modules/AiCopilot/Rest/Copilot.php:338
 #, php-format
 msgid "I can create a %1$s about \"%2$s\" for you - turn on \"Auto-applies (with approval)\" and ask again to have me create it."
 msgstr ""
 
 #. translators: %s is e.g. "blog post".
-#: modules/AiCopilot/Rest/Copilot.php:390
+#: modules/AiCopilot/Rest/Copilot.php:346
 #, php-format
 msgid "I can create a %s for you - turn on \"Auto-applies (with approval)\" and ask again to have me create it."
 msgstr ""
 
-#. translators: 1: site name, 2: real live site snapshot text.
-#: modules/AiCopilot/Rest/Copilot.php:411
-#, php-format
-msgid ""
-"You are VuloPilot, an AI website copilot embedded in the WordPress plugin VuloPilot, helping the owner of the site \"%1$s\". You help with SEO, performance, security, accessibility, GEO/AI-search visibility, WooCommerce store health, and automations.\n"
-"\n"
-"You can directly create 1 specific kind of real WordPress content (a blog post) - everything else you help with is advice only. For each, collect the fields in order - a field listed after the first one does NOT mean it's skippable; ask about each one, one at a time, unless the user already stated it somewhere in the conversation:\n"
-"1. \"generate-blog\" - a blog post or article. Collect, in order: topic (what it's about), word_count (target word count), tone (e.g. Professional/Friendly/Informative/Casual).\n"
-"\n"
-"Rules for content creation:\n"
-"- Ask for exactly ONE missing field at a time, as a short natural question, following the collection order above. Never ask about a field already given anywhere earlier in this conversation. Never ask more than 3 questions total for one request.\n"
-"- If the user changed their mind about something, use their latest answer, not an earlier one.\n"
-"- A field can be given implicitly inside natural phrasing, not just as an explicit \"field: value\" statement - e.g. \"a casual blog post about X\" already gives both topic and tone; \"500 words\" gives word_count. Recognize these the same as an explicit answer, and don't ask about them again.\n"
-"- If a message already gives multiple fields at once, or a fully-specified first message gives everything needed, only ask about whatever is still actually missing - or proceed straight to ready_action if nothing is missing.\n"
-"\n"
-"Worked example for \"generate-blog\" (the same collect-one-at-a-time pattern):\n"
-"User: \"Write a blog\" → {\"status\":\"question\",\"message\":\"Sure! What should the blog be about?\"}\n"
-"User: \"AI in eCommerce\" → {\"status\":\"question\",\"message\":\"Great - how many words would you like?\"}\n"
-"User: \"1500 words\" → {\"status\":\"question\",\"message\":\"What tone would you prefer? For example: Professional, Friendly, Informative, or Casual.\"}\n"
-"User: \"Professional\" → {\"status\":\"ready_action\",\"action_id\":\"generate-blog\",\"input\":{\"topic\":\"AI in eCommerce\",\"word_count\":1500,\"tone\":\"Professional\"}}\n"
-"\n"
-"For anything that is NOT a blog post request - a general question, SEO/performance/security/accessibility/GEO/WooCommerce/automation advice, editing something that already exists, or any other kind of written content - answer using the real site snapshot below when relevant, and point the user to the specific tab (Issues, Performance, Security, GEO, WooCommerce, Automations) where they can review or fix something themselves. You cannot execute any change on the site yourself beyond the 3 content-creation kinds above - say so plainly if asked to perform some other action, rather than claiming to have done it. Reply in plain text or Markdown, never HTML.\n"
-"\n"
-"Respond with ONLY raw JSON, no markdown fences, no commentary, in exactly one of these shapes:\n"
-"{\"status\":\"question\",\"message\":\"<the single next question, phrased naturally>\"}\n"
-"{\"status\":\"ready_action\",\"action_id\":\"generate-blog\",\"input\":{...only the fields listed above for that action_id...}}\n"
-"{\"status\":\"respond\",\"message\":\"<a direct answer, or other written content the user still has to copy/paste themselves>\"}%2$s"
-msgstr ""
-
-#. translators: 1: scanner label, 2: category, 3: open finding count, 4: severity
-#: modules/AiCopilot/Rest/Copilot.php:520
-#, php-format
-msgid "- Finding group \"%1$s\" (%2$s): %3$d open, severity %4$s."
-msgstr ""
-
-#. translators: 1: automation name, 2: status (enabled/disabled), 3: trigger type
-#: modules/AiCopilot/Rest/Copilot.php:536
-#, php-format
-msgid "- Automation \"%1$s\": %2$s, trigger %3$s."
-msgstr ""
-
-#. translators: 1: original filename, 2: mime type
-#: modules/AiCopilot/Rest/Copilot.php:574
-#, php-format
-msgid "- Attached file \"%1$s\" (%2$s) - its content can't be read, only the filename is available."
-msgstr ""
-
-#. translators: 1: original filename, 2: mime type
-#: modules/AiCopilot/Rest/Copilot.php:588
-#, php-format
-msgid "- Attached file \"%1$s\" (%2$s) - could not be read."
-msgstr ""
-
-#. translators: 1: original filename, 2: mime type, 3: the file's own text content, 4: truncation note or empty string
-#: modules/AiCopilot/Rest/Copilot.php:600
-#, php-format
-msgid ""
-"- Attached file \"%1$s\" (%2$s):\n"
-"%3$s%4$s"
-msgstr ""
-
-#: modules/AiCopilot/Rest/Copilot.php:622
-#: modules/TechnicalSeo/Scanners/SeoScanner.php:46
+#: modules/AiCopilot/Rest/Copilot.php:522
+#: modules/TechnicalSeo/Scanners/SeoScanner.php:45
 #: assets/js/index.js:1
 #: assets/js/index.js:9
 #: assets/js/post-editor.js:1
 msgid "SEO"
 msgstr ""
 
-#: modules/AiCopilot/Rest/Copilot.php:626
+#: modules/AiCopilot/Rest/Copilot.php:526
 msgid "GEO/AI-search"
 msgstr ""
 
-#: modules/AiCopilot/Rest/Copilot.php:630
+#: modules/AiCopilot/Rest/Copilot.php:530
 #: assets/js/index.js:1
 msgid "WooCommerce"
 msgstr ""
 
-#: modules/AiCopilot/Services/AiCreditGatewayClient.php:94
-msgid "The AI provider on VuloCloud is not set up yet, so this request cannot run. This is a VuloCloud setup issue rather than a problem with your site; contact support if it continues."
+#: modules/BrandVisibility/Abilities.php:37
+msgid "Get Brand Score"
 msgstr ""
 
-#: modules/AiCopilot/Services/AiCreditGatewayClient.php:102
-msgid "The AI provider is temporarily unavailable. Please try again in a minute."
+#: modules/BrandVisibility/Abilities.php:38
+msgid "Brand visibility score."
 msgstr ""
 
-#: modules/BrandVisibility/Scanners/AboutPageAnalysisScanner.php:49
+#: modules/BrandVisibility/Scanners/AboutPageAnalysisScanner.php:42
 msgid "About Page Analysis"
 msgstr ""
 
-#: modules/BrandVisibility/Scanners/AboutPageAnalysisScanner.php:85
+#: modules/BrandVisibility/Scanners/AboutPageAnalysisScanner.php:78
 msgid "enough real content"
 msgstr ""
 
-#: modules/BrandVisibility/Scanners/AboutPageAnalysisScanner.php:88
+#: modules/BrandVisibility/Scanners/AboutPageAnalysisScanner.php:81
 msgid "a visible contact signal"
 msgstr ""
 
 #. translators: %s is a comma-separated list of what the About page is missing.
-#: modules/BrandVisibility/Scanners/AboutPageAnalysisScanner.php:95
+#: modules/BrandVisibility/Scanners/AboutPageAnalysisScanner.php:88
 #, php-format
 msgid "About page is missing %s"
 msgstr ""
 
-#: modules/BrandVisibility/Scanners/AboutPageAnalysisScanner.php:100
+#: modules/BrandVisibility/Scanners/AboutPageAnalysisScanner.php:93
 msgid "This site has an About page, but it doesn't yet give AI answer engines or readers enough real substance (word count, contact details) to establish it as a genuine trust signal."
 msgstr ""
 
-#: modules/BrandVisibility/Scanners/AuthorSchemaScanner.php:49
+#: modules/BrandVisibility/Scanners/AuthorSchemaScanner.php:45
 #: assets/js/index.js:5
 msgid "Author Schema"
 msgstr ""
 
 #. translators: %s is the post/page title.
-#: modules/BrandVisibility/Scanners/AuthorSchemaScanner.php:84
+#: modules/BrandVisibility/Scanners/AuthorSchemaScanner.php:80
 #, php-format
 msgid "No author schema found: %s"
 msgstr ""
 
-#: modules/BrandVisibility/Scanners/AuthorSchemaScanner.php:89
+#: modules/BrandVisibility/Scanners/AuthorSchemaScanner.php:85
 msgid "A Person reference in this content's structured data is what AI answer engines and Knowledge Panels read to resolve who wrote it - separate from a human-visible author bio, which alone isn't machine-readable."
 msgstr ""
 
-#: modules/BrandVisibility/Scanners/OrganizationSchemaScanner.php:39
+#: modules/BrandVisibility/Scanners/OrganizationSchemaScanner.php:38
 msgid "Organization Schema"
 msgstr ""
 
-#: modules/BrandVisibility/Scanners/OrganizationSchemaScanner.php:77
+#: modules/BrandVisibility/Scanners/OrganizationSchemaScanner.php:76
 msgid "No Organization schema found on the homepage"
 msgstr ""
 
-#: modules/BrandVisibility/Scanners/OrganizationSchemaScanner.php:80
+#: modules/BrandVisibility/Scanners/OrganizationSchemaScanner.php:79
 msgid "Organization (or LocalBusiness) structured data is what AI answer engines and Google Knowledge Panels use to resolve \"who runs this site\" as a real-world entity. Its absence makes this site harder to confidently identify and cite."
 msgstr ""
 
-#: modules/ContentOptimization/ContentAnalyzer.php:59
-#: modules/GeoAnalysis/GeoAnalyzer.php:69
+#: modules/ContentOptimization/Abilities.php:37
+msgid "Get Content Score"
+msgstr ""
+
+#: modules/ContentOptimization/Abilities.php:38
+msgid "Content quality score across the site."
+msgstr ""
+
+#: modules/ContentOptimization/ContentAnalyzer.php:54
+#: modules/GeoAnalysis/GeoAnalyzer.php:63
 msgid "post_id must refer to a published post or page."
 msgstr ""
 
-#: modules/ContentOptimization/ContentAnalyzer.php:175
+#: modules/ContentOptimization/ContentAnalyzer.php:158
 msgid "The AI did not return a usable Content Intelligence analysis."
 msgstr ""
 
-#: modules/ContentOptimization/ContentAnalyzer.php:181
+#: modules/ContentOptimization/ContentAnalyzer.php:164
 msgid "The AI response is missing a valid \"topic_authority\" score."
 msgstr ""
 
-#: modules/ContentOptimization/ContentAnalyzer.php:192
-#: modules/GeoAnalysis/GeoAnalyzer.php:467
+#: modules/ContentOptimization/ContentAnalyzer.php:175
+#: modules/GeoAnalysis/GeoAnalyzer.php:411
 msgid "The AI did not return any suggestions."
 msgstr ""
 
-#: modules/ContentOptimization/Scanners/ReadabilityScanner.php:55
+#: modules/ContentOptimization/Scanners/ReadabilityScanner.php:48
 #: assets/js/index.js:1
 #: assets/js/index.js:17
 msgid "Readability"
 msgstr ""
 
 #. translators: 1: post/page title, 2: Flesch Reading Ease score (0-100).
-#: modules/ContentOptimization/Scanners/ReadabilityScanner.php:109
+#: modules/ContentOptimization/Scanners/ReadabilityScanner.php:102
 #, php-format
 msgid "Difficult to read (score %2$d/100): %1$s"
 msgstr ""
 
-#: modules/ContentOptimization/Scanners/ReadabilityScanner.php:115
+#: modules/ContentOptimization/Scanners/ReadabilityScanner.php:108
 msgid "Shorter sentences and simpler words generally read easier for both visitors and AI systems summarizing this content."
 msgstr ""
 
+#: modules/GeoAnalysis/Abilities.php:37
+msgid "Get GEO Score"
+msgstr ""
+
+#: modules/GeoAnalysis/Abilities.php:38
+msgid "Generative Engine Optimization (AI search visibility) score."
+msgstr ""
+
+#: modules/GeoAnalysis/Abilities.php:55
+msgid "Get GEO Top Pages"
+msgstr ""
+
+#: modules/GeoAnalysis/Abilities.php:56
+msgid "Best and worst pages by open GEO findings."
+msgstr ""
+
+#: modules/GeoAnalysis/Abilities.php:63
+msgid "How many pages per list (1-20). Defaults to 5."
+msgstr ""
+
+#: modules/GeoAnalysis/Abilities.php:67
+msgid "Pass \"all\" to rank by open findings of any category."
+msgstr ""
+
+#: modules/GeoAnalysis/Abilities.php:71
+msgid "Comma-separated scanner ids to scope by."
+msgstr ""
+
+#: modules/GeoAnalysis/Abilities.php:85
+#: assets/js/index.js:1
+msgid "Generate llms.txt"
+msgstr ""
+
+#: modules/GeoAnalysis/Abilities.php:86
+msgid "Generate fresh llms.txt content for this site (returned, not written)."
+msgstr ""
+
 #. translators: 1: previous score, 2: new score, 3: post title.
-#: modules/GeoAnalysis/GeoAnalyzer.php:142
+#: modules/GeoAnalysis/GeoAnalyzer.php:129
 #, php-format
 msgid "The GEO score for \"%3$s\" fell from %1$d to %2$d."
 msgstr ""
 
 #. translators: 1: site name, 2: post title.
-#: modules/GeoAnalysis/GeoAnalyzer.php:170
+#: modules/GeoAnalysis/GeoAnalyzer.php:157
 #, php-format
 msgid "[%1$s] GEO score dropped for \"%2$s\""
 msgstr ""
 
-#: modules/GeoAnalysis/GeoAnalyzer.php:438
+#: modules/GeoAnalysis/GeoAnalyzer.php:382
 msgid "The AI did not return a usable GEO analysis."
 msgstr ""
 
 #. translators: %s is the missing/invalid score dimension.
-#: modules/GeoAnalysis/GeoAnalyzer.php:450
+#: modules/GeoAnalysis/GeoAnalyzer.php:394
 #, php-format
 msgid "The AI response is missing a valid \"%s\" score."
 msgstr ""
 
 #. translators: 1: real number of pages not updated since the "stale after" window, 2: real total published pages checked.
-#: modules/GeoAnalysis/Rest/Geo.php:286
+#: modules/GeoAnalysis/Rest/Geo.php:284
 #, php-format
 msgid "%1$d of %2$d pages haven’t been updated in a while"
 msgid_plural "%1$d of %2$d pages haven’t been updated in a while"
 msgstr[0] ""
 msgstr[1] ""
 
-#: modules/GeoAnalysis/Scanners/GeoAuthorInfoScanner.php:43
+#: modules/GeoAnalysis/Scanners/GeoAuthorInfoScanner.php:42
 msgid "Author Information"
 msgstr ""
 
 #. translators: %s is the post/page title.
-#: modules/GeoAnalysis/Scanners/GeoAuthorInfoScanner.php:80
+#: modules/GeoAnalysis/Scanners/GeoAuthorInfoScanner.php:79
 #, php-format
 msgid "No author bio available: %s"
 msgstr ""
 
-#: modules/GeoAnalysis/Scanners/GeoAuthorInfoScanner.php:85
+#: modules/GeoAnalysis/Scanners/GeoAuthorInfoScanner.php:84
 msgid "AI answer engines weigh visible author expertise when deciding whether to cite a source. A missing author bio gives them nothing to evaluate."
 msgstr ""
 
-#: modules/GeoAnalysis/Scanners/GeoChunkingScanner.php:44
+#: modules/GeoAnalysis/Scanners/GeoChunkingScanner.php:43
 msgid "Chunking"
 msgstr ""
 
 #. translators: %s is the post/page title.
-#: modules/GeoAnalysis/Scanners/GeoChunkingScanner.php:81
+#: modules/GeoAnalysis/Scanners/GeoChunkingScanner.php:80
 #, php-format
 msgid "Contains an overly long paragraph: %s"
 msgstr ""
 
-#: modules/GeoAnalysis/Scanners/GeoChunkingScanner.php:86
+#: modules/GeoAnalysis/Scanners/GeoChunkingScanner.php:85
 msgid "AI answer engines retrieve and quote content in small chunks. A very long paragraph is harder to cleanly extract than the same information split into shorter ones."
 msgstr ""
 
-#: modules/GeoAnalysis/Scanners/GeoCitationOpportunityScanner.php:51
+#: modules/GeoAnalysis/Scanners/GeoCitationOpportunityScanner.php:48
 msgid "Citation Opportunities"
 msgstr ""
 
 #. translators: %s is the post/page title.
-#: modules/GeoAnalysis/Scanners/GeoCitationOpportunityScanner.php:99
+#: modules/GeoAnalysis/Scanners/GeoCitationOpportunityScanner.php:96
 #, php-format
 msgid "Statistic mentioned with no source link: %s"
 msgstr ""
 
-#: modules/GeoAnalysis/Scanners/GeoCitationOpportunityScanner.php:104
+#: modules/GeoAnalysis/Scanners/GeoCitationOpportunityScanner.php:101
 msgid "This content mentions a statistic or study but links to no external source. AI answer engines favor content that backs up factual claims with citations."
 msgstr ""
 
@@ -3464,364 +3581,388 @@ msgstr ""
 msgid "This content has no author bio and has never been updated since it was first published - two of the clearest signals AI engines use to judge expertise and trustworthiness are both missing."
 msgstr ""
 
-#: modules/GeoAnalysis/Scanners/GeoEntityNamingConsistencyScanner.php:43
+#: modules/GeoAnalysis/Scanners/GeoEntityNamingConsistencyScanner.php:42
 msgid "Entity Naming Consistency"
 msgstr ""
 
 #. translators: %s is the post/page title.
-#: modules/GeoAnalysis/Scanners/GeoEntityNamingConsistencyScanner.php:86
+#: modules/GeoAnalysis/Scanners/GeoEntityNamingConsistencyScanner.php:85
 #, php-format
 msgid "Brand name written inconsistently: %s"
 msgstr ""
 
 #. translators: %s is a comma-separated list of the different spellings found.
-#: modules/GeoAnalysis/Scanners/GeoEntityNamingConsistencyScanner.php:93
+#: modules/GeoAnalysis/Scanners/GeoEntityNamingConsistencyScanner.php:92
 #, php-format
 msgid "This content refers to the site as multiple different spellings/casings (%s). AI answer engines resolve entities more reliably when a brand name is written the exact same way throughout."
 msgstr ""
 
-#: modules/GeoAnalysis/Scanners/GeoFaqOpportunityScanner.php:44
+#: modules/GeoAnalysis/Scanners/GeoFaqOpportunityScanner.php:43
 msgid "FAQ Opportunities"
 msgstr ""
 
 #. translators: %s is the post/page title.
-#: modules/GeoAnalysis/Scanners/GeoFaqOpportunityScanner.php:85
+#: modules/GeoAnalysis/Scanners/GeoFaqOpportunityScanner.php:84
 #, php-format
 msgid "No FAQ-style questions found: %s"
 msgstr ""
 
-#: modules/GeoAnalysis/Scanners/GeoFaqOpportunityScanner.php:90
+#: modules/GeoAnalysis/Scanners/GeoFaqOpportunityScanner.php:89
 msgid "AI answer engines frequently lift direct question/answer pairs into their responses. Content with no question-phrased headings is less likely to be cited this way."
 msgstr ""
 
-#: modules/GeoAnalysis/Scanners/GeoSemanticStructureScanner.php:44
+#: modules/GeoAnalysis/Scanners/GeoSemanticStructureScanner.php:42
 msgid "Semantic Structure"
 msgstr ""
 
 #. translators: %s is the post/page title.
-#: modules/GeoAnalysis/Scanners/GeoSemanticStructureScanner.php:86
+#: modules/GeoAnalysis/Scanners/GeoSemanticStructureScanner.php:84
 #, php-format
 msgid "Heading levels skip a level: %s"
 msgstr ""
 
-#: modules/GeoAnalysis/Scanners/GeoSemanticStructureScanner.php:91
+#: modules/GeoAnalysis/Scanners/GeoSemanticStructureScanner.php:89
 msgid "A heading jumps more than one level deeper than the previous one (e.g. an H2 followed directly by an H4). This breaks the document outline AI systems and screen readers rely on to understand structure."
 msgstr ""
 
-#: modules/GeoAnalysis/Scanners/GeoSummaryBlockScanner.php:51
+#: modules/GeoAnalysis/Scanners/GeoSummaryBlockScanner.php:48
 msgid "Summary Blocks"
 msgstr ""
 
 #. translators: %s is the post/page title.
-#: modules/GeoAnalysis/Scanners/GeoSummaryBlockScanner.php:97
+#: modules/GeoAnalysis/Scanners/GeoSummaryBlockScanner.php:94
 #, php-format
 msgid "No upfront summary found: %s"
 msgstr ""
 
-#: modules/GeoAnalysis/Scanners/GeoSummaryBlockScanner.php:102
+#: modules/GeoAnalysis/Scanners/GeoSummaryBlockScanner.php:99
 msgid "AI answer engines favor content with a short summary or key-takeaways list near the top, rather than requiring the full article to be read first."
 msgstr ""
 
-#: modules/GeoAnalysis/Scanners/GeoTrustSignalsScanner.php:44
+#: modules/GeoAnalysis/Scanners/GeoTrustSignalsScanner.php:40
 #: assets/js/index.js:5
 msgid "Trust Signals"
 msgstr ""
 
-#: modules/GeoAnalysis/Scanners/GeoTrustSignalsScanner.php:68
+#: modules/GeoAnalysis/Scanners/GeoTrustSignalsScanner.php:64
 msgid "an About page"
 msgstr ""
 
-#: modules/GeoAnalysis/Scanners/GeoTrustSignalsScanner.php:71
+#: modules/GeoAnalysis/Scanners/GeoTrustSignalsScanner.php:67
 msgid "a Contact page"
 msgstr ""
 
 #. translators: %s is a comma-separated list of missing page types.
-#: modules/GeoAnalysis/Scanners/GeoTrustSignalsScanner.php:77
+#: modules/GeoAnalysis/Scanners/GeoTrustSignalsScanner.php:73
 #, php-format
 msgid "Site is missing %s"
 msgstr ""
 
-#: modules/GeoAnalysis/Scanners/GeoTrustSignalsScanner.php:82
+#: modules/GeoAnalysis/Scanners/GeoTrustSignalsScanner.php:78
 msgid "AI answer engines and readers both use \"who is behind this site\" pages as a baseline trust signal before treating content as citable."
 msgstr ""
 
-#: modules/KnowledgeGraph/EntityExtractor.php:185
+#: modules/KnowledgeGraph/Abilities.php:37
+msgid "Get Entities"
+msgstr ""
+
+#: modules/KnowledgeGraph/Abilities.php:38
+msgid "Entities VuloPilot extracted from the site: organization, people, products, categories, and contact details."
+msgstr ""
+
+#: modules/KnowledgeGraph/EntityExtractor.php:176
 msgid "Website title"
 msgstr ""
 
-#: modules/KnowledgeGraph/EntityExtractor.php:192
+#: modules/KnowledgeGraph/EntityExtractor.php:183
 #: assets/js/index.js:5
 msgid "Organization schema"
 msgstr ""
 
-#: modules/KnowledgeGraph/EntityExtractor.php:199
+#: modules/KnowledgeGraph/EntityExtractor.php:190
 msgid "About page"
 msgstr ""
 
 #. translators: 1: real business name, 2: real service or product name.
-#: modules/KnowledgeGraph/EntityExtractor.php:297
-#: modules/KnowledgeGraph/EntityExtractor.php:306
+#: modules/KnowledgeGraph/EntityExtractor.php:284
+#: modules/KnowledgeGraph/EntityExtractor.php:293
 #, php-format
 msgid "%1$s offers %2$s"
 msgstr ""
 
 #. translators: 1: real business name, 2: real published category name.
-#: modules/KnowledgeGraph/EntityExtractor.php:321
+#: modules/KnowledgeGraph/EntityExtractor.php:307
 #, php-format
 msgid "%1$s publishes content about %2$s"
 msgstr ""
 
-#: modules/KnowledgeGraph/EntityExtractor.php:526
+#: modules/KnowledgeGraph/EntityExtractor.php:510
 msgid "Missing product image"
 msgstr ""
 
-#: modules/KnowledgeGraph/EntityExtractor.php:530
+#: modules/KnowledgeGraph/EntityExtractor.php:514
 msgid "Missing SKU"
 msgstr ""
 
-#: modules/KnowledgeGraph/EntityExtractor.php:537
+#: modules/KnowledgeGraph/EntityExtractor.php:521
 msgid "Missing product description"
 msgstr ""
 
-#: modules/KnowledgeGraph/EntityExtractor.php:541
+#: modules/KnowledgeGraph/EntityExtractor.php:525
 msgid "Missing price"
 msgstr ""
 
-#: modules/TechnicalSeo/Rest/Seo.php:193
-#: modules/TechnicalSeo/Rest/Seo.php:537
+#: modules/TechnicalSeo/Abilities.php:37
+msgid "Get SEO Score"
+msgstr ""
+
+#: modules/TechnicalSeo/Abilities.php:38
+msgid "Technical SEO score with per-category breakdown."
+msgstr ""
+
+#: modules/TechnicalSeo/Abilities.php:55
+msgid "Get Pages Needing SEO Attention"
+msgstr ""
+
+#: modules/TechnicalSeo/Abilities.php:56
+msgid "Pages ranked by open technical-SEO findings, with a 7-day delta."
+msgstr ""
+
+#: modules/TechnicalSeo/Rest/Seo.php:188
+#: modules/TechnicalSeo/Rest/Seo.php:552
 msgid "That page could not be found."
 msgstr ""
 
-#: modules/TechnicalSeo/Rest/Seo.php:583
+#: modules/TechnicalSeo/Rest/Seo.php:598
 msgid "Title Tag"
 msgstr ""
 
-#: modules/TechnicalSeo/Rest/Seo.php:587
+#: modules/TechnicalSeo/Rest/Seo.php:602
 msgid "Missing title tag"
 msgstr ""
 
-#: modules/TechnicalSeo/Rest/Seo.php:600
+#: modules/TechnicalSeo/Rest/Seo.php:615
 msgid "Duplicate title - shared with another published page"
 msgstr ""
 
-#: modules/TechnicalSeo/Rest/Seo.php:603
+#: modules/TechnicalSeo/Rest/Seo.php:618
 msgid "Title tag is unique and set"
 msgstr ""
 
-#: modules/TechnicalSeo/Rest/Seo.php:611
+#: modules/TechnicalSeo/Rest/Seo.php:626
 #: assets/js/post-editor.js:1
 msgid "Meta Description"
 msgstr ""
 
 #. translators: %d: real current character count.
-#: modules/TechnicalSeo/Rest/Seo.php:626
+#: modules/TechnicalSeo/Rest/Seo.php:641
 #, php-format
 msgid "Too short (%d characters)"
 msgstr ""
 
-#: modules/TechnicalSeo/Rest/Seo.php:632
+#: modules/TechnicalSeo/Rest/Seo.php:647
 msgid "Meta description is set"
 msgstr ""
 
-#: modules/TechnicalSeo/Rest/Seo.php:642
+#: modules/TechnicalSeo/Rest/Seo.php:657
 msgid "H1 Heading"
 msgstr ""
 
-#: modules/TechnicalSeo/Rest/Seo.php:645
+#: modules/TechnicalSeo/Rest/Seo.php:660
 msgid "H1 tag found"
 msgstr ""
 
-#: modules/TechnicalSeo/Rest/Seo.php:648
+#: modules/TechnicalSeo/Rest/Seo.php:663
 msgid "H1 tag not found"
 msgstr ""
 
-#: modules/TechnicalSeo/Rest/Seo.php:656
+#: modules/TechnicalSeo/Rest/Seo.php:671
 msgid "Subheadings"
 msgstr ""
 
-#: modules/TechnicalSeo/Rest/Seo.php:659
+#: modules/TechnicalSeo/Rest/Seo.php:674
 msgid "H2, H3+ tags found"
 msgstr ""
 
-#: modules/TechnicalSeo/Rest/Seo.php:662
+#: modules/TechnicalSeo/Rest/Seo.php:677
 msgid "No subheadings found"
 msgstr ""
 
 #. translators: 1: real word count, 2: real minimum recommended word count.
-#: modules/TechnicalSeo/Rest/Seo.php:683
+#: modules/TechnicalSeo/Rest/Seo.php:698
 #, php-format
 msgid "Thin content (%1$d words, recommended %2$d+)"
 msgstr ""
 
-#: modules/TechnicalSeo/Rest/Seo.php:690
+#: modules/TechnicalSeo/Rest/Seo.php:705
 msgid "Word count is good"
 msgstr ""
 
-#: modules/TechnicalSeo/Rest/Seo.php:700
-#: modules/TechnicalSeo/Scanners/ImagesScanner.php:41
+#: modules/TechnicalSeo/Rest/Seo.php:715
+#: modules/TechnicalSeo/Scanners/ImagesScanner.php:39
 #: assets/js/index.js:1
 #: assets/js/index.js:9
 msgid "Images"
 msgstr ""
 
-#: modules/TechnicalSeo/Rest/Seo.php:703
+#: modules/TechnicalSeo/Rest/Seo.php:718
 msgid "No images in this content"
 msgstr ""
 
 #. translators: %d: real number of images missing alt text on this page.
-#: modules/TechnicalSeo/Rest/Seo.php:724
+#: modules/TechnicalSeo/Rest/Seo.php:739
 #, php-format
 msgid "%d image missing alt text"
 msgid_plural "%d images missing alt text"
 msgstr[0] ""
 msgstr[1] ""
 
-#: modules/TechnicalSeo/Rest/Seo.php:730
+#: modules/TechnicalSeo/Rest/Seo.php:745
 msgid "All images have alt text"
 msgstr ""
 
-#: modules/TechnicalSeo/Rest/Seo.php:744
+#: modules/TechnicalSeo/Rest/Seo.php:759
 msgid "Featured Image"
 msgstr ""
 
-#: modules/TechnicalSeo/Rest/Seo.php:747
+#: modules/TechnicalSeo/Rest/Seo.php:762
 msgid "Featured image is set"
 msgstr ""
 
-#: modules/TechnicalSeo/Rest/Seo.php:750
+#: modules/TechnicalSeo/Rest/Seo.php:765
 msgid "No featured image set"
 msgstr ""
 
-#: modules/TechnicalSeo/Rest/Seo.php:760
-#: modules/TechnicalSeo/Scanners/BrokenLinksScanner.php:63
+#: modules/TechnicalSeo/Rest/Seo.php:775
+#: modules/TechnicalSeo/Scanners/BrokenLinksScanner.php:54
 #: assets/js/index.js:1
 #: assets/js/index.js:5
 msgid "Broken Links"
 msgstr ""
 
 #. translators: %d: real number of broken links found on this page by the Broken Links scanner.
-#: modules/TechnicalSeo/Rest/Seo.php:781
+#: modules/TechnicalSeo/Rest/Seo.php:796
 #, php-format
 msgid "%d broken internal link found"
 msgid_plural "%d broken internal links found"
 msgstr[0] ""
 msgstr[1] ""
 
-#: modules/TechnicalSeo/Rest/Seo.php:787
+#: modules/TechnicalSeo/Rest/Seo.php:802
 msgid "No broken links found"
 msgstr ""
 
-#: modules/TechnicalSeo/Rest/Seo.php:803
+#: modules/TechnicalSeo/Rest/Seo.php:818
 msgid "Orphan Page"
 msgstr ""
 
-#: modules/TechnicalSeo/Rest/Seo.php:820
+#: modules/TechnicalSeo/Rest/Seo.php:835
 msgid "0 internal links point to this page - nothing else links to it"
 msgstr ""
 
-#: modules/TechnicalSeo/Rest/Seo.php:824
+#: modules/TechnicalSeo/Rest/Seo.php:839
 msgid "At least one other page links to this page"
 msgstr ""
 
-#: modules/TechnicalSeo/Rest/Seo.php:832
+#: modules/TechnicalSeo/Rest/Seo.php:847
 msgid "Canonical"
 msgstr ""
 
-#: modules/TechnicalSeo/Rest/Seo.php:835
-#: modules/TechnicalSeo/Rest/Seo.php:871
-#: modules/TechnicalSeo/Rest/Seo.php:889
+#: modules/TechnicalSeo/Rest/Seo.php:850
+#: modules/TechnicalSeo/Rest/Seo.php:886
+#: modules/TechnicalSeo/Rest/Seo.php:904
 msgid "Could not fetch this page to check"
 msgstr ""
 
-#: modules/TechnicalSeo/Rest/Seo.php:839
+#: modules/TechnicalSeo/Rest/Seo.php:854
 msgid "Canonical is set"
 msgstr ""
 
-#: modules/TechnicalSeo/Rest/Seo.php:842
+#: modules/TechnicalSeo/Rest/Seo.php:857
 msgid "No canonical URL tag found"
 msgstr ""
 
-#: modules/TechnicalSeo/Rest/Seo.php:850
+#: modules/TechnicalSeo/Rest/Seo.php:865
 msgid "Indexability"
 msgstr ""
 
-#: modules/TechnicalSeo/Rest/Seo.php:853
+#: modules/TechnicalSeo/Rest/Seo.php:868
 msgid "Not published"
 msgstr ""
 
-#: modules/TechnicalSeo/Rest/Seo.php:857
+#: modules/TechnicalSeo/Rest/Seo.php:872
 msgid "Site is set to discourage search engines (Settings → Reading)"
 msgstr ""
 
-#: modules/TechnicalSeo/Rest/Seo.php:860
+#: modules/TechnicalSeo/Rest/Seo.php:875
 msgid "Content is indexed"
 msgstr ""
 
-#: modules/TechnicalSeo/Rest/Seo.php:868
-#: modules/TechnicalSeo/Scanners/StructuredDataValidationScanner.php:39
+#: modules/TechnicalSeo/Rest/Seo.php:883
+#: modules/TechnicalSeo/Scanners/StructuredDataValidationScanner.php:38
 msgid "Structured Data"
 msgstr ""
 
-#: modules/TechnicalSeo/Rest/Seo.php:875
+#: modules/TechnicalSeo/Rest/Seo.php:890
 msgid "Structured data (JSON-LD) found"
 msgstr ""
 
-#: modules/TechnicalSeo/Rest/Seo.php:878
+#: modules/TechnicalSeo/Rest/Seo.php:893
 msgid "No schema detected"
 msgstr ""
 
-#: modules/TechnicalSeo/Rest/Seo.php:886
+#: modules/TechnicalSeo/Rest/Seo.php:901
 #: assets/js/index.js:1
 #: assets/js/index.js:9
 msgid "Social Metadata"
 msgstr ""
 
-#: modules/TechnicalSeo/Rest/Seo.php:902
+#: modules/TechnicalSeo/Rest/Seo.php:917
 msgid "Open Graph tags found"
 msgstr ""
 
 #. translators: %s: real comma-separated list of missing Open Graph properties.
-#: modules/TechnicalSeo/Rest/Seo.php:911
+#: modules/TechnicalSeo/Rest/Seo.php:926
 #, php-format
 msgid "Open Graph tags missing: %s"
 msgstr ""
 
-#: modules/TechnicalSeo/Scanners/AiCrawlerBlockedPagesScanner.php:46
+#: modules/TechnicalSeo/Scanners/AiCrawlerBlockedPagesScanner.php:45
 msgid "AI Crawler Blocked Pages"
 msgstr ""
 
 #. translators: 1: bot display name, 2: post/page title.
-#: modules/TechnicalSeo/Scanners/AiCrawlerBlockedPagesScanner.php:105
+#: modules/TechnicalSeo/Scanners/AiCrawlerBlockedPagesScanner.php:103
 #, php-format
 msgid "%1$s is blocked from crawling: %2$s"
 msgstr ""
 
 #. translators: %s is the bot display name.
-#: modules/TechnicalSeo/Scanners/AiCrawlerBlockedPagesScanner.php:113
+#: modules/TechnicalSeo/Scanners/AiCrawlerBlockedPagesScanner.php:111
 #, php-format
 msgid "robots.txt disallows this page for %s specifically, so it won't be read for AI answers even though the rest of the site may be reachable."
 msgstr ""
 
-#: modules/TechnicalSeo/Scanners/BrokenImagesScanner.php:64
+#: modules/TechnicalSeo/Scanners/BrokenImagesScanner.php:54
 #: assets/js/index.js:1
 msgid "Broken Images"
 msgstr ""
 
 #. translators: %s is the broken image URL.
-#: modules/TechnicalSeo/Scanners/BrokenImagesScanner.php:111
+#: modules/TechnicalSeo/Scanners/BrokenImagesScanner.php:101
 #, php-format
 msgid "Broken image: %s"
 msgstr ""
 
 #. translators: %s is an HTTP status or error description.
-#: modules/TechnicalSeo/Scanners/BrokenImagesScanner.php:118
-#: modules/TechnicalSeo/Scanners/BrokenLinksScanner.php:118
+#: modules/TechnicalSeo/Scanners/BrokenImagesScanner.php:108
+#: modules/TechnicalSeo/Scanners/BrokenLinksScanner.php:108
 #, php-format
 msgid "Request failed with: %s"
 msgstr ""
 
 #. translators: %s is the broken URL.
-#: modules/TechnicalSeo/Scanners/BrokenLinksScanner.php:111
+#: modules/TechnicalSeo/Scanners/BrokenLinksScanner.php:101
 #, php-format
 msgid "Broken link: %s"
 msgstr ""
@@ -3840,58 +3981,58 @@ msgstr ""
 msgid "A missing canonical tag can lead search engines to treat identical content reachable at multiple URLs as duplicates."
 msgstr ""
 
-#: modules/TechnicalSeo/Scanners/DuplicateContentScanner.php:41
+#: modules/TechnicalSeo/Scanners/DuplicateContentScanner.php:39
 #: assets/js/index.js:17
 msgid "Duplicate Content"
 msgstr ""
 
 #. translators: 1: the duplicated title, 2: number of posts sharing it.
-#: modules/TechnicalSeo/Scanners/DuplicateContentScanner.php:98
+#: modules/TechnicalSeo/Scanners/DuplicateContentScanner.php:94
 #, php-format
 msgid "Duplicate title used by %2$d posts: %1$s"
 msgstr ""
 
-#: modules/TechnicalSeo/Scanners/DuplicateContentScanner.php:104
+#: modules/TechnicalSeo/Scanners/DuplicateContentScanner.php:100
 msgid "Multiple published posts share this exact title, which can split search ranking signal between them or confuse which one search engines show."
 msgstr ""
 
-#: modules/TechnicalSeo/Scanners/HeadingStructureScanner.php:44
+#: modules/TechnicalSeo/Scanners/HeadingStructureScanner.php:43
 msgid "Heading Structure"
 msgstr ""
 
 #. translators: %s is the post/page title.
-#: modules/TechnicalSeo/Scanners/HeadingStructureScanner.php:91
+#: modules/TechnicalSeo/Scanners/HeadingStructureScanner.php:90
 #, php-format
 msgid "No subheadings found in long content: %s"
 msgstr ""
 
-#: modules/TechnicalSeo/Scanners/HeadingStructureScanner.php:96
+#: modules/TechnicalSeo/Scanners/HeadingStructureScanner.php:95
 msgid "Breaking long content into sections with subheadings makes it easier for readers to scan and for search engines to understand its structure."
 msgstr ""
 
 #. translators: %s is the image filename.
-#: modules/TechnicalSeo/Scanners/ImagesScanner.php:85
+#: modules/TechnicalSeo/Scanners/ImagesScanner.php:83
 #, php-format
 msgid "Image missing alt text: %s"
 msgstr ""
 
-#: modules/TechnicalSeo/Scanners/ImagesScanner.php:90
+#: modules/TechnicalSeo/Scanners/ImagesScanner.php:88
 msgid "Alt text helps search engines and screen reader users understand what an image shows."
 msgstr ""
 
-#: modules/TechnicalSeo/Scanners/InternalLinkingScanner.php:43
+#: modules/TechnicalSeo/Scanners/InternalLinkingScanner.php:42
 #: assets/js/index.js:1
 #: assets/js/index.js:9
 msgid "Internal Linking"
 msgstr ""
 
 #. translators: %s is the post/page title.
-#: modules/TechnicalSeo/Scanners/InternalLinkingScanner.php:79
+#: modules/TechnicalSeo/Scanners/InternalLinkingScanner.php:78
 #, php-format
 msgid "No internal links found in content: %s"
 msgstr ""
 
-#: modules/TechnicalSeo/Scanners/InternalLinkingScanner.php:84
+#: modules/TechnicalSeo/Scanners/InternalLinkingScanner.php:83
 msgid "Linking to other pages on this site helps search engines discover and rank content, and helps readers find related pages."
 msgstr ""
 
@@ -3900,26 +4041,26 @@ msgid "Meta Descriptions"
 msgstr ""
 
 #. translators: %s is the post/page title.
-#: modules/TechnicalSeo/Scanners/MetaDescriptionScanner.php:85
+#: modules/TechnicalSeo/Scanners/MetaDescriptionScanner.php:84
 #, php-format
 msgid "No meta description set: %s"
 msgstr ""
 
-#: modules/TechnicalSeo/Scanners/MetaDescriptionScanner.php:90
+#: modules/TechnicalSeo/Scanners/MetaDescriptionScanner.php:89
 msgid "This post has no excerpt set. Most themes and SEO plugins fall back to the excerpt for the search-result description when no dedicated description is configured."
 msgstr ""
 
-#: modules/TechnicalSeo/Scanners/OpenGraphScanner.php:42
+#: modules/TechnicalSeo/Scanners/OpenGraphScanner.php:40
 msgid "Open Graph"
 msgstr ""
 
 #. translators: %s is a comma-separated list of missing Open Graph properties.
-#: modules/TechnicalSeo/Scanners/OpenGraphScanner.php:85
+#: modules/TechnicalSeo/Scanners/OpenGraphScanner.php:83
 #, php-format
 msgid "Missing Open Graph tags on the homepage: %s"
 msgstr ""
 
-#: modules/TechnicalSeo/Scanners/OpenGraphScanner.php:90
+#: modules/TechnicalSeo/Scanners/OpenGraphScanner.php:88
 msgid "Open Graph tags control how this site's links look when shared on Facebook, LinkedIn, and similar platforms. Without them, shared links show no preview image or description."
 msgstr ""
 
@@ -3937,25 +4078,25 @@ msgstr ""
 msgid "Among the recently modified content sampled by this scan, nothing links to this page. Pages with no inbound internal links are harder for search engines to discover."
 msgstr ""
 
-#: modules/TechnicalSeo/Scanners/RobotsTxtScanner.php:39
+#: modules/TechnicalSeo/Scanners/RobotsTxtScanner.php:38
 #: assets/js/index.js:1
 msgid "Robots.txt"
 msgstr ""
 
-#: modules/TechnicalSeo/Scanners/RobotsTxtScanner.php:64
+#: modules/TechnicalSeo/Scanners/RobotsTxtScanner.php:63
 #: assets/js/index.js:5
 msgid "robots.txt is not reachable"
 msgstr ""
 
-#: modules/TechnicalSeo/Scanners/RobotsTxtScanner.php:67
+#: modules/TechnicalSeo/Scanners/RobotsTxtScanner.php:66
 msgid "No robots.txt file was found at the site root. Its absence isn't harmful by itself, but it means there's no explicit crawl guidance for search engines."
 msgstr ""
 
-#: modules/TechnicalSeo/Scanners/RobotsTxtScanner.php:77
+#: modules/TechnicalSeo/Scanners/RobotsTxtScanner.php:76
 msgid "robots.txt is blocking all search engines"
 msgstr ""
 
-#: modules/TechnicalSeo/Scanners/RobotsTxtScanner.php:80
+#: modules/TechnicalSeo/Scanners/RobotsTxtScanner.php:79
 msgid "robots.txt disallows every page for all crawlers (User-agent: * / Disallow: /). If unintentional, this removes the entire site from search results."
 msgstr ""
 
@@ -3987,19 +4128,19 @@ msgid "A featured image is used as the preview image when this page is shared on
 msgstr ""
 
 #. translators: %s is the post/page title.
-#: modules/TechnicalSeo/Scanners/SeoScanner.php:95
+#: modules/TechnicalSeo/Scanners/SeoScanner.php:92
 #, php-format
 msgid "Title is too short for search results: %s"
 msgstr ""
 
 #. translators: %s is the post/page title.
-#: modules/TechnicalSeo/Scanners/SeoScanner.php:100
+#: modules/TechnicalSeo/Scanners/SeoScanner.php:97
 #, php-format
 msgid "Title may be truncated in search results: %s"
 msgstr ""
 
 #. translators: 1: minimum recommended title length, 2: maximum recommended title length.
-#: modules/TechnicalSeo/Scanners/SeoScanner.php:107
+#: modules/TechnicalSeo/Scanners/SeoScanner.php:104
 #, php-format
 msgid "Search engines display roughly %1$d–%2$d characters of a title before truncating."
 msgstr ""
@@ -4014,27 +4155,27 @@ msgid "Neither /wp-sitemap.xml nor /sitemap.xml returned a successful response. 
 msgstr ""
 
 #. translators: %d is which structured-data block on the page (1-indexed) is invalid.
-#: modules/TechnicalSeo/Scanners/StructuredDataValidationScanner.php:85
+#: modules/TechnicalSeo/Scanners/StructuredDataValidationScanner.php:84
 #, php-format
 msgid "Invalid structured data (JSON-LD) block #%d on the homepage"
 msgstr ""
 
-#: modules/TechnicalSeo/Scanners/StructuredDataValidationScanner.php:90
+#: modules/TechnicalSeo/Scanners/StructuredDataValidationScanner.php:89
 msgid "This structured data block does not parse as valid JSON, so search engines will ignore it entirely for rich results."
 msgstr ""
 
-#: modules/TechnicalSeo/Scanners/ThinContentScanner.php:48
+#: modules/TechnicalSeo/Scanners/ThinContentScanner.php:45
 msgid "Thin Content"
 msgstr ""
 
 #. translators: 1: post/page title, 2: word count.
-#: modules/TechnicalSeo/Scanners/ThinContentScanner.php:88
+#: modules/TechnicalSeo/Scanners/ThinContentScanner.php:85
 #, php-format
 msgid "Thin content (%2$d words): %1$s"
 msgstr ""
 
 #. translators: %d is the recommended minimum word count.
-#: modules/TechnicalSeo/Scanners/ThinContentScanner.php:96
+#: modules/TechnicalSeo/Scanners/ThinContentScanner.php:93
 #, php-format
 msgid "Search engines generally rank substantive content higher. Consider expanding this to at least %d words."
 msgstr ""
@@ -4056,171 +4197,146 @@ msgid "Style"
 msgstr ""
 
 #: assets/js/block/faq/index.js:1
-msgid "Questions & answers"
-msgstr ""
-
-#. translators: %d: real number of questions currently on this block.
-#: assets/js/block/faq/index.js:2
-#, js-format
-msgid "%d items"
-msgstr ""
-
-#: assets/js/block/faq/index.js:2
-msgid "No questions added yet."
-msgstr ""
-
-#. translators: %d: real 1-based question number.
-#: assets/js/block/faq/index.js:3
-#, js-format
-msgid "Question %d"
-msgstr ""
-
-#: assets/js/block/faq/index.js:3
-msgid "Question"
-msgstr ""
-
-#: assets/js/block/faq/index.js:3
-#: assets/js/index.js:17
-msgid "Answer"
-msgstr ""
-
-#: assets/js/block/faq/index.js:3
-msgid "Duplicate"
-msgstr ""
-
-#: assets/js/block/faq/index.js:3
-#: assets/js/post-editor.js:1
-msgid "Remove"
-msgstr ""
-
-#: assets/js/block/faq/index.js:3
-msgid "Add question"
-msgstr ""
-
-#: assets/js/block/faq/index.js:3
-msgid "You can also edit questions directly on the canvas."
-msgstr ""
-
-#: assets/js/block/faq/index.js:3
 msgid "Behavior"
 msgstr ""
 
-#: assets/js/block/faq/index.js:3
+#: assets/js/block/faq/index.js:1
 msgid "Layout"
 msgstr ""
 
-#: assets/js/block/faq/index.js:3
+#: assets/js/block/faq/index.js:1
 msgid "Allow multiple answers open"
 msgstr ""
 
-#: assets/js/block/faq/index.js:3
+#: assets/js/block/faq/index.js:1
 msgid "Initially open item"
 msgstr ""
 
-#: assets/js/block/faq/index.js:3
+#: assets/js/block/faq/index.js:1
 msgid "None (all closed)"
 msgstr ""
 
-#: assets/js/block/faq/index.js:3
+#: assets/js/block/faq/index.js:1
 msgid "Open/close animation"
 msgstr ""
 
-#: assets/js/block/faq/index.js:3
+#: assets/js/block/faq/index.js:1
 msgid "Animation duration (ms)"
 msgstr ""
 
-#: assets/js/block/faq/index.js:3
+#: assets/js/block/faq/index.js:1
 msgid "Toggle icon"
 msgstr ""
 
-#: assets/js/block/faq/index.js:3
+#: assets/js/block/faq/index.js:1
 msgid "Icon position"
 msgstr ""
 
-#: assets/js/block/faq/index.js:3
+#: assets/js/block/faq/index.js:1
 msgid "Question heading level"
 msgstr ""
 
-#: assets/js/block/faq/index.js:3
+#: assets/js/block/faq/index.js:1
 msgid "Enable FAQ structured data"
 msgstr ""
 
-#: assets/js/block/faq/index.js:3
+#: assets/js/block/faq/index.js:1
 msgid "Outputs real FAQPage JSON-LD for search engines, generated only from real question/answer rows."
 msgstr ""
 
-#: assets/js/block/faq/index.js:3
+#: assets/js/block/faq/index.js:1
 msgid "Appearance"
 msgstr ""
 
-#: assets/js/block/faq/index.js:3
+#: assets/js/block/faq/index.js:1
 msgid "Typography"
 msgstr ""
 
-#: assets/js/block/faq/index.js:3
+#: assets/js/block/faq/index.js:1
 msgid "Question size"
 msgstr ""
 
-#: assets/js/block/faq/index.js:3
+#: assets/js/block/faq/index.js:1
 msgid "Answer size"
 msgstr ""
 
-#: assets/js/block/faq/index.js:3
+#: assets/js/block/faq/index.js:1
 msgid "Colors"
 msgstr ""
 
-#: assets/js/block/faq/index.js:3
+#: assets/js/block/faq/index.js:1
 msgid "Text"
 msgstr ""
 
-#: assets/js/block/faq/index.js:3
+#: assets/js/block/faq/index.js:1
 msgid "Accent"
 msgstr ""
 
-#: assets/js/block/faq/index.js:3
+#: assets/js/block/faq/index.js:1
 #: assets/js/block/table-of-contents/index.js:1
 msgid "Background"
 msgstr ""
 
-#: assets/js/block/faq/index.js:3
+#: assets/js/block/faq/index.js:1
 msgid "Expanded question background"
 msgstr ""
 
-#: assets/js/block/faq/index.js:3
+#: assets/js/block/faq/index.js:1
 msgid "Spacing & borders"
 msgstr ""
 
-#: assets/js/block/faq/index.js:3
+#: assets/js/block/faq/index.js:1
 msgid "Item gap"
 msgstr ""
 
-#: assets/js/block/faq/index.js:3
+#: assets/js/block/faq/index.js:1
 #: assets/js/block/table-of-contents/index.js:1
 msgid "Padding"
 msgstr ""
 
-#: assets/js/block/faq/index.js:3
+#: assets/js/block/faq/index.js:1
 msgid "Border"
 msgstr ""
 
-#: assets/js/block/faq/index.js:3
+#: assets/js/block/faq/index.js:1
 msgid "Corner radius"
 msgstr ""
 
-#: assets/js/block/faq/index.js:3
+#: assets/js/block/faq/index.js:1
 msgid "Icon settings"
 msgstr ""
 
-#: assets/js/block/faq/index.js:3
+#: assets/js/block/faq/index.js:1
 msgid "Size"
 msgstr ""
 
-#: assets/js/block/faq/index.js:3
+#: assets/js/block/faq/index.js:1
 msgid "Spacing from edge"
 msgstr ""
 
-#: assets/js/block/faq/index.js:3
-msgid "Add a question from the Content tab in the sidebar to get started."
+#: assets/js/block/faq/index.js:1
+msgid "Question…"
+msgstr ""
+
+#: assets/js/block/faq/index.js:1
+msgid "Enter the answer to the question"
+msgstr ""
+
+#: assets/js/block/faq/index.js:1
+msgid "Duplicate"
+msgstr ""
+
+#: assets/js/block/faq/index.js:1
+#: assets/js/post-editor.js:1
+msgid "Remove"
+msgstr ""
+
+#: assets/js/block/faq/index.js:1
+msgid "Add a question to get started."
+msgstr ""
+
+#: assets/js/block/faq/index.js:1
+msgid "Add New FAQ"
 msgstr ""
 
 #: assets/js/block/table-of-contents/index.js:1
@@ -6854,10 +6970,6 @@ msgstr ""
 
 #: assets/js/index.js:1
 msgid "A Markdown index of your key pages, served at /llms.txt for AI systems to read instead of crawling your whole site."
-msgstr ""
-
-#: assets/js/index.js:1
-msgid "Generate llms.txt"
 msgstr ""
 
 #: assets/js/index.js:1
@@ -10408,19 +10520,19 @@ msgid "Source page"
 msgstr ""
 
 #: assets/js/index.js:1
-msgid "External"
+msgid "External link"
 msgstr ""
 
 #: assets/js/index.js:1
-msgid "Internal"
+msgid "Internal link"
+msgstr ""
+
+#: assets/js/index.js:1
+msgid "Anchor text"
 msgstr ""
 
 #: assets/js/index.js:1
 msgid "Target URL"
-msgstr ""
-
-#: assets/js/index.js:1
-msgid "Link Text"
 msgstr ""
 
 #: assets/js/index.js:1
@@ -10429,16 +10541,17 @@ msgid "Actions"
 msgstr ""
 
 #: assets/js/index.js:1
-msgid "Open URL"
+#: assets/js/index.js:9
+msgid "Edit page"
 msgstr ""
 
 #: assets/js/index.js:1
-msgid "Unignore"
+msgid "View Image"
 msgstr ""
 
 #: assets/js/index.js:1
 #: assets/js/index.js:5
-msgid "Finding reopened."
+msgid "View Page"
 msgstr ""
 
 #: assets/js/index.js:1
@@ -10526,6 +10639,14 @@ msgid "All link types"
 msgstr ""
 
 #: assets/js/index.js:1
+msgid "Internal"
+msgstr ""
+
+#: assets/js/index.js:1
+msgid "External"
+msgstr ""
+
+#: assets/js/index.js:1
 msgid "All pages"
 msgstr ""
 
@@ -10547,6 +10668,10 @@ msgstr ""
 #: assets/js/index.js:1
 #: assets/js/index.js:5
 msgid "Snoozed"
+msgstr ""
+
+#: assets/js/index.js:1
+msgid "Link Text"
 msgstr ""
 
 #: assets/js/index.js:1
@@ -10970,6 +11095,10 @@ msgstr ""
 
 #: assets/js/index.js:5
 msgid "Minor"
+msgstr ""
+
+#: assets/js/index.js:5
+msgid "Finding reopened."
 msgstr ""
 
 #: assets/js/index.js:5
@@ -11613,10 +11742,6 @@ msgid "No issues"
 msgstr ""
 
 #: assets/js/index.js:5
-msgid "View Page"
-msgstr ""
-
-#: assets/js/index.js:5
 msgid "Your business"
 msgstr ""
 
@@ -12048,10 +12173,6 @@ msgstr ""
 
 #: assets/js/index.js:9
 msgid "No meta description set."
-msgstr ""
-
-#: assets/js/index.js:9
-msgid "Edit page"
 msgstr ""
 
 #: assets/js/index.js:9
@@ -15022,6 +15143,10 @@ msgstr ""
 
 #: assets/js/index.js:17
 msgid "Or type your own answer…"
+msgstr ""
+
+#: assets/js/index.js:17
+msgid "Answer"
 msgstr ""
 
 #: assets/js/index.js:17

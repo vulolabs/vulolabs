@@ -22,6 +22,7 @@ class Module {
 
 	/** Module constructor. */
 	public function __construct() {
+		new Abilities();
 		add_action( 'save_post', array( $this, 'maybe_regenerate_llms_txt' ), 10, 2 );
 	}
 

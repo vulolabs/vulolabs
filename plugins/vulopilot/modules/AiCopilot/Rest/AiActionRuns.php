@@ -205,20 +205,32 @@ class AiActionRuns extends \WP_REST_Controller {
 	}
 
 	/**
-	 * @inheritDoc
+	 * @param \WP_REST_Request $request Full request object.
+	 * @return \WP_REST_Response|\WP_Error
 	 */
 	public function get_items( $request ) {
+		return $this->prepare_get_items_response( $request->get_params(), $request );
+	}
+
+	/**
+	 * List AI action runs (REST or ability).
+	 *
+	 * @param array                 $payload Request params.
+	 * @param \WP_REST_Request|null $request Request object, if any.
+	 * @return \WP_REST_Response|\WP_Error
+	 */
+	public function prepare_get_items_response( $payload = array(), $request = null ) {
 		$repository = new ActionRunRepository();
 
-		$status = sanitize_key( (string) $request->get_param( 'status' ) );
+		$status = sanitize_key( (string) ( $payload['status'] ?? null ) );
 
 		return rest_ensure_response(
 			$repository->find_all(
 				array(
-					'page'      => absint( $request->get_param( 'page' ) ) ? absint( $request->get_param( 'page' ) ) : 1,
-					'per_page'  => absint( $request->get_param( 'per_page' ) ) ? absint( $request->get_param( 'per_page' ) ) : 20,
+					'page'      => absint( ( $payload['page'] ?? null ) ) ? absint( ( $payload['page'] ?? null ) ) : 1,
+					'per_page'  => absint( ( $payload['per_page'] ?? null ) ) ? absint( ( $payload['per_page'] ?? null ) ) : 20,
 					'status'    => $status,
-					'action_id' => sanitize_key( (string) $request->get_param( 'action_id' ) ),
+					'action_id' => sanitize_key( (string) ( $payload['action_id'] ?? null ) ),
 				)
 			)
 		);

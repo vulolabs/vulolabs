@@ -51,6 +51,17 @@ class Dashboard extends \WP_REST_Controller {
 	 * @inheritDoc
 	 */
 	public function get_items( $request ) {
+		return $this->prepare_get_items_response( $request->get_params(), $request );
+	}
+
+	/**
+	 * Site overview (REST or ability).
+	 *
+	 * @param array                 $payload Request params.
+	 * @param \WP_REST_Request|null $request Request object, if any.
+	 * @return \WP_REST_Response
+	 */
+	public function prepare_get_items_response( $payload, $request = null ) {
 		$findings        = new FindingRepository();
 		$automations     = new AutomationsRepository();
 		$action_runs     = new ActionRunRepository();

@@ -82,19 +82,42 @@ class Automations extends \WP_REST_Controller {
 	 * @inheritDoc
 	 */
 	public function get_items( $request ) {
+		return $this->prepare_get_items_response( $request->get_params(), $request );
+	}
+
+	/**
+	 * List automations (REST or ability).
+	 *
+	 * @param array                 $payload Request params.
+	 * @param \WP_REST_Request|null $request Request object, if any.
+	 * @return \WP_REST_Response
+	 */
+	public function prepare_get_items_response( $payload, $request = null ) {
+		$payload = wp_parse_args(
+			$payload,
+			array(
+				'page'     => 0,
+				'per_page' => 0,
+				'status'   => '',
+				'search'   => '',
+				'orderby'  => '',
+				'order'    => '',
+			)
+		);
+
 		$repository = new AutomationsRepository();
 
-		$status = sanitize_key( (string) $request->get_param( 'status' ) );
-		$search = sanitize_text_field( (string) $request->get_param( 'search' ) );
+		$status = sanitize_key( (string) $payload['status'] );
+		$search = sanitize_text_field( (string) $payload['search'] );
 
 		$result                  = $repository->find_all(
 			array(
-				'page'     => absint( $request->get_param( 'page' ) ) ? absint( $request->get_param( 'page' ) ) : 1,
-				'per_page' => absint( $request->get_param( 'per_page' ) ) ? absint( $request->get_param( 'per_page' ) ) : 20,
+				'page'     => absint( $payload['page'] ) ? absint( $payload['page'] ) : 1,
+				'per_page' => absint( $payload['per_page'] ) ? absint( $payload['per_page'] ) : 20,
 				'status'   => $status,
 				'search'   => $search,
-				'orderby'  => sanitize_key( (string) $request->get_param( 'orderby' ) ),
-				'order'    => sanitize_key( (string) $request->get_param( 'order' ) ),
+				'orderby'  => sanitize_key( (string) $payload['orderby'] ),
+				'order'    => sanitize_key( (string) $payload['order'] ),
 			)
 		);
 		$result['status_counts'] = $repository->get_status_counts();

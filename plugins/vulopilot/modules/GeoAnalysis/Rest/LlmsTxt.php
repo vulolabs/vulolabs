@@ -50,9 +50,20 @@ class LlmsTxt extends \WP_REST_Controller {
 
 	/**
 	 * @param \WP_REST_Request $request Full request object.
-	 * @return \WP_REST_Response
+	 * @return \WP_REST_Response|\WP_Error
 	 */
 	public function get_regenerated_content( $request ) {
+		return $this->prepare_get_regenerated_content_response( $request->get_params(), $request );
+	}
+
+	/**
+	 * Freshly generated llms.txt content (REST or ability).
+	 *
+	 * @param array                 $payload Request params.
+	 * @param \WP_REST_Request|null $request Request object, if any.
+	 * @return \WP_REST_Response|\WP_Error
+	 */
+	public function prepare_get_regenerated_content_response( $payload = array(), $request = null ) {
 		return rest_ensure_response( array( 'content' => VuloPilot()->llms_txt_generator->generate() ) );
 	}
 }
