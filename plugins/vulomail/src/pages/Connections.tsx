@@ -61,8 +61,7 @@ const Connections = () => {
 			.catch((e) => setError(errorMessage(e)));
 	}, []);
 
-	// Back from "Sign in with Google": say how it went, then drop the result from the address so a
-	// reload doesn't repeat it.
+	// Back from "Sign in with Google": say how it went, then drop the result from the address so a reload doesn't repeat it.
 	useEffect(() => {
 		const params = new URLSearchParams(window.location.hash.replace(/^#/, ''));
 		const outcome = params.get('google');
@@ -132,8 +131,7 @@ const Connections = () => {
 
 		apiPost<Partial<SettingsShape>>('settings', changes)
 			.then((saved) => {
-				// The server is the source of truth: a routing slot it rejected (e.g. the
-				// connection failed validation) must not be left looking set on screen.
+				// The server is the source of truth - a rejected routing slot can't be left looking set on screen.
 				setPayload((current) =>
 					current
 						? {
@@ -255,8 +253,7 @@ const Connections = () => {
 			};
 		});
 
-		// Email always has WordPress's own mailer to fall back on; it is the default until a
-		// connection is made primary.
+		// Email always has WordPress's own mailer to fall back on; it is the default until a connection is made primary.
 		if (isEmail) {
 			rows.unshift({
 				icon: `wordpress ${primaryId ? 'blue' : 'green'}`,
@@ -287,7 +284,7 @@ const Connections = () => {
 			});
 		}
 
-		return (
+		return (			
 			<div className="settings-section-group" key={channel.id}>
 				<div className="settings-left-section">
 					<SectionComponent icon={channel.icon} title={channel.title} desc={channel.desc} />
@@ -331,7 +328,9 @@ const Connections = () => {
 
 	return (
 		<>
-			{CHANNELS.map(renderChannel)}
+			<FormGroupWrapperComponent>
+				{CHANNELS.map(renderChannel)}
+			</FormGroupWrapperComponent>
 			<PopupComponent
 				open={Boolean(editing)}
 				onClose={() => setEditing(null)}
@@ -385,23 +384,21 @@ const Connections = () => {
 							pendingDelete?.label ?? ''
 						)}
 					</p>
-					<div className="vulomail-form-footer">
-						<ButtonInput
-							buttons={[
-								{
-									text: __('Keep connection', 'vulomail'),
-									color: 'purple',
-									onClick: () => setPendingDelete(null),
-								},
-								{
-									text: __('Delete connection', 'vulomail'),
-									icon: 'delete',
-									color: 'border-red',
-									onClick: confirmDelete,
-								},
-							]}
-						/>
-					</div>
+					<ButtonInput
+						buttons={[
+							{
+								text: __('Keep connection', 'vulomail'),
+								color: 'purple',
+								onClick: () => setPendingDelete(null),
+							},
+							{
+								text: __('Delete connection', 'vulomail'),
+								icon: 'delete',
+								color: 'border-red',
+								onClick: confirmDelete,
+							},
+						]}
+					/>
 				</div>
 			</PopupComponent>
 		</>

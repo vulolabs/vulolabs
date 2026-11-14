@@ -14,7 +14,7 @@ import {
 	NoticeComponent,
 	PopupComponent,
 } from '@zyra/components';
-import { ButtonInput, SelectInput } from '@zyra/inputs';
+import { ButtonInput } from '@zyra/inputs';
 import { TableCard } from '@zyra/table';
 import { apiDelete, apiGet, apiPost } from '../services/api';
 import { errorMessage, notify } from '../services/notify';
@@ -51,7 +51,7 @@ interface TableQuery {
 	per_page?: number | string;
 	searchValue?: string;
 	categoryFilter?: string;
-	filter?: { date?: { startDate?: Date | string; endDate?: Date | string } };
+	filter?: { date?: { startDate?: Date | string; endDate?: Date | string }; status?: string };
 }
 
 // The icon the builder shows for each kind of field.
@@ -170,8 +170,12 @@ const download = (endpoint: string, params: Record<string, string | number | und
 const Submissions = () => {
 	const linkedForm = Number(new URLSearchParams(useLocation().hash).get('form')) || 0;
 	const [forms, setForms] = useState<{ id: number; title: string; submissions?: number }[] | null>(null);
-	const [formId, setFormId] = useState(linkedForm);
-	const [query, setQuery] = useState<TableQuery>({ paged: 1, per_page: 10 });
+	const startForm = linkedForm ? String(linkedForm) : 'all';
+	const startQuery: TableQuery = { paged: 1, per_page: 10, categoryFilter: startForm };
+	const [query, setQuery] = useState<TableQuery>(startQuery);
+	// The form pills are the table's categories, so the picked form lives in the table's own query.
+	const formId = query.categoryFilter && 'all' !== query.categoryFilter ? Number(query.categoryFilter) : 0;
+	const status = query.filter?.status && 'inbox' !== query.filter.status ? query.filter.status : 'inbox';
 	const [list, setList] = useState<List>({ data: [], total: 0, status_counts: { unread: 0, read: 0, spam: 0 } });
 	const [isLoading, setIsLoading] = useState(false);
 	const [error, setError] = useState('');
@@ -184,10 +188,10 @@ const Submissions = () => {
 
 	const onQueryUpdate = useCallback((next: TableQuery) => setQuery(next), []);
 
-	const hasActiveFilter = Boolean(query.filter?.date || query.searchValue || (query.categoryFilter && 'all' !== query.categoryFilter));
+	const hasActiveFilter = Boolean(query.filter?.date || query.searchValue || (query.filter?.status && 'inbox' !== query.filter.status));
 
 	const resetFilters = () => {
-		setQuery({ paged: 1, per_page: 10 });
+		setQuery(startQuery);
 		setResetCount((n) => n + 1);
 	};
 
@@ -199,7 +203,7 @@ const Submissions = () => {
 
 	const filters = {
 		form_id: formId,
-		status: query.categoryFilter && 'all' !== query.categoryFilter ? query.categoryFilter : 'inbox',
+		status,
 		search: query.searchValue || undefined,
 		after: pickedDay(query.filter?.date?.startDate),
 		before: pickedDay(query.filter?.date?.endDate),
@@ -281,22 +285,11 @@ const Submissions = () => {
 				headerCustomContent={
 					forms && forms.length > 0 ? (
 						<div className="vuloform-inline">
-							<SelectInput
-								type="single-select"
-								name="form"
-								isClearable={false}
-								options={[
-									{ value: '0', label: __('All forms', 'vuloform') },
-									...forms.map((form) => ({ value: String(form.id), label: form.title })),
-								]}
-								value={String(formId)}
-								onChange={(value) => setFormId(Number(value))}
-							/>
 							<ButtonInput
 								buttons={{
 									text: __('Export CSV', 'vuloform'),
 									icon: 'export',
-									color: 'purple',
+									color: 'white',
 									disabled: 0 === list.total,
 									tooltip: 0 === list.total ? __('There is nothing to export.', 'vuloform') : undefined,
 									onClick: () => download('submissions/export', filters, 'submissions.csv'),
@@ -310,12 +303,12 @@ const Submissions = () => {
 				{!error && forms && forms.length > 0 && (
 					<ColumnComponent>
 						<AnalyticsComponent
-							variant="small"
+							variant="trend-stat"
 							cols={3}
 							data={[
-								{ icon: 'mail blue', number: counts.unread, text: __('New', 'vuloform') },
-								{ icon: 'check green', number: counts.read, text: __('Read', 'vuloform') },
-								{ icon: 'error red', number: counts.spam, text: __('Spam', 'vuloform') },
+								{ icon: 'mail', number: counts.unread, text: __('New', 'vuloform'), desc: __('Not opened yet', 'vuloform') },
+								{ icon: 'check', number: counts.read, text: __('Read', 'vuloform'), desc: __('Already opened', 'vuloform') },
+								{ icon: 'error', number: counts.spam, text: __('Spam', 'vuloform'), desc: __('Caught by spam protection', 'vuloform') },
 							]}
 						/>
 					</ColumnComponent>
@@ -336,11 +329,24 @@ const Submissions = () => {
 					)}
 					{!error && forms && forms.length > 0 && (
 						<TableCard
-							// A different form, or a reset, starts from its own first page and filters.
-							key={`${formId}-${resetCount}`}
+							key={resetCount}
 							search={{ placeholder: __('Search submissions…', 'vuloform') }}
 							showMenu={false}
-							filters={[{ key: 'date', type: 'date', label: __('Date range', 'vuloform') }]}
+							filters={[
+								{ key: 'date', type: 'date', label: __('Date range', 'vuloform') },
+								{
+									key: 'status',
+									type: 'select',
+									label: __('Status', 'vuloform'),
+									size: 9,
+									options: [
+										{ value: 'inbox', label: __('Inbox', 'vuloform') },
+										{ value: 'unread', label: __('New', 'vuloform') },
+										{ value: 'read', label: __('Read', 'vuloform') },
+										{ value: 'spam', label: __('Spam', 'vuloform') },
+									],
+								},
+							]}
 							filtersBeforeSearch
 							buttonActions={
 								hasActiveFilter
@@ -407,11 +413,10 @@ const Submissions = () => {
 							rows={list.data}
 							ids={list.data.map((row) => row.id)}
 							totalRows={list.total}
+							activeCategory={startForm}
 							categoryCounts={[
-								{ value: 'all', label: __('Inbox', 'vuloform'), count: counts.unread + counts.read },
-								{ value: 'unread', label: __('New', 'vuloform'), count: counts.unread },
-								{ value: 'read', label: __('Read', 'vuloform'), count: counts.read },
-								{ value: 'spam', label: __('Spam', 'vuloform'), count: counts.spam },
+								{ value: 'all', label: __('All forms', 'vuloform'), count: forms.reduce((sum, form) => sum + (form.submissions ?? 0), 0) },
+								...forms.map((form) => ({ value: String(form.id), label: form.title, count: form.submissions ?? 0 })),
 							]}
 							isLoading={isLoading}
 							onQueryUpdate={onQueryUpdate}

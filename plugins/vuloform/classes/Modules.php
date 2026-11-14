@@ -150,12 +150,4 @@ class Modules {
 
 		return true;
 	}
-
-	/**
-	 * @param string $id Module id.
-	 * @return bool
-	 */
-	public function is_active( $id ) {
-		return in_array( $id, $this->get_active_modules(), true );
-	}
 }

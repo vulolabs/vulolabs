@@ -5,6 +5,8 @@ import {
 	RichText,
 	InspectorControls,
 	useSettings,
+	MediaUpload,
+	MediaUploadCheck,
 	// eslint-disable-next-line camelcase
 	__experimentalBorderControl as BorderControl,
 } from '@wordpress/block-editor';
@@ -22,8 +24,6 @@ import {
 	__experimentalUnitControl as UnitControl,
 } from '@wordpress/components';
 import metadata from './block.json';
-import FaqAccordion from './FaqAccordion';
-import { buildFaqStyleVars } from './faqStyleVars';
 import {
 	DEFAULT_FAQ_STYLE,
 	APPEARANCE_PRESETS,
@@ -126,24 +126,16 @@ registerBlockType( metadata.name, {
 		} = attributes;
 
 		const style = mergeFaqStyle( attributes.style );
-		const styleVars = buildFaqStyleVars( attributes );
 		const blockProps = useBlockProps();
 
-		const settings = {
-			layoutMode,
-			allowMultipleOpen,
-			initialOpenIndex,
-			iconStyle,
-			iconPosition,
-			headingLevel,
-			animationEnabled,
-		};
-
-		const updateQuestion = ( index, field, value ) => {
+		const patchQuestion = ( index, patch ) => {
 			const next = questions.slice();
-			next[ index ] = { ...next[ index ], [ field ]: value };
+			next[ index ] = { ...next[ index ], ...patch };
 			setAttributes( { questions: next } );
 		};
+
+		const updateQuestion = ( index, field, value ) =>
+			patchQuestion( index, { [ field ]: value } );
 
 		const addRow = () =>
 			setAttributes( {
@@ -551,66 +543,121 @@ registerBlockType( metadata.name, {
 				</InspectorControls>
 
 				<div { ...blockProps }>
-					<FaqAccordion
-						items={ questions }
-						renderQuestion={ ( item, index ) => (
-							<RichText
-								tagName="span"
-								value={ item.question }
-								onChange={ ( value ) =>
-									updateQuestion( index, 'question', value )
-								}
-								placeholder={ __( 'Question…', 'vulopilot' ) }
-								allowedFormats={ [] }
-							/>
-						) }
-						renderAnswer={ ( item, index ) => (
-							<RichText
-								tagName="div"
-								value={ item.answer }
-								onChange={ ( value ) =>
-									updateQuestion( index, 'answer', value )
-								}
-								placeholder={ __(
-									'Enter the answer to the question',
+					<div className="vulopilot-faq-editor">
+						{ 0 === questions.length && (
+							<p className="vulopilot-faq-editor-empty">
+								{ __(
+									'Add a question below to get started.',
 									'vulopilot'
 								) }
-							/>
+							</p>
 						) }
-						renderItemControls={ ( item, index ) => (
-							<span className="vulopilot-faq__item-controls">
-								<Button
-									icon="admin-page"
-									label={ __( 'Duplicate', 'vulopilot' ) }
-									size="small"
-									onClick={ () => duplicateRow( index ) }
+						{ questions.map( ( item, index ) => (
+							<div
+								className={ `vulopilot-faq-editor-card${ item.hidden ? ' is-hidden' : '' }` }
+								key={ index }
+							>
+								<div className="vulopilot-faq-editor-card__header">
+									<RichText
+										tagName="p"
+										className="vulopilot-faq-editor-card__question"
+										placeholder={ __( 'Question', 'vulopilot' ) }
+										value={ item.question }
+										onChange={ ( value ) =>
+											updateQuestion( index, 'question', value )
+										}
+									/>
+									<div className="vulopilot-faq-editor-card__actions">
+										<Button
+											icon={ item.hidden ? 'hidden' : 'visibility' }
+											label={
+												item.hidden
+													? __( 'Show on frontend', 'vulopilot' )
+													: __( 'Hide from frontend', 'vulopilot' )
+											}
+											showTooltip
+											size="small"
+											onClick={ () =>
+												updateQuestion( index, 'hidden', ! item.hidden )
+											}
+										/>
+										<Button
+											icon="trash"
+											label={ __( 'Delete question', 'vulopilot' ) }
+											showTooltip
+											isDestructive
+											size="small"
+											onClick={ () => removeRow( index ) }
+										/>
+									</div>
+								</div>
+								<RichText
+									tagName="div"
+									className="vulopilot-faq-editor-card__answer"
+									placeholder={ __( 'Answer', 'vulopilot' ) }
+									value={ item.answer }
+									onChange={ ( value ) =>
+										updateQuestion( index, 'answer', value )
+									}
 								/>
-								<Button
-									icon="trash"
-									label={ __( 'Remove', 'vulopilot' ) }
-									isDestructive
-									size="small"
-									onClick={ () => removeRow( index ) }
-								/>
-							</span>
-						) }
-						settings={ { ...settings, layoutMode: 'expanded' } }
-						styleVars={ styleVars }
-						className={ `vulopilot-faq--appearance-${ appearance }` }
-						groupName="editor-preview"
-						emptyMessage={ __(
-							'Add a question to get started.',
-							'vulopilot'
-						) }
-					/>
-					<Button
-						className="vulopilot-faq-add-row"
-						variant="secondary"
-						icon="plus-alt2"
-						onClick={ addRow }
-					>
-						{ __( 'Add New FAQ', 'vulopilot' ) }
-					</Button>
+								{ item.imageUrl && (
+									<img
+										className="vulopilot-faq-editor-card__image-preview"
+										src={ item.imageUrl }
+										alt=""
+									/>
+								) }
+								<div className="vulopilot-faq-editor-card__image-row">
+									<MediaUploadCheck>
+										<MediaUpload
+											onSelect={ ( media ) =>
+												patchQuestion( index, {
+													imageId: media.id,
+													imageUrl: media.url,
+												} )
+											}
+											allowedTypes={ [ 'image' ] }
+											value={ item.imageId }
+											render={ ( { open } ) => (
+												<Button
+													variant="primary"
+													size="small"
+													onClick={ open }
+												>
+													{ item.imageUrl
+														? __( 'Replace image', 'vulopilot' )
+														: __( 'Add Image', 'vulopilot' ) }
+												</Button>
+											) }
+										/>
+									</MediaUploadCheck>
+									{ item.imageUrl && (
+										<Button
+											variant="tertiary"
+											isDestructive
+											size="small"
+											onClick={ () =>
+												patchQuestion( index, {
+													imageId: 0,
+													imageUrl: '',
+												} )
+											}
+										>
+											{ __( 'Remove image', 'vulopilot' ) }
+										</Button>
+									) }
+								</div>
+							</div>
+						) ) }
+						<Button
+							className="vulopilot-faq-editor-add"
+							variant="primary"
+							icon="plus-alt2"
+							onClick={ addRow }
+						>
+							{ __( 'Add New FAQ', 'vulopilot' ) }
+						</Button>
+					</div>
 				</div>
 			</>
 		);

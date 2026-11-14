@@ -77,61 +77,46 @@ class SubmissionRepository {
 	public function query( array $args ) {
 		global $wpdb;
 
-		$where  = array( '1=1' );
-		$params = array();
+		$table = $this->table();
+		$where = array();
 
 		if ( ! empty( $args['form_id'] ) ) {
-			$where[]  = 'form_id = %d';
-			$params[] = (int) $args['form_id'];
+			$where[] = $wpdb->prepare( 'form_id = %d', $args['form_id'] );
 		}
 
 		if ( ! empty( $args['search'] ) ) {
-			$where[]  = 'search_text LIKE %s';
-			$params[] = '%' . $wpdb->esc_like( $args['search'] ) . '%';
+			$where[] = $wpdb->prepare( 'search_text LIKE %s', '%' . $wpdb->esc_like( $args['search'] ) . '%' );
 		}
 
 		if ( ! empty( $args['after'] ) ) {
-			$where[]  = 'created_at >= %s';
-			$params[] = $args['after'];
+			$where[] = $wpdb->prepare( 'created_at >= %s', $args['after'] );
 		}
 
 		if ( ! empty( $args['before'] ) ) {
-			$where[]  = 'created_at <= %s';
-			$params[] = $args['before'];
+			$where[] = $wpdb->prepare( 'created_at <= %s', $args['before'] );
 		}
 
 		// Counted before the status filter, so each status pill shows its own total.
-		$base_where = implode( ' AND ', $where );
+		$base_where = $where ? 'WHERE ' . implode( ' AND ', $where ) : '';
 
-		// phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber -- the WHERE strings hold only the fixed fragments built above; values go through prepare().
-		$counts = $wpdb->get_results(
-			$wpdb->prepare( "SELECT status, COUNT(*) AS total FROM %i WHERE {$base_where} GROUP BY status", array_merge( array( $this->table() ), $params ) ),
-			ARRAY_A
-		);
+		$status = $args['status'] ?? '';
 
-		if ( in_array( $args['status'] ?? '', self::STATUSES, true ) ) {
-			$where[]  = 'status = %s';
-			$params[] = $args['status'];
-		} elseif ( 'inbox' === ( $args['status'] ?? '' ) ) {
-			// Everything that isn't spam.
+		if ( in_array( $status, self::STATUSES, true ) ) {
+			$where[] = $wpdb->prepare( 'status = %s', $status );
+		} elseif ( 'inbox' === $status ) {
 			$where[] = "status <> 'spam'";
 		}
 
-		$where_sql = implode( ' AND ', $where );
+		$where_sql = $where ? 'WHERE ' . implode( ' AND ', $where ) : '';
 		$order     = 'asc' === strtolower( (string) ( $args['order'] ?? '' ) ) ? 'ASC' : 'DESC';
 		$per_page  = (int) ( $args['per_page'] ?? 0 );
 		$per_page  = $per_page > 0 ? min( 500, $per_page ) : 10;
 		$offset    = ( max( 1, (int) ( $args['page'] ?? 1 ) ) - 1 ) * $per_page;
 
-		$total = (int) $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM %i WHERE {$where_sql}", array_merge( array( $this->table() ), $params ) ) );
-
-		$rows = $wpdb->get_results(
-			$wpdb->prepare(
-				"SELECT * FROM %i WHERE {$where_sql} ORDER BY created_at {$order}, id {$order} LIMIT %d OFFSET %d",
-				array_merge( array( $this->table() ), $params, array( $per_page, $offset ) )
-			),
-			ARRAY_A
-		);
+		// phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- the table name is ours, the WHERE strings are built from prepare() calls above, $order is ASC or DESC and the numbers are integers.
+		$counts = $wpdb->get_results( "SELECT status, COUNT(*) AS total FROM {$table} {$base_where} GROUP BY status", ARRAY_A );
+		$total  = (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$table} {$where_sql}" );
+		$rows   = $wpdb->get_results( "SELECT * FROM {$table} {$where_sql} ORDER BY created_at {$order}, id {$order} LIMIT {$per_page} OFFSET {$offset}", ARRAY_A );
 		// phpcs:enable
 
 		$status_counts = array_fill_keys( self::STATUSES, 0 );
@@ -161,10 +146,11 @@ class SubmissionRepository {
 			return 0;
 		}
 
-		$placeholders = implode( ',', array_fill( 0, count( $ids ), '%d' ) );
+		$id_list = implode( ',', $ids );
+		$table   = $this->table();
 
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare, WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber -- $placeholders is a generated list of %d.
-		return (int) $wpdb->query( $wpdb->prepare( "UPDATE %i SET status = %s WHERE id IN ({$placeholders})", array_merge( array( $this->table(), $status ), $ids ) ) );
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- $ids were cast with absint(), the table name is ours.
+		return (int) $wpdb->query( $wpdb->prepare( "UPDATE {$table} SET status = %s WHERE id IN ({$id_list})", $status ) );
 	}
 
 	/**
@@ -225,10 +211,11 @@ class SubmissionRepository {
 			}
 		}
 
-		$placeholders = implode( ',', array_fill( 0, count( $ids ), '%d' ) );
+		$id_list = implode( ',', $ids );
+		$table   = $this->table();
 
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare, WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber -- $placeholders is a generated list of %d.
-		return (int) $wpdb->query( $wpdb->prepare( "DELETE FROM %i WHERE id IN ({$placeholders})", array_merge( array( $this->table() ), $ids ) ) );
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- $ids were cast with absint(), the table name is ours.
+		return (int) $wpdb->query( "DELETE FROM {$table} WHERE id IN ({$id_list})" );
 	}
 
 	/**
@@ -242,15 +229,19 @@ class SubmissionRepository {
 	public function ids_where( $column, $value, $limit = 200 ) {
 		global $wpdb;
 
-		// phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+		$table = $this->table();
+		$limit = (int) $limit;
+
 		if ( 'created_before' === $column ) {
-			$ids = $wpdb->get_col( $wpdb->prepare( 'SELECT id FROM %i WHERE created_at < %s ORDER BY id ASC LIMIT %d', $this->table(), (string) $value, (int) $limit ) );
+			$where = $wpdb->prepare( 'created_at < %s', (string) $value );
 		} elseif ( 'user_id' === $column ) {
-			$ids = $wpdb->get_col( $wpdb->prepare( 'SELECT id FROM %i WHERE user_id = %d ORDER BY id ASC LIMIT %d', $this->table(), (int) $value, (int) $limit ) );
+			$where = $wpdb->prepare( 'user_id = %d', $value );
 		} else {
-			$ids = $wpdb->get_col( $wpdb->prepare( 'SELECT id FROM %i WHERE form_id = %d ORDER BY id ASC LIMIT %d', $this->table(), (int) $value, (int) $limit ) );
+			$where = $wpdb->prepare( 'form_id = %d', $value );
 		}
-		// phpcs:enable
+
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- the table name is ours, $where comes from prepare().
+		$ids = $wpdb->get_col( "SELECT id FROM {$table} WHERE {$where} ORDER BY id ASC LIMIT {$limit}" );
 
 		return array_map( 'intval', (array) $ids );
 	}

@@ -14,6 +14,7 @@ import { BlurredProContent } from '../../components/UpgradeToProOverlay';
 
 interface CommerceProDummiesProps {
 	onClick: () => void;
+	isModuleGate?: boolean;
 }
 
 const DummyCard = ({
@@ -24,6 +25,7 @@ const DummyCard = ({
 	onClick,
 	action,
 	children,
+	isModuleGate,
 }: {
 	title: string;
 	titleIcon: string;
@@ -32,9 +34,24 @@ const DummyCard = ({
 	onClick: () => void;
 	action?: ReactNode;
 	children: ReactNode;
+	isModuleGate?: boolean;
 }) => (
 	<CardComponent title={title} titleIcon={titleIcon} desc={desc} action={action}>
-		<BlurredProContent contentClassName={contentClassName} onClick={onClick}>
+		<BlurredProContent
+			contentClassName={contentClassName}
+			onClick={onClick}
+			icon={isModuleGate ? 'unlock' : ''}
+			title={isModuleGate ? __('Enable Commerce module', 'vulopilot') : undefined}
+			desc={
+				isModuleGate
+					? __(
+							'Turn the Commerce module on from Settings → Modules to see this here.',
+							'vulopilot'
+						)
+					: undefined
+			}
+			buttonText={isModuleGate ? __('Enable module', 'vulopilot') : undefined}
+		>
 			{children}
 		</BlurredProContent>
 		<DummyDataNotice />
@@ -62,7 +79,7 @@ const DUMMY_TILES: { icon: string; title: string; desc: string }[] = [
 	{ icon: 'bar-chart', title: __('Revenue Reports', 'vulopilot'), desc: __('Today, this week, and this month.', 'vulopilot') },
 ];
 
-const CommerceProDummies = ({ onClick }: CommerceProDummiesProps) => (
+const CommerceProDummies = ({ onClick, isModuleGate }: CommerceProDummiesProps) => (
 	<>
 		<ColumnComponent fullHeight grid={6}>
 			<DummyCard
@@ -71,6 +88,7 @@ const CommerceProDummies = ({ onClick }: CommerceProDummiesProps) => (
 				desc={__('Select an AI action and a batch of products - each product gets its own proposal to review.', 'vulopilot')}
 				contentClassName="commerce-dummy-bulk"
 				onClick={onClick}
+				isModuleGate={isModuleGate}
 			>
 				<div className="commerce-dummy-field">{__('Rewrite product title', 'vulopilot')}</div>
 				<div className="commerce-dummy-field">{__('Search products by name…', 'vulopilot')}</div>
@@ -88,6 +106,7 @@ const CommerceProDummies = ({ onClick }: CommerceProDummiesProps) => (
 				desc={__("Your store's key numbers for the selected period.", 'vulopilot')}
 				contentClassName="commerce-dummy-glance"
 				onClick={onClick}
+				isModuleGate={isModuleGate}
 			>
 				<ChartComponent
 					type="dynamic-line"
@@ -115,6 +134,7 @@ const CommerceProDummies = ({ onClick }: CommerceProDummiesProps) => (
 				desc={__('Key areas of your WooCommerce store at a glance.', 'vulopilot')}
 				contentClassName="commerce-locked-preview"
 				onClick={onClick}
+				isModuleGate={isModuleGate}
 			>
 				{DUMMY_TILES.map((tile) => (
 					<div className="commerce-locked-tile" key={tile.title}>
@@ -133,6 +153,7 @@ const CommerceProDummies = ({ onClick }: CommerceProDummiesProps) => (
 				desc={__('Real cross-sell, upsell, and bundle opportunities across your store.', 'vulopilot')}
 				contentClassName="commerce-dummy-optimizer"
 				onClick={onClick}
+				isModuleGate={isModuleGate}
 			>
 				<AnalyticsComponent
 					variant="small"
@@ -153,6 +174,7 @@ const CommerceProDummies = ({ onClick }: CommerceProDummiesProps) => (
 				desc={__("Real, actionable insights about your store's revenue and products.", 'vulopilot')}
 				contentClassName="commerce-dummy-intelligence"
 				onClick={onClick}
+				isModuleGate={isModuleGate}
 			>
 				<ListComponent
 					className="mini-card report"
@@ -172,6 +194,7 @@ const CommerceProDummies = ({ onClick }: CommerceProDummiesProps) => (
 				desc={__('Real open WooCommerce findings, summarized.', 'vulopilot')}
 				contentClassName="commerce-dummy-assistant"
 				onClick={onClick}
+				isModuleGate={isModuleGate}
 			>
 				<div className="desc">
 					{__('(Example) 5 findings could be affecting sales. I can help optimize a batch of products with AI.', 'vulopilot')}
@@ -190,6 +213,7 @@ const CommerceProDummies = ({ onClick }: CommerceProDummiesProps) => (
 				desc={__('Findings from your most recent scans, grouped by check.', 'vulopilot')}
 				contentClassName="commerce-dummy-issues"
 				onClick={onClick}
+				isModuleGate={isModuleGate}
 			>
 				<ListComponent
 					className="mini-card report"
@@ -209,6 +233,7 @@ const CommerceProDummies = ({ onClick }: CommerceProDummiesProps) => (
 				desc={__('Products projected to run out of stock soon.', 'vulopilot')}
 				contentClassName="commerce-dummy-stockout"
 				onClick={onClick}
+				isModuleGate={isModuleGate}
 			>
 				<ListComponent
 					className="mini-card report"

@@ -29,7 +29,7 @@ export default {
 		{
 			key: 'keep_data_uninstall',
 			type: 'choice-toggle',
-			variant: 'compact',
+			iconEnable: true,
 			defaultValue: 'keep_data',
 			label: __('When VuloForm is deleted', 'vuloform'),
 			options: [
@@ -38,14 +38,14 @@ export default {
 					value: 'keep_data',
 					label: __('Keep data', 'vuloform'),
 					desc: __('Reinstalling picks up where you left off.', 'vuloform'),
-					icon: 'database green',
+					icon: 'database',
 				},
 				{
 					key: 'delete_everything',
 					value: 'delete_everything',
 					label: __('Delete everything', 'vuloform'),
 					desc: __('Removes forms, submissions and uploaded files.', 'vuloform'),
-					icon: 'delete red',
+					icon: 'delete',
 				},
 			],
 		},

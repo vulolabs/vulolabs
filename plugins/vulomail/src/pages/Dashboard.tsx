@@ -273,7 +273,7 @@ const Dashboard = () => {
 						{
 							text: __('Send a test', 'vulomail'),
 							icon: 'send',
-							color: 'purple',
+							color: 'white',
 							onClick: () => goTo('tools'),
 						},
 						{
@@ -369,18 +369,17 @@ const Dashboard = () => {
 								value={days}
 								onChange={(value) => setDays(value as string)}
 								modules={[]}
-								variant="pill"
 							/>
 						}
 					>
 						<AnalyticsComponent
-							variant="small"
+							variant="tinted"
 							cols={4}
 							data={[
-								{ icon: 'mail green', number: email.sent, text: __('Emails sent', 'vulomail') },
-								{ icon: 'error red', number: email.failed, text: __('Emails failed', 'vulomail') },
-								{ icon: 'send blue', number: sms.sent, text: __('SMS sent', 'vulomail') },
-								{ icon: 'error red', number: sms.failed, text: __('SMS failed', 'vulomail') },
+								{ colorClass: 'green', number: email.sent, text: __('Emails sent', 'vulomail') },
+								{ colorClass: 'red', number: email.failed, text: __('Emails failed', 'vulomail') },
+								{ colorClass: 'blue', number: sms.sent, text: __('SMS sent', 'vulomail') },
+								{ colorClass: 'red', number: sms.failed, text: __('SMS failed', 'vulomail') },
 							]}
 						/>
 					</CardComponent>
@@ -469,7 +468,6 @@ const Dashboard = () => {
 								message={__('Alerts are sent once an SMS connection is set as primary.', 'vulomail')}
 							/>
 						)}
-						<div className="vulomail-form-footer">
 							<ButtonInput
 								buttons={{
 									text:
@@ -480,7 +478,6 @@ const Dashboard = () => {
 									onClick: () => goTo('sms-alerts'),
 								}}
 							/>
-						</div>
 					</CardComponent>
 				</ColumnComponent>
 			</ContainerComponent>

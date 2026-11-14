@@ -21,7 +21,7 @@ const WhyAccessibilityMattersCard = () => (
 			className="checklist"
 			items={WHY_IT_MATTERS_POINTS.map((point) => ({
 				id: point,
-				icon: 'check green-color',
+				icon: 'check zyra-green-color',
 				title: point,
 			}))}
 		/>

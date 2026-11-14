@@ -110,3 +110,9 @@ if ( ! function_exists( 'vulomail_send_sms' ) ) {
 		return $result->success ? true : $result->to_wp_error();
 	}
 }
+
+if ( ! function_exists( 'vulomail_register_email_template' ) ) {
+	function vulomail_register_email_template( $name, array $args = array() ) {
+		return \VuloMail\Templates\Registry::register( $name, $args );
+	}
+}

@@ -75,6 +75,7 @@ interface LogList {
 	data: LogRow[];
 	total: number;
 	status_counts: { sent: number; failed: number };
+	channel_counts: { email: number; sms: number };
 }
 
 interface TableQuery {
@@ -82,16 +83,11 @@ interface TableQuery {
 	per_page?: number | string;
 	searchValue?: string;
 	categoryFilter?: string;
+	languageFilter?: string;
 	filter?: { date?: { startDate?: Date | string; endDate?: Date | string } };
 	orderby?: string;
 	order?: string;
 }
-
-const CHANNELS = [
-	{ key: 'all', value: 'all', label: __('All', 'vulomail') },
-	{ key: 'email', value: 'email', label: __('Email', 'vulomail') },
-	{ key: 'sms', value: 'sms', label: __('SMS', 'vulomail') },
-];
 
 /**
  * One end of the date-range filter as the calendar day that was picked (`YYYY-MM-DD`). The server
@@ -163,9 +159,8 @@ const linkify = (text: string): ReactNode[] =>
 		);
 
 const Logs = () => {
-	const [channel, setChannel] = useState('all');
 	const [query, setQuery] = useState<TableQuery>({ paged: 1, per_page: 10 });
-	const [list, setList] = useState<LogList>({ data: [], total: 0, status_counts: { sent: 0, failed: 0 } });
+	const [list, setList] = useState<LogList>({ data: [], total: 0, status_counts: { sent: 0, failed: 0 }, channel_counts: { email: 0, sms: 0 } });
 	const [isLoading, setIsLoading] = useState(true);
 	const [error, setError] = useState('');
 	const [reload, setReload] = useState(0);
@@ -196,7 +191,7 @@ const Logs = () => {
 		setIsLoading(true);
 
 		apiGet<LogList>('logs', {
-			channel: 'all' === channel ? undefined : channel,
+			channel: query.languageFilter && 'all' !== query.languageFilter ? query.languageFilter : undefined,
 			status: query.categoryFilter && 'all' !== query.categoryFilter ? query.categoryFilter : undefined,
 			search: query.searchValue || undefined,
 			after: pickedDay(query.filter?.date?.startDate),
@@ -218,7 +213,7 @@ const Logs = () => {
 		return () => {
 			cancelled = true;
 		};
-	}, [channel, query, reload]);
+	}, [query, reload]);
 
 	const openDetail = (row: LogRow) => {
 		apiGet<LogDetail>(`logs/${row.id}`)
@@ -297,37 +292,18 @@ const Logs = () => {
 				headerIcon="clock"
 				headerTitle={__('Logs', 'vulomail')}
 				headerDescription={__('Every email and text message this site has tried to send.', 'vulomail')}
-				headerCustomContent={
-					<div className="vulomail-inline">
-						<ToggleInput
-							options={CHANNELS}
-							value={channel}
-							onChange={(value) => setChannel(value as string)}
-							modules={[]}
-							variant="pill"
-						/>
-						<ButtonInput
-							buttons={{
-								text: __('Delete all logs', 'vulomail'),
-								icon: 'delete',
-								color: 'border-red',
-								disabled: 0 === sent + failed,
-								onClick: () => setConfirmClear(true),
-							}}
-						/>
-					</div>
-				}
 			/>
 			<ContainerComponent general>
 				<ColumnComponent>
 					<AnalyticsComponent
-						variant="small"
+						variant="small-card"
 						cols={3}
 						data={[
-							{ icon: 'check green', number: sent, text: __('Sent', 'vulomail') },
-							{ icon: 'error red', number: failed, text: __('Failed', 'vulomail') },
+							{ icon: 'check green', colorClass: 'green', number: sent, text: __('Sent', 'vulomail') },
+							{ icon: 'error red', colorClass: 'red', number: failed, text: __('Failed', 'vulomail') },
 							{
 								icon: 'analytics blue',
+								colorClass: 'blue',
 								number: 0 === sent + failed ? '—' : `${Math.round((sent / (sent + failed)) * 100)}%`,
 								text: __('Delivery rate', 'vulomail'),
 							},
@@ -335,7 +311,7 @@ const Logs = () => {
 					/>
 				</ColumnComponent>
 				<ColumnComponent>
-				<CardComponent id="logs-delivery-log-card" title={__('Delivery log', 'vulomail')} titleIcon="clock">
+				<CardComponent id="logs-delivery-log-card">
 					{error ? (
 						<ModuleGuardComponent icon="error" title={__('Could not load the log', 'vulomail')} desc={error} />
 					) : (
@@ -345,6 +321,12 @@ const Logs = () => {
 							filters={[{ key: 'date', type: 'date', label: __('Date range', 'vulomail') }]}
 							// Inline beside the search box, rather than zyra's floating filter bar.
 							filtersBeforeSearch
+							// After the search box. Nothing to delete until something has been logged.
+							buttonActions={
+								sent + failed > 0
+									? [{ label: __('Delete all logs', 'vulomail'), icon: 'delete', color: 'border-red', onClick: () => setConfirmClear(true) }]
+									: undefined
+							}
 							format={vulomailAppLocalizer.date_format_js}
 							headers={{
 								subject: {
@@ -424,7 +406,6 @@ const Logs = () => {
 							ids={list.data.map((row) => row.id)}
 							totalRows={list.total}
 							categoryCounts={[
-								// 'all' is TableCard's own default active category, so this pill starts selected.
 								{
 									value: 'all',
 									label: __('All', 'vulomail'),
@@ -432,6 +413,11 @@ const Logs = () => {
 								},
 								{ value: 'sent', label: __('Sent', 'vulomail'), count: list.status_counts.sent },
 								{ value: 'failed', label: __('Failed', 'vulomail'), count: list.status_counts.failed },
+							]}
+							languageFilterCounts={[
+								{ value: 'all', label: __('All', 'vulomail'), count: list.channel_counts.email + list.channel_counts.sms },
+								{ value: 'email', label: __('Email', 'vulomail'), count: list.channel_counts.email },
+								{ value: 'sms', label: __('SMS', 'vulomail'), count: list.channel_counts.sms },
 							]}
 							isLoading={isLoading}
 							onQueryUpdate={onQueryUpdate}
@@ -648,24 +634,15 @@ const Logs = () => {
 							<section>
 								<div className="vulomail-log-message-head">
 									<h4 className="vulomail-section-title">{__('Message', 'vulomail')}</h4>
-									<div className="vulomail-log-seg" role="tablist" aria-label={__('Message view', 'vulomail')}>
-										{(
-											[
-												['preview', __('Preview', 'vulomail')],
-												['raw', __('Plain text', 'vulomail')],
-											] as const
-										).map(([value, label]) => (
-											<button
-												key={value}
-												type="button"
-												role="tab"
-												aria-selected={value === messageView}
-												onClick={() => setMessageView(value)}
-											>
-												{label}
-											</button>
-										))}
-									</div>
+									<ToggleInput
+										
+										value={messageView}
+										onChange={(value) => setMessageView(value as 'preview' | 'raw')}
+										options={[
+											{ key: 'preview', value: 'preview', label: __('Preview', 'vulomail') },
+											{ key: 'raw', value: 'raw', label: __('Plain text', 'vulomail') },
+										]}
+									/>
 								</div>
 								<div className="vulomail-log-message">
 									{detail.subject && (
@@ -710,7 +687,7 @@ const Logs = () => {
 			>
 				<div className="vulomail-popup-body">
 					<p>{__('Every email and SMS log entry will be permanently deleted. This can\'t be undone.', 'vulomail')}</p>
-					<div className="vulomail-form-footer">
+				
 						<ButtonInput
 							buttons={[
 								{
@@ -728,7 +705,6 @@ const Logs = () => {
 								},
 							]}
 						/>
-					</div>
 				</div>
 			</PopupComponent>
 		</>

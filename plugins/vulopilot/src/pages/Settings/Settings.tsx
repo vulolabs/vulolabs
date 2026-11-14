@@ -12,6 +12,7 @@ import {
 	FormGroupWrapperComponent,
 	ModuleGuardComponent,
 	NavigatorComponent,
+	type SaveStatus,
 	PopupComponent,
 	SectionComponent,
 } from '@zyra/components';
@@ -31,6 +32,7 @@ import type { ComponentType } from 'react';
 const Settings = () => {
 	const [isLoading, setIsLoading] = useState(true);
 	const [error, setError] = useState<string | null>(null);
+	const [saveStatus, setSaveStatus] = useState<SaveStatus>('idle');
 	const settingsRef = useRef<Record<string, unknown>>({});
 	// Remounts the navigator (via `key`) when a filter adds tabs after this page first rendered.
 	const [proTabsTick, setProTabsTick] = useState(0);
@@ -154,6 +156,7 @@ const Settings = () => {
 								Popup={ShowProPopup}
 								// Per-tab opt-in into InputRenderer's card-grouped layout.
 								groupBySections={settingModal.groupBySections}
+								onSaveStatusChange={setSaveStatus}
 							/>
 						) : (
 							<ModuleGuardComponent
@@ -269,6 +272,7 @@ const Settings = () => {
 				Link={Link}
 				settingName={'Settings'}
 				className="admin-settings"
+				saveStatus={saveStatus}
 			/>
 		</SettingProvider>
 	);

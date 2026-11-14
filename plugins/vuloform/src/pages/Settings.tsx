@@ -3,7 +3,7 @@ import { useEffect, useRef, useState, JSX } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { __ } from '@wordpress/i18n';
 import { getAvailableSettings, getSettingById, SettingProvider, useSetting } from '@zyra/core';
-import { CardComponent, ModuleGuardComponent, NavigatorComponent } from '@zyra/components';
+import { CardComponent, ModuleGuardComponent, NavigatorComponent, type SaveStatus } from '@zyra/components';
 import { InputRenderer } from '@zyra/inputs';
 import { apiGet } from '../services/api';
 import { errorMessage } from '../services/notify';
@@ -34,6 +34,7 @@ interface Stored {
 const Settings = () => {
 	const [isLoading, setIsLoading] = useState(true);
 	const [error, setError] = useState<string | null>(null);
+	const [saveStatus, setSaveStatus] = useState<SaveStatus>('idle');
 	const settingsRef = useRef<Record<string, unknown>>({});
 
 	const settingsArray = getAvailableSettings(getTemplateData('settings'), []);
@@ -126,6 +127,7 @@ const Settings = () => {
 							updateSetting={updateSetting}
 							Popup={() => null}
 							groupBySections={settingModal.groupBySections}
+							onSaveStatusChange={setSaveStatus}
 						/>
 					) : (
 						<ModuleGuardComponent
@@ -165,6 +167,7 @@ const Settings = () => {
 				settingName={'Settings'}
 				className="admin-settings"
 				menuIcon
+				saveStatus={saveStatus}
 			/>
 		</SettingProvider>
 	);

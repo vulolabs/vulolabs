@@ -4,6 +4,7 @@ import Dashboard from './pages/Dashboard';
 import Logs from './pages/Logs';
 import Tools from './pages/Tools';
 import SmsAlerts from './pages/SmsAlerts';
+import EmailTemplates from './pages/EmailTemplates';
 import Settings from './pages/Settings';
 
 export interface RouteDefinition {
@@ -28,6 +29,12 @@ export const routes: RouteDefinition[] = [
 		name: __('SMS Alerts', 'vulomail'),
 		desc: __('Text messages for site, store and customer events.', 'vulomail'),
 		component: SmsAlerts,
+	},
+	{
+		tab: 'email-templates',
+		name: __('Email Templates', 'vulomail'),
+		desc: __('Customise every plugin’s email templates from one place.', 'vulomail'),
+		component: EmailTemplates,
 	},
 	{
 		tab: 'logs',

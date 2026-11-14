@@ -55,6 +55,10 @@ class Admin {
 					'name'     => __( 'SMS Alerts', 'vulomail' ),
 					'priority' => 20,
 				),
+				'email-templates' => array(
+					'name'     => __( 'Email Templates', 'vulomail' ),
+					'priority' => 25,
+				),
 				'logs'       => array(
 					'name'     => __( 'Logs', 'vulomail' ),
 					'priority' => 30,

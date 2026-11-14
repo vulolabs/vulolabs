@@ -6,7 +6,7 @@ import { applyFilters } from '@wordpress/hooks';
 import { useLocation, Link } from 'react-router-dom';
 import { getApiLink, getApiResponse, getAvailableSettings, getSettingById } from '@zyra/core';
 import { InputRenderer } from '@zyra/inputs';
-import { CardComponent, NavigatorComponent } from '@zyra/components';
+import { CardComponent, NavigatorComponent, type SaveStatus } from '@zyra/components';
 import { SettingProvider, useSetting } from '../../contexts/SettingContext';
 import { getTemplateData } from '../../services/templateService';
 import Popup from '../../components/Popup/Popup';
@@ -19,6 +19,7 @@ import ModulesPanel from '../../components/Settings/ModulesPanel';
 const Settings = () => {
 	const [ isLoading, setIsLoading ] = useState( true );
 	const [ error, setError ] = useState< string | null >( null );
+	const [ saveStatus, setSaveStatus ] = useState< SaveStatus >( 'idle' );
 	const settingsRef = useRef< Record< string, unknown > >( {} );
 
 	const settingsArray = getAvailableSettings( getTemplateData( 'settings' ), [] );
@@ -126,6 +127,7 @@ const Settings = () => {
 						// A tab can opt in to InputRenderer's card-grouped layout with `groupBySections: true`
 						// (General.ts is the first).
 						groupBySections={ settingModal?.groupBySections }
+						onSaveStatusChange={ setSaveStatus }
 					/>
 					{ /* A section that isn't a field list (e.g. Integrations' VuloCloud AI connection) is
 					      drawn after the declarative ones. */ }
@@ -167,6 +169,7 @@ const Settings = () => {
 				// rows). Without it the fields sit flush against their labels and the row edges.
 				className="admin-settings vulocart-settings"
 				menuIcon
+				saveStatus={ saveStatus }
 			/>
 		</SettingProvider>
 	);

@@ -56,42 +56,55 @@ class FormRepository {
 	}
 
 	/**
-	 * Paginated list for the admin table, each with its submission counts.
+	 * Paginated list for the admin table.
 	 *
-	 * @param array $args search, status, page, per_page.
+	 * @param array $args search, status, plugin, page, per_page.
 	 * @return array{data: array, total: int}
 	 */
 	public function query( array $args = array() ) {
 		global $wpdb;
 
-		$where  = array( '1=1' );
-		$params = array();
+		$table   = $this->table();
+		$plugin  = (string) ( $args['plugin'] ?? '' );
+		$plugins = Templates::plugins();
+		$where   = array();
+		$hidden  = Templates::unavailable();
 
 		if ( ! empty( $args['search'] ) ) {
-			$where[]  = 'title LIKE %s';
-			$params[] = '%' . $wpdb->esc_like( $args['search'] ) . '%';
+			$where[] = $wpdb->prepare( 'title LIKE %s', '%' . $wpdb->esc_like( $args['search'] ) . '%' );
 		}
 
 		if ( in_array( $args['status'] ?? '', self::STATUSES, true ) ) {
-			$where[]  = 'status = %s';
-			$params[] = $args['status'];
+			$where[] = $wpdb->prepare( 'status = %s', $args['status'] );
 		}
 
-		$where_sql = implode( ' AND ', $where );
+		if ( 'vuloform' === $plugin ) {
+			// Forms that were not made from any plugin's template.
+			$hidden = array_merge( $hidden, ...array_values( $plugins ) );
+		} elseif ( '' !== $plugin && 'all' !== $plugin ) {
+			// A plugin that offers no templates has no forms in the list.
+			if ( empty( $plugins[ $plugin ] ) ) {
+				return array(
+					'data'  => array(),
+					'total' => 0,
+				);
+			}
+
+			$where[] = $this->template_sql( $plugins[ $plugin ] );
+		}
+
+		if ( $hidden ) {
+			$where[] = $this->template_sql( $hidden, true );
+		}
+
+		$where_sql = $where ? 'WHERE ' . implode( ' AND ', $where ) : '';
 		$per_page  = (int) ( $args['per_page'] ?? 0 );
 		$per_page  = $per_page > 0 ? min( 100, $per_page ) : 10;
 		$offset    = ( max( 1, (int) ( $args['page'] ?? 1 ) ) - 1 ) * $per_page;
 
-		// phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber -- $where_sql holds only the fixed fragments built above; values go through prepare().
-		$total = (int) $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM %i WHERE {$where_sql}", array_merge( array( $this->table() ), $params ) ) );
-
-		$rows = $wpdb->get_results(
-			$wpdb->prepare(
-				"SELECT id, title, status, created_at, updated_at FROM %i WHERE {$where_sql} ORDER BY updated_at DESC, id DESC LIMIT %d OFFSET %d",
-				array_merge( array( $this->table() ), $params, array( $per_page, $offset ) )
-			),
-			ARRAY_A
-		);
+		// phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- the table name is ours, $where_sql is built from prepare() calls above and the numbers are integers.
+		$total = (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$table} {$where_sql}" );
+		$rows  = $wpdb->get_results( "SELECT id, title, status, created_at, updated_at FROM {$table} {$where_sql} ORDER BY updated_at DESC, id DESC LIMIT {$per_page} OFFSET {$offset}", ARRAY_A );
 		// phpcs:enable
 
 		return array(
@@ -101,25 +114,61 @@ class FormRepository {
 	}
 
 	/**
+	 * @param string $template Template id.
+	 * @return int[] Forms made from that template, oldest first.
+	 */
+	public function ids_for_template( $template ) {
+		global $wpdb;
+
+		if ( '' === $template ) {
+			return array();
+		}
+
+		$table = $this->table();
+		$where = $this->template_sql( array( $template ) );
+
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- the table name is ours, $where comes from prepare().
+		$ids = $wpdb->get_col( "SELECT id FROM {$table} WHERE {$where} ORDER BY id ASC" );
+
+		return array_map( 'intval', $ids );
+	}
+
+	/**
+	 * A form remembers its template as `"template":"id"` inside its schema, so that is what we match.
+	 *
+	 * @param string[] $ids Template ids, at least one.
+	 * @param bool     $not True for forms made from none of them, false for any of them.
+	 * @return string Already-prepared SQL condition.
+	 */
+	private function template_sql( array $ids, $not = false ) {
+		global $wpdb;
+
+		$conditions = array();
+
+		foreach ( $ids as $id ) {
+			$like         = '%' . $wpdb->esc_like( '"template":' . wp_json_encode( $id ) ) . '%';
+			$conditions[] = $wpdb->prepare( $not ? 'form_schema NOT LIKE %s' : 'form_schema LIKE %s', $like );
+		}
+
+		return '(' . implode( $not ? ' AND ' : ' OR ', $conditions ) . ')';
+	}
+
+	/**
 	 * @return array<int, array{id: string, title: string}> Published forms, for the block and shortcode pickers.
 	 */
 	public function published() {
 		global $wpdb;
 
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
-		$rows = $wpdb->get_results( $wpdb->prepare( 'SELECT id, title FROM %i WHERE status = %s ORDER BY title ASC LIMIT 500', $this->table(), 'published' ), ARRAY_A );
+		$table  = $this->table();
+		$hidden = Templates::unavailable();
+		$extra  = $hidden ? ' AND ' . $this->template_sql( $hidden, true ) : '';
+
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- the table name is ours, $extra comes from prepare().
+		$rows = $wpdb->get_results( "SELECT id, title FROM {$table} WHERE status = 'published'{$extra} ORDER BY title ASC LIMIT 500", ARRAY_A );
 
 		return $rows ? $rows : array();
 	}
 
-	/**
-	 * Creates a form.
-	 *
-	 * @param string $title  Title.
-	 * @param mixed  $schema Schema, sanitized here.
-	 * @param string $status draft or published.
-	 * @return int New form id, 0 on failure.
-	 */
 	public function create( $title, $schema = array(), $status = 'draft' ) {
 		global $wpdb;
 
@@ -198,7 +247,13 @@ class FormRepository {
 		unset( $this->cache[ (int) $id ] );
 
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
-		return (bool) $wpdb->delete( $this->table(), array( 'id' => (int) $id ) );
+		$deleted = (bool) $wpdb->delete( $this->table(), array( 'id' => (int) $id ) );
+
+		if ( $deleted ) {
+			do_action( 'vuloform_form_deleted', (int) $id );
+		}
+
+		return $deleted;
 	}
 
 	/**

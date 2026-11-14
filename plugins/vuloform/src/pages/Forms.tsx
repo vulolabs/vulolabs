@@ -14,6 +14,7 @@ import { TableCard } from '@zyra/table';
 import { apiDelete, apiGet, apiPost } from '../services/api';
 import { errorMessage, notify } from '../services/notify';
 import type { Form } from '../services/types';
+import '../components/forms.scss';
 
 interface FormRow {
 	id: number;
@@ -90,16 +91,20 @@ const Forms = () => {
 		(source) => source.plugin_file && source.forms.some((form) => form.already_migrated)
 	);
 
+	// A template a plugin supplies is grouped under that plugin's name instead of its own category.
+	const categoryOf = (template: { category?: string; plugin?: string }) => template.plugin || template.category || '';
+
 	// Categories in first-seen order, each with how many templates it holds.
 	const templateCategories = vuloformAppLocalizer.templates.reduce<
 		Array<{ id: string; label: string; count: number }>
 	>((categories, template) => {
-		const existing = categories.find((category) => category.label === template.category);
+		const label = categoryOf(template);
+		const existing = categories.find((category) => category.label === label);
 
 		if (existing) {
 			existing.count++;
 		} else {
-			categories.push({ id: template.category, label: template.category, count: 1 });
+			categories.push({ id: label, label, count: 1 });
 		}
 
 		return categories;
@@ -109,7 +114,7 @@ const Forms = () => {
 		'all' === templateCategory
 			? vuloformAppLocalizer.templates
 			: vuloformAppLocalizer.templates.filter(
-					(template) => template.category === templateCategory
+					(template) => categoryOf(template) === templateCategory
 				);
 
 	const onQueryUpdate = useCallback((next: TableQuery) => setQuery(next), []);
@@ -412,6 +417,15 @@ const Forms = () => {
 														text={__('Draft', 'vuloform')}
 													/>
 												)}
+												{0 === row.submissions && (
+													<BadgeComponent
+														color="blue"
+														text={__(
+															'No submissions',
+															'vuloform'
+														)}
+													/>
+												)}
 											</span>
 											<span className="vuloform-cell-secondary">
 												{sprintf(
@@ -423,85 +437,43 @@ const Forms = () => {
 										</div>
 									),
 								},
-								submissions: {
-									label: __('Submissions', 'vuloform'),
+								shortcode: {
+									label: __('Shortcode', 'vuloform'),
 									render: (row: FormRow) => (
-										<a
-											href={`#&tab=submissions&form=${row.id}`}
-										>
-											{sprintf(
-												/* translators: %d: number of submissions. */
-												_n(
-													'%d submission',
-													'%d submissions',
-													row.submissions,
-													'vuloform'
-												),
-												row.submissions
-											)}
-											{row.unread > 0 && (
-												<>
-													{' '}
-													<BadgeComponent
-														color="blue"
-														text={sprintf(
-															/* translators: %d: number of unread submissions. */
-															__(
-																'%d new',
-																'vuloform'
-															),
-															row.unread
-														)}
-													/>
-												</>
-											)}
-										</a>
+										<code className="vuloform-cell-shortcode">
+											{`[vuloform id="${row.id}"]`}
+										</code>
 									),
 								},
 								id: {
-									label: '',
-									render: (row: FormRow) => (
-										<div className="vuloform-row-actions">
-											<ButtonInput
-												buttons={[
-													{
-														text: __(
-															'Edit',
-															'vuloform'
-														),
-														icon: 'edit',
-														color: 'purple',
-														onClick: () =>
-															open(
-																`&tab=forms&form=${row.id}`
-															),
-													},
-													{
-														text: __(
-															'Duplicate',
-															'vuloform'
-														),
-														icon: 'copy',
-														color: 'purple',
-														onClick: () =>
-															duplicate(row),
-													},
-													{
-														text: __(
-															'Delete',
-															'vuloform'
-														),
-														icon: 'delete',
-														color: 'border-red',
-														onClick: () =>
-															setPendingDelete(
-																row
-															),
-													},
-												]}
-											/>
-										</div>
-									),
+									label: __('Actions', 'vuloform'),
+									type: 'action',
+									actions: [
+										{
+											label: __('Edit', 'vuloform'),
+											icon: 'edit',
+											color: 'text-purple',
+											type: 'button',
+											onClick: (row: Record<string, unknown>) =>
+												open(`&tab=forms&form=${(row as unknown as FormRow).id}`),
+										},
+										{
+											label: __('Duplicate', 'vuloform'),
+											icon: 'copy',
+											color: 'text-purple',
+											type: 'button',
+											onClick: (row: Record<string, unknown>) =>
+												duplicate(row as unknown as FormRow),
+										},
+										{
+											label: __('Delete', 'vuloform'),
+											icon: 'delete',
+											color: 'text-red',
+											type: 'button',
+											onClick: (row: Record<string, unknown>) =>
+												setPendingDelete(row as unknown as FormRow),
+										},
+									],
 								},
 							}}
 							rows={list.data}
@@ -588,6 +560,7 @@ const Forms = () => {
 										aria-hidden="true"
 									/>
 									<strong>{template.title}</strong>
+									{template.plugin && <BadgeComponent color="purple" text={template.plugin} />}
 									<span>{template.desc}</span>
 								</button>
 							))}

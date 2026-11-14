@@ -35,8 +35,7 @@ const CONNECTIONS = settingsUrl('connections');
  */
 const RULES: Rule[] = [
 	{
-		// PHPMailer's "Invalid address: (From): wordpress@localhost". Checked first: connecting a
-		// service wouldn't fix it.
+		// PHPMailer's "Invalid address: (From): wordpress@localhost" - checked first, since connecting a service wouldn't fix it.
 		matches: (code, text) => /invalid address:?\s*\(from\)/i.test(text),
 		help: () => ({
 			text: __(
@@ -76,8 +75,7 @@ const RULES: Rule[] = [
 		}),
 	},
 	{
-		// WordPress's built-in mailer failed, usually "Could not instantiate mail function.": the
-		// server has no mail program, which is normal on most hosting.
+		// WordPress's built-in mailer failed - usually no mail program on the server, normal on most hosting.
 		matches: (code, text, provider) =>
 			'wp_mail_failed' === code || 'default' === provider || /instantiate mail function|sendmail/i.test(text),
 		help: () => ({

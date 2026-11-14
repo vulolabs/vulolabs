@@ -1,5 +1,19 @@
 @use '../../components/config' as *;
 
+#content-quick-actions-card {
+	.item.icon-purple .item-icon {
+		color: #7c5cc4;
+	}
+
+	.item.icon-blue .item-icon {
+		color: #0284c7;
+	}
+
+	.item.icon-orange .item-icon {
+		color: #e67a2e;
+	}
+}
+
 .content-quality-overview-wrapper{
 	display: flex;
 	gap: 1rem;

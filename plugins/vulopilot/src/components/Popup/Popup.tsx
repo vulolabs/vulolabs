@@ -74,7 +74,7 @@ const ShowProPopup: React.FC<PopupProps> = (props) => {
 	if (props.confirmMode) {
 		return (
 			<div className="popup-confirm">
-				<i className="popup-icon adminfont-suspended admin-badge red"></i>
+				<i className="popup-icon adminfont-suspended admin-badge zyra-red"></i>
 				<div className="title">{props.title || __('Confirmation', 'vulopilot')}</div>
 				<div className="desc">{props.confirmMessage}</div>
 				<ButtonInput
@@ -144,8 +144,8 @@ const ShowProPopup: React.FC<PopupProps> = (props) => {
 	if (props.vulocloud) {
 		return (
 			<div className="popup-wrapper">
-				<div className="popup-header orange-bg">
-					<i className="adminfont-lock orange-bg" />
+				<div className="popup-header zyra-orange-bg">
+					<i className="adminfont-lock zyra-orange-bg" />
 				</div>
 				<div className="popup-body">
 					<div className="module-name">

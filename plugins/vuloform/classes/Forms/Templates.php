@@ -15,6 +15,25 @@ defined( 'ABSPATH' ) || exit;
  */
 class Templates {
 
+	public static function plugins() {
+		$plugins = array();
+
+		foreach ( self::all() as $id => $template ) {
+			if ( ! empty( $template['plugin'] ) ) {
+				$plugins[ $template['plugin'] ][] = $id;
+			}
+		}
+
+		return $plugins;
+	}
+
+	public static function unavailable() {
+		return array();
+	}
+	public static function protected_form_ids() {
+		return array();
+	}
+
 	/**
 	 * @return array<string, array{title: string, desc: string, icon: string, category: string, schema: array}>
 	 */
@@ -181,6 +200,33 @@ class Templates {
 						array( 'options' => self::options( array( __( 'Vegetarian', 'vuloform' ), __( 'Vegan', 'vuloform' ), __( 'Gluten free', 'vuloform' ) ) ) )
 					),
 					self::field( 'textarea', __( 'Anything we should know?', 'vuloform' ) ),
+				),
+				'submit' => __( 'Register', 'vuloform' ),
+			),
+			'registration' => array(
+				'title'  => __( 'Registration form', 'vuloform' ),
+				'desc'   => __( 'Account details for a new member, with consent.', 'vuloform' ),
+				'icon'   => 'person',
+				'fields' => array(
+					self::field( 'text', __( 'First name', 'vuloform' ), array( 'required' => true, 'width' => 50 ) ),
+					self::field( 'text', __( 'Last name', 'vuloform' ), array( 'required' => true, 'width' => 50 ) ),
+					$email,
+					$phone,
+					self::field( 'date', __( 'Date of birth', 'vuloform' ) ),
+					self::field(
+						'radio',
+						__( 'Gender', 'vuloform' ),
+						array( 'options' => self::options( array( __( 'Female', 'vuloform' ), __( 'Male', 'vuloform' ), __( 'Other', 'vuloform' ), __( 'Prefer not to say', 'vuloform' ) ) ) )
+					),
+					self::field( 'address', __( 'Address', 'vuloform' ) ),
+					self::field(
+						'consent',
+						__( 'Terms', 'vuloform' ),
+						array(
+							'required'     => true,
+							'consent_text' => __( 'I agree to the terms and conditions.', 'vuloform' ),
+						)
+					),
 				),
 				'submit' => __( 'Register', 'vuloform' ),
 			),

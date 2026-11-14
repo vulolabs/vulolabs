@@ -1,7 +1,6 @@
 import { __ } from '@wordpress/i18n';
 import { NoticeComponent } from '@zyra/components';
-import { ButtonInput, SelectInput, TextInput } from '@zyra/inputs';
-import { Segmented } from './Section';
+import { ButtonInput, SelectInput, TextInput, ToggleInput } from '@zyra/inputs';
 import type { Field, Rule, When as WhenValue } from '../services/types';
 import { fieldType } from './fields';
 
@@ -54,12 +53,11 @@ const When = ({ name, value, fields, onChange }: WhenProps) => {
 	return (
 		<div className="vuloform-when">
 			{when.rules.length > 1 && (
-				<Segmented
-					label={__('How many rules must be true', 'vuloform')}
+				<ToggleInput
 					value={when.match}
 					options={[
-						{ value: 'all', label: __('All of these are true', 'vuloform') },
-						{ value: 'any', label: __('Any of these is true', 'vuloform') },
+						{ key: 'all', value: 'all', label: __('All of these are true', 'vuloform') },
+						{ key: 'any', value: 'any', label: __('Any of these is true', 'vuloform') },
 					]}
 					onChange={(match) => onChange({ ...when, match: match as 'all' | 'any' })}
 				/>

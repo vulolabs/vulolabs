@@ -2,7 +2,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { useLocation, Link } from 'react-router-dom';
 import { __ } from '@wordpress/i18n';
-import { CardComponent, ModuleGuardComponent, NavigatorComponent } from '@zyra/components';
+import { CardComponent, ModuleGuardComponent, NavigatorComponent, type SaveStatus } from '@zyra/components';
 import { InputRenderer } from '@zyra/inputs';
 import { SettingProvider, useSetting } from '../contexts/SettingContext';
 import schemas, { TEMPLATE_PREFIX } from '../components/Settings';
@@ -14,6 +14,11 @@ import { settingsUrl } from '../services/types';
 import type { Settings as StoredSettings } from '../services/types';
 
 type FormValues = Record<string, unknown>;
+
+// One array for the life of the page: the navigator re-selects the tab named in the URL whenever
+// it receives a new `settingContent`, so building it on every render sent you back to the first tab
+// each time a save changed the status indicator.
+const settingContent = schemas.map((schema) => ({ type: 'file' as const, content: schema }));
 
 /**
  * Converts stored settings into the value each form field expects (see components/Settings/index.ts
@@ -65,6 +70,7 @@ export const schemaValues = (schema: SettingsSchema, stored: StoredSettings): Fo
 const Settings = () => {
 	const [isLoading, setIsLoading] = useState(true);
 	const [error, setError] = useState('');
+	const [saveStatus, setSaveStatus] = useState<SaveStatus>('idle');
 	// Form values for every sub-tab, kept across sub-tab switches.
 	const valuesRef = useRef<FormValues>({});
 
@@ -124,6 +130,7 @@ const Settings = () => {
 				updateSetting={updateSetting}
 				Popup={RequiredPluginPopup}
 				groupBySections={schema.groupBySections}
+				onSaveStatusChange={setSaveStatus}
 			/>
 		);
 	};
@@ -143,7 +150,7 @@ const Settings = () => {
 	return (
 		<SettingProvider>
 			<NavigatorComponent
-				settingContent={schemas.map((schema) => ({ type: 'file' as const, content: schema }))}
+				settingContent={settingContent}
 				currentSetting={current}
 				getForm={GetForm}
 				prepareUrl={settingsUrl}
@@ -152,6 +159,7 @@ const Settings = () => {
 				settingName={'Settings'}
 				className="admin-settings"
 				menuIcon
+				saveStatus={saveStatus}
 			/>
 		</SettingProvider>
 	);

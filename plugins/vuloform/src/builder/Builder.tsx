@@ -2,17 +2,16 @@
 import { useEffect, useRef, useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import { __, _n, sprintf } from '@wordpress/i18n';
-import { BadgeComponent, CardComponent, ContainerComponent, ModuleGuardComponent, PopupComponent } from '@zyra/components';
-import { ButtonInput } from '@zyra/inputs';
+import { BreadcrumbTrail, CardComponent, ContainerComponent, FormGroupComponent, ModuleGuardComponent, NavigatorHeaderComponent, PopupComponent, TabsComponent, type SaveStatus } from '@zyra/components';
+import { ButtonInput, MultiCheckboxInput } from '@zyra/inputs';
 import { apiGet, apiPost } from '../services/api';
 import { errorMessage, notify } from '../services/notify';
 import type { Field, Form, FormSettings as Settings } from '../services/types';
 import Canvas from './Canvas';
 import Inspector from './Inspector';
-import { createField, uniqueKey } from './fields';
+import { createField, lockOf, uniqueKey } from './fields';
 import FormSettings, { lastSection, openSettingsGroup } from './FormSettings';
 import Share from './Share';
-import Switch from './Switch';
 import { builderHash, openBuilder, tabFromHash } from './route';
 import type { BuilderTab } from './route';
 import { duplicateField } from './fields';
@@ -31,8 +30,6 @@ const TABS: { id: Tab; label: string; icon: string }[] = [
 	{ id: 'share', label: __('Share', 'vuloform'), icon: 'link' },
 ];
 
-const HISTORY_LIMIT = 60;
-
 /**
  * A snapshot as text, to compare with what was saved. The drag-and-drop library marks the fields it
  * handles with `chosen` and `selected`; those are not part of the form.
@@ -44,14 +41,12 @@ const fingerprint = (snapshot: unknown): string => JSON.stringify(snapshot, (key
  *
  * One snapshot (title, fields, settings) is the source of truth; the palette, canvas, field
  * settings and form settings all read from it and report changes back here. Every change goes
- * through commit(), which is what makes undo, redo and the unsaved-changes warning work.
+ * through commit(), which is what makes the unsaved-changes warning work.
  */
 const Builder = ({ formId }: { formId: number }) => {
 	const [form, setForm] = useState<Form | null>(null);
 	const [error, setError] = useState('');
 	const [present, setPresent] = useState<Snapshot | null>(null);
-	const [past, setPast] = useState<Snapshot[]>([]);
-	const [future, setFuture] = useState<Snapshot[]>([]);
 	const [selectedId, setSelectedId] = useState('');
 	// The open tab is read from the URL (`&subtab=settings`), so it can be linked to and reloaded.
 	const tab = tabFromHash(useLocation().hash);
@@ -68,10 +63,10 @@ const Builder = ({ formId }: { formId: number }) => {
 	const inFlight = useRef(false);
 	const [problems, setProblems] = useState<NonNullable<Form['issues']>>([]);
 	const [previewHtml, setPreviewHtml] = useState<string | null>(null);
-	const lastCommit = useRef(0);
-	// Undoing back to what was saved is not an unsaved change.
 	const isDirty = null !== present && fingerprint(present) !== savedSnapshot.current;
 	const previewRef = useRef<HTMLDivElement>(null);
+	// What zyra's save-status pill shows. A change waiting for its autosave counts as saving.
+	const saveStatus: SaveStatus = 'error' === saveState ? 'error' : isSaving ? 'saving' : isDirty ? 'pending' : 'saved' === saveState ? 'saved' : 'idle';
 
 	latest.current = { form, present };
 
@@ -231,40 +226,7 @@ const Builder = ({ formId }: { formId: number }) => {
 		);
 	}
 
-	const commit = (patch: Partial<Snapshot>) => {
-		const now = Date.now();
-
-		// Typing produces a change per keystroke; changes close together share one undo step.
-		if (now - lastCommit.current > 700) {
-			setPast((items) => [...items.slice(-HISTORY_LIMIT + 1), present]);
-		}
-
-		lastCommit.current = now;
-		setFuture([]);
-		setPresent({ ...present, ...patch });
-	};
-
-	const undo = () => {
-		if (!past.length) {
-			return;
-		}
-
-		setFuture((items) => [present, ...items]);
-		setPresent(past[past.length - 1]);
-		setPast((items) => items.slice(0, -1));
-		lastCommit.current = 0;
-	};
-
-	const redo = () => {
-		if (!future.length) {
-			return;
-		}
-
-		setPast((items) => [...items, present]);
-		setPresent(future[0]);
-		setFuture((items) => items.slice(1));
-		lastCommit.current = 0;
-	};
+	const commit = (patch: Partial<Snapshot>) => setPresent({ ...present, ...patch });
 
 	const publish = (status: Form['status']) => {
 		if ('published' === status) {
@@ -313,94 +275,55 @@ const Builder = ({ formId }: { formId: number }) => {
 
 	return (
 		<div className="vuloform-builder settings-wrapper tabs" data-template="default">
-			{/* The same page header and tab strip as the other VuloLabs screens, drawn with zyra's own classes. */}
-			<div className="title-section">
-				<div className="title-wrapper">
-					<div className="typography typography-title vuloform-builder-heading">
-						<i className="adminfont-form title-icon" aria-hidden="true" />
-						<input
-							type="text"
-							className="vuloform-builder-name"
-							name="form-title"
-							value={present.title}
-							placeholder={__('Form name', 'vuloform')}
-							aria-label={__('Form name', 'vuloform')}
-							size={Math.max(8, present.title.length + 1)}
-							onChange={(event) => commit({ title: event.target.value })}
-						/>
-						{'published' === form.status ? (
-							<BadgeComponent color="green" text={__('Published', 'vuloform')} />
-						) : (
-							<BadgeComponent color="yellow" text={__('Draft', 'vuloform')} />
-						)}
-					</div>
-					<div className="breadcrumbs">
-						<span>
-							<a href="#&tab=forms">{__('Forms', 'vuloform')}</a>
-						</span>
-						<span> / {present.title || __('Untitled form', 'vuloform')}</span>
-						{/* Changes save by themselves; this says where that stands, and nothing when there is nothing to say. */}
-						<span className={`vuloform-builder-dirty is-${saveState}`} aria-live="polite">
-							{(() => {
-								if (isSaving) {
-									return __('Saving…', 'vuloform');
-								}
-
-								if ('error' === saveState) {
-									return __('Could not save. Trying again shortly.', 'vuloform');
-								}
-
-								if (isDirty) {
-									return __('Unsaved changes', 'vuloform');
-								}
-
-								return 'saved' === saveState ? __('Saved', 'vuloform') : '';
-							})()}
-						</span>
-					</div>
-				</div>
-				<div className="title-custom-section vuloform-builder-actions">
-					<div className="vuloform-builder-history">
-						<button type="button" className="vuloform-icon-button" disabled={!past.length} onClick={undo} aria-label={__('Undo', 'vuloform')} title={__('Undo', 'vuloform')}>
-							<i className="adminfont-undo" aria-hidden="true" />
-						</button>
-						<button type="button" className="vuloform-icon-button" disabled={!future.length} onClick={redo} aria-label={__('Redo', 'vuloform')} title={__('Redo', 'vuloform')}>
-							<i className="adminfont-undo is-mirrored" aria-hidden="true" />
-						</button>
-					</div>
-					<ButtonInput
-						buttons={[
-							{ text: __('Preview', 'vuloform'), icon: 'eye', color: 'purple', onClick: preview },
-							'published' === form.status
-								? { text: __('Unpublish', 'vuloform'), color: 'purple', disabled: isSaving, onClick: () => publish('draft') }
-								: { text: __('Publish', 'vuloform'), icon: 'check', disabled: isSaving, onClick: () => publish('published') },
-						]}
+			<NavigatorHeaderComponent
+				headerDescription={__('Build the form, then publish it. Your changes are saved as you make them.', 'vuloform')}
+				headerTitle={
+					<input
+						type="text"
+						className="vuloform-builder-name"
+						name="form-title"
+						value={present.title}
+						placeholder={__('Form name', 'vuloform')}
+						aria-label={__('Form name', 'vuloform')}
+						size={Math.max(8, present.title.length + 1)}
+						onChange={(event) => commit({ title: event.target.value })}
 					/>
-				</div>
-			</div>
+				}
+				badges={[{ text: 'published' === form.status ? __('Published', 'vuloform') : __('Draft', 'vuloform'), color: 'published' === form.status ? 'green' : 'yellow' }]}
+				breadcrumbs={
+					<BreadcrumbTrail
+						ariaLabel={__('Breadcrumb', 'vuloform')}
+						items={[{ label: __('Forms', 'vuloform'), href: '#&tab=forms' }, { label: present.title || __('Untitled form', 'vuloform') }]}
+					/>
+				}
+				saveStatus={saveStatus}
+				saveStatusLabels={{
+					idle: __('Changes save automatically', 'vuloform'),
+					saving: __('Saving…', 'vuloform'),
+					saved: __('Saved', 'vuloform'),
+					error: __('Could not save. Trying again shortly.', 'vuloform'),
+				}}
+				headerCustomContent={
+					<div className="vuloform-builder-actions">
+						<ButtonInput
+							buttons={[
+								{ text: __('Preview', 'vuloform'), icon: 'eye', color: 'white', onClick: preview },
+								'published' === form.status
+									? { text: __('Unpublish', 'vuloform'), color: 'red', disabled: isSaving, onClick: () => publish('draft') }
+									: { text: __('Publish', 'vuloform'), icon: 'check', disabled: isSaving, onClick: () => publish('published') },
+							]}
+						/>
+					</div>
+				}
+			/>
 
-			<div className="tabs-wrapper settings-tab">
-				<div className="tabs-item" role="tablist">
-					{TABS.map((item) => (
-						<a
-							href={`#${builderHash(item.id, 'settings' === item.id ? lastSection() : '')}`}
-							role="tab"
-							key={item.id}
-							aria-selected={tab === item.id}
-							className={`tab ${tab === item.id ? 'active-tab' : ''}`}
-							onClick={(event) => {
-								event.preventDefault();
-								setTab(item.id);
-							}}
-						>
-							<div className="tab-name">
-								<i className={`adminfont-${item.icon}`} aria-hidden="true" />
-								{item.label}
-							</div>
-						</a>
-					))}
-				</div>
-			</div>
+			{/* Only the strip: each pane is drawn below, so the list of problems can sit between them. */}
+			<TabsComponent
+				className="settings-tab"
+				tabs={TABS.map((item) => ({ label: item.label, icon: item.icon }))}
+				activeIndex={TABS.findIndex((item) => item.id === tab)}
+				onTabChange={(index) => setTab(TABS[index].id)}
+			/>
 
 			{problems.length > 0 && (triedToPublish || 'published' === form.status) && (
 				<div className="vuloform-builder-problems">
@@ -463,6 +386,7 @@ const Builder = ({ formId }: { formId: number }) => {
 			{'fields' === tab && (
 				<div className="vuloform-builder-panes">
 					<Canvas
+						template={present.settings.template}
 						fields={present.fields}
 						selectedId={selectedId}
 						onSelect={setSelectedId}
@@ -485,7 +409,12 @@ const Builder = ({ formId }: { formId: number }) => {
 						onDelete={(id) => {
 							const removed = present.fields.find((field) => field.id === id);
 
-							// Rules that looked at the deleted field go with it; undo brings both back.
+							// A field the template needs (such as the store name) can't be removed.
+							if (removed && false === lockOf(present.settings.template, removed).delete) {
+								return;
+							}
+
+							// Rules that looked at the deleted field go with it.
 							commit({
 								fields: present.fields
 									.filter((field) => field.id !== id)
@@ -499,17 +428,19 @@ const Builder = ({ formId }: { formId: number }) => {
 								setSelectedId('');
 							}
 
-							notify('info', __('Field removed. Use Undo to bring it back.', 'vuloform'));
+							notify('info', __('Field removed.', 'vuloform'));
 						}}
 						footer={
 							<div className="vuloform-canvas-guard">
-								<Switch
-									name="recaptcha"
-									label={__('Google reCAPTCHA', 'vuloform')}
-									desc={__('An extra spam check before the form is sent. It loads a Google script for everyone who opens this form.', 'vuloform')}
-									checked={Boolean(present.settings.spam.recaptcha)}
-									onChange={(recaptcha) => commit({ settings: { ...present.settings, spam: { ...present.settings.spam, recaptcha } } })}
-								/>
+								<FormGroupComponent label={__('Google reCAPTCHA', 'vuloform')} desc={__('An extra spam check before the form is sent. It loads a Google script for everyone who opens this form.', 'vuloform')} row>
+									<MultiCheckboxInput
+										look="toggle"
+										modules={[]}
+										options={[{ key: 'recaptcha', value: 'recaptcha' }]}
+										value={Boolean(present.settings.spam.recaptcha) ? ['recaptcha'] : []}
+										onChange={(values) => commit({ settings: { ...present.settings, spam: { ...present.settings.spam, recaptcha: values.includes('recaptcha') } } })}
+									/>
+								</FormGroupComponent>
 								{present.settings.spam.recaptcha && !vuloformAppLocalizer.recaptcha_ready && (
 									<p className="vuloform-note">
 										{__('reCAPTCHA is not set up yet, so this form is sent without the check.', 'vuloform')}{' '}
@@ -526,11 +457,12 @@ const Builder = ({ formId }: { formId: number }) => {
 						}
 					/>
 					<Inspector
+						template={present.settings.template}
 						field={selected}
 						fields={present.fields}
 						onChange={(changed) => commit({ fields: present.fields.map((field) => (field.id === changed.id ? changed : field)) })}
 						onAddField={(type, label, key, patch) => {
-							// One step, so a single Undo takes back both the new field and its use.
+							// One step: the new field and its use are added together.
 							const index = Math.max(0, present.fields.findIndex((field) => field.id === selectedId));
 							const added = { ...createField(type, present.fields), label, key: uniqueKey(key, present.fields) };
 							const fields = present.fields.map((field) => (field.id === selectedId ? { ...field, ...patch } : field));
@@ -542,18 +474,16 @@ const Builder = ({ formId }: { formId: number }) => {
 			)}
 
 			{'settings' === tab && (
-				<ContainerComponent general>
-					<FormSettings
-						settings={present.settings}
-						fields={present.fields}
-						onChange={(settings) => commit({ settings })}
-						onChangeWithEmailField={(settings) => {
-							const email = { ...createField('email', present.fields), required: true };
+				<FormSettings
+					settings={present.settings}
+					fields={present.fields}
+					onChange={(settings) => commit({ settings })}
+					onChangeWithEmailField={(settings) => {
+						const email = { ...createField('email', present.fields), required: true };
 
-							commit({ fields: [...present.fields, email], settings: settings(email.key) });
-						}}
-					/>
-				</ContainerComponent>
+						commit({ fields: [...present.fields, email], settings: settings(email.key) });
+					}}
+				/>
 			)}
 
 			{'share' === tab && (

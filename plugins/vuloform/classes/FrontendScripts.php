@@ -65,7 +65,12 @@ class FrontendScripts {
 				'desc'     => $template['desc'],
 				'icon'     => $template['icon'],
 				'category' => $template['category'] ?? __( 'Other', 'vuloform' ),
+				'plugin' => $template['plugin'] ?? '',
+
 				'fields'   => count( $template['schema']['fields'] ),
+
+				'exists' => ! empty( $template['single'] ) ? (int) ( VuloForm()->forms->ids_for_template( $id )[0] ?? 0 ) : 0,
+			
 			);
 		}
 

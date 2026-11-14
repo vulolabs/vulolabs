@@ -80,7 +80,7 @@ export default {
 		{
 			key: 'recaptcha_type',
 			type: 'choice-toggle',
-			variant: 'compact',
+			iconEnable: true,
 			defaultValue: 'v2',
 			label: __('Version', 'vuloform'),
 			options: [
@@ -89,14 +89,14 @@ export default {
 					value: 'v2',
 					label: __('v2 checkbox', 'vuloform'),
 					desc: __("Visitors tick \"I'm not a robot\".", 'vuloform'),
-					icon: 'check green',
+					icon: 'check',
 				},
 				{
 					key: 'v3',
 					value: 'v3',
 					label: __('v3 invisible', 'vuloform'),
 					desc: __('Scores each visitor in the background.', 'vuloform'),
-					icon: 'security blue',
+					icon: 'security',
 				},
 			],
 		},

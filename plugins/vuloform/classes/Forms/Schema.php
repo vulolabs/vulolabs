@@ -69,6 +69,7 @@ class Schema {
 	 */
 	public static function default_settings() {
 		return array(
+			'template'          => '',
 			'submit_label'      => __( 'Submit', 'vuloform' ),
 			'next_label'        => __( 'Next', 'vuloform' ),
 			'previous_label'    => __( 'Back', 'vuloform' ),
@@ -489,8 +490,10 @@ class Schema {
 	public static function missing_modules( array $schema ) {
 		$missing = array();
 
+		$active = isset( VuloForm()->modules ) ? VuloForm()->modules->get_active_modules() : array();
+
 		foreach ( (array) ( $schema['settings']['extensions'] ?? array() ) as $id => $extension ) {
-			if ( ! empty( $extension['enabled'] ) && ! empty( $extension['needs_module'] ) && ! ( isset( VuloForm()->modules ) && VuloForm()->modules->is_active( (string) $id ) ) ) {
+			if ( ! empty( $extension['enabled'] ) && ! empty( $extension['needs_module'] ) && ! in_array( (string) $id, $active, true ) ) {
 				$missing[] = (string) $id;
 			}
 		}
@@ -596,6 +599,7 @@ class Schema {
 		$style    = $raw['style'];
 
 		$settings = array(
+			'template'          => sanitize_key( (string) $raw['template'] ),
 			'submit_label'      => self::text_or( $raw['submit_label'], $defaults['submit_label'] ),
 			'next_label'        => self::text_or( $raw['next_label'], $defaults['next_label'] ),
 			'previous_label'    => self::text_or( $raw['previous_label'], $defaults['previous_label'] ),

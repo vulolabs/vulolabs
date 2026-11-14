@@ -77,18 +77,13 @@ class LogRepository {
 	 * Paginated, filtered list.
 	 *
 	 * @param array $args channel, status, search, after, before (UTC datetimes), page, per_page, orderby, order.
-	 * @return array{data: array, total: int, status_counts: array<string, int>}
+	 * @return array{data: array, total: int, status_counts: array<string, int>, channel_counts: array<string, int>}
 	 */
 	public function query( array $args ) {
 		global $wpdb;
 
 		$where  = array( '1=1' );
 		$params = array();
-
-		if ( ! empty( $args['channel'] ) ) {
-			$where[]  = 'channel = %s';
-			$params[] = $args['channel'];
-		}
 
 		if ( ! empty( $args['search'] ) ) {
 			$like     = '%' . $wpdb->esc_like( $args['search'] ) . '%';
@@ -107,12 +102,26 @@ class LogRepository {
 			$params[] = $args['before'];
 		}
 
+		// Counted before the channel filter, so the channel pills each show their own total.
+		$channel_where  = implode( ' AND ', $where );
+		$channel_params = $params;
+
+		if ( ! empty( $args['channel'] ) ) {
+			$where[]  = 'channel = %s';
+			$params[] = $args['channel'];
+		}
+
 		// Counted before the status filter, so the pill bar shows every status's own total.
 		$base_where = implode( ' AND ', $where );
 
 		// phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber -- $base_where/$where_sql hold only the fixed fragments built above; values go through prepare().
 		$counts = $wpdb->get_results(
 			$wpdb->prepare( "SELECT status, COUNT(*) AS total FROM %i WHERE {$base_where} GROUP BY status", array_merge( array( $this->table() ), $params ) ),
+			ARRAY_A
+		);
+
+		$channel_rows = $wpdb->get_results(
+			$wpdb->prepare( "SELECT channel, COUNT(*) AS total FROM %i WHERE {$channel_where} GROUP BY channel", array_merge( array( $this->table() ), $channel_params ) ),
 			ARRAY_A
 		);
 
@@ -151,10 +160,20 @@ class LogRepository {
 			$status_counts[ $count['status'] ] = (int) $count['total'];
 		}
 
+		$channel_counts = array(
+			'email' => 0,
+			'sms'   => 0,
+		);
+
+		foreach ( (array) $channel_rows as $count ) {
+			$channel_counts[ $count['channel'] ] = (int) $count['total'];
+		}
+
 		return array(
-			'data'          => $rows ? $rows : array(),
-			'total'         => $total,
-			'status_counts' => $status_counts,
+			'data'           => $rows ? $rows : array(),
+			'total'          => $total,
+			'status_counts'  => $status_counts,
+			'channel_counts' => $channel_counts,
 		);
 	}
 

@@ -2,8 +2,7 @@
 import { useEffect, useState } from 'react';
 import { __ } from '@wordpress/i18n';
 import { NoticeComponent, PopupComponent } from '@zyra/components';
-import { ButtonInput, TextInput } from '@zyra/inputs';
-import { Segmented } from './Section';
+import { ButtonInput, TextInput, ToggleInput } from '@zyra/inputs';
 import { apiGet, apiPost } from '../services/api';
 import { errorMessage, notify } from '../services/notify';
 import { useJob } from '../services/JobContext';
@@ -58,15 +57,14 @@ const CreateBackup = ({ open, onClose }: { open: boolean; onClose: () => void })
 			<div className="vulobackup-popup-body">
 				<div className="vulobackup-control">
 					<span className="vulobackup-control-label">{__('What to back up', 'vulobackup')}</span>
-					<Segmented
-						label={__('What to back up', 'vulobackup')}
+					<ToggleInput
 						value={type}
 						options={[
-							{ value: 'full', label: __('Database and files', 'vulobackup') },
-							{ value: 'database', label: __('Database only', 'vulobackup') },
-							{ value: 'files', label: __('Files only', 'vulobackup') },
+							{ key: 'full', value: 'full', label: __('Database and files', 'vulobackup') },
+							{ key: 'database', value: 'database', label: __('Database only', 'vulobackup') },
+							{ key: 'files', value: 'files', label: __('Files only', 'vulobackup') },
 						]}
-						onChange={setType}
+						onChange={(value) => setType(String(value))}
 					/>
 				</div>
 				{needsAreas && (

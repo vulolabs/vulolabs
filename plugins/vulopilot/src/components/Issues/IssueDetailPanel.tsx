@@ -557,11 +557,7 @@ const IssueDetailPanel: React.FC<IssueDetailPanelProps> = ({
 									<i className="adminfont-lock issue-detail-section-lock" />
 								)}
 								<span className="issue-detail-section-title">
-									{showRecommendedFix
-										? __('Recommended fix', 'vulopilot')
-										: showWhatHappened
-											? __('What happened?', 'vulopilot')
-											: __('Example finding', 'vulopilot')}
+									{sampleSectionTitle}
 								</span>
 								{!isProActive && (
 									<span className="admin-tag pro-tag">
@@ -711,7 +707,7 @@ const IssueDetailPanel: React.FC<IssueDetailPanelProps> = ({
 
 									return {
 										id: row.id,
-										icon: CATEGORY_ICONS[group.category] ?? 'ai',
+										icon: CATEGORY_ICONS[group.category] ?? 'ai orange',
 										title: row.title,
 										desc: sprintf(
 											/* translators: 1: affected page/location, 2: formatted detection date */
@@ -759,9 +755,12 @@ const IssueDetailPanel: React.FC<IssueDetailPanelProps> = ({
 								affectedItems.length > 0 &&
 								0 === otherAffectedItems.length && (
 									<span className="desc">
-										{__(
-											'This group\'s only other open finding is already shown above.',
-											'vulopilot'
+										{sprintf(
+											__(
+												'This group has only one open finding - its full details are in the “%s” section above.',
+												'vulopilot'
+											),
+											sampleSectionTitle
 										)}
 									</span>
 								)}

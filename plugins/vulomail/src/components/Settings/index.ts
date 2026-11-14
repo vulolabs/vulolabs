@@ -403,7 +403,7 @@ const uninstall: SettingsSchema = {
 		{
 			key: 'keep_data_uninstall',
 			type: 'choice-toggle',
-			variant: 'compact',
+			iconEnable: true,
 			defaultValue: 'keep_data',
 			label: __('When VuloMail is deleted', 'vulomail'),
 			options: [
@@ -412,14 +412,14 @@ const uninstall: SettingsSchema = {
 					value: 'keep_data',
 					label: __('Keep data', 'vulomail'),
 					desc: __('Reinstalling picks up where you left off.', 'vulomail'),
-					icon: 'database green',
+					icon: 'database',
 				},
 				{
 					key: 'delete_everything',
 					value: 'delete_everything',
 					label: __('Delete everything', 'vulomail'),
 					desc: __('Removes connections, settings and logs.', 'vulomail'),
-					icon: 'delete red',
+					icon: 'delete',
 				},
 			],
 		},

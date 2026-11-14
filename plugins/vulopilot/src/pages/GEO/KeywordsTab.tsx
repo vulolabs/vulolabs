@@ -19,6 +19,7 @@ const BENEFITS = [
 const KeywordsTab = () => {
 	const RealPanel = useFilterSlot('vulopilot_keywords_panel');
 	const isProInstalled = Boolean(vulopilotAppLocalizer.khali_dabba);
+	const isModuleGate = isProInstalled;
 	const [isPopupOpen, setIsPopupOpen] = useState(false);
 
 	if (RealPanel) {
@@ -35,6 +36,23 @@ const KeywordsTab = () => {
 				<BlurredProContent
 					contentClassName="gsc-connect-hero"
 					onClick={() => setIsPopupOpen(true)}
+					icon={isModuleGate ? 'unlock' : ''}
+					title={
+						isModuleGate
+							? __('Enable Keyword Rank Tracking module', 'vulopilot')
+							: undefined
+					}
+					desc={
+						isModuleGate
+							? __(
+									'Turn the Keyword Rank Tracking module on from Settings → Modules to connect Google Search Console here.',
+									'vulopilot'
+								)
+							: undefined
+					}
+					buttonText={
+						isModuleGate ? __('Enable module', 'vulopilot') : undefined
+					}
 				>
 					<ButtonInput
 						buttons={{
@@ -69,7 +87,7 @@ const KeywordsTab = () => {
 				height="auto"
 				position="lightbox"
 			>
-				{isProInstalled ? (
+				{isModuleGate ? (
 					<ShowProPopup moduleName={KEYWORDS_MODULE_ID} />
 				) : (
 					<ShowProPopup />

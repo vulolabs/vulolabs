@@ -335,7 +335,7 @@ const GeoScoreSection = ({ onSelectSignal }: GeoScoreSectionProps) => {
 							value={period}
 							onChange={(value) => setPeriod(value as PeriodDays)}
 							modules={[]}
-							variant="pill"
+							
 						/>
 					}
 				>

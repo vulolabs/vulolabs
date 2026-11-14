@@ -1,0 +1,1268 @@
+// Styles for the Forms tab: the forms list (pages/Forms.tsx) and the form builder opened from it
+// (src/builder/*). Colours, spacing and type come from zyra's design tokens.
+
+// Forms.tsx: shown in the table body when a competitor plugin with forms is detected, independent
+// of the "Migrate forms" header button which always stays visible.
+.vuloform-migration-banner {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 1rem;
+	margin-bottom: 1rem;
+	padding: 0.875rem 1rem;
+	border: 0.063rem solid var(--color-primary);
+	border-radius: 0.5rem;
+	background: color-mix(in srgb, var(--color-primary) 6%, transparent);
+
+	strong {
+		display: block;
+		color: var(--text-color);
+	}
+
+	span {
+		display: block;
+		margin-top: 0.125rem;
+		font-size: 0.8125rem;
+		color: var(--sub-text-color);
+	}
+}
+
+// Same shape as .vuloform-migration-banner above, shown after a successful migration (green instead
+// of the brand purple, since this is a confirmation rather than an opportunity to act on).
+.vuloform-migration-success {
+	border-color: #16a34a;
+	background: color-mix(in srgb, #16a34a 6%, transparent);
+}
+
+// The same empty-state ModuleGuardComponent zyra renders elsewhere (e.g. "Create your first
+// form"), but tinted and bordered like .vuloform-migration-banner above so a detected plugin's
+// forms read as an opportunity to act on, not a generic empty state or a warning.
+.vuloform-migration-guard {
+	border: 0.063rem solid var(--color-primary);
+	border-radius: 0.5rem;
+	background: color-mix(in srgb, var(--color-primary) 6%, transparent);
+}
+
+.vuloform-cell {
+	display: flex;
+	flex-direction: column;
+	gap: 0.125rem;
+	min-width: 0;
+}
+
+.vuloform-cell-primary {
+	font-weight: 600;
+	color: var(--text-color);
+	overflow-wrap: anywhere;
+}
+
+.vuloform-cell-secondary {
+	font-size: 0.8125rem;
+	color: var(--sub-text-color);
+	overflow-wrap: anywhere;
+}
+
+// A form's name with its status badge beside it.
+.vuloform-cell-title {
+	display: flex;
+	align-items: center;
+	gap: 0.5rem;
+	flex-wrap: wrap;
+}
+
+// "New form" chooser: a category sidebar beside the template grid, like WPForms' own picker.
+.vuloform-template-picker {
+	display: flex;
+	align-items: flex-start;
+	gap: 1.25rem;
+}
+
+.vuloform-template-categories {
+	display: flex;
+	flex-direction: column;
+	flex: 0 0 11rem;
+	gap: 0.125rem;
+}
+
+.vuloform-template-category {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 0.5rem;
+	padding: 0.5rem 0.75rem;
+	border: none;
+	border-radius: 0.375rem;
+	background: none;
+	color: var(--text-color);
+	font-size: 0.8125rem;
+	text-align: left;
+	cursor: pointer;
+
+	span {
+		color: var(--sub-text-color);
+	}
+
+	&:hover,
+	&:focus-visible {
+		background: var(--background-primary);
+		outline: none;
+	}
+
+	&.is-active {
+		background: var(--color-primary);
+		color: var(--background-white);
+
+		span {
+			color: inherit;
+		}
+	}
+}
+
+// A form's number, in front of its name.
+.vuloform-cell-number {
+	color: var(--sub-text-color);
+	font-variant-numeric: tabular-nums;
+}
+
+// The [vuloform id="…"] shown in the forms list.
+.vuloform-cell-shortcode {
+	display: inline-block;
+	flex: none;
+	align-self: center;
+	width: fit-content;
+	max-width: 100%;
+	padding: 0.125rem 0.375rem;
+	border-radius: 0.25rem;
+	background: var(--background-color);
+	font-size: 0.8125rem;
+	user-select: all;
+}
+
+// ---------- Builder ----------
+
+.vuloform-templates {
+	display: grid;
+	grid-template-columns: repeat(auto-fill, minmax(13rem, 1fr));
+	gap: 0.75rem;
+	flex: 1 1 auto;
+	min-width: 0;
+}
+
+.vuloform-template {
+	display: flex;
+	flex-direction: column;
+	align-items: flex-start;
+	gap: 0.25rem;
+	padding: 1rem;
+	border: 0.063rem solid var(--border-color);
+	border-radius: 0.5rem;
+	background: var(--background-white);
+	color: var(--text-color);
+	text-align: left;
+	cursor: pointer;
+
+	i {
+		font-size: 1.5rem;
+		color: var(--color-primary);
+	}
+
+	span {
+		font-size: 0.8125rem;
+		color: var(--sub-text-color);
+	}
+
+	&:hover,
+	&:focus-visible {
+		border-color: var(--color-primary);
+		background: var(--background-primary);
+		outline: none;
+	}
+
+	&:disabled {
+		opacity: 0.6;
+		cursor: default;
+	}
+}
+
+// Reads as the page title; shows it is a text box on hover and while typing. The selector is
+// this specific so it wins over WordPress's own styling of text inputs.
+.vuloform-builder .title-section input.vuloform-builder-name {
+	min-height: 0;
+	box-shadow: none;
+	min-width: 6rem;
+	max-width: 100%;
+	margin: 0 -0.375rem;
+	padding: 0 0.375rem;
+	border: 0.063rem solid transparent;
+	border-radius: 0.375rem;
+	background: transparent;
+	color: inherit;
+	font: inherit;
+	line-height: 1.4;
+	field-sizing: content;
+
+	&:hover {
+		border-color: var(--border-color);
+	}
+
+	&:focus {
+		border-color: var(--color-primary);
+		background: var(--background-white);
+		box-shadow: none;
+		outline: none;
+	}
+}
+
+.vuloform-builder-actions {
+	display: flex;
+	align-items: center;
+	gap: 0.5rem;
+	flex-wrap: wrap;
+}
+
+.vuloform-builder-problems {
+	padding: 1rem 1.25rem 0;
+}
+
+.vuloform-builder-panes {
+	display: grid;
+	grid-template-columns: minmax(0, 1fr) 22rem;
+	align-items: start;
+	gap: 1rem;
+	padding: 1.25rem 1.25rem 2rem;
+}
+
+.vuloform-builder-main {
+	display: grid;
+	grid-template-columns: 17rem minmax(0, 1fr);
+	align-items: start;
+	gap: 1rem;
+}
+
+// On narrow screens the three panes stack: library, form, settings.
+@media (width <= 1200px) {
+	.vuloform-builder-panes,
+	.vuloform-builder-main {
+		grid-template-columns: minmax(0, 1fr);
+	}
+}
+
+// The three panes are cards, with the same corner radius and soft shadow as zyra's own.
+.vuloform-palette,
+.vuloform-inspector,
+.vuloform-canvas {
+	border-radius: 0.45rem;
+	background: var(--background-white);
+	box-shadow: 0 0.1875rem 0.75rem rgb(0 0 0 / 9%);
+}
+
+// The field library: a header saying what it is for, then every field type as one clean row.
+.vuloform-palette {
+	display: flex;
+	flex-direction: column;
+	overflow: hidden;
+}
+
+// Wide screens: it stays beside the form like the settings panel on the other side.
+@media (width > 1200px) {
+	.vuloform-palette {
+		position: sticky;
+		top: calc(2rem + 1rem);
+		max-height: calc(100vh - 2rem - 2rem);
+	}
+}
+
+.vuloform-palette-head {
+	display: flex;
+	flex: none;
+	align-items: center;
+	gap: 0.625rem;
+	padding: 0.75rem 1rem;
+	border-bottom: 0.063rem solid var(--border-color);
+
+	> i {
+		display: grid;
+		flex: none;
+		width: 2rem;
+		height: 2rem;
+		border-radius: 0.375rem;
+		background: color-mix(in srgb, var(--color-primary) 10%, transparent);
+		color: var(--color-primary);
+		place-items: center;
+	}
+}
+
+.vuloform-palette-head-text {
+	display: flex;
+	flex-direction: column;
+	min-width: 0;
+
+	strong {
+		font-size: 0.9375rem;
+		line-height: 1.3;
+		color: var(--text-color);
+	}
+
+	span {
+		font-size: 0.75rem;
+		color: var(--sub-text-color);
+	}
+}
+
+.vuloform-palette-body {
+	flex: 1 1 auto;
+	min-height: 0;
+	padding: 0.25rem 0.5rem 0.75rem;
+	overflow-y: auto;
+}
+
+.vuloform-palette-group h3 {
+	margin: 0.75rem 0.5rem 0.25rem;
+	font-size: 0.75rem;
+	font-weight: 600;
+	color: var(--sub-text-color);
+}
+
+.vuloform-palette-items {
+	display: grid;
+	grid-template-columns: repeat(2, minmax(0, 1fr));
+	gap: 0.25rem;
+}
+
+.vuloform-palette-item {
+	display: flex;
+	align-items: center;
+	gap: 0.5rem;
+	width: 100%;
+	min-width: 0;
+	padding: 0.375rem;
+	border: 0.063rem solid var(--border-color);
+	border-radius: 0.375rem;
+	background: none;
+	color: var(--text-color);
+	font: inherit;
+	font-size: 0.8125rem;
+	line-height: 1.25;
+	text-align: left;
+	overflow-wrap: anywhere;
+	cursor: grab;
+
+	i {
+		display: grid;
+		flex: none;
+		width: 1.75rem;
+		height: 1.75rem;
+		border-radius: 0.375rem;
+		background: color-mix(in srgb, var(--color-primary) 8%, transparent);
+		font-size: 1rem;
+		color: var(--color-primary);
+		place-items: center;
+	}
+
+	&:hover,
+	&:focus-visible {
+		border-color: var(--color-primary);
+		background: var(--background-primary);
+		outline: none;
+	}
+}
+
+.vuloform-canvas {
+	min-height: 24rem;
+	padding: 1rem;
+}
+
+.vuloform-canvas-list {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 0.5rem;
+
+	&.is-empty {
+		min-height: 12rem;
+		border: 0.125rem dashed var(--border-color);
+		border-radius: 0.5rem;
+	}
+
+	// A palette item while it is being dropped onto the form.
+	> .vuloform-palette-item {
+		flex: 1 1 100%;
+		padding: 0.75rem;
+		border-style: dashed;
+		border-color: var(--color-primary);
+	}
+}
+
+.vuloform-canvas-empty {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: 0.25rem;
+	padding: 2rem 1rem 1rem;
+	color: var(--sub-text-color);
+	text-align: center;
+
+	i {
+		font-size: 2rem;
+		color: var(--color-primary);
+	}
+
+	strong {
+		color: var(--text-color);
+	}
+}
+
+.vuloform-card {
+	display: flex;
+	align-items: stretch;
+	flex: 1 1 100%;
+	min-width: 0;
+	border: 0.063rem solid var(--border-color);
+	border-radius: 0.5rem;
+	background: var(--background-white);
+
+	&.vuloform-card-w66 {
+		flex: 1 1 calc(66% - 0.5rem);
+	}
+
+	&.vuloform-card-w50 {
+		flex: 1 1 calc(50% - 0.5rem);
+	}
+
+	&.vuloform-card-w33 {
+		flex: 1 1 calc(33% - 0.5rem);
+	}
+
+	&.is-selected {
+		border-color: var(--color-primary);
+		box-shadow: 0 0 0 0.063rem var(--color-primary);
+	}
+
+	&.is-break {
+		border-style: dashed;
+		background: var(--background-primary);
+	}
+}
+
+.vuloform-card-handle {
+	display: flex;
+	align-items: center;
+	padding: 0 0.5rem;
+	color: var(--sub-text-color);
+	cursor: grab;
+}
+
+.vuloform-card-body {
+	display: flex;
+	align-items: center;
+	flex: 1;
+	gap: 0.625rem;
+	min-width: 0;
+	padding: 0.625rem 0.25rem;
+	border: 0;
+	background: none;
+	color: var(--text-color);
+	font: inherit;
+	text-align: left;
+	cursor: pointer;
+
+	> i {
+		font-size: 1.125rem;
+		color: var(--color-primary);
+	}
+
+	&:focus-visible {
+		outline: 0.125rem solid var(--color-primary);
+		outline-offset: -0.125rem;
+	}
+}
+
+.vuloform-card-text {
+	display: flex;
+	flex-direction: column;
+	flex: 1;
+	min-width: 0;
+
+	strong {
+		overflow: hidden;
+		text-overflow: ellipsis;
+		white-space: nowrap;
+	}
+
+	> span {
+		font-size: 0.75rem;
+		color: var(--sub-text-color);
+	}
+}
+
+.vuloform-card-required {
+	color: #e35047;
+}
+
+.vuloform-card-actions {
+	display: flex;
+	align-items: center;
+	padding-right: 0.375rem;
+}
+
+.vuloform-card-actions button,
+.vuloform-icon-button {
+	display: inline-flex;
+	flex: none;
+	align-items: center;
+	justify-content: center;
+	width: 2.25rem;
+	height: 2.25rem;
+	border: 0;
+	border-radius: 0.375rem;
+	background: none;
+	color: var(--sub-text-color);
+	cursor: pointer;
+
+	&:hover:not(:disabled),
+	&:focus-visible {
+		background: var(--background-primary);
+		color: var(--color-primary);
+		outline: none;
+	}
+
+	&.is-danger:hover:not(:disabled),
+	&.is-danger:focus-visible {
+		background: #e350471a;
+		color: #e35047;
+	}
+
+	&:disabled {
+		opacity: 0.35;
+		cursor: default;
+	}
+
+	// The icon font draws its glyphs small, the bin most of all; sized here so every icon button
+	// is easy to see and to hit.
+	i {
+		font-size: 1.125rem;
+		line-height: 1;
+	}
+
+	.adminfont-delete {
+		font-size: 1.375rem;
+	}
+}
+
+.vuloform-inspector {
+	display: flex;
+	flex-direction: column;
+	overflow: hidden;
+}
+
+// Wide screens: the panel stays beside the form while the page scrolls, and scrolls on its own
+// when its settings are taller than the window. 2rem is the WordPress admin bar.
+@media (width > 1200px) {
+	.vuloform-inspector {
+		position: sticky;
+		top: calc(2rem + 1rem);
+		max-height: calc(100vh - 2rem - 2rem);
+	}
+}
+
+// What is being edited. It stays put while the settings under it scroll.
+.vuloform-inspector-title {
+	display: flex;
+	flex: none;
+	align-items: center;
+	gap: 0.625rem;
+	padding: 0.75rem 1rem;
+	border-bottom: 0.063rem solid var(--border-color);
+
+	> i {
+		display: grid;
+		flex: none;
+		width: 2rem;
+		height: 2rem;
+		border-radius: 0.375rem;
+		background: color-mix(in srgb, var(--color-primary) 10%, transparent);
+		color: var(--color-primary);
+		place-items: center;
+	}
+}
+
+.vuloform-inspector-title-text {
+	display: flex;
+	flex-direction: column;
+	min-width: 0;
+
+	strong {
+		overflow: hidden;
+		font-size: 0.9375rem;
+		line-height: 1.3;
+		color: var(--text-color);
+		text-overflow: ellipsis;
+		white-space: nowrap;
+	}
+
+	span {
+		font-size: 0.75rem;
+		color: var(--sub-text-color);
+	}
+}
+
+.vuloform-inspector-body {
+	flex: 1 1 auto;
+	min-height: 0;
+	overflow-y: auto;
+
+	> .inline-notice,
+	> .admin-notice {
+		margin: 0.75rem 1rem;
+	}
+}
+
+.vuloform-inspector-empty {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: 0.25rem;
+	padding: 2.5rem 1.5rem;
+	color: var(--sub-text-color);
+	text-align: center;
+
+	i {
+		font-size: 1.75rem;
+	}
+
+	strong {
+		color: var(--text-color);
+	}
+}
+
+.vuloform-inspector-section {
+	border-bottom: 0.063rem solid var(--border-color);
+
+	&:last-child {
+		border-bottom: 0;
+	}
+}
+
+// The whole header is the button, so there is a large target to open or close a group.
+.vuloform-inspector-section-head {
+	display: flex;
+	align-items: center;
+	gap: 0.5rem;
+	box-sizing: border-box;
+	width: 100%;
+	padding: 0.75rem 1rem;
+	border: 0;
+	background: none;
+	color: var(--text-color);
+	text-align: left;
+	cursor: pointer;
+
+	&:hover {
+		background: color-mix(in srgb, var(--color-primary) 4%, transparent);
+	}
+
+	&:focus-visible {
+		outline: 0.125rem solid var(--color-primary);
+		outline-offset: -0.125rem;
+	}
+
+	i {
+		flex: none;
+		color: var(--sub-text-color);
+	}
+}
+
+.vuloform-inspector-section-title {
+	flex: none;
+	font-size: 0.8125rem;
+	font-weight: 600;
+}
+
+// What a closed group holds, so it need not be opened to check.
+.vuloform-inspector-section-summary {
+	flex: 1;
+	min-width: 0;
+	overflow: hidden;
+	font-size: 0.75rem;
+	color: var(--sub-text-color);
+	text-align: right;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+.vuloform-inspector-section.is-open .vuloform-inspector-section-title {
+	flex: 1;
+}
+
+.vuloform-inspector-section-body {
+	display: flex;
+	flex-direction: column;
+	gap: 0.625rem;
+	padding: 0 1rem 0.875rem;
+}
+
+.vuloform-control {
+	display: flex;
+	flex-direction: column;
+	gap: 0.3125rem;
+	min-width: 0;
+}
+
+// A short setting on one line: its label, then its control, so the two read as a pair.
+.vuloform-control.is-inline {
+	display: grid;
+	grid-template-columns: 5.5rem minmax(0, 1fr);
+	align-items: center;
+	gap: 0.25rem 0.625rem;
+
+	.vuloform-control-desc {
+		grid-column: 2;
+	}
+}
+
+.vuloform-control-label {
+	font-size: 0.8125rem;
+	font-weight: 600;
+	line-height: 1.3;
+	color: var(--text-color);
+}
+
+.vuloform-control-desc {
+	font-size: 0.75rem;
+	line-height: 1.4;
+	color: var(--sub-text-color);
+	overflow-wrap: anywhere;
+}
+
+.vuloform-control-pair {
+	display: grid;
+	grid-template-columns: repeat(2, minmax(0, 1fr));
+	align-items: start;
+	gap: 0.75rem;
+}
+
+.vuloform-option,
+.vuloform-rule {
+	display: flex;
+	align-items: center;
+	gap: 0.375rem;
+
+	> :first-child {
+		flex: 1;
+		min-width: 0;
+	}
+}
+
+.vuloform-rule {
+	flex-direction: column;
+	align-items: stretch;
+	padding: 0.5rem;
+	border: 0.063rem solid var(--border-color);
+	border-radius: 0.375rem;
+	background: color-mix(in srgb, var(--text-color) 2%, transparent);
+}
+
+// A line of a rule: the answer it looks at with its bin, then the comparison and what to compare with.
+.vuloform-rule-line {
+	display: flex;
+	align-items: center;
+	gap: 0.375rem;
+
+	> * {
+		flex: 1 1 0;
+		min-width: 0;
+	}
+
+	> .vuloform-icon-button {
+		flex: none;
+	}
+}
+
+.vuloform-inspector-conditions {
+	display: flex;
+	flex-direction: column;
+	gap: 0.625rem;
+	padding: 0.75rem 1rem;
+}
+
+.vuloform-checks {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 0.375rem 1rem;
+
+	label {
+		display: inline-flex;
+		align-items: center;
+		gap: 0.25rem;
+	}
+}
+
+// One notification or webhook in the form settings: a line that opens to edit.
+.vuloform-item {
+	border: 0.063rem solid var(--border-color);
+	border-radius: 0.5rem;
+	background: var(--background-white);
+
+	&.is-open {
+		border-color: color-mix(in srgb, var(--color-primary) 45%, var(--border-color));
+	}
+}
+
+.vuloform-item-head {
+	display: flex;
+	align-items: center;
+	gap: 0.5rem;
+	padding: 0.5rem 0.75rem 0.5rem 0;
+}
+
+.vuloform-item-toggle {
+	display: grid;
+	flex: none;
+	width: 2.5rem;
+	height: 2.5rem;
+	margin-left: 0.5rem;
+	border: 0;
+	border-radius: 0.375rem;
+	background: none;
+	cursor: pointer;
+	place-items: center;
+	background: var(--background-color);
+
+	> i {
+		font-size: 1.25rem;
+		color: var(--color-primary);
+	}
+
+	&:focus-visible {
+		outline: 0.125rem solid var(--color-primary);
+	}
+}
+
+.vuloform-item.is-off .vuloform-item-toggle,
+.vuloform-item.is-off .vuloform-item-text {
+	opacity: 0.6;
+}
+
+.vuloform-item-text {
+	display: flex;
+	flex: 1;
+	flex-direction: column;
+	align-items: flex-start;
+	min-width: 0;
+}
+
+// The name, typed in place. It looks like a heading until it is pointed at or edited.
+.vuloform-item-head input.vuloform-item-name {
+	max-width: 100%;
+	min-height: 0;
+	margin: 0 0 0 -0.25rem;
+	padding: 0 0.25rem;
+	border: 0.063rem solid transparent;
+	border-radius: 0.25rem;
+	background: none;
+	box-shadow: none;
+	color: var(--text-color);
+	font: inherit;
+	font-weight: 600;
+	line-height: 1.5;
+	text-overflow: ellipsis;
+
+	&:hover {
+		border-color: var(--border-color);
+	}
+
+	&:focus {
+		border-color: var(--color-primary);
+		background: var(--background-white);
+		outline: none;
+	}
+}
+
+.vuloform-item-summary {
+	max-width: 100%;
+	padding: 0;
+	border: 0;
+	background: none;
+	color: var(--sub-text-color);
+	font: inherit;
+	font-size: 0.8125rem;
+	text-align: left;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+	overflow: hidden;
+	cursor: pointer;
+}
+
+.vuloform-item-state {
+	font-size: 0.75rem;
+	color: var(--sub-text-color);
+}
+
+.vuloform-item-head .is-flipped {
+	display: inline-block;
+	transform: rotate(180deg);
+}
+
+.vuloform-item-body {
+	border-top: 0.063rem solid var(--border-color);
+	border-radius: 0 0 0.5rem 0.5rem;
+	overflow: hidden;
+}
+
+// Placeholders that are added to the message with a click.
+.vuloform-chips {
+	display: flex;
+	align-items: center;
+	flex-wrap: wrap;
+	gap: 0.25rem 0.375rem;
+
+	button {
+		padding: 0.0625rem 0.375rem;
+		border: 0.063rem solid var(--border-color);
+		border-radius: 0.25rem;
+		background: var(--background-white);
+		color: var(--text-color);
+		font-family: ui-monospace, Menlo, Consolas, monospace;
+		font-size: 0.75rem;
+		cursor: pointer;
+
+		&:hover,
+		&:focus-visible {
+			border-color: var(--color-primary);
+			color: var(--color-primary);
+			outline: none;
+		}
+	}
+}
+
+.vuloform-link {
+	padding: 0;
+	border: 0;
+	background: none;
+	color: var(--color-primary);
+	font: inherit;
+	font-size: 0.8125rem;
+	text-decoration: underline;
+	cursor: pointer;
+
+	&:focus-visible {
+		outline: 0.125rem solid var(--color-primary);
+		outline-offset: 0.125rem;
+	}
+}
+
+.vuloform-muted {
+	color: var(--sub-text-color);
+}
+
+.vuloform-steps {
+	margin: 1rem 0 0 1.25rem;
+	color: var(--sub-text-color);
+}
+
+.vuloform-preview {
+	// The lightbox popup around this already scrolls (PopupComponent.scss's
+	// `[data-position="lightbox"]`); a second scrollable max-height here nested
+	// a scrollbar inside a scrollbar.
+	padding: 1.5rem;
+
+	// wp-admin caps the width of a select; the public site does not.
+	select.vuloform-input {
+		max-width: none;
+	}
+}
+
+// ---------- Form settings (the builder's Settings tab) ----------
+
+.vuloform-form-settings {
+	display: flex;
+	flex-direction: column;
+	gap: 1rem;
+	width: 100%;
+}
+
+// What a group is for, with its "Add" button.
+.vuloform-subhead {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 1rem;
+	flex-wrap: wrap;
+
+	p {
+		flex: 1 1 20rem;
+		margin: 0;
+		color: var(--sub-text-color);
+	}
+}
+
+.settings-wide .vuloform-steps {
+	margin-left: 1.25rem;
+}
+
+// "Required" stands by itself above the groups of a field's settings.
+.vuloform-inspector-required {
+	padding: 0.75rem 1rem;
+}
+
+// A calculation said back in words, or what is wrong with it.
+.vuloform-formula-meaning {
+	display: flex;
+	flex-direction: column;
+	gap: 0.125rem;
+	padding: 0.5rem 0.625rem;
+	border-radius: 0.375rem;
+	background: color-mix(in srgb, var(--color-primary) 6%, transparent);
+	font-size: 0.8125rem;
+
+	span {
+		color: var(--sub-text-color);
+	}
+
+	strong {
+		overflow-wrap: anywhere;
+	}
+
+	&.is-wrong {
+		background: #e350471a;
+
+		strong {
+			font-weight: 400;
+			color: #b42318;
+		}
+	}
+}
+
+// The form's own number fields stand out from the operators beside them.
+.vuloform-inspector .vuloform-chips button.is-field {
+	border-color: color-mix(in srgb, var(--color-primary) 40%, var(--border-color));
+	background: color-mix(in srgb, var(--color-primary) 6%, transparent);
+	color: var(--color-primary);
+	font-family: ui-monospace, Menlo, Consolas, monospace;
+}
+
+.vuloform-inspector .vuloform-chips button {
+	min-width: 1.875rem;
+	padding: 0.25rem 0.5rem;
+	font-family: inherit;
+	font-size: 0.8125rem;
+}
+
+// What stops a form from being published, with a way to each place that needs fixing.
+.vuloform-problems {
+	display: flex;
+	gap: 0.75rem;
+	padding: 0.875rem 1rem;
+	border: 0.063rem solid #f0c36d;
+	border-left-width: 0.25rem;
+	border-radius: 0.5rem;
+	background: #fff8e6;
+	color: #5c3b00;
+
+	> i {
+		flex: none;
+		margin-top: 0.125rem;
+		font-size: 1.125rem;
+		color: #b7791f;
+	}
+
+	> div {
+		flex: 1;
+		min-width: 0;
+	}
+
+	ul {
+		margin: 0.375rem 0;
+		padding: 0;
+		list-style: none;
+	}
+
+	li {
+		display: flex;
+		align-items: baseline;
+		flex-wrap: wrap;
+		gap: 0.125rem 0.75rem;
+		margin: 0;
+		padding: 0.25rem 0;
+
+		& + li {
+			border-top: 0.063rem solid #f0c36d66;
+		}
+	}
+
+	.vuloform-link {
+		flex: none;
+		font-weight: 600;
+	}
+}
+
+.vuloform-problems-note {
+	font-size: 0.75rem;
+	opacity: 0.8;
+}
+
+// A short caution inside a section, with a link to where it is resolved.
+.vuloform-note {
+	margin: 0;
+	padding: 0.75rem 1rem;
+	border: 0.063rem solid #f0c36d;
+	border-radius: 0.5rem;
+	background: #fff8e6;
+	color: #5c3b00;
+
+	a {
+		font-weight: 600;
+		color: var(--color-primary);
+	}
+}
+
+// Rules that limit a notification, webhook or confirmation to certain answers: one line each.
+.vuloform-when {
+	display: flex;
+	flex-direction: column;
+	align-items: flex-start;
+	gap: 0.5rem;
+	width: 100%;
+}
+
+.vuloform-when .choice-toggle-wrapper .toggle-option label {
+	padding-inline: 0.75rem;
+	white-space: nowrap;
+}
+
+.vuloform-when-rule {
+	display: grid;
+	grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr) minmax(0, 1.2fr) auto;
+	align-items: center;
+	gap: 0.5rem;
+	width: 100%;
+}
+
+@media (width <= 782px) {
+	.vuloform-when-rule {
+		grid-template-columns: minmax(0, 1fr) auto;
+
+		> :not(.vuloform-icon-button) {
+			grid-column: 1;
+		}
+	}
+}
+
+// The tags that fill a starting value in automatically, under the box they go into.
+.vuloform-dynamic-tags {
+	margin-top: 0.375rem;
+}
+
+// A titled block inside a settings group, such as Webhooks inside Integrations.
+.vuloform-subhead h3 {
+	margin: 0 0 0.125rem;
+	font-size: 1rem;
+	font-weight: 600;
+	color: var(--text-color);
+}
+
+.vuloform-subhead > div {
+	flex: 1 1 20rem;
+	min-width: 0;
+}
+
+.vuloform-subhead > div p {
+	margin: 0;
+}
+
+// The choices behind "Add integration".
+.vuloform-connectors {
+	padding: 1rem;
+	border: 0.063rem solid var(--border-color);
+	border-radius: 0.5rem;
+	background: var(--background-white);
+}
+
+// Under the fields of a form: the form's own spam check, managed where the form is built.
+.vuloform-canvas-guard {
+	display: flex;
+	flex-direction: column;
+	gap: 0.75rem;
+	margin-top: 1rem;
+	padding: 1rem 1.25rem;
+	border: 0.063rem dashed var(--borderColor, #dcdcde);
+	border-radius: 0.5rem;
+	background: #fff;
+
+	.vuloform-control-desc {
+		margin: 0;
+
+		a {
+			font-weight: 600;
+			color: var(--color-primary);
+		}
+	}
+}
+
+// An exception to the confirmation: its line is one button, not a name to edit.
+.vuloform-exception-text {
+	padding: 0;
+	border: 0;
+	background: none;
+	color: var(--text-color);
+	font: inherit;
+	text-align: left;
+	cursor: pointer;
+
+	> strong {
+		font-weight: 600;
+		line-height: 1.5;
+	}
+}
+
+// Exceptions to the confirmation: a list managed on the right of its section.
+.vuloform-exceptions {
+	display: flex;
+	flex-direction: column;
+	align-items: stretch;
+	gap: 0.75rem;
+	width: 100%;
+}
+
+.vuloform-exceptions-head {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 1rem;
+}
+
+.vuloform-exception-body {
+	display: flex;
+	flex-direction: column;
+	gap: 1.25rem;
+	padding: 1rem 1.25rem 1.25rem;
+	border-top: 0.063rem solid var(--border-color);
+}
+
+// A setting with its label above it, where there is no room for the label beside it.
+.vuloform-field {
+	display: flex;
+	flex-direction: column;
+	align-items: stretch;
+	gap: 0.5rem;
+
+	> .choice-toggle-container {
+		align-self: flex-start;
+
+		.toggle-option label {
+			padding-inline: 0.875rem;
+			white-space: nowrap;
+		}
+	}
+}
+
+// A once-only field that is already on the form.
+.vuloform-palette-item:disabled {
+	opacity: 0.4;
+	cursor: not-allowed;
+}
+
+// A field fixed at the top or bottom of the form: no drag handle, shown as locked.
+.vuloform-card.is-pinned .vuloform-card-handle {
+	cursor: default;
+	opacity: 0.6;
+}

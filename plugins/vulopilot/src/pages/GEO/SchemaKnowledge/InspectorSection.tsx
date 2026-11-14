@@ -194,7 +194,7 @@ const InspectorSection = ({
 								onPageFilterChange(value as SchemaPageFilter)
 							}
 							modules={[]}
-							variant="pill"
+							
 						/>
 					)}
 					<TableCard

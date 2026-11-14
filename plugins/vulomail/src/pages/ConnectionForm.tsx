@@ -108,8 +108,7 @@ const ConnectionForm = ({ channel, connection, onSaved, onCancel }: ConnectionFo
 	const setValue = (key: string, value: string | number | boolean) =>
 		setValues((current) => ({ ...current, [key]: value }));
 
-	// Whether a field's `show_if` rule holds, as ConnectionRepository::field_applies() reads it: a toggle
-	// compares on/off, a select its chosen value or one of a list of values.
+	// Whether a field's `show_if` rule holds, as ConnectionRepository::field_applies() reads it.
 	const applies = (field?: ProviderField) =>
 		!field?.show_if ||
 		Object.entries(field.show_if).every(([key, expected]) => {

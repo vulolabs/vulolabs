@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import { __, _n, sprintf } from '@wordpress/i18n';
 import {
+	AnalyticsComponent,
 	BadgeComponent,
 	CardComponent,
 	ColumnComponent,
@@ -91,7 +92,7 @@ const IssueCard = ({ check }: { check: Check }) => (
 					<ButtonInput
 						buttons={{
 							text: check.action.label,
-							color: 'error' === check.status ? 'purple' : 'border-purple',
+							color: 'purple-bg',
 							onClick: () => follow(check.action),
 						}}
 					/>
@@ -125,7 +126,7 @@ const InfoCard = ({ check }: { check: Check }) => (
 		{check.fix && <p className="vulomail-diag-note">{check.fix}</p>}
 		{check.action && (
 			<ButtonInput
-				buttons={{ text: check.action.label, color: 'border-purple', onClick: () => follow(check.action) }}
+				buttons={{ text: check.action.label, color: 'purple-bg', onClick: () => follow(check.action) }}
 			/>
 		)}
 	</div>
@@ -144,8 +145,7 @@ const TestCard = ({ channel, connections, preselected }: TestCardProps) => {
 	const [result, setResult] = useState<TestResult | null>(null);
 	const [isHighlighted, setIsHighlighted] = useState(isTarget);
 
-	// Scrolls to and briefly highlights this card so it's obvious which one was preselected,
-	// since both the email and SMS cards are already on screen without any tab to switch to.
+	// Scrolls to and briefly highlights this card so it's obvious which one was preselected.
 	useEffect(() => {
 		if (!isTarget) {
 			return;
@@ -305,7 +305,7 @@ const Tools = () => {
 						buttons={{
 							text: checks ? __('Run diagnostics again', 'vulomail') : __('Running…', 'vulomail'),
 							icon: 'refresh',
-							color: 'purple',
+							color: 'purple-bg',
 							disabled: !checks,
 							onClick: runDiagnostics,
 						}}
@@ -407,20 +407,15 @@ const Tools = () => {
 											<span className="is-green" style={{ flexGrow: passed }} />
 										</div>
 									</div>
-									<div className="vulomail-diag-stats">
-										<div className="vulomail-diag-stat is-red">
-											<strong className="vulomail-diag-stat-number">{problems}</strong>
-											<span className="vulomail-diag-stat-label">{__('Problems', 'vulomail')}</span>
-										</div>
-										<div className="vulomail-diag-stat is-amber">
-											<strong className="vulomail-diag-stat-number">{attention}</strong>
-											<span className="vulomail-diag-stat-label">{__('Need attention', 'vulomail')}</span>
-										</div>
-										<div className="vulomail-diag-stat is-green">
-											<strong className="vulomail-diag-stat-number">{passed}</strong>
-											<span className="vulomail-diag-stat-label">{__('Passed', 'vulomail')}</span>
-										</div>
-									</div>
+										<AnalyticsComponent
+											variant="tinted"
+											cols={3}
+											data={[
+												{ colorClass: 'red', number: problems, text: __('Problems', 'vulomail') },
+												{ colorClass: 'yellow', number: attention, text: __('Need attention', 'vulomail') },
+												{ colorClass: 'green', number: passed, text: __('Passed', 'vulomail') },
+											]}
+										/>
 								</div>
 
 								{bySeverity('error').length > 0 && (

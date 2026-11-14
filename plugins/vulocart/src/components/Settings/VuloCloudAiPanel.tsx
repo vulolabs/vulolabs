@@ -143,7 +143,7 @@ const VuloCloudAiPanel = () => {
 					) : (
 						<div className="common-card">
 							<div className="common-card-header">
-								<i className="common-card-icon adminfont-ai orange" />
+								<i className="common-card-icon adminfont-ai zyra-orange" />
 								<div className="common-card-content">
 									<div className="common-card-title">
 										{ __( 'VuloCloud AI', 'vulocart' ) }
@@ -193,7 +193,7 @@ const VuloCloudAiPanel = () => {
 			</div>
 			<PopupComponent position="lightbox" open={ confirmDisconnect } onClose={ () => setConfirmDisconnect( false ) } width={ 31.25 } height="auto">
 				<div className="popup-confirm">
-					<i className="popup-icon adminfont-suspended admin-badge red"></i>
+					<i className="popup-icon adminfont-suspended admin-badge zyra-red"></i>
 					<div className="title">{ __( 'Disconnect VuloCloud', 'vulocart' ) }</div>
 					<div className="desc">
 						{ __( 'Disconnect this site from VuloCloud? AI features will stop working until you connect again.', 'vulocart' ) }

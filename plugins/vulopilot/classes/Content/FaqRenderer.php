@@ -279,6 +279,9 @@ class FaqRenderer {
 			if ( ! is_array( $row ) ) {
 				continue;
 			}
+			if ( ! empty( $row['hidden'] ) ) {
+				continue;
+			}
 
 			$question = isset( $row['question'] ) ? trim( wp_kses_post( (string) $row['question'] ) ) : '';
 			$answer   = isset( $row['answer'] ) ? trim( wp_kses_post( (string) $row['answer'] ) ) : '';

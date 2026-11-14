@@ -1,5 +1,12 @@
 import type { ProviderDefinition, SmsTriggerDefinition } from './services/types';
 
+/** One `vulomail_email_sources`-filter entry — a plugin that owns its own email templates. */
+export interface EmailSource {
+	plugin: string;
+	label: string;
+	rest_namespace: string;
+}
+
 declare global {
 	/**
 	 * Shape of the `vulomailAppLocalizer` object localized by FrontendScripts::localize_scripts().
@@ -26,6 +33,7 @@ declare global {
 		plugins_url: string;
 		khali_dabba: boolean;
 		active_modules: string[];
+		email_sources: EmailSource[];
 	}
 
 	var vulomailAppLocalizer: VuloMailLocalizer;
