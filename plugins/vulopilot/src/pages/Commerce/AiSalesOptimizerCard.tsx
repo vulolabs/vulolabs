@@ -30,7 +30,7 @@ const AiSalesOptimizerCard = ({
 				titleIcon="ai"
 				title={__('AI Sales Optimizer', 'vulopilot')}
 				desc={__('Real cross-sell, upsell, and bundle opportunities across your store.', 'vulopilot')}
-				isLoading={isLoading}
+				isLoading={isLoading || undefined}
 			>
 				<AiCopilotGuard>
 					{!isLoading && !data && (

@@ -1,0 +1,237 @@
+// ---- The top bar (zyra's HeaderComponent, set up in app.tsx) ----
+// A flat white bar with a hairline, like VuloCart's: the brand and one quiet version pill on the left; the AI
+// credits chip, one search field and the account button on the right. zyra draws the markup; only its look
+// changes here.
+.admin-main-wrapper .admin-header.admin-header {
+	gap: 1.5rem;
+	min-height: 3.5rem;
+	box-sizing: border-box;
+	padding: 0.5rem 1.25rem;
+	border-bottom: 1px solid #eceef4;
+	background: #fff;
+	box-shadow: none;
+
+	.left-section {
+		gap: 1rem;
+
+		// The brand, a step larger than zyra draws it.
+		img {
+			height: 2rem;
+			width: auto;
+			max-height: none;
+		}
+	}
+
+	.right-section {
+		gap: 0.625rem;
+	}
+
+	// ---- Versions: one pill, "Free 1.0.1 | Pro 1.0.1", nothing alarming ----
+	.version-tag {
+		gap: 0;
+		overflow: hidden;
+		border: 1px solid #eceef4;
+		border-radius: 999px;
+		background: #f7f7fa;
+
+		.admin-badge {
+			display: inline-flex;
+			align-items: center;
+			gap: 0.3125rem;
+			margin: 0;
+			padding: 0.3125rem 0.875rem;
+			border: 0;
+			border-radius: 0;
+
+			// zyra tints these purple and red (.zyra-purple / .zyra-red); the pill stays one quiet grey.
+			background: transparent !important;
+			font-size: 0.875rem;
+			font-weight: 500;
+			line-height: 1.5;
+			color: #6b7086 !important;
+
+			i {
+				display: none;
+			}
+
+			b {
+				margin-right: 0.1875rem;
+				font-weight: 600;
+				color: #3c4257;
+			}
+
+			+ .admin-badge {
+				border-left: 1px solid #eceef4;
+			}
+		}
+
+		// The Pro segment: the Pro mark in the accent colour before the label.
+		.admin-badge + .admin-badge i {
+			display: inline-flex;
+			font-size: 1.125rem;
+			color: var(--color-primary, #5007aa);
+		}
+	}
+
+	// ---- Search: scope and query in one rounded field ----
+	.search-field {
+		height: 2.375rem;
+		border-color: #e3e6ef;
+		border-radius: 0.625rem;
+		background: #f7f7fa;
+
+		&:hover {
+			border-color: #d4d8e4;
+		}
+
+		&:focus-within {
+			background: #fff;
+		}
+
+		/* stylelint-disable selector-class-pattern -- react-select's own class names (zyra's scope picker). */
+		.search-action {
+			min-width: 7.5rem;
+			background: transparent;
+
+			.select-prefix__control {
+				min-height: 0;
+				padding-left: 0.375rem;
+				background: transparent;
+			}
+
+			.select-prefix__single-value {
+				color: #3c4257;
+			}
+
+			.select-prefix__dropdown-indicator {
+				padding: 0 0.5rem 0 0.25rem;
+				color: #a9aec0;
+
+				svg {
+					width: 0.875rem;
+					height: 0.875rem;
+				}
+			}
+		}
+
+		/* stylelint-enable selector-class-pattern */
+
+		.search-section {
+			min-width: 13rem;
+			background: transparent;
+		}
+
+		.basic-input::placeholder {
+			color: #a9aec0;
+		}
+	}
+
+	// ---- Account: a round button ----
+	.menu-dropdown .tooltip-wrapper {
+		display: inline-grid;
+		place-items: center;
+	}
+
+	.menu-dropdown .popup-icon {
+		display: inline-grid;
+		place-items: center;
+		width: 2.375rem;
+		height: 2.375rem;
+		padding: 0;
+		border: 1px solid #e3e6ef;
+		border-radius: 50%;
+		background: #fff;
+		font-size: 1.125rem;
+		color: #3c4257;
+		cursor: pointer;
+		transition: border-color 0.15s, color 0.15s, background 0.15s;
+
+		&:hover {
+			border-color: var(--color-primary, #5007aa);
+			background: #faf7ff;
+			color: var(--color-primary, #5007aa);
+		}
+	}
+}
+
+// ---- AI credits chip (AiCredits/AiCreditsIndicator.tsx) ----
+.vp-credits {
+	--chip-text: #3c4257;
+	--chip-bg: #fff;
+	--chip-border: #e3e6ef;
+	--bolt: #fff;
+	--bolt-bg: #f59e0b;
+
+	display: inline-flex;
+	align-items: center;
+	gap: 0.5rem;
+	height: 2.375rem;
+	margin: 0;
+	padding: 0 0.875rem 0 0.375rem;
+	border: 1px solid var(--chip-border);
+	border-radius: 999px;
+	background: var(--chip-bg);
+	font-size: 0.8125rem;
+	font-weight: 600;
+	color: var(--chip-text);
+	white-space: nowrap;
+	cursor: pointer;
+	transition: border-color 0.15s, box-shadow 0.15s, background 0.15s;
+
+	&:hover {
+		border-color: #c9b6f2;
+		box-shadow: 0 4px 12px -6px rgb(80 7 170 / 25%);
+	}
+
+	&:focus-visible {
+		outline: 2px solid var(--color-primary, #5007aa);
+		outline-offset: 2px;
+	}
+
+	&:disabled {
+		cursor: progress;
+		opacity: 0.7;
+	}
+
+	> i {
+		font-size: 0.75rem;
+		color: #a9aec0;
+	}
+
+	// Before connecting: a warm offer.
+	&.is-claim,
+	&.is-busy {
+		--chip-text: #9a3412;
+		--chip-bg: linear-gradient(90deg, #fff7ed, #fffbf5);
+		--chip-border: #fed7aa;
+
+		background: var(--chip-bg);
+
+		&:hover {
+			border-color: #fdba74;
+			box-shadow: 0 4px 12px -6px rgb(234 88 12 / 35%);
+		}
+	}
+
+	&.is-low {
+		--chip-text: #92400e;
+		--chip-border: #fcd9a4;
+	}
+
+	&.is-empty {
+		--chip-text: #b42323;
+		--chip-border: #f6c9c9;
+		--bolt-bg: #e5484d;
+	}
+}
+
+.vp-credits-bolt {
+	display: inline-grid;
+	flex: none;
+	place-items: center;
+	width: 1.5rem;
+	height: 1.5rem;
+	border-radius: 50%;
+	background: var(--bolt-bg);
+	color: var(--bolt);
+}

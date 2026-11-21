@@ -19,6 +19,7 @@ import { TableCard } from '@zyra/table';
 import { formatWpDate } from '../../services/formatWpDate';
 import RecommendedFixesCard from './RecommendedFixesCard';
 import './Performance.scss';
+import { columns } from '../../services/tableColumns';
 
 
 interface PageSpeedRow {
@@ -512,7 +513,7 @@ const SlowPagesTab = () => {
 		<ContainerComponent>
 			<ColumnComponent>
 				<CardComponent
-					isLoading={isLoading || isTrendLoading}
+					isLoading={(isLoading || isTrendLoading) || undefined}
 					action={
 						hasDeviceScores && (
 							<ToggleInput
@@ -713,7 +714,7 @@ const SlowPagesTab = () => {
 								onClick: handleExport,
 							},
 						]}
-						headers={{
+						headers={columns({
 							title: {
 								key: 'title',
 								type: 'info',
@@ -811,7 +812,7 @@ const SlowPagesTab = () => {
 									},
 								],
 							},
-						}}
+						})}
 						rows={pageRows.map((row) => ({
 							...row,
 							pageTypeIcon: PAGE_TYPE_ICONS[row.page_type] ?? 'document',

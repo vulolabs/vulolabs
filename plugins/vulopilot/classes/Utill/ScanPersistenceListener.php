@@ -168,12 +168,7 @@ class ScanPersistenceListener {
 
 		$this->activity_logs->log(
 			'scan.completed',
-			sprintf(
-				/* translators: 1: scanner id, 2: number of findings. */
-				__( 'Scan "%1$s" completed with %2$d finding(s).', 'vulopilot' ),
-				$scan_result->get_scanner_id(),
-				count( $scan_result->get_findings() )
-			),
+			self::describe_scan( $scan_result->get_scanner_id(), count( $scan_result->get_findings() ), ScanResult::STATUS_FAILED === $scan_result->get_status() ),
 			ScanResult::STATUS_FAILED === $scan_result->get_status() ? Severity::HIGH : Severity::INFO,
 			'system',
 			'scan',
@@ -204,17 +199,40 @@ class ScanPersistenceListener {
 
 		$this->activity_logs->log(
 			'scan.completed.security',
-			sprintf(
-				/* translators: 1: scanner id, 2: number of findings. */
-				__( 'Scan "%1$s" completed with %2$d finding(s).', 'vulopilot' ),
-				$scan_result->get_scanner_id(),
-				count( $scan_result->get_findings() )
-			),
+			self::describe_scan( $scan_result->get_scanner_id(), count( $scan_result->get_findings() ), ScanResult::STATUS_FAILED === $scan_result->get_status() ),
 			ScanResult::STATUS_FAILED === $scan_result->get_status() ? Severity::HIGH : Severity::INFO,
 			'system',
 			'scan',
 			(string) $scan_id
 		);
+	}
+
+	/**
+	 * Human-readable activity line for one scan, e.g. "About page analysis: 2 issues found".
+	 *
+	 * Uses the scanner's label rather than its id; falls back to the id when the scanner is no longer registered.
+	 *
+	 * @param string $scanner_id Scanner id.
+	 * @param int    $count      Number of findings the scan raised.
+	 * @param bool   $failed     Whether the scan failed.
+	 * @return string
+	 */
+	public static function describe_scan( string $scanner_id, int $count, bool $failed = false ): string {
+		$scanner = VuloPilot()->scanner_registry->get_scanner( $scanner_id );
+		$label   = $scanner ? $scanner->get_label() : $scanner_id;
+
+		if ( $failed ) {
+			/* translators: %s: scan name. */
+			return sprintf( __( '%s: scan failed', 'vulopilot' ), $label );
+		}
+
+		if ( 0 === $count ) {
+			/* translators: %s: scan name. */
+			return sprintf( __( '%s: no issues found', 'vulopilot' ), $label );
+		}
+
+		/* translators: 1: scan name, 2: number of issues found. */
+		return sprintf( _n( '%1$s: %2$d issue found', '%1$s: %2$d issues found', $count, 'vulopilot' ), $label, $count );
 	}
 
 	/**

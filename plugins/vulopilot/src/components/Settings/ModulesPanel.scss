@@ -1,0 +1,183 @@
+// Settings → Modules. zyra's default module card opens with a 16:9 gradient banner per category, which made the
+// page a wall of muddy colour blocks unlike every other VuloPilot screen. Here a card is the settings-card look:
+// a tinted icon tile beside the category and name, the description, what is included, and the switch pinned to
+// the bottom so every card in a row lines up.
+.admin-main-wrapper.admin-main-wrapper .module-container[data-variant='default'] {
+	.list-toolbar {
+		margin-bottom: 0.25rem;
+	}
+
+	.module-option-row {
+		grid-template-columns: repeat(auto-fill, minmax(15rem, 1fr));
+		gap: 1rem;
+
+		.module-list-item {
+			position: relative;
+			display: grid;
+			grid-template-columns: 2.75rem minmax(0, 1fr);
+			grid-template-rows: auto auto auto 1fr auto;
+			column-gap: 0.75rem;
+			box-sizing: border-box;
+			padding: 1.125rem 1.125rem 0;
+			overflow: visible;
+			border: 1px solid var(--vp-border);
+			border-radius: 0.625rem;
+			background: var(--vp-surface);
+			box-shadow: 0 1px 2px rgb(22 21 29 / 4%);
+			transition: border-color 0.15s, box-shadow 0.15s;
+
+			&:hover {
+				transform: none;
+				border-color: #cfd3e1;
+				box-shadow: 0 4px 14px rgb(22 21 29 / 7%);
+			}
+
+			&.highlight {
+				border-color: var(--vp-primary);
+				box-shadow: 0 0 0 3px color-mix(in srgb, var(--vp-primary) 14%, transparent);
+			}
+		}
+
+		// The banner becomes an app-style icon tile. Its colour is an inline gradient, hence !important.
+		.module-cover {
+			position: static;
+			grid-column: 1;
+			grid-row: 1 / span 2;
+			align-self: center;
+			width: 2.75rem;
+			height: 2.75rem;
+			aspect-ratio: auto;
+			border-radius: 0.625rem;
+			background: color-mix(in srgb, var(--vp-primary) 9%, transparent) !important;
+
+			&::after {
+				content: none;
+			}
+		}
+
+		.module-cover-mark {
+			font-size: 1rem;
+			font-weight: 700;
+			letter-spacing: 0;
+			color: var(--vp-primary);
+			text-shadow: none;
+		}
+
+		.module-cover-icon {
+			font-size: 1.375rem;
+		}
+
+		// "Pro" sits in the card's corner, not on the banner that is gone.
+		.module-cover-pro {
+			top: 0.875rem;
+			inset-inline-end: 0.875rem;
+			padding: 0.1875rem 0.5rem;
+			border: 1px solid color-mix(in srgb, var(--color-accent, #e9437a) 30%, transparent);
+			border-radius: 1rem;
+			background: color-mix(in srgb, var(--color-accent, #e9437a) 8%, #fff);
+
+			i {
+				font-size: 0.9375rem;
+			}
+		}
+
+		// The body's parts join the card's grid so the name can sit beside the tile.
+		.module-card-body {
+			display: contents;
+
+			.module-eyebrow {
+				grid-column: 2;
+				grid-row: 1;
+				align-self: end;
+				padding-inline-end: 3.5rem;
+				font-size: 0.6875rem;
+				font-weight: 600;
+				letter-spacing: 0.04em;
+				color: var(--vp-muted);
+			}
+
+			.meta-name {
+				grid-column: 2;
+				grid-row: 2;
+				align-self: start;
+				padding-inline-end: 3.5rem;
+				font-size: 0.9375rem;
+				font-weight: 600;
+				color: var(--vp-ink);
+			}
+
+			.typography-desc {
+				grid-column: 1 / -1;
+				grid-row: 3;
+				margin-top: 0.75rem;
+				font-size: 0.8125rem;
+				color: var(--vp-muted);
+			}
+
+			.feature-sections-wrapper {
+				grid-column: 1 / -1;
+				grid-row: 4;
+				align-self: start;
+				margin-top: 0.875rem;
+				padding: 0.75rem 0.875rem;
+				border: 1px solid var(--vp-border-soft);
+				border-radius: 0.5rem;
+				background: #fafafc;
+
+				.feature-section:not(:last-child) {
+					border-bottom: 1px dashed var(--vp-border);
+				}
+
+				.feature-header .free-badge,
+				.feature-header .pro-badge {
+					display: inline-flex;
+					align-items: center;
+					gap: 0.25rem;
+					font-size: 0.6875rem;
+					font-weight: 600;
+					letter-spacing: 0.04em;
+				}
+
+				.feature-item {
+					color: var(--vp-text);
+				}
+
+				.feature-section.pro .feature-item {
+					color: var(--vp-muted);
+				}
+			}
+		}
+
+		.footer-wrapper {
+			grid-column: 1 / -1;
+			grid-row: 5;
+			align-self: end;
+			margin-top: 0.875rem;
+			padding: 0;
+
+			.module-footer {
+				display: flex;
+				align-items: center;
+				justify-content: space-between;
+				margin: 0;
+				padding: 0.75rem 0;
+				border-top: 1px solid var(--vp-border-soft);
+			}
+
+			.buttons a {
+				display: inline-flex;
+				align-items: center;
+				justify-content: center;
+				width: 2rem;
+				height: 2rem;
+				border-radius: 0.375rem;
+				color: var(--vp-muted);
+
+				&:hover {
+					background: var(--vp-surface-hover);
+					color: var(--vp-ink);
+				}
+			}
+		}
+	}
+}

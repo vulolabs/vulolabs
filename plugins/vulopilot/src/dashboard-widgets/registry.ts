@@ -1,78 +1,63 @@
 import { __ } from '@wordpress/i18n';
+import { useEffect, useState } from 'react';
 import { applyFilters } from '@wordpress/hooks';
-import { createStatWidgetComponent, StatWidgetConfig } from './StatWidget';
 import CrawlerTrafficWidget from './CrawlerTrafficWidget';
-import NeedsAttentionWidget from './NeedsAttentionWidget';
-import OverallScoreWidget from './OverallScoreWidget';
 import SiteSnapshotWidget from './SiteSnapshotWidget';
-import RecentActivityWidget from './RecentActivityWidget';
+import HealthTrendSample from './HealthTrendSample';
 import { WidgetDefinition } from './types';
 
-/** The newer "Good morning" Dashboard mockup's own top section, in its exact order. */
-const MOCKUP_WIDGETS: WidgetDefinition[] = [
+/**
+ * The dashboard's "More insights" section: analysis people can reorder or hide. What needs doing (health summary,
+ * next steps, autopilot, recent changes) is drawn by pages/Dashboard itself and is not customizable.
+ * Every id must be in Utill::DASHBOARD_WIDGET_IDS, or saved layouts drop it.
+ */
+const INSIGHT_WIDGETS: WidgetDefinition[] = [
 	{
-		id: 'overall-score',
-		title: __('Vital Pulse', 'vulopilot'),
-		desc: __('Your real sitewide health score, critical-issue count, and last scan time.', 'vulopilot'),
+		id: 'vulopilot-activity',
+		title: __('Health trend', 'vulopilot'),
+		desc: __('How your overall score has moved over time.', 'vulopilot'),
 		icon: 'analytics',
-		grid: 6,
-		component: OverallScoreWidget,
-	},
-	{
-		id: 'site-snapshot',
-		title: __('Site snapshot', 'vulopilot'),
-		desc: __('Real WordPress core counts - posts, pages, comments, users, and active plugins.', 'vulopilot'),
-		icon: 'info',
-		grid: 6,
-		component: SiteSnapshotWidget,
-	},
-	{
-		id: 'needs-attention',
-		title: __('Needs your attention', 'vulopilot'),
-		desc: __('Real open issues, quick fixes, and pending approvals that need action.', 'vulopilot'),
-		icon: 'error',
-		grid: 6,
-		component: NeedsAttentionWidget,
+		grid: 7,
+		// A sample of a Pro feature; VuloPilot Pro replaces it with the real card through `vulopilot_dashboard_widgets`.
+		component: HealthTrendSample,
 	},
 	{
 		id: 'crawler-traffic',
 		title: __('AI crawler traffic', 'vulopilot'),
-		desc: __('A quick look at real AI crawler visits, with a link to the full report.', 'vulopilot'),
+		desc: __('Which AI crawlers visit your site, and when they last came.', 'vulopilot'),
 		icon: 'global-community',
-		grid: 6,
+		grid: 5,
 		component: CrawlerTrafficWidget,
 	},
 	{
-		id: 'recent-activity',
-		title: __('Recent activity', 'vulopilot'),
-		desc: __('A real feed of meaningful site events - scans, fixes, and changes.', 'vulopilot'),
-		icon: 'recent',
+		id: 'site-snapshot',
+		title: __('Site profile', 'vulopilot'),
+		desc: __("Your site's content, technology, audience and the identity AI engines see.", 'vulopilot'),
+		icon: 'website',
 		grid: 12,
-		component: RecentActivityWidget,
+		component: SiteSnapshotWidget,
 	},
-	
 ];
 
-/** No config-driven "one number" stat widgets left on the Dashboard. */
+/** Free's widgets, as `vulopilot_dashboard_widgets` adds to or replaces them. */
+export const getDashboardWidgets = (): WidgetDefinition[] =>
+	applyFilters('vulopilot_dashboard_widgets', INSIGHT_WIDGETS) as WidgetDefinition[];
 
-const STAT_WIDGET_CONFIGS: StatWidgetConfig[] = [];
+/**
+ * The widgets, read again whenever VuloPilot Pro finishes loading. Pro's script runs after this one, so reading the
+ * filter once (at import) missed every widget Pro registers - the same reason useFilterSlot() rechecks.
+ */
+export const useDashboardWidgets = (): WidgetDefinition[] => {
+	const [widgets, setWidgets] = useState<WidgetDefinition[]>(getDashboardWidgets);
 
-const STAT_WIDGETS: WidgetDefinition[] = STAT_WIDGET_CONFIGS.map(
-	(config) => ({
-		id: config.id,
-		title: config.title,
-		icon: config.icon,
-		grid: 4,
-		component: createStatWidgetComponent(config),
-	})
-);
+	useEffect(() => {
+		const recheck = () => setWidgets(getDashboardWidgets());
 
+		recheck();
+		window.addEventListener('vulopilot_pro_modules_loaded', recheck);
 
-export const DEFAULT_DASHBOARD_WIDGETS: WidgetDefinition[] = applyFilters(
-	'vulopilot_dashboard_widgets',
-	// MOCKUP_WIDGETS leads.
-		[
-			...MOCKUP_WIDGETS,
-			...STAT_WIDGETS,
-		]
-	) as WidgetDefinition[];
+		return () => window.removeEventListener('vulopilot_pro_modules_loaded', recheck);
+	}, []);
+
+	return widgets;
+};

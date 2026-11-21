@@ -298,7 +298,7 @@ const HistoryDetailPanel: React.FC<HistoryDetailPanelProps> = ({
 								// `ListComponent` renders a title as HTML, so escape it.
 								title: escapeHtml(page.title),
 								action: page.edit_link
-									? () => window.open(page.edit_link, '_blank', 'noopener,noreferrer')
+									? () => window.open(page.edit_link ?? undefined, '_blank', 'noopener,noreferrer')
 									: undefined,
 								titleTag: (
 									<BadgeComponent
@@ -315,7 +315,7 @@ const HistoryDetailPanel: React.FC<HistoryDetailPanelProps> = ({
 											text: __('View', 'vulopilot'),
 											icon: 'eye',
 											color: 'text-purple',
-											onClick: () => window.open(page.edit_link, '_blank', 'noopener,noreferrer'),
+											onClick: () => window.open(page.edit_link ?? undefined, '_blank', 'noopener,noreferrer'),
 										}}
 									/>
 								) : undefined,
@@ -343,7 +343,7 @@ const HistoryDetailPanel: React.FC<HistoryDetailPanelProps> = ({
 									icon: 'document',
 									title: escapeHtml(page.title),
 									action: page.edit_link
-										? () => window.open(page.edit_link, '_blank', 'noopener,noreferrer')
+										? () => window.open(page.edit_link ?? undefined, '_blank', 'noopener,noreferrer')
 										: undefined,
 									titleTag: <BadgeComponent color="green" text={__('Clean', 'vulopilot')} />,
 									tags: page.edit_link ? (
@@ -352,7 +352,7 @@ const HistoryDetailPanel: React.FC<HistoryDetailPanelProps> = ({
 												text: __('View', 'vulopilot'),
 												icon: 'eye',
 												color: 'text-purple',
-												onClick: () => window.open(page.edit_link, '_blank', 'noopener,noreferrer'),
+												onClick: () => window.open(page.edit_link ?? undefined, '_blank', 'noopener,noreferrer'),
 											}}
 										/>
 									) : undefined,

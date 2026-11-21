@@ -2,7 +2,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { getApiResponse, getApiLink } from '@zyra/core';
 import { __ } from '@wordpress/i18n';
-import type { CategoryCount } from '@zyra/table';
+import type { CategoryCount, QueryProps } from '@zyra/table';
 
 export interface ApiListResult<T> {
 	data: T[];
@@ -22,16 +22,8 @@ export interface ApiListResult<T> {
 	onQueryUpdate: (query: TableCardQuery) => void;
 }
 
-/** The subset of zyra TableCard's internal query state this hook forwards to the REST request. */
-interface TableCardQuery {
-	paged?: number | string;
-	per_page?: number | string;
-	filter?: Record<string, string | string[]>;
-	searchValue?: string;
-	categoryFilter?: string;
-	orderby?: string;
-	order?: string;
-}
+/** zyra TableCard's query state, which this hook forwards to the REST request. */
+type TableCardQuery = QueryProps;
 
 /** A status-like categorical dimension a list page wants surfaced as a TableCard status-count pill bar. */
 export interface CategoryFilterConfig {

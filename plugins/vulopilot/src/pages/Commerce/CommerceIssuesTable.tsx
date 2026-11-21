@@ -20,6 +20,7 @@ import {
 	CHECKOUT_SCANNER_IDS,
 	STORE_SCANNER_IDS,
 } from './CommerceTab.constants';
+import { columns, tableRows } from '../../services/tableColumns';
 
 const PER_PAGE = 10;
 
@@ -169,7 +170,7 @@ const CommerceIssuesTable = ({
 						onRowClick={(row: Record<string, unknown>) => {
 							handleSelectGroup(row as unknown as FindingGroup);
 						}}
-						headers={{
+						headers={columns({
 							issue: {
 								key: 'label',
 								type: 'info',
@@ -211,8 +212,8 @@ const CommerceIssuesTable = ({
 									},
 								],
 							},
-						}}
-						rows={pageRows.map((row) => ({
+						})}
+						rows={tableRows(pageRows.map((row) => ({
 							...row,
 							issueIcon: issueIconFor(row.category, row.scanner_id),
 							descriptionText:
@@ -226,7 +227,7 @@ const CommerceIssuesTable = ({
 								},
 								{ text: row.severity, color: `badge-${row.severity}` },
 							],
-						}))}
+						})))}
 						ids={pageRows.map((row) => row.scanner_id)}
 						totalRows={tabGroups.length}
 						isLoading={false}

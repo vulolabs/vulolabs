@@ -125,7 +125,7 @@ const SeoVisibility = () => {
 			case 'brand-visibility':
 				return <BrandVisibilityTab initialScannerId={jumpScannerId} />;
 			case 'seo':
-				return <SeoTab onNavigateTab={goToTab} />;
+				return <SeoTab />;
 			case 'geo':
 				return <GeoTab />;
 			case 'aeo':

@@ -1,25 +1,21 @@
 /* global vulopilotAppLocalizer */
 import { useState } from 'react';
-import { __, sprintf } from '@wordpress/i18n';
-import { COLOR_PALETTE, scrollToId } from '@zyra/core';
+import { __, _n, sprintf } from '@wordpress/i18n';
+import { scrollToId } from '@zyra/core';
 import {
-	AnalyticsComponent,
 	CardComponent,
-	ChartComponent,
 	ColumnComponent,
 	ContainerComponent,
-	ListComponent,
 	ModuleGuardComponent,
-	TypographyComponent,
-	IconComponent
 } from '@zyra/components';
 import { useSeoScore, SeoScoreResponse } from './useSeoTabData';
-import { getRating, ratingColor } from './seoRating';
+import { getRating } from './seoRating';
 import { ALL_SEO_SCANNER_IDS } from './seoIssuesShared';
 import { SEO_SECTIONS } from './seoSections';
 import IssuesSection from './IssuesSection';
 import SeoProgressCard from './SeoProgressCard';
 import PageAnalysisPanel from './PageAnalysisPanel';
+import ScoreBreakdown from '../../components/ScoreBreakdown/ScoreBreakdown';
 
 const CATEGORY_CARDS: {
 	key: keyof SeoScoreResponse['category_scores'];
@@ -78,9 +74,13 @@ const SeoTab = () => {
 	const [analyzingPostId, setAnalyzingPostId] = useState<number | null>(null);
 
 	/** Same real "scroll the just-opened detail panel into view" fix the other issues tables' own `handleSelectGroup` already establishes. */
-	const handleAnalyze = (postId: number) => {
+	// `quiet`: the list picked the page itself (on load, or after a filter change), so don't scroll to the panel.
+	const handleAnalyze = (postId: number, quiet = false) => {
 		setAnalyzingPostId(postId);
-		scrollToId('seo-page-analysis-panel');
+
+		if (!quiet) {
+			scrollToId('seo-page-analysis-panel');
+		}
 	};
 
 	if (!isSeoModuleActive()) {
@@ -111,159 +111,46 @@ const SeoTab = () => {
 					title={__('SEO Health', 'vulopilot')}
 					titleIcon="search"
 					desc={__('Your real, site-wide SEO score, open issue counts, and progress over time.', 'vulopilot')}
-					isLoading={isLoadingScore}
+					isLoading={isLoadingScore || undefined}
 				>
-					<>
-						{score && (
-							<div className="overall-score-wrapper">
-								 <div className="overall-score-summary">
-										<ChartComponent
-											type="ring"
-											height={200}
-											// Top-level `color` - `type="ring"` only ever paints its stroke from this prop.
-											color={
-												COLOR_PALETTE[
-													ratingColor(score.seo_score) as keyof typeof COLOR_PALETTE
-												]
-											}
-											centerLabel={
-												<>
-													<TypographyComponent
-														variant={'h1'}
-														color={ratingColor(score.seo_score)}
-													>
-														{score.seo_score}
-													</TypographyComponent>
-													<TypographyComponent variant={'h4'}>
-														{getRating(score.seo_score)}
-													</TypographyComponent>
-												</>
-											}
-											data={[
-												{
-													label: __('Score', 'vulopilot'),
-													value: score.seo_score,
-													// Same real rating color the ring's own "Needs Attention"/"Good"/"Poor" label below already uses (`ratingClass()`/`getRating()`).
-													color: COLOR_PALETTE[
-														ratingColor(score.seo_score) as keyof typeof COLOR_PALETTE
-													],
-												},
-												{
-													label: __('Remaining', 'vulopilot'),
-													value: 100 - score.seo_score,
-													color: '#e5e7eb',
-												},
-											]}
-										/>
-										{/* * "Overall Score" - was a verbatim repeat of * this card's own header title ("SEO Health") * right above it. */}
-										<TypographyComponent variant={'h3'} color="text-green">
-											{__('Overall Score', 'vulopilot')}
-										</TypographyComponent>
-										<div className="desc">
-											{scoreSummary(score.seo_score)}
-										</div>
-								</div>
-								{/* * Same 6 real per-category scores the old * `AnalyticsComponent` progress-bar rows above * this used to show. */}
-							  <div className="overall-score-summary">
-								<ListComponent
-									className="mini-card report hover without-border seo-health-score-category-list"
-									loading={isLoadingScore}
-									items={CATEGORY_CARDS.map((card) => {
-										const category = score.category_scores[card.key];
-										const delta = categoryScoreDelta(category);
+					{score && (
+						<ScoreBreakdown
+							score={score.seo_score}
+							ratingLabel={getRating(score.seo_score)}
+							summary={scoreSummary(score.seo_score)}
+							rows={CATEGORY_CARDS.map((card) => {
+								const category = score.category_scores[card.key];
 
-										return {
-											id: card.key,
-											icon: card.icon,
-											title: card.title,
-											desc: sprintf(
-												/* translators: %d: real number of open findings. */
-												__('%d issues', 'vulopilot'),
-												category.open_count
-											),
-											tags: (
-												<>
-													<TypographyComponent
-														variant="h5"
-														weight="bold"
-														color={ratingColor(category.score)}
-														className="seo-health-score-row-value"
-													>
-														{category.score}
-														<TypographyComponent
-															as="span"
-															variant="body-md"
-															className="seo-health-score-row-suffix"
-														>
-															/100
-														</TypographyComponent>
-													</TypographyComponent>
-													{null !== delta && (
-														<TypographyComponent
-															as="span"
-															variant="body-md"
-															weight="bold"
-															color={delta >= 0 ? 'green' : 'red'}
-															className="seo-health-score-row-delta"
-														>
-															<IconComponent
-																name={delta >= 0 ? 'arrow-up' : 'arrow-down'}
-															/>
-															{Math.abs(delta)}
-														</TypographyComponent>
-													)}
-												</>
-											),
-											action: () =>
-												setCategoryFocus({
-													key: card.key,
-													token: Date.now(),
-												}),
-										};
-									})}
-								/>
-								</div>
-							</div>
-						)}
-						{score && (
-							<AnalyticsComponent
-								variant="with-out-boxshadow"
-								cols={4}
-								isLoading={isLoadingScore}
-								data={[
-									{
-										number: score.pages_checked,
-										text: __('Pages checked', 'vulopilot'),
-										iconClass: 'admin-bg-color2',
-									},
-									{
-										number: score.total_open,
-										text: __('Issues found', 'vulopilot'),
-										iconClass: 'admin-bg-color3',
-									},
-									{
-										number: (
-											<span className="is-poor">
-												{score.severity_breakdown.critical}
-											</span>
-										),
-										text: __('Critical issues', 'vulopilot'),
-										iconClass: 'admin-bg-color4',
-									},
-									{
-										number: (
-											<span className="is-attention">
-												{score.severity_breakdown.high}
-											</span>
-										),
-										text: __('High priority issues', 'vulopilot'),
-										iconClass: 'admin-bg-color5',
-									},
-								]}
-							/>
-						)}
-					</>
-
+								return {
+									key: card.key,
+									icon: card.icon.split(' ')[0],
+									title: card.title,
+									sub: sprintf(
+										/* translators: %d: number of open findings. */
+										_n('%d issue', '%d issues', category.open_count, 'vulopilot'),
+										category.open_count
+									),
+									score: category.score,
+									change: categoryScoreDelta(category),
+									onClick: () => setCategoryFocus({ key: card.key, token: Date.now() }),
+								};
+							})}
+							stats={[
+								{ label: __('Pages checked', 'vulopilot'), value: score.pages_checked },
+								{ label: __('Issues found', 'vulopilot'), value: score.total_open },
+								{
+									label: __('Critical', 'vulopilot'),
+									value: score.severity_breakdown.critical,
+									tone: score.severity_breakdown.critical > 0 ? 'bad' : undefined,
+								},
+								{
+									label: __('High priority', 'vulopilot'),
+									value: score.severity_breakdown.high,
+									tone: score.severity_breakdown.high > 0 ? 'warn' : undefined,
+								},
+							]}
+						/>
+					)}
 				</CardComponent>
 			</ColumnComponent>
 

@@ -59,11 +59,6 @@
 	}
 }
 
-.gsc-connect-error {
-	color: #cc1818;
-	text-align: center;
-}
-
 .gsc-inline-action {
 	background: none;
 	border: none;
@@ -332,3 +327,124 @@
 	-webkit-text-security: disc;
 }
 
+
+// SaveToast (Settings.tsx): the save state, always in view.
+.vp-save-toast {
+	position: fixed;
+	z-index: 100000;
+
+	// Under the WordPress admin bar (32px) and VuloPilot's header, in line with the page's right edge.
+	top: calc(32px + 4.5rem);
+	right: 1.25rem;
+	display: inline-flex;
+	align-items: center;
+	gap: 0.5rem;
+	padding: 0.625rem 1rem;
+	border-radius: 999px;
+	background: #1c1b33;
+	box-shadow: 0 8px 24px rgb(28 27 51 / 20%);
+	font-size: 0.8125rem;
+	font-weight: 500;
+	color: #fff;
+	opacity: 0;
+	transform: translateY(-0.5rem);
+	transition:
+		opacity 0.2s ease,
+		transform 0.2s ease;
+	pointer-events: none;
+
+	&.is-visible {
+		opacity: 1;
+		transform: translateY(0);
+	}
+
+	i {
+		font-size: 0.875rem;
+	}
+
+	&.is-saved i {
+		color: #4ade80;
+	}
+
+	&.is-saving i {
+		animation: vp-save-spin 1s linear infinite;
+	}
+
+	&.is-error {
+		background: #b42318;
+	}
+
+	// The admin bar is 46px tall on small screens.
+	@media (width <= 782px) {
+		top: calc(46px + 4.5rem);
+		right: 1rem;
+	}
+
+	@media (prefers-reduced-motion: reduce) {
+		transition: none;
+
+		&.is-saving i {
+			animation: none;
+		}
+	}
+}
+
+@keyframes vp-save-spin {
+	to {
+		transform: rotate(360deg);
+	}
+}
+
+// Every setting row built from CardHeader (Integrations and friends): the label column has one width and every
+// control starts on one line and fills one column - inputs, input + button, a lone button - so the rows line up.
+.vulopilot-settings .common-card {
+	--vp-control-width: 26rem;
+
+	display: flex;
+	align-items: center;
+	gap: 0 0.5rem;
+
+	> .common-card-header,
+	&.compact > .common-card-header {
+		flex: none;
+		width: calc(100% - var(--vp-control-width) - 2rem);
+		margin-right: 1.5rem;
+	}
+
+	> :not(.common-card-header),
+	&.compact > :not(.common-card-header) {
+		flex: 1 1 0;
+		width: auto;
+		min-width: 0;
+		max-width: none;
+		margin-left: 0;
+	}
+
+	// A button beside an input keeps its size; a lone button sits at the end of the control column.
+	> .common-card-action,
+	&.compact > .common-card-action {
+		flex: none;
+		width: auto;
+		margin-left: auto;
+	}
+
+	.vp-field {
+		max-width: none;
+		margin-left: 0;
+	}
+
+	@media (width <= 960px) {
+		flex-wrap: wrap;
+		gap: 0.75rem 0.5rem;
+
+		> .common-card-header,
+		&.compact > .common-card-header {
+			width: 100%;
+			margin-right: 0;
+		}
+
+		> :not(.common-card-header) {
+			flex-basis: 12rem;
+		}
+	}
+}

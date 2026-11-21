@@ -43,10 +43,11 @@ const ChatInput: React.FC<ChatInputProps> = ({
 		<ButtonInput
 			buttons={[
 				{
+					// Icon-only: zyra renders the (empty) text next to the icon.
+					text: '',
 					icon: 'send',
 					color: 'purple chat-input-send',
 					disabled: disabled || (!sendDisabledReason && !value.trim()),
-					ariaDisabled: !!sendDisabledReason,
 					onClick: handleSend,
 				},
 			]}

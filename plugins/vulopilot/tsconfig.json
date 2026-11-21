@@ -2,11 +2,15 @@
 	"extends": "../../tsconfig.base.json",
 	"compilerOptions": {
 		"paths": {
+			"react": ["./node_modules/@types/react"],
+			"react/*": ["./node_modules/@types/react/*"],
+			"react-dom": ["./node_modules/@types/react-dom"],
+			"react-dom/*": ["./node_modules/@types/react-dom/*"],
 			"zyra": ["./node_modules/@multivendorx/zyra"],
 			"@zyra/core": ["./node_modules/@multivendorx/zyra"],
 			"@zyra/components": ["./node_modules/@multivendorx/zyra"],
-			"@zyra/inputs": ["./node_modules/@multivendorx/zyra"],
-			"@zyra/table": ["./node_modules/@multivendorx/zyra"],
+			"@zyra/inputs": ["./src/types/zyra-inputs.d.ts"],
+			"@zyra/table": ["./src/types/zyra-table.d.ts"],
 			"@zyra/builders": ["./node_modules/@multivendorx/zyra"]
 		}
 	},

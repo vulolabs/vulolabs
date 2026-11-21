@@ -33,6 +33,19 @@ export default {
 			className: 'full-width',
 			row: false,
 			modal: [
+				// GeoSemanticStructureScanner reads `structure.enable` and Utill's defaults seed it, so without this item
+				// the saved entry drew as a blank row and the scan could not be seen or switched off.
+				{
+					id: 'structure',
+					icon: 'editor-list blue',
+					label: __('Heading structure', 'vulopilot'),
+					desc: __(
+						'Flag pages whose headings skip a level (an H2 straight to an H4), which makes them harder for AI to outline.',
+						'vulopilot'
+					),
+					disableBtn: true,
+					statusLabels: STATUS_LABELS,
+				},
 				{
 					id: 'entity',
 					icon: 'centralized-connections yellow',
@@ -201,7 +214,7 @@ export default {
 			type: 'notice',
 			noticeType: 'info',
 			label: '',
-			message: __('Content-freshness thresholds feed your GEO/AEO score . Get alerted when it drops under <a href="?page=vulopilot#&tab=settings&subtab=notifications">Notifications → Visibility Alerts</a>.',
+			message: __('Content-freshness thresholds feed your GEO/AEO score. Get alerted when it drops under <a href="?page=vulopilot#&tab=settings&subtab=notifications">Notifications → Visibility Alerts</a>.',
 				'vulopilot'
 			),
 			moduleEnabled: 'geo-analysis',

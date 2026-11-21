@@ -14,7 +14,7 @@
     overflow: hidden;
     border: 0.063rem solid #e5deff;
 
-    @media (max-width: 782px) {
+    @media (width <= 782px) {
         flex-wrap: wrap;
     }
 }
@@ -55,7 +55,7 @@
     height: 5.5rem;
     width: auto;
 
-    @media (max-width: 782px) {
+    @media (width <= 782px) {
         display: none;
     }
 }
@@ -74,4 +74,90 @@
     &:hover {
         color: #000;
     }
+}
+
+// ---- State, pill and facts (BackupProtectionNotice) ----
+.info-banner {
+	padding-top: 1rem;
+	padding-bottom: 1rem;
+
+	&.is-warn .info-banner-icon {
+		background: #fff4e0;
+		color: #b45309;
+	}
+
+	&.is-good .info-banner-icon {
+		background: #e3f6ea;
+		color: #1f9d55;
+	}
+
+	.info-banner-title {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: center;
+		gap: 0.625rem;
+		padding-bottom: 0.25rem;
+		font-weight: 600;
+	}
+
+	.info-banner-action .admin-btn + .admin-btn {
+		margin-left: 0.5rem;
+	}
+}
+
+.info-banner-pill {
+	display: inline-flex;
+	align-items: center;
+	gap: 0.375rem;
+	padding: 0.1875rem 0.625rem;
+	border-radius: 999px;
+	font-size: 0.75rem;
+	font-weight: 600;
+	line-height: 1.4;
+
+	&::before {
+		content: '';
+		width: 0.4375rem;
+		height: 0.4375rem;
+		border-radius: 50%;
+		background: currentcolor;
+	}
+
+	&.is-warn {
+		background: #fff4e0;
+		color: #b45309;
+	}
+
+	&.is-good {
+		background: #e3f6ea;
+		color: #1f9d55;
+	}
+}
+
+.info-banner-meta {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 0.25rem 1.25rem;
+	margin: 0.5rem 0 0;
+	padding: 0;
+	list-style: none;
+	font-size: 0.8125rem;
+	color: #5b5f73;
+
+	li {
+		display: inline-flex;
+		align-items: center;
+		gap: 0.375rem;
+		margin: 0;
+	}
+
+	i {
+		font-size: 0.8125rem;
+		color: #8a8ea3;
+	}
+
+	strong {
+		font-weight: 600;
+		color: #1d1f2c;
+	}
 }

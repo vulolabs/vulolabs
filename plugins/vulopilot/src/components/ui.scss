@@ -1,0 +1,932 @@
+// VuloPilot type and spacing tokens, the same values VuloCart, VuloForm and VuloMail use (their components/ui.scss).
+// Tokens, the page-header alignment, then the UI kit components/ui.tsx draws (cards, KPI tiles, segmented control,
+// pills, lists, empty states, skeletons, switch). Type scale, as in the other three plugins:
+//   page title 26/700 (design-system.scss) · section heading 18/700 · card title 15/600 · body 13–14/400
+//   labels 13/500 muted · KPI figure 28/700 · small print 12.
+.admin-main-wrapper {
+	--ui-border: #eceef4;
+	--ui-line: #f2f3f8;
+	--ui-ink: #1c1b33;
+	--ui-text: #3c4257;
+	--ui-muted: #6b7086;
+	--ui-faint: #a9aec0;
+	--ui-accent: var(--color-primary, #5007aa);
+	--ui-accent-soft: #f3ecff;
+	--ui-surface: #fff;
+	--ui-sunken: #f7f7fa;
+	--ui-radius: 0.75rem;
+	--ui-shadow: 0 1px 2px rgb(28 27 51 / 4%), 0 1px 3px rgb(28 27 51 / 3%);
+	--ui-shadow-hover: 0 4px 12px -6px rgb(28 27 51 / 12%);
+	--ui-good: #15803d;
+	--ui-good-bg: #ecf7f0;
+	--ui-warn: #b45309;
+	--ui-warn-bg: #fdf4e6;
+	--ui-bad: #c42b2b;
+	--ui-bad-bg: #fdecec;
+	--ui-info: #2563eb;
+	--ui-info-bg: #eef3fe;
+}
+
+// ---- Page header: in line with the content under it ----
+// VuloCart draws each screen's header inside its content container; VuloPilot's screens draw it just before it,
+// where zyra's own 24px margin pushed the title 4px right of the cards and 8px lower than VuloCart's. Same edges
+// and the same 16px start under the top bar here.
+.admin-main-wrapper.admin-main-wrapper > .title-section {
+	box-sizing: border-box;
+	margin: 0 20px 1rem;
+	padding: 1rem 0 0.5rem;
+}
+
+.admin-main-wrapper .screen-reader-text {
+	position: absolute;
+	width: 1px;
+	height: 1px;
+	overflow: hidden;
+	clip-path: inset(50%);
+	white-space: nowrap;
+}
+
+// ---- UI kit (components/ui.tsx), ported from VuloForm's ui.scss with a vp- prefix ----
+
+// A screen's content: one column of sections, 20px apart.
+.vp-page {
+	display: flex;
+	flex-direction: column;
+	gap: 1.25rem;
+	width: 100%;
+	min-width: 0;
+	padding-bottom: 2rem;
+	transition: opacity 0.2s ease;
+
+	&.is-loading {
+		opacity: 0.6;
+	}
+}
+
+.vp-row {
+	display: grid;
+	grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+	gap: 1.25rem;
+	align-items: start;
+
+	&.is-wide-left {
+		grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr);
+	}
+
+	&.is-side {
+		grid-template-columns: minmax(0, 1fr) 24rem;
+	}
+
+	@media (width <= 1100px) {
+		&,
+		&.is-wide-left,
+		&.is-side {
+			grid-template-columns: minmax(0, 1fr);
+		}
+	}
+}
+
+// ---- Card ----
+.vp-card {
+	display: flex;
+	flex-direction: column;
+	min-width: 0;
+	border: 1px solid var(--ui-border);
+	border-radius: var(--ui-radius);
+	background: var(--ui-surface);
+	box-shadow: var(--ui-shadow);
+}
+
+.vp-card-head {
+	display: flex;
+	align-items: flex-start;
+	justify-content: space-between;
+	gap: 1rem;
+	padding: 1.25rem 1.5rem 0.25rem;
+
+	h3 {
+		margin: 0;
+		font-size: 0.9375rem;
+		font-weight: 600;
+		line-height: 1.4;
+		color: var(--ui-ink);
+	}
+
+	p {
+		max-width: 42rem;
+		margin: 0.125rem 0 0;
+		font-size: 0.8125rem;
+		line-height: 1.5;
+		color: var(--ui-muted);
+	}
+
+	@media (width <= 600px) {
+		flex-direction: column;
+	}
+}
+
+.vp-card-title {
+	display: flex;
+	align-items: flex-start;
+	gap: 0.75rem;
+	min-width: 0;
+}
+
+// VuloCart's card icon: a small neutral tile with a hairline, not a tinted block.
+.vp-card-icon {
+	display: inline-grid;
+	flex: none;
+	place-items: center;
+	width: 1.875rem;
+	height: 1.875rem;
+	border: 1px solid var(--ui-border);
+	border-radius: 0.5rem;
+	background: #fff;
+	color: var(--ui-text);
+
+	i {
+		font-size: 0.9375rem;
+	}
+}
+
+.vp-card-actions {
+	display: flex;
+	flex: none;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 0.75rem;
+
+	.buttons-wrapper {
+		margin: 0;
+	}
+}
+
+.vp-card-link {
+	display: inline-flex;
+	align-items: center;
+	gap: 0.25rem;
+	padding-top: 0.25rem;
+	font-size: 0.8125rem;
+	font-weight: 500;
+	color: var(--ui-muted);
+	text-decoration: none;
+	white-space: nowrap;
+	transition: color 0.15s;
+
+	i {
+		font-size: 0.625rem;
+	}
+
+	&:hover,
+	&:focus-visible {
+		color: var(--ui-accent);
+	}
+}
+
+.vp-card-body {
+	display: flex;
+	flex-direction: column;
+	gap: 0.75rem;
+	padding: 0.875rem 1.5rem 1.375rem;
+}
+
+// A card with no header.
+.vp-card > .vp-card-body:first-child {
+	padding-top: 1.25rem;
+}
+
+// ---- Icon tile ----
+.vp-icon {
+	--tone: var(--ui-text);
+	--tone-bg: #f3f4f8;
+
+	display: inline-grid;
+	flex: none;
+	place-items: center;
+	width: 2rem;
+	height: 2rem;
+	border-radius: 0.5rem;
+	background: var(--tone-bg);
+	color: var(--tone);
+
+	i {
+		font-size: 0.9375rem;
+		color: inherit;
+	}
+
+	&.is-sm {
+		width: 1.625rem;
+		height: 1.625rem;
+
+		i {
+			font-size: 0.8125rem;
+		}
+	}
+
+	&.is-lg {
+		width: 2.75rem;
+		height: 2.75rem;
+		border-radius: 0.75rem;
+
+		i {
+			font-size: 1.25rem;
+		}
+	}
+
+	&.is-violet {
+		--tone: #6d28d9;
+		--tone-bg: #f3effd;
+	}
+
+	&.is-blue {
+		--tone: var(--ui-info);
+		--tone-bg: var(--ui-info-bg);
+	}
+
+	&.is-green {
+		--tone: var(--ui-good);
+		--tone-bg: var(--ui-good-bg);
+	}
+
+	&.is-amber {
+		--tone: var(--ui-warn);
+		--tone-bg: var(--ui-warn-bg);
+	}
+
+	&.is-red {
+		--tone: var(--ui-bad);
+		--tone-bg: var(--ui-bad-bg);
+	}
+}
+
+// ---- Section heading ----
+.vp-section-head {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	justify-content: space-between;
+	gap: 0.75rem;
+	margin-top: 0.5rem;
+
+	h2 {
+		margin: 0;
+		font-size: 1.125rem;
+		font-weight: 700;
+		color: var(--ui-ink);
+	}
+}
+
+// ---- Segmented control ----
+.vp-seg {
+	display: inline-flex;
+	align-items: center;
+	gap: 0.125rem;
+	padding: 0.1875rem;
+	border: 1px solid var(--ui-border);
+	border-radius: 0.5rem;
+	background: #f7f7fb;
+
+	button {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		gap: 0.375rem;
+		min-height: 1.875rem;
+		margin: 0;
+		padding: 0 0.75rem;
+		border: 0;
+		border-radius: 0.375rem;
+		background: transparent;
+		font-size: 0.875rem;
+		font-weight: 500;
+		color: var(--ui-muted);
+		cursor: pointer;
+		transition: background 0.15s, color 0.15s, box-shadow 0.15s;
+
+		&:hover {
+			color: var(--ui-ink);
+		}
+
+		&:focus-visible {
+			outline: 2px solid var(--ui-accent);
+			outline-offset: 1px;
+		}
+
+		&.is-active {
+			background: #fff;
+			box-shadow: 0 1px 3px rgb(20 20 43 / 12%);
+			font-weight: 600;
+			color: var(--ui-accent);
+		}
+	}
+
+	&.is-sm button {
+		min-height: 1.625rem;
+		padding: 0 0.5rem;
+		font-size: 0.8125rem;
+	}
+
+	&.is-stretch {
+		display: flex;
+
+		button {
+			flex: 1;
+		}
+	}
+}
+
+// ---- Change chip ----
+.vp-delta {
+	display: inline-flex;
+	align-items: center;
+	gap: 0.125rem;
+	padding: 0.125rem 0.5rem;
+	border-radius: 999px;
+	font-size: 0.75rem;
+	font-weight: 600;
+	letter-spacing: 0;
+
+	i {
+		font-size: 0.625rem;
+	}
+
+	&.is-good {
+		background: #e8f8ee;
+		color: #12803d;
+	}
+
+	&.is-bad {
+		background: #fdecec;
+		color: #b42323;
+	}
+}
+
+// ---- KPI tiles: separate white tiles, each with an icon tile; the change carries the colour ----
+.vp-kpis {
+	display: grid;
+	grid-template-columns: repeat(4, minmax(0, 1fr));
+	gap: 1rem;
+
+	&.is-3 {
+		grid-template-columns: repeat(3, minmax(0, 1fr));
+	}
+
+	@media (width <= 900px) {
+		&,
+		&.is-3 {
+			grid-template-columns: repeat(2, minmax(0, 1fr));
+		}
+	}
+
+	@media (width <= 480px) {
+		&,
+		&.is-3 {
+			grid-template-columns: minmax(0, 1fr);
+		}
+	}
+}
+
+.vp-kpi {
+	--kpi: var(--ui-text);
+	--kpi-bg: #f3f4f8;
+
+	display: flex;
+	flex-direction: column;
+	gap: 0.25rem;
+	min-width: 0;
+	padding: 1.25rem 1.5rem;
+	border: 1px solid var(--ui-border);
+	border-radius: var(--ui-radius);
+	background: #fff;
+	box-shadow: var(--ui-shadow);
+	color: inherit;
+	text-decoration: none;
+	transition: border-color 0.15s ease, box-shadow 0.15s ease;
+
+	// A light accent on the icons only, in tile order.
+	&:nth-child(4n + 1) {
+		--kpi: #15803d;
+		--kpi-bg: #ecf7f0;
+	}
+
+	&:nth-child(4n + 2) {
+		--kpi: #2563eb;
+		--kpi-bg: #eef3fe;
+	}
+
+	&:nth-child(4n + 3) {
+		--kpi: #6d28d9;
+		--kpi-bg: #f3effd;
+	}
+
+	&:nth-child(4n + 4) {
+		--kpi: #b45309;
+		--kpi-bg: #fdf4e6;
+	}
+
+	&.is-red {
+		--kpi: var(--ui-bad);
+		--kpi-bg: var(--ui-bad-bg);
+	}
+
+	&.is-green {
+		--kpi: var(--ui-good);
+		--kpi-bg: var(--ui-good-bg);
+	}
+
+	&.is-blue {
+		--kpi: var(--ui-info);
+		--kpi-bg: var(--ui-info-bg);
+	}
+
+	&.is-violet {
+		--kpi: #6d28d9;
+		--kpi-bg: #f3effd;
+	}
+
+	&.is-amber {
+		--kpi: var(--ui-warn);
+		--kpi-bg: var(--ui-warn-bg);
+	}
+
+	&:is(a):hover {
+		border-color: #d9dbe5;
+		box-shadow: var(--ui-shadow-hover);
+
+		.vp-kpi-label {
+			color: var(--ui-ink);
+		}
+	}
+
+	&:is(a):focus-visible {
+		outline: 2px solid var(--ui-accent);
+		outline-offset: 2px;
+	}
+}
+
+.vp-kpi-label {
+	display: flex;
+	align-items: center;
+	gap: 0.625rem;
+	margin-bottom: 0.5rem;
+	font-size: 0.8125rem;
+	font-weight: 500;
+	color: var(--ui-muted);
+	transition: color 0.15s;
+}
+
+.vp-kpi-icon {
+	display: inline-grid;
+	flex: none;
+	place-items: center;
+	width: 2rem;
+	height: 2rem;
+	border-radius: 0.5rem;
+	background: var(--kpi-bg);
+	color: var(--kpi);
+
+	i {
+		font-size: 1rem;
+	}
+}
+
+.vp-kpi-value {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 0.625rem;
+	font-size: 1.75rem;
+	font-weight: 700;
+	line-height: 1.2;
+	letter-spacing: -0.02em;
+	color: var(--ui-ink);
+}
+
+.vp-kpi-hint {
+	overflow: hidden;
+	font-size: 0.75rem;
+	color: var(--ui-muted);
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+// ---- Status pill ----
+.vp-pill {
+	--tone: var(--ui-good);
+	--tone-bg: var(--ui-good-bg);
+
+	display: inline-flex;
+	flex: none;
+
+	// As wide as its words, even alone in a table cell that stretches what it holds.
+	width: fit-content;
+	align-items: center;
+	gap: 0.375rem;
+	padding: 0.125rem 0.625rem;
+	border-radius: 999px;
+	background: var(--tone-bg);
+	font-size: 0.75rem;
+	font-weight: 600;
+	line-height: 1.5;
+	color: var(--tone);
+	white-space: nowrap;
+
+	&::before {
+		content: '';
+		width: 0.4375rem;
+		height: 0.4375rem;
+		border-radius: 50%;
+		background: currentcolor;
+	}
+
+	&.is-warn {
+		--tone: var(--ui-warn);
+		--tone-bg: var(--ui-warn-bg);
+	}
+
+	&.is-bad {
+		--tone: var(--ui-bad);
+		--tone-bg: var(--ui-bad-bg);
+	}
+
+	&.is-off {
+		--tone: #6b7280;
+		--tone-bg: #f3f4f6;
+	}
+
+	&.is-info {
+		--tone: var(--ui-info);
+		--tone-bg: var(--ui-info-bg);
+	}
+}
+
+// ---- Empty state ----
+.vp-empty {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: 0.625rem;
+	padding: 2rem 1rem 1.5rem;
+	text-align: center;
+
+	.vp-empty-text {
+		display: flex;
+		flex-direction: column;
+		gap: 0.25rem;
+		max-width: 28rem;
+	}
+
+	strong {
+		font-size: 0.9375rem;
+		font-weight: 600;
+		color: var(--ui-ink);
+	}
+
+	span {
+		font-size: 0.8125rem;
+		line-height: 1.5;
+		color: var(--ui-muted);
+	}
+
+	.vp-empty-action {
+		margin-top: 0.375rem;
+
+		.buttons-wrapper {
+			margin: 0;
+		}
+	}
+
+	// In a list: icon beside the text, left aligned (VuloCart's "You're all caught up").
+	&.is-compact {
+		flex-direction: row;
+		align-items: center;
+		gap: 0.75rem;
+		padding: 0.25rem 0 0.5rem;
+		text-align: left;
+
+		.vp-empty-text {
+			gap: 0.125rem;
+		}
+
+		strong {
+			font-size: 0.875rem;
+		}
+
+		.vp-empty-action {
+			margin: 0 0 0 auto;
+		}
+	}
+}
+
+// ---- Loading placeholder ----
+.vp-skel {
+	height: 3rem;
+	border-radius: var(--ui-radius);
+	background: linear-gradient(90deg, #f3f4f8 25%, #eceef4 50%, #f3f4f8 75%);
+	background-size: 200% 100%;
+	animation: vp-shimmer 1.4s ease-in-out infinite;
+
+	&.is-block {
+		height: 7rem;
+	}
+
+	&.is-hero {
+		height: 5.5rem;
+	}
+
+	&.is-chart {
+		height: 12rem;
+	}
+
+	&.is-tall {
+		height: 22rem;
+	}
+
+	@media (prefers-reduced-motion: reduce) {
+		animation: none;
+	}
+}
+
+@keyframes vp-shimmer {
+	0% {
+		background-position: 200% 0;
+	}
+
+	100% {
+		background-position: -200% 0;
+	}
+}
+
+// ---- List inside a card: hairline-separated rows ----
+.vp-list {
+	margin: 0;
+	padding: 0;
+	list-style: none;
+
+	> li {
+		display: flex;
+		align-items: center;
+		gap: 0.75rem;
+		margin: 0;
+		padding: 0.75rem 0;
+		border-top: 1px solid var(--ui-line);
+
+		&:first-child {
+			border-top: 0;
+			padding-top: 0.25rem;
+		}
+
+		&:last-child {
+			padding-bottom: 0;
+		}
+
+		// On a phone the action drops under the text, lined up with it, so the text gets the full width.
+		@media (width <= 600px) {
+			flex-wrap: wrap;
+
+			> .vp-list-main {
+				flex-basis: calc(100% - 2.75rem);
+			}
+
+			> .vp-chip-link {
+				margin-left: 2.75rem;
+			}
+		}
+	}
+}
+
+.vp-list-main {
+	display: flex;
+	flex: 1;
+	flex-direction: column;
+	gap: 0.125rem;
+	min-width: 0;
+	color: inherit;
+	text-decoration: none;
+
+	strong {
+		overflow: hidden;
+		font-size: 0.875rem;
+		font-weight: 600;
+		line-height: 1.4;
+		color: var(--ui-ink);
+		text-overflow: ellipsis;
+		white-space: nowrap;
+
+		@media (width <= 600px) {
+			white-space: normal;
+		}
+	}
+
+	span {
+		font-size: 0.8125rem;
+		line-height: 1.45;
+		color: var(--ui-muted);
+		overflow-wrap: anywhere;
+	}
+
+	a {
+		color: inherit;
+		text-decoration: none;
+	}
+
+	&:is(a):hover strong,
+	a:hover strong {
+		color: var(--ui-accent);
+	}
+}
+
+// A small outlined link button inside a list row.
+.vp-chip-link {
+	flex: none;
+	padding: 0.25rem 0.75rem;
+	border: 1px solid var(--ui-border);
+	border-radius: 999px;
+	background: #fff;
+	font-size: 0.75rem;
+	font-weight: 600;
+	color: var(--ui-text);
+	text-decoration: none;
+	white-space: nowrap;
+	transition: border-color 0.15s, color 0.15s;
+
+	&:hover,
+	&:focus-visible {
+		border-color: var(--ui-accent);
+		color: var(--ui-accent);
+	}
+}
+
+
+// ---- On/off switch (ui.tsx Switch) ----
+.vp-switch {
+	position: relative;
+	display: inline-block;
+	width: 2.5rem;
+	height: 1.375rem;
+	flex-shrink: 0;
+
+	input {
+		opacity: 0;
+		width: 0;
+		height: 0;
+	}
+
+	.vp-switch-track {
+		position: absolute;
+		inset: 0;
+		background: var(--border-color, #ccc);
+		border-radius: 1.375rem;
+		cursor: pointer;
+		transition: background 0.15s ease;
+
+		&::before {
+			content: '';
+			position: absolute;
+			height: 1.063rem;
+			width: 1.063rem;
+			left: 0.156rem;
+			bottom: 0.156rem;
+			background: #fff;
+			border-radius: 50%;
+			transition: transform 0.15s ease;
+		}
+	}
+
+	input:checked + .vp-switch-track {
+		background: var(--color-primary);
+	}
+
+	input:checked + .vp-switch-track::before {
+		transform: translateX(1.125rem);
+	}
+}
+
+.vp-switch.is-disabled {
+	opacity: 0.45;
+
+	.vp-switch-track {
+		cursor: not-allowed;
+	}
+}
+
+.vp-switch input:focus-visible + .vp-switch-track {
+	outline: 2px solid var(--color-primary, #5007aa);
+	outline-offset: 2px;
+}
+
+// ---- A rail list of one-click actions: icon tile, name and one line, an arrow (Content quick start, Performance
+// quick fixes) ----
+.vp-quick {
+	margin: 0 -0.5rem;
+	padding: 0;
+	list-style: none;
+
+	li {
+		margin: 0;
+	}
+
+	button {
+		display: flex;
+		align-items: center;
+		gap: 0.75rem;
+		width: 100%;
+		margin: 0;
+		padding: 0.5rem;
+		border: 0;
+		border-radius: 0.625rem;
+		background: none;
+		font: inherit;
+		text-align: left;
+		color: inherit;
+		cursor: pointer;
+		transition: background 0.15s;
+
+		.vp-quick-text {
+			display: flex;
+			flex: 1;
+			flex-direction: column;
+			min-width: 0;
+		}
+
+		strong {
+			font-size: 0.8125rem;
+			font-weight: 600;
+			color: var(--ui-ink);
+		}
+
+		.vp-quick-text span {
+			font-size: 0.75rem;
+			color: var(--ui-muted);
+		}
+
+		> i {
+			font-size: 0.6875rem;
+			color: var(--ui-faint);
+			transition: color 0.15s, transform 0.15s;
+		}
+
+		&:hover,
+		&:focus-visible {
+			background: var(--ui-sunken);
+
+			strong,
+			> i {
+				color: var(--ui-accent);
+			}
+
+			> i {
+				transform: translateX(2px);
+			}
+		}
+
+		&:disabled {
+			cursor: default;
+			opacity: 0.7;
+		}
+	}
+}
+
+.vp-spin {
+	display: inline-block;
+	animation: vp-spin 1s linear infinite;
+
+	@media (prefers-reduced-motion: reduce) {
+		animation: none;
+	}
+}
+
+@keyframes vp-spin {
+	to {
+		transform: rotate(360deg);
+	}
+}
+
+// zyra's tabbed page header (NavigatorComponent): on a phone its right side (scan button, "Last scan") wraps
+// instead of pushing the page wider than the screen.
+@media (width <= 600px) {
+	.admin-main-wrapper .right-section {
+		flex-wrap: wrap;
+		min-width: 0;
+		max-width: 100%;
+	}
+}
+
+// zyra tables: the row whose details are open beside the table (`activeRowId`, e.g. the page in Page analysis) is
+// one tinted band with an accent bar, and its action button is filled, so it is clear which row the panel shows.
+// The tint sits on the row, not the cells (zyra's rows are flex boxes, its cells are not equal height); the
+// selectors match zyra's own table rules, which would otherwise win.
+.admin-main-wrapper.admin-main-wrapper .admin-table-wrapper .table-wrapper .admin-table .admin-table-body .admin-row.is-selected {
+	background: #f6f2ff;
+	box-shadow: inset 3px 0 0 var(--ui-accent);
+}
+
+body .admin-main-wrapper .admin-table-wrapper .table-wrapper .admin-table .admin-row.is-selected .admin-column.action .table-action .table-action-buttons .admin-btn {
+	border-color: var(--ui-accent);
+	background: var(--ui-accent);
+	color: #fff;
+
+	i {
+		color: #fff;
+	}
+}

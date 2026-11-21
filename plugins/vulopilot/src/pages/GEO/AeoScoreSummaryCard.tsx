@@ -1,11 +1,11 @@
 import { __ } from '@wordpress/i18n';
-import { COLOR_PALETTE } from '@zyra/core';
-import { CardComponent, ChartComponent, TypographyComponent } from '@zyra/components';
+import { CardComponent, TypographyComponent } from '@zyra/components';
 import { useContentGate } from '../../services/useContentGate';
 import { useFilterSlot } from '../../services/useFilterSlot';
 import type { ComponentType } from 'react';
 import type { FindingGroup } from '../../components/Issues/issuesTypes';
 import type { TrendChange } from './geoTrendChange';
+import { ScoreRing } from '../../components/ScoreBreakdown/ScoreBreakdown';
 
 interface AeoTopic {
 	key: string;
@@ -38,25 +38,7 @@ const dummyContent = (
 	<div className="aeo-score-summary">
 		<div className="aeo-score-summary-gauge">
 			<div className="geo-overall-visibility">
-				<ChartComponent
-					type="ring"
-					height={200}
-					color={COLOR_PALETTE.green}
-					centerLabel={
-						<>
-							<TypographyComponent variant={'h1'} color="green">
-								{DUMMY_SCORE}
-							</TypographyComponent>
-							<TypographyComponent variant={'h4'}>
-								{__('Good', 'vulopilot')}
-							</TypographyComponent>
-						</>
-					}
-					data={[
-						{ label: __('Score', 'vulopilot'), value: DUMMY_SCORE, color: COLOR_PALETTE.green },
-						{ label: __('Remaining', 'vulopilot'), value: 100 - DUMMY_SCORE, color: '#e5e7eb' },
-					]}
-				/>
+				<ScoreRing score={DUMMY_SCORE} label={__('Good', 'vulopilot')} />
 				<TypographyComponent variant={'h3'} color="text-green">
 					{__('AEO Score', 'vulopilot')}
 				</TypographyComponent>
@@ -83,7 +65,7 @@ const AeoScoreSummaryCard = ({ isActive, ...panelProps }: AeoScoreSummaryCardPro
 				'How ready your content is to be extracted and quoted directly by AI answer engines.',
 				'vulopilot'
 			)}
-			isLoading={panelProps.isLoading}
+			isLoading={panelProps.isLoading || undefined}
 		>
 			{wrap(Panel ? <Panel {...panelProps} /> : dummyContent, dummyContent)}
 		</CardComponent>

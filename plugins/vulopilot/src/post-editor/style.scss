@@ -301,9 +301,37 @@
 		flex-shrink: 0;
 	}
 
+	// Every error line in the editor sidebar (free and Pro panels share it): the soft red box the settings use
+	// (components/FieldError), with a round "!" drawn in CSS so it needs no icon font here.
 	&__error {
-		color: #cc1818;
-		padding: 8px 10px 0;
+		display: flex;
+		align-items: flex-start;
+		gap: 0.4375rem;
+		margin: 8px 10px 0;
+		padding: 0.5rem 0.75rem;
+		border: 1px solid #fecdca;
+		border-radius: 0.375rem;
+		background: #fef3f2;
+		font-size: 0.75rem;
+		line-height: 1.45;
+		color: #b42318;
+
+		&::before {
+			content: "!";
+			display: inline-flex;
+			flex: none;
+			align-items: center;
+			justify-content: center;
+			width: 0.875rem;
+			height: 0.875rem;
+			margin-top: 0.0625rem;
+			border-radius: 50%;
+			background: #d92d20;
+			font-size: 0.625rem;
+			font-weight: 700;
+			line-height: 1;
+			color: #fff;
+		}
 	}
 
 	&__list {

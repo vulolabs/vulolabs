@@ -6,6 +6,7 @@ import { FormGroupWrapperComponent, NoticeManager } from '@zyra/components';
 import { TextInput } from '@zyra/inputs';
 import { useSetting } from '../../contexts/SettingContext';
 import CardHeader from '../CardHeader';
+import FieldError, { Field } from '../FieldError/FieldError';
 
 /** "Stop typing, then save" debounce. */
 const AUTOSAVE_DEBOUNCE_MS = 1000;
@@ -33,6 +34,8 @@ const TagManagerPanel = () => {
 	const [isEditable, setIsEditable] = useState(false);
 	// Latest typed value not yet saved - lets blur, unmount and page unload save it right away.
 	const pendingRef = useRef<string | null>(null);
+	// The format hint waits until you leave the field, so it never shouts while you are still typing.
+	const [isTouched, setIsTouched] = useState(false);
 
 	const persist = (nextContainerId: string) => {
 		pendingRef.current = null;
@@ -118,6 +121,8 @@ const TagManagerPanel = () => {
 		};
 	}, []);
 
+	const showError = isTouched && !isValidContainerId(containerId);
+
 	return (
 		<FormGroupWrapperComponent>
 			<CardHeader
@@ -128,21 +133,28 @@ const TagManagerPanel = () => {
 					'vulopilot'
 				)}
 			>
-				<TextInput
-					id="tag-manager-container-id-input"
-					placeholder={__('GTM-XXXXXXX', 'vulopilot')}
-					size={25}
-					value={containerId}
-					onChange={(value) => handleContainerIdChange(String(value))}
-					onBlur={flush}
-					onFocus={() => setIsEditable(true)}
-					readOnly={!isEditable}
-				/>
-				{!isValidContainerId(containerId) && (
-					<p className="description" style={{ color: '#d63638' }}>
-						{__('A Container ID looks like GTM-XXXXXXX. This value was not saved.', 'vulopilot')}
-					</p>
-				)}
+				<Field invalid={showError}>
+					<TextInput
+						id="tag-manager-container-id-input"
+						placeholder={__('GTM-XXXXXXX', 'vulopilot')}
+						size={25}
+						value={containerId}
+						onChange={(value) => handleContainerIdChange(String(value))}
+						onBlur={() => {
+							setIsTouched(true);
+							flush();
+						}}
+						onFocus={() => setIsEditable(true)}
+						readOnly={!isEditable}
+						aria-invalid={showError || undefined}
+						aria-describedby={showError ? 'tag-manager-container-id-error' : undefined}
+					/>
+					{showError && (
+						<FieldError id="tag-manager-container-id-error">
+							{__('Use the format GTM-XXXXXXX, for example GTM-AB12CD3. This ID has not been saved.', 'vulopilot')}
+						</FieldError>
+					)}
+				</Field>
 			</CardHeader>
 		</FormGroupWrapperComponent>
 	);

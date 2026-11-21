@@ -75,4 +75,27 @@ declare global {
 		vulopilotPostSeo: VuloPilotPostSeoLocalizer;
 	}
 	 
+
+	/**
+	 * webpack's require.context() extension, untyped in this repo (no @types/webpack-env). Declared here
+	 * rather than carrying the gap forward.
+	 */
+	 
+	 
+	var require: {
+		// eslint-disable-next-line no-unused-vars
+		( id: string ): any;
+		context: (
+			// eslint-disable-next-line no-unused-vars
+			directory: string,
+			// eslint-disable-next-line no-unused-vars
+			useSubdirectories?: boolean,
+			// eslint-disable-next-line no-unused-vars
+			regExp?: RegExp
+		) => {
+			keys: () => string[];
+			// eslint-disable-next-line no-unused-vars
+			( id: string ): any;
+		};
+	};
 }

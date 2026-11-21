@@ -2,13 +2,9 @@
 import { useEffect, useRef, useState } from 'react';
 import { __ } from '@wordpress/i18n';
 import { getApiLink, getApiResponse, scrollToId } from '@zyra/core';
-import {
-	CardComponent,
-	ColumnComponent,
-	ModuleGuardComponent,
-	ContainerComponent,
-} from '@zyra/components';
-import { ButtonInput, TextInput, SelectInput } from '@zyra/inputs';
+import { ColumnComponent, ContainerComponent } from '@zyra/components';
+import { EmptyState, Segmented, Skeleton } from '../../components/ui';
+import HistoryEmptySample from './HistoryEmptySample';
 import HistoryDetailPanel from './HistoryDetailPanel';
 import HistoryTimeline from './HistoryTimeline';
 import {
@@ -19,8 +15,10 @@ import {
 } from '../../services/historyTypes';
 // Reports' own page moved here from AI Copilot.
 import '../AIAssistant/AICopilot.scss';
+import '../AIAssistant/copilot.scss';
 import '../../components/common.scss';
 import './Reports.scss';
+import './History.scss';
 
 interface HistoryResponse {
 	data: HistoryRow[];
@@ -111,7 +109,8 @@ const HistoryTab = () => {
 
 		const params = new URLSearchParams();
 		params.set('page', String(targetPage));
-		params.set('per_page', '20');
+		// Enough for whole scans: a scan logs one row per check, and the timeline folds them into one.
+		params.set('per_page', '100');
 
 		if ('all' !== activeFilter) {
 			params.set('type', activeFilter);
@@ -293,12 +292,6 @@ const HistoryTab = () => {
 		URL.revokeObjectURL(url);
 	};
 
-	// Format options for SelectInput
-	const dateRangeSelectOptions = DATE_RANGE_OPTIONS.map(opt => ({
-		value: opt.value,
-		label: opt.label
-	}));
-
 	// Handle search change from TextInput
 	const handleSearchChange = (value: string | number | FileList) => {
 		// Ensure we're working with a string
@@ -315,121 +308,110 @@ const HistoryTab = () => {
 		}
 	};
 
+	const isEmpty = !error && !isLoading && 0 === rows.length;
+	// Only a search counts: the period is always set (30 days by default).
+	const isFiltered = Boolean(search);
+
 	return (
 		<ContainerComponent>
 			<ColumnComponent grid={8}>
-			<CardComponent titleIcon="security" title={__('History', 'vulopilot')} desc={__('Everything VuloPilot has scanned, changed, or applied. Use filters to find exactly what you need.', 'vulopilot')}>
-				<div className='filter-wrapper'>
-					<div className="category-filter">
-						{FILTER_TABS.map((tab) => (
-							<span
-								key={tab.id}
-								className={`category-item  ${tab.id === activeFilter ? 'active' : ''}`}
-								onClick={() => setActiveFilter(tab.id)}
-							>
-								{tab.label}
-								{typeCounts[tab.id] > 0 && (
-									<span className="issues-category-tab-count">
-										{` (${typeCounts[tab.id]})`}
-									</span>
-								)}
+				<section className="vp-card vp-history">
+					<header className="vp-card-head">
+						<div className="vp-card-title">
+							<span className="vp-card-icon" aria-hidden="true">
+								<i className="adminfont-recent" />
 							</span>
-						))}
+							<div>
+								<h3>{__('Activity', 'vulopilot')}</h3>
+								<p>{__('Every scan, AI change, conversation and automation run, newest first.', 'vulopilot')}</p>
+							</div>
+						</div>
+						<div className="vp-card-actions">
+							<button type="button" className="vp-widget-tool" onClick={handleExport} disabled={0 === rows.length}>
+								<i className="adminfont-download" aria-hidden="true" />
+								{__('Export CSV', 'vulopilot')}
+							</button>
+						</div>
+					</header>
+
+					<div className="vp-history-toolbar">
+						<div className="vp-tabs" role="group" aria-label={__('Show', 'vulopilot')}>
+							{FILTER_TABS.map((tab) => (
+								<button
+									key={tab.id}
+									type="button"
+									className={tab.id === activeFilter ? 'is-active' : ''}
+									aria-pressed={tab.id === activeFilter}
+									onClick={() => setActiveFilter(tab.id)}
+								>
+									{tab.label}
+									<b>{typeCounts[tab.id] ?? 0}</b>
+								</button>
+							))}
+						</div>
+						<div className="vp-history-filters">
+							<label className="vp-history-search">
+								<i className="adminfont-search" aria-hidden="true" />
+								<input
+									type="search"
+									value={search}
+									placeholder={__('Search activity…', 'vulopilot')}
+									aria-label={__('Search activity', 'vulopilot')}
+									onChange={(event) => handleSearchChange(event.target.value)}
+								/>
+							</label>
+							<Segmented
+								size="sm"
+								label={__('Period', 'vulopilot')}
+								value={dateRange}
+								onChange={(value) => handleDateRangeChange(value)}
+								options={DATE_RANGE_OPTIONS}
+							/>
+						</div>
 					</div>
 
-					{/* Same real one-row toolbar shape RecentContentCard.tsx's own `.recent-content-toolbar` already establishes (search, filter select(s), action button, wrapped+right-aligned) - search/date range/Export used to each fall onto their own line here since `.filter-wrapper`'s own real style only applies inside a TableCard's `.table-container` (Table.scss's own nested selector), so outside that context it was an unstyled `<div>` and every child fell back to plain block-level stacking. */}
-					<div className="history-toolbar">
-						<TextInput
-							type="text"
-							name="history-search"
-							placeholder={__('Search history…', 'vulopilot')}
-							value={search}
-							size={20}
-							onChange={handleSearchChange}
-							inputClass="history-search-input"
-							wrapperClass="history-search-wrapper"
-						/>
-
-						<SelectInput
-							type="single-select"
-							options={dateRangeSelectOptions}
-							size={15}
-							value={dateRange}
-							onChange={handleDateRangeChange}
-							placeholder={__('Select date range', 'vulopilot')}
-							isClearable={false}
-						/>
-
-						<ButtonInput
-							buttons={{
-								text: __('Export', 'vulopilot'),
-								icon: 'download',
-								onClick: handleExport,
-								disabled: 0 === rows.length,
-							}}
-						/>
+					<div className="vp-history-body">
+						{error && (
+							<EmptyState icon="error" tone="red" title={__('Could not load activity', 'vulopilot')} text={error} />
+						)}
+						{isLoading && 0 === rows.length && !error && (
+							<>
+								<Skeleton />
+								<Skeleton />
+								<Skeleton />
+							</>
+						)}
+						{isEmpty && isFiltered && (
+							<EmptyState
+								compact
+								icon="search"
+								title={__('Nothing matches', 'vulopilot')}
+								text={__('Try another search, or a longer period.', 'vulopilot')}
+							/>
+						)}
+						{isEmpty && !isFiltered && <HistoryEmptySample filter={activeFilter} />}
+						{rows.length > 0 && (
+							<HistoryTimeline
+								rows={rows}
+								total={total}
+								selectedRow={selectedRow}
+								onSelectRow={handleSelectRow}
+								isLoadingMore={isLoadingMore}
+								onLoadMore={handleLoadMore}
+							/>
+						)}
 					</div>
-				</div>
-				{error ? (
-					<ModuleGuardComponent
-						icon="error"
-						title={__('Could not load history', 'vulopilot')}
-						desc={error}
-					/>
-				) : !isLoading && rows.length === 0 ? (
-					<ModuleGuardComponent
-						icon="check"
-						title={
-							'conversation' === activeFilter
-								? __(
-										'No conversations yet',
-										'vulopilot'
-									)
-								: 'automations' === activeFilter
-									? __(
-											'No automation history yet',
-											'vulopilot'
-										)
-									: __('Nothing here yet', 'vulopilot')
-						}
-						desc={
-							'conversation' === activeFilter
-								? __(
-										"AI chat isn't connected yet - once it is, your conversations will show up here.",
-										'vulopilot'
-									)
-								: 'automations' === activeFilter
-									? __(
-											"No automation has run yet - automated workflows will show up here once they do.",
-											'vulopilot'
-										)
-									: __(
-											'Scans and AI changes will show up here as VuloPilot works.',
-											'vulopilot'
-										)
-						}
-					/>
-				) : (
-					<HistoryTimeline
-						rows={rows}
-						total={total}
-						selectedRow={selectedRow}
-						onSelectRow={handleSelectRow}
-						isLoadingMore={isLoadingMore}
-						onLoadMore={handleLoadMore}
-					/>
-				)}
-			</CardComponent>
+				</section>
 			</ColumnComponent>
 
 			<ColumnComponent grid={4}>
-				<div id="history-detail-panel">
-				<HistoryDetailPanel
-					row={selectedRow}
-					onDeleted={handleDelete}
-					onRolledBack={() => fetchPage(1, false)}
-					onSelectRelatedAction={handleSelectRelatedAction}
-				/>
+				<div id="history-detail-panel" className="vp-history-detail">
+					<HistoryDetailPanel
+						row={selectedRow}
+						onDeleted={handleDelete}
+						onRolledBack={() => fetchPage(1, false)}
+						onSelectRelatedAction={handleSelectRelatedAction}
+					/>
 				</div>
 			</ColumnComponent>
 		</ContainerComponent>

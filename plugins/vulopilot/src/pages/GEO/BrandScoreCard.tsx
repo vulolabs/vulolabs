@@ -1,8 +1,8 @@
 /* global vulopilotAppLocalizer */
 import { useEffect, useState } from 'react';
-import { __, sprintf } from '@wordpress/i18n';
+import { __ } from '@wordpress/i18n';
 import { getApiLink, getApiResponse } from '@zyra/core';
-import { MetricTileComponent, type MetricTileItem } from '@zyra/components';
+import { ScoreRing } from '../../components/ScoreBreakdown/ScoreBreakdown';
 
 interface BrandScoreResponse {
 	brand_score: number;
@@ -26,23 +26,6 @@ const getRating = (score: number): string => {
 		return __('Needs Work', 'vulopilot');
 	}
 	return __('At Risk', 'vulopilot');
-};
-
-/** Same 3-tier thresholds as `getRating()` above, as one of zyra's own `$color-palette` names. */
-const ratingColor = (score: number): string => {
-	if (score >= 70) {
-		return 'green';
-	}
-	if (score >= 40) {
-		return 'yellow';
-	}
-	return 'red';
-};
-
-const RING_COLOR: Record<string, string> = {
-	green: '#16a34a',
-	yellow: '#b7791f',
-	red: '#dc2626',
 };
 
 const SCORE_TILES: {
@@ -102,33 +85,28 @@ const BrandScoreCard = () => {
 	}, []);
 
 	return (
-		<MetricTileComponent
-			cols={3}
-			isLoading={isLoading}
-			data={SCORE_TILES.map((tile) => {
+		<div className="vp-brand-scores">
+			{SCORE_TILES.map((tile) => {
 				const score = data ? data[tile.key] : 0;
-				const color = ratingColor(score);
 
-				return {
-					id: tile.key,
-					icon: tile.icon,
-					title: tile.title,
-					desc: tile.desc,
-					number: sprintf(
-						/* translators: %d: real 0-100 score. */
-						__('%d/100', 'vulopilot'),
-						score
-					),
-					status: { text: getRating(score), color },
-					chart: {
-						type: 'ring',
-						data: score,
-						color: RING_COLOR[color],
-						height: 130,
-					},
-				};
-			}) as MetricTileItem[]}
-		/>
+				return (
+					<section key={tile.key} className="vp-brand-score">
+						<div className="vp-brand-score-text">
+							<span className="vp-brand-score-icon" aria-hidden="true">
+								<i className={`adminfont-${tile.icon.split(' ')[0]}`} />
+							</span>
+							<h3>{tile.title}</h3>
+							<p>{tile.desc}</p>
+						</div>
+						{isLoading ? (
+							<span className="vp-brand-score-skel" aria-hidden="true" />
+						) : (
+							<ScoreRing score={score} label={getRating(score)} size="md" />
+						)}
+					</section>
+				);
+			})}
+		</div>
 	);
 };
 

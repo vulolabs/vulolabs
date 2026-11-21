@@ -17,6 +17,7 @@ import { TableCard, TableRow } from '@zyra/table';
 import { useApiList } from '../../services/useApiList';
 import { formatWpDate } from '../../services/formatWpDate';
 import ShowProPopup from '../../components/Popup/Popup';
+import { columns } from '../../services/tableColumns';
 
 /** `wp_vulopilot_not_found_logs` rows - NotFoundLogger's own real 404 visit log. */
 interface NotFoundLogRow extends TableRow {
@@ -223,7 +224,7 @@ const NotFoundLogSection = () => {
 									],
 								},
 							]}
-							headers={{
+							headers={columns({
 								requested_path: {
 									key: 'requested_path',
 									type: 'info',
@@ -317,7 +318,7 @@ const NotFoundLogSection = () => {
 										},
 									],
 								},
-							}}
+							})}
 							rows={notFoundLogs.data.map((row) => ({
 								...row,
 								rowIcon:

@@ -354,6 +354,7 @@ const SitemapPanel = () => {
 												desc={__('How you want to display the HTML sitemap.', 'vulopilot')}
 											>
 												<SelectInput
+													type="single-select"
 													size={10}
 													options={DISPLAY_FORMAT_OPTIONS}
 													value={(setting.html_sitemap_display_format as string) ?? 'list'}
@@ -369,6 +370,7 @@ const SitemapPanel = () => {
 												desc={__('How to sort the items in the HTML sitemap.', 'vulopilot')}
 											>
 												<SelectInput
+													type="single-select"
 													size={15}
 													options={SORT_BY_OPTIONS}
 													value={(setting.html_sitemap_sort_by as string) ?? 'published_date'}
@@ -390,6 +392,7 @@ const SitemapPanel = () => {
 												)}
 											>
 												<SelectInput
+													type="single-select"
 													size={15}
 													options={ITEM_TITLES_OPTIONS}
 													value={(setting.html_sitemap_item_titles as string) ?? 'post_title'}

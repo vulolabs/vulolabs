@@ -1,31 +1,21 @@
 /* global vulopilotAppLocalizer */
 import { useEffect, useState } from 'react';
-import { __, sprintf } from '@wordpress/i18n';
-import { COLOR_PALETTE, getApiLink, getApiResponse } from '@zyra/core';
+import { __, _n, sprintf } from '@wordpress/i18n';
+import { getApiLink, getApiResponse } from '@zyra/core';
 import {
 	AnalyticsComponent,
 	CardComponent,
 	ChartComponent,
 	ColumnComponent,
 	ContainerComponent,
-	BadgeComponent,
-	ListComponent,
 	ModuleGuardComponent,
-	TypographyComponent,
 } from '@zyra/components';
 import { ToggleInput } from '@zyra/inputs';
-import {
-	Area,
-	AreaChart,
-	CartesianGrid,
-	ResponsiveContainer,
-	Tooltip,
-	XAxis,
-	YAxis,
-} from 'recharts';
 import type { FindingGroup } from '../../components/Issues/issuesTypes';
 import type { CrawlerAnalytics } from './useCrawlerAnalytics';
-import { formatWpDate, formatWpDay } from '../../services/formatWpDate';
+import ScoreBreakdown from '../../components/ScoreBreakdown/ScoreBreakdown';
+import ScoreTrendArea, { TrendHead } from '../../components/ScoreTrendArea/ScoreTrendArea';
+import { formatWpDate } from '../../services/formatWpDate';
 
 const PIE_COLORS = ['#7C3AED', '#2563EB', '#0D9488', '#EA580C', '#DB2777', '#65A30D'];
 
@@ -41,16 +31,6 @@ const getRating = (score: number): string => {
 };
 
 /** Same 3-tier band as `getRating()` above, as one of zyra's own `$color-palette` names. */
-const ratingColor = (score: number): string => {
-	if (score >= 70) {
-		return 'green';
-	}
-	if (score >= 40) {
-		return 'yellow';
-	}
-	return 'red';
-};
-
 const pctChange = (current: number, previous: number): number | null => {
 	if (0 === previous) {
 		return null;
@@ -71,21 +51,24 @@ const ChangeBadge = ({ current, previous }: { current: number; previous: number 
 };
 
 /** Real "Robots.txt is accessible" / "XML sitemap is accessible" / "No critical AI-bot blocks" checklist. */
-const CHECKLIST_ITEMS: { key: string; scannerIds: string[]; label: string }[] = [
+const CHECKLIST_ITEMS: { key: string; scannerIds: string[]; label: string; goodText: string }[] = [
 	{
 		key: 'robots',
 		scannerIds: ['robots-txt'],
-		label: __('Robots.txt is not reachable', 'vulopilot'),
+		label: __('robots.txt', 'vulopilot'),
+		goodText: __('Reachable and readable by crawlers', 'vulopilot'),
 	},
 	{
 		key: 'sitemap',
 		scannerIds: ['sitemap', 'sitemap-validation'],
-		label: __('No XML sitemap found', 'vulopilot'),
+		label: __('XML sitemap', 'vulopilot'),
+		goodText: __('Found and valid', 'vulopilot'),
 	},
 	{
 		key: 'ai-blocks',
 		scannerIds: ['ai-crawler-blocked-pages'],
-		label: __('No critical AI-bot blocks', 'vulopilot'),
+		label: __('AI crawler access', 'vulopilot'),
+		goodText: __('No important AI bots are blocked', 'vulopilot'),
 	},
 ];
 
@@ -208,92 +191,35 @@ const CrawlerAnalyticsSection = ({
 							/>
 						) : (
 							<>
-								<div className="overall-score-wrapper">
-									<div className="overall-score-summary">
-											<ChartComponent
-												type="ring"
-												height={200}
-												// Top-level `color` - `type="ring"` only ever paints its stroke from this prop.
-												color={
-													COLOR_PALETTE[
-														ratingColor(analytics.crawl_health_score) as keyof typeof COLOR_PALETTE
-													]
-												}
-												centerLabel={
-													<>
-														<TypographyComponent
-															variant={'h1'}
-															color={ratingColor(analytics.crawl_health_score)}
-														>
-															{analytics.crawl_health_score}
-														</TypographyComponent>
-														<TypographyComponent variant={'h4'}>
-															{getRating(analytics.crawl_health_score)}
-														</TypographyComponent>
-													</>
-												}
-												data={[
-													{
-														label: __('Score', 'vulopilot'),
-														value: analytics.crawl_health_score,
-														// Same real rating color the ring's own "Good"/"Needs Work"/"At Risk" label above already uses (`getRating()`).
-														color: COLOR_PALETTE[
-															ratingColor(analytics.crawl_health_score) as keyof typeof COLOR_PALETTE
-														],
-													},
-													{
-														label: __('Remaining', 'vulopilot'),
-														value: 100 - analytics.crawl_health_score,
-														color: '#e5e7eb',
-													},
-												]}
-											/>
-											<TypographyComponent variant={'h3'} color="text-green">
-												{__('Overall Crawl Health', 'vulopilot')}
-											</TypographyComponent>
-											<div className="desc">
-												{__('How many robots.txt/sitemap crawl-health checks currently pass.', 'vulopilot')}
-											</div>
-									</div>
-									<div className="overall-score-summary">
-									<ListComponent
-										className="mini-card report hover seo-health-score-category-list"
-										items={checklist.map((item) => ({
-											id: item.key,
-											icon:
-												null === item.isGood
-													? 'info blue'
+								<ScoreBreakdown
+									score={analytics.crawl_health_score}
+									ratingLabel={getRating(analytics.crawl_health_score)}
+									summary={__('How many robots.txt, sitemap and AI-access checks currently pass.', 'vulopilot')}
+									rows={checklist.map((item) => ({
+										key: item.key,
+										icon: { robots: 'document', sitemap: 'url', 'ai-blocks': 'ai' }[item.key] ?? 'check',
+										title: item.label,
+										sub: item.isGood
+											? item.goodText
+											: null === item.isGood
+												? undefined
+												: sprintf(
+														/* translators: %d: number of open findings. */
+														_n('%d issue', '%d issues', openCount(item.scannerIds), 'vulopilot'),
+														openCount(item.scannerIds)
+													),
+										score: null,
+										status: (
+											<span className={`vp-check-pill is-${null === item.isGood ? 'wait' : item.isGood ? 'good' : 'bad'}`}>
+												{null === item.isGood
+													? __('Checking…', 'vulopilot')
 													: item.isGood
-														? 'check green'
-														: 'error yellow',
-											title: item.label,
-											desc: sprintf(
-												/* translators: %d: real number of open findings. */
-												__('%d issues', 'vulopilot'),
-												openCount(item.scannerIds)
-											),
-											tags: (
-												<BadgeComponent
-													color={
-														null === item.isGood
-															? ''
-															: item.isGood
-																? 'green'
-																: 'yellow'
-													}
-													text={
-														null === item.isGood
-															? __('Checking…', 'vulopilot')
-															: item.isGood
-																? __('Good', 'vulopilot')
-																: __('Warning', 'vulopilot')
-													}
-												/>
-											),
-										}))}
-									/>
-									</div>
-								</div>
+														? __('Pass', 'vulopilot')
+														: __('Fix', 'vulopilot')}
+											</span>
+										),
+									}))}
+								/>
 								{/* * Same "bottom stat tile row" shape * SeoTab.tsx's own "SEO Health" card * closes with, kept on `variant="dashboard"` *. */}
 								<AnalyticsComponent
 									variant="dashboard"
@@ -332,28 +258,17 @@ const CrawlerAnalyticsSection = ({
 							/>
 						}
 					>
-						<div className="dashboard-trend-chart">
-							<ResponsiveContainer width="100%" height="100%">
-								<AreaChart
-									// `date` is a plain calendar day.
-									data={analytics.daily_volume.map((day) => ({
-										...day,
-										date: formatWpDate(`${day.date} 12:00:00`),
-									}))}
-								>
-									<CartesianGrid strokeDasharray="3 3" />
-									<XAxis dataKey="date" tickFormatter={formatWpDay} />
-									<YAxis allowDecimals={false} />
-									<Tooltip labelFormatter={formatWpDay} />
-									<Area
-										type="monotone"
-										dataKey="total"
-										stroke="#4B227A"
-										fill="#00EED0"
-									/>
-								</AreaChart>
-							</ResponsiveContainer>
-						</div>
+						<TrendHead
+							points={analytics.daily_volume.map((day) => ({ date: day.date, score: day.total }))}
+							days={Number(period)}
+							suffix={__(' requests', 'vulopilot')}
+						/>
+						<ScoreTrendArea
+							points={analytics.daily_volume.map((day) => ({ date: day.date, score: day.total }))}
+							height={240}
+							scale="count"
+							label={__('Requests', 'vulopilot')}
+						/>
 					</CardComponent>
 
 				</ColumnComponent>

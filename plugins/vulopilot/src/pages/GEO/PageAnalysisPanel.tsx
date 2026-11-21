@@ -1,12 +1,12 @@
 /* global vulopilotAppLocalizer */
 import { useEffect, useState } from 'react';
-import { __, sprintf } from '@wordpress/i18n';
+import { __, _n, sprintf } from '@wordpress/i18n';
 import { getApiLink, getApiResponse } from '@zyra/core';
-import { CardComponent, ModuleGuardComponent, ListComponent, BadgeComponent } from '@zyra/components';
 import { ButtonInput } from '@zyra/inputs';
+import { EmptyState, Skeleton } from '../../components/ui';
 import { buildEditLink } from './seoIssuesShared';
 import { PAGE_ANALYSIS_CHECK_QUERY_PARAM } from '../../services/seoIssueEditorTarget';
-import { formatWpDate } from '../../services/formatWpDate';
+import { formatWpDate, formatWpTime } from '../../services/formatWpDate';
 import './PageAnalysisPanel.scss';
 
 type CheckStatus = 'pass' | 'warn' | 'fail';
@@ -31,176 +31,302 @@ interface PageAnalysisPanelProps {
 	postId: number;
 }
 
-/** zyra's own icon font only ever ships glyphs for 4 classes. */
-const STATUS_ICON: Record<CheckStatus, string> = {
-	pass: 'check green',
-	warn: 'error red',
-	fail: 'close red',
+const GROUPS: { status: CheckStatus; title: string }[] = [
+	{ status: 'fail', title: __('Fix these', 'vulopilot') },
+	{ status: 'warn', title: __('Worth improving', 'vulopilot') },
+	{ status: 'pass', title: __('Passing', 'vulopilot') },
+];
+
+const STATUS_WORD: Record<CheckStatus, string> = {
+	fail: __('Failed', 'vulopilot'),
+	warn: __('Needs work', 'vulopilot'),
+	pass: __('Passed', 'vulopilot'),
 };
 
-/** Real per-check status pill - reuses `BadgeComponent`'s own `border` outline look. */
-const STATUS_BADGE: Record<CheckStatus, { text: string; color: string }> = {
-	pass: { text: __('Passed', 'vulopilot'), color: 'green' },
-	warn: { text: __('Needs work', 'vulopilot'), color: 'orange' },
-	fail: { text: __('Failed', 'vulopilot'), color: 'red' },
-};
-
-/** Worst-first - same real "what actually needs attention floats to the top" ordering `WhatShouldIFixFirstCard.tsx`/`SEVERITY_RANK` elsewhere in this plugin already use. */
-const STATUS_RANK: Record<CheckStatus, number> = {
-	fail: 0,
-	warn: 1,
-	pass: 2,
-};
-
-const sortByStatus = (checks: PageCheck[]): PageCheck[] =>
-	[...checks].sort((a, b) => STATUS_RANK[a.status] - STATUS_RANK[b.status]);
-
-/** Builds a deep link that navigates to the editor and highlights the check's field. */
+/** The editor, opened at the field this check is about. */
 const buildCheckEditLink = (postId: number, checkKey: string): string =>
 	`${buildEditLink(postId)}&${PAGE_ANALYSIS_CHECK_QUERY_PARAM}=${encodeURIComponent(checkKey)}`;
 
-/** "Page Analysis". */
+/** "localhost:8888 › 2026 › 11 › hello-world", the way Google shows a result's address. */
+const breadcrumb = (permalink: string): { host: string; path: string } => {
+	try {
+		const url = new URL(permalink);
+		const parts = url.pathname.split('/').filter(Boolean);
+
+		return { host: url.host, path: parts.length ? ` › ${parts.join(' › ')}` : '' };
+	} catch {
+		return { host: permalink, path: '' };
+	}
+};
+
+/** A Google-like snippet length: titles near 60 characters, descriptions near 160. */
+const clip = (text: string, max: number): string => (text.length > max ? `${text.slice(0, max - 1).trimEnd()}…` : text);
+
+/**
+ * "Page analysis" for one post or page (`GET /seo/analyze-page`): how many checks pass, how it would look in Google,
+ * and every check grouped by what to do - fix, improve, or nothing (folded away). A check opens the editor at its
+ * field.
+ */
 const PageAnalysisPanel = ({ postId }: PageAnalysisPanelProps) => {
 	const [data, setData] = useState<PageAnalysisResponse | null>(null);
 	const [isLoading, setIsLoading] = useState(true);
 	const [error, setError] = useState<string | null>(null);
+	const [reloadToken, setReloadToken] = useState(0);
+	const [showPassing, setShowPassing] = useState(false);
 
 	useEffect(() => {
+		let cancelled = false;
 		setIsLoading(true);
 		setError(null);
-		setData(null);
 
-		getApiResponse<PageAnalysisResponse>(
-			getApiLink(vulopilotAppLocalizer, `seo/analyze-page?post_id=${postId}`),
-			{ headers: { 'X-WP-Nonce': vulopilotAppLocalizer.nonce } }
-		)
+		getApiResponse<PageAnalysisResponse>(getApiLink(vulopilotAppLocalizer, `seo/analyze-page?post_id=${postId}`), {
+			headers: { 'X-WP-Nonce': vulopilotAppLocalizer.nonce },
+		})
 			.then((response) => {
+				if (cancelled) {
+					return;
+				}
+
 				if (response) {
 					setData(response);
 				} else {
-					setError(
-						__('Could not analyze this page. Please try again.', 'vulopilot')
-					);
+					setError(__('Could not analyze this page. Please try again.', 'vulopilot'));
 				}
 			})
-			.catch(() =>
-				setError(
-					__('Could not analyze this page. Please try again.', 'vulopilot')
-				)
-			)
-			.finally(() => setIsLoading(false));
-	}, [postId]);
+			.catch(() => !cancelled && setError(__('Could not analyze this page. Please try again.', 'vulopilot')))
+			.finally(() => !cancelled && setIsLoading(false));
 
-	/** "Fix with AI" for this whole page. */
-	const primaryFixCheck =
-		data?.checks.find((check: PageCheck) => 'fail' === check.status) ??
-		data?.checks.find((check: PageCheck) => 'warn' === check.status) ??
-		null;
+		return () => {
+			cancelled = true;
+		};
+	}, [postId, reloadToken]);
+
+	// A different page starts with its passing checks folded again.
+	useEffect(() => setShowPassing(false), [postId]);
+
+	const page = data && data.post_id === postId ? data : null;
+	const checks = page ? page.checks : [];
+	const count = (status: CheckStatus) => checks.filter((check) => check.status === status).length;
+	const counts = { fail: count('fail'), warn: count('warn'), pass: count('pass') };
+	const total = checks.length;
+	const firstToFix = checks.find((check) => 'fail' === check.status) ?? checks.find((check) => 'warn' === check.status) ?? null;
+
+	let body;
+
+	if (error) {
+		body = (
+			<EmptyState
+				compact
+				icon="error"
+				tone="red"
+				title={__('Something went wrong', 'vulopilot')}
+				text={error}
+				action={
+					<ButtonInput
+						buttons={{ text: __('Try again', 'vulopilot'), color: 'purple', onClick: () => setReloadToken((n) => n + 1) }}
+					/>
+				}
+			/>
+		);
+	} else if (!page) {
+		body = (
+			<>
+				<Skeleton size="block" />
+				<Skeleton />
+				<Skeleton />
+				<Skeleton />
+			</>
+		);
+	} else {
+		const { host, path } = breadcrumb(page.permalink);
+
+		body = (
+			<>
+				{/* How the page scores: passed of total, then a bar split by status. */}
+				<div className="vp-pa-summary">
+					<div className="vp-pa-score">
+						<strong>{counts.pass}</strong>
+						<span>
+							{sprintf(
+								/* translators: %d: total number of checks. */
+								__('of %d checks passed', 'vulopilot'),
+								total
+							)}
+						</span>
+					</div>
+					<div className="vp-pa-bar" aria-hidden="true">
+						{(['fail', 'warn', 'pass'] as CheckStatus[]).map(
+							(status) => counts[status] > 0 && <i key={status} className={`is-${status}`} style={{ flexGrow: counts[status] }} />
+						)}
+					</div>
+					<ul className="vp-pa-counts">
+						{(['fail', 'warn', 'pass'] as CheckStatus[]).map((status) => (
+							<li key={status} className={`is-${status}`}>
+								<b>{counts[status]}</b> {STATUS_WORD[status].toLowerCase()}
+							</li>
+						))}
+					</ul>
+				</div>
+
+				{/* Google's view of the page. */}
+				<div className="vp-pa-serp">
+					<span className="vp-pa-serp-label">{__('Google preview', 'vulopilot')}</span>
+					<div className="vp-pa-serp-site">
+						<span className="vp-pa-serp-favicon" aria-hidden="true">
+							{host.charAt(0).toUpperCase()}
+						</span>
+						<span>
+							<b>{host}</b>
+							<em>
+								{host}
+								{path}
+							</em>
+						</span>
+					</div>
+					<a className="vp-pa-serp-title" href={page.permalink} target="_blank" rel="noreferrer">
+						{clip(page.title || __('(no title)', 'vulopilot'), 60)}
+					</a>
+					{page.meta_description ? (
+						<p className="vp-pa-serp-desc">{clip(page.meta_description, 160)}</p>
+					) : (
+						<p className="vp-pa-serp-desc is-missing">
+							<i className="adminfont-error" aria-hidden="true" />
+							{__('No meta description - Google will pick a snippet from the page for you.', 'vulopilot')}
+						</p>
+					)}
+				</div>
+
+				{/* The checks, grouped by what to do. */}
+				{GROUPS.map(({ status, title }) => {
+					const rows = checks.filter((check) => check.status === status);
+
+					if (0 === rows.length) {
+						return null;
+					}
+
+					const folded = 'pass' === status && !showPassing;
+
+					return (
+						<section key={status} className={`vp-pa-group is-${status}`}>
+							<header>
+								{'pass' === status ? (
+									<button type="button" onClick={() => setShowPassing((open) => !open)} aria-expanded={!folded}>
+										{title}
+										<span className="vp-pa-n">{rows.length}</span>
+										<i className={`vp-pa-fold adminfont-keyboard-arrow-down${folded ? '' : ' is-open'}`} aria-hidden="true" />
+									</button>
+								) : (
+									<h4>
+										{title}
+										<span className="vp-pa-n">{rows.length}</span>
+									</h4>
+								)}
+							</header>
+							{!folded && (
+								<ul>
+									{rows.map((check) => (
+										<li key={check.key}>
+											<a
+												className={`vp-pa-check is-${check.status}`}
+												href={buildCheckEditLink(page.post_id, check.key)}
+												target="_blank"
+												rel="noopener noreferrer"
+											>
+												<span className="vp-pa-mark" aria-hidden="true">
+													<i className={`adminfont-${'pass' === status ? 'check' : 'fail' === status ? 'close' : 'error'}`} />
+												</span>
+												<span className="vp-pa-check-text">
+													<strong>{check.label}</strong>
+													<span>{check.message}</span>
+												</span>
+												<span className="vp-pa-check-go">
+													{'pass' === status ? __('View', 'vulopilot') : __('Fix', 'vulopilot')}
+													<i className="adminfont-arrow-right" aria-hidden="true" />
+												</span>
+											</a>
+										</li>
+									))}
+								</ul>
+							)}
+						</section>
+					);
+				})}
+			</>
+		);
+	}
 
 	return (
-		<CardComponent
-			className="page-analysis-panel"
-			title={__('Page Analysis', 'vulopilot')}
-			titleIcon="search"
-			desc={__('A single page\'s real SEO/GEO signals, checked live.', 'vulopilot')}
-			isLoading={isLoading}
-		>
-			{error && (
-				<ModuleGuardComponent
-					icon="error"
-					title={__('Something went wrong', 'vulopilot')}
-					desc={error}
-				/>
-			)}
-			{data && (
-				<>
-					<div className="page-analysis-search-preview">
-						<div className="page-analysis-search-preview-meta">
-							{sprintf(
-								/* translators: %s: this site's own Settings → General → Date Format, e.g. "10/09/2026". */
-								__('Analyzed %s', 'vulopilot'),
-								formatWpDate(data.analyzed_at)
-							)}
-						</div>
-						<div className="page-analysis-search-preview-title">
-							{data.title}
-						</div>
-						<div className="page-analysis-search-preview-url">
-							{data.permalink}
-						</div>
-						<div className="page-analysis-search-preview-desc">
-							{data.meta_description ||
-								__('No meta description set.', 'vulopilot')}
-						</div>
+		<section className="vp-card vp-pa" aria-busy={isLoading} aria-label={__('Page analysis', 'vulopilot')}>
+			<header className="vp-card-head">
+				<div className="vp-card-title">
+					<span className="vp-card-icon" aria-hidden="true">
+						<i className="adminfont-search" />
+					</span>
+					<div>
+						<h3>{__('Page analysis', 'vulopilot')}</h3>
+						<p>
+							{page
+								? sprintf(
+										/* translators: 1: date, 2: time. */
+										__('Checked live · %1$s, %2$s', 'vulopilot'),
+										formatWpDate(page.analyzed_at),
+										formatWpTime(page.analyzed_at)
+								  )
+								: __('Checking this page’s SEO and AI-search signals…', 'vulopilot')}
+						</p>
 					</div>
+				</div>
+				<button
+					type="button"
+					className="vp-pa-recheck"
+					onClick={() => setReloadToken((n) => n + 1)}
+					disabled={isLoading}
+					aria-label={__('Check again', 'vulopilot')}
+					title={__('Check again', 'vulopilot')}
+				>
+					<i className={`adminfont-refresh${isLoading ? ' vp-spin' : ''}`} aria-hidden="true" />
+				</button>
+			</header>
 
-					<ListComponent
-						className="mini-card report hover"
-						items={sortByStatus(data.checks).map((template) => ({
-							id: template.key,
-							icon: STATUS_ICON[template.status],
-							title: template.label,
-							desc: template.message,
-							action: () => {
-								window.open(
-									buildCheckEditLink(data.post_id, template.key),
-									'_blank',
-									'noopener,noreferrer'
-								);
-							},
-							tags: (
-								<>
-									<BadgeComponent
-										color={STATUS_BADGE[template.status].color}
-										text={STATUS_BADGE[template.status].text}
-									/>
-									<i className="adminfont-pagination-right-arrow ai-copilot-row-arrow" />
-								</>
-							),
-						}))}
-					/>
+			<div className="vp-card-body vp-pa-body">{body}</div>
 
+			{page && (
+				<footer className="vp-pa-foot">
 					<ButtonInput
 						position="full-width"
-						buttons={[
-							{
-								icon: 'edit',
-								color: 'border-green',
-								text: __('Edit page', 'vulopilot'),
-								onClick: () => {
-									window.location.href = buildEditLink(postId);
-								},
+						buttons={{
+							icon: 'ai',
+							color: 'purple-bg',
+							text: firstToFix
+								? sprintf(
+										/* translators: %d: number of checks to fix. */
+										_n('Fix %d check with AI', 'Fix %d checks with AI', counts.fail + counts.warn, 'vulopilot'),
+										counts.fail + counts.warn
+								  )
+								: __('Nothing to fix', 'vulopilot'),
+							disabled: !firstToFix,
+							onClick: () => {
+								if (firstToFix) {
+									window.location.href = buildCheckEditLink(postId, firstToFix.key);
+								}
 							},
-							{
-								icon: 'eye',
-								color: 'border-blue',
-								text: __('View page', 'vulopilot'),
-								disabled: !data?.permalink,
-								onClick: () => {
-									if (data?.permalink) {
-										window.open(data.permalink, '_blank', 'noreferrer');
-									}
-								},
-							},
-							{
-								icon: 'ai',
-								color: 'orange-bg',
-								text: __('Fix with AI', 'vulopilot'),
-								disabled: !primaryFixCheck,
-								onClick: () => {
-									if (primaryFixCheck) {
-										window.location.href = buildCheckEditLink(
-											postId,
-											primaryFixCheck.key
-										);
-									}
-								},
-							},
-						]}
+						}}
 					/>
-				</>
+					<div className="vp-pa-links">
+						<a href={buildEditLink(postId)}>
+							<i className="adminfont-edit" aria-hidden="true" />
+							{__('Edit page', 'vulopilot')}
+						</a>
+						{page.permalink && (
+							<a href={page.permalink} target="_blank" rel="noreferrer">
+								<i className="adminfont-eye" aria-hidden="true" />
+								{__('View page', 'vulopilot')}
+							</a>
+						)}
+					</div>
+				</footer>
 			)}
-		</CardComponent>
+		</section>
 	);
 };
 

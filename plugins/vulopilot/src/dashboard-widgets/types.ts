@@ -77,7 +77,10 @@ export interface WidgetDefinition {
 	title: string;
 	desc?: string;
 	icon: string;
-	grid: number;
+	/** Columns of 12 the widget spans. Pro widgets may leave it out and pass `size` instead. */
+	grid?: number;
+	/** Pro's shorthand: 'small' spans half the row. */
+	size?: 'small' | 'large';
 	component: React.ComponentType<WidgetProps>;
 }
 
@@ -86,6 +89,3 @@ export interface WidgetLayoutEntry {
 	id: string;
 	enabled: boolean;
 }
-
-/** Shared "last N days" trend-period selector value, used by this folder's trend-chart widgets. */
-export type PeriodDays = '7' | '30' | '90';

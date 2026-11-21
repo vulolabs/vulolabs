@@ -166,7 +166,7 @@ const useOpenSidebarOnTitleClick = () => {
 
 /** The post-editor SEO metabox, mounted separately from the dashboard app. */
 const VuloPilotIcon = () => (
-	<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 64 64" class="" aria-hidden="true"><path d="M14 0h36a14 14 0 0 1 14 14v36a14 14 0 0 1-14 14H14A14 14 0 0 1 0 50V14A14 14 0 0 1 14 0z" fill="#002991"/><g fill="none" stroke="#ffffff" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"><path d="M16.5 31.5 L27 42 L46.5 22.5"/><path d="M35.5 21.5 H47.5 V33.5"/></g><circle cx="16.5" cy="31.5" r="4.6" fill="#D8362B"/></svg>);
+	<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 64 64" aria-hidden="true"><path d="M14 0h36a14 14 0 0 1 14 14v36a14 14 0 0 1-14 14H14A14 14 0 0 1 0 50V14A14 14 0 0 1 14 0z" fill="#002991"/><g fill="none" stroke="#ffffff" strokeWidth="6" strokeLinecap="round" strokeLinejoin="round"><path d="M16.5 31.5 L27 42 L46.5 22.5"/><path d="M35.5 21.5 H47.5 V33.5"/></g><circle cx="16.5" cy="31.5" r="4.6" fill="#D8362B"/></svg>);
 
 /** VuloPilot SEO sidebar. */
 const VuloPilotSeoPlugin = () => {

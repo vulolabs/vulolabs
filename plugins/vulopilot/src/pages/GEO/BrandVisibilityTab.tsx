@@ -121,7 +121,7 @@ const BrandVisibilityTab = ({ initialScannerId }: BrandVisibilityTabProps) => {
 
 	if (!isBrandModuleActive()) {
 		return (
-			<ColumnComponent general>
+			<ColumnComponent>
 				<CardComponent
 					title={__('Brand', 'vulopilot')}
 					titleIcon="module"

@@ -9,6 +9,7 @@ export default {
 		'Diagnostics and maintenance actions for troubleshooting VuloPilot.',
 		'vulopilot'
 	),
+	hideSettingHeader: true,
 	headerIcon: 'setting',
 	submitUrl: 'settings',
 	modal: [

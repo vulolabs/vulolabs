@@ -346,7 +346,7 @@ const MODULES_CATALOG: { category: boolean; tab: string; modules: ModuleCatalogI
         },
 
 		// Commerce Section
-		{ type: 'separator', id: 'woo-commerce-analytics', label: __('Commerce', 'vulopilot') },
+		{ type: 'separator', id: 'commerce', label: __('Commerce', 'vulopilot') },
 		{
             id: 'woo-commerce-analytics',
             icon: 'cart',

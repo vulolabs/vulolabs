@@ -14,6 +14,8 @@ export interface CopilotTurnBubbleProps {
 	 
 	// eslint-disable-next-line no-unused-vars
 	onUndo?: (runId: number) => void;
+	/** The assistant's avatar glyph; ChatMessage's default ('person') when unset. */
+	aiAvatarIcon?: string;
 }
 
 /** The standard `CopilotChatTurn` bubble. */
@@ -21,8 +23,12 @@ const CopilotTurnBubble: React.FC<CopilotTurnBubbleProps> = ({
 	turn,
 	undoingRunId = null,
 	onUndo,
+	aiAvatarIcon,
 }) => (
-	<ChatMessage sender={'user' === turn.role ? 'user' : 'ai'}>
+	<ChatMessage
+		sender={'user' === turn.role ? 'user' : 'ai'}
+		avatarIcon={'user' === turn.role ? undefined : aiAvatarIcon}
+	>
 		{turn.attachments && turn.attachments.length > 0 && (
 			<div className="chat-message-attachments">
 				{turn.attachments.map((attachment) =>

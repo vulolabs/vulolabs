@@ -13,6 +13,14 @@ interface InfoBannerProps {
 	onAction?: () => void;
 	/** Omit for a non-dismissible banner - no close control rendered at all. */
 	onDismiss?: () => void;
+	/** Colours the icon badge: a state that needs action (`warn`) or is fine (`good`). */
+	tone?: 'info' | 'warn' | 'good';
+	/** A pill beside the title, e.g. "Not enabled". */
+	badge?: React.ReactNode;
+	/** Short facts under the description. */
+	meta?: React.ReactNode[];
+	/** A quieter second action beside the main one. */
+	secondaryAction?: { label: string; onClick: () => void };
 }
 
 /** Shared full-width illustrated banner with a background pattern and right-side illustration. */
@@ -23,10 +31,14 @@ const InfoBanner: React.FC<InfoBannerProps> = ({
 	actionLabel,
 	onAction,
 	onDismiss,
+	tone = 'info',
+	badge,
+	meta = [],
+	secondaryAction,
 }) => {
 	return (
 		<div
-			className="info-banner"
+			className={`info-banner is-${tone}`}
 			style={{ backgroundImage: `url(${infoBannerBg})` }}
 		>
 			{onDismiss && (
@@ -49,8 +61,18 @@ const InfoBanner: React.FC<InfoBannerProps> = ({
 			</div>
 
 			<div className="info-banner-content">
-				<div className="info-banner-title">{title}</div>
+				<div className="info-banner-title">
+					{title}
+					{badge}
+				</div>
 				<div className="desc">{desc}</div>
+				{meta.length > 0 && (
+					<ul className="info-banner-meta">
+						{meta.map((item, index) => (
+							<li key={index}>{item}</li>
+						))}
+					</ul>
+				)}
 			</div>
 
 			<img className="info-banner-illustration" src={infoBanner} alt="" />
@@ -58,12 +80,17 @@ const InfoBanner: React.FC<InfoBannerProps> = ({
 			{actionLabel && onAction && (
 				<ButtonInput
 					wrapperClass="info-banner-action"
-					buttons={{
-						text: actionLabel,
-						rightIcon: 'pagination-right-arrow',
-						color: 'purple-bg',
-						onClick: onAction,
-					}}
+					buttons={[
+						...(secondaryAction
+							? [{ text: secondaryAction.label, color: 'purple', onClick: secondaryAction.onClick }]
+							: []),
+						{
+							text: actionLabel,
+							rightIcon: 'pagination-right-arrow',
+							color: 'purple-bg',
+							onClick: onAction,
+						},
+					]}
 				/>
 			)}
 		</div>

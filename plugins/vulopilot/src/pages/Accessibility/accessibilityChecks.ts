@@ -1,4 +1,5 @@
 import { __ } from '@wordpress/i18n';
+import type { Tone } from '../../components/ui';
 
 export interface AccessibilityCheck {
 	/** React key, and the tab key SectionedIssuesTable.tsx uses for this check's own tab. */
@@ -11,12 +12,19 @@ export interface AccessibilityCheck {
 	/** Real hex color, shared by the tile's count/icon and its "Review" button border. */
 	color: string;
 	emptyMessage: string;
+	/** The page's check list: a plain icon and tone for its tile, and the line shown when nothing is open. */
+	tileIcon?: string;
+	tone?: Tone;
+	clearText?: string;
 }
 
 /** The reference mockup's 5-tile "Accessibility Checks" grid. */
 const REAL_ACCESSIBILITY_CHECKS: AccessibilityCheck[] = [
 	{
 		key: 'page-structure',
+		tileIcon: 'editor-list',
+		tone: 'violet',
+		clearText: __('Headings and landmarks are in order.', 'vulopilot'),
 		title: __('Page Structure', 'vulopilot'),
 		description: __('Some pages harder to use.', 'vulopilot'),
 		scannerIds: ['accessibility'],
@@ -29,6 +37,9 @@ const REAL_ACCESSIBILITY_CHECKS: AccessibilityCheck[] = [
 	},
 	{
 		key: 'images-media',
+		tileIcon: 'image',
+		tone: 'green',
+		clearText: __('Every image has a description.', 'vulopilot'),
 		title: __('Images & Media', 'vulopilot'),
 		description: __(
 			'Not all images explained.',
@@ -44,6 +55,9 @@ const REAL_ACCESSIBILITY_CHECKS: AccessibilityCheck[] = [
 	},
 	{
 		key: 'links-forms',
+		tileIcon: 'link',
+		tone: 'amber',
+		clearText: __('Links and form fields are clearly labelled.', 'vulopilot'),
 		title: __('Links & Forms', 'vulopilot'),
 		description: __(
 			'Some controls may be difficult to understand.',
@@ -59,6 +73,9 @@ const REAL_ACCESSIBILITY_CHECKS: AccessibilityCheck[] = [
 	},
 	{
 		key: 'keyboard-use',
+		tileIcon: 'coding',
+		tone: 'blue',
+		clearText: __('Everything can be reached without a mouse.', 'vulopilot'),
 		title: __('Keyboard Use', 'vulopilot'),
 		description: __(
 			'Some visitors may have trouble.',
@@ -74,6 +91,9 @@ const REAL_ACCESSIBILITY_CHECKS: AccessibilityCheck[] = [
 	},
 	{
 		key: 'visual-readability',
+		tileIcon: 'eye',
+		tone: 'red',
+		clearText: __('Text is easy to see and read.', 'vulopilot'),
 		title: __('Visual Readability', 'vulopilot'),
 		description: __('Some text may be difficult to see.', 'vulopilot'),
 		scannerIds: ['readability'],

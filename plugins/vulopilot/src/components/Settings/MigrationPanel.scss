@@ -1,20 +1,117 @@
-.vulopilot-migration-row {
-	display: flex;
-	align-items: center;
-	justify-content: space-between;
-	gap: 1rem;
-	padding: 1rem 0;
-	border-top: 1px solid #e5e7eb;
+// Settings → Migration: one card - what the import does and its button, then the SEO plugins whose data was found.
+.admin-main-wrapper.admin-main-wrapper .vp-migrate {
+	box-sizing: border-box;
+	padding: 1.25rem 1.375rem;
+	border: 1px solid var(--vp-border);
+	border-radius: 0.625rem;
+	background: var(--vp-surface);
+	box-shadow: 0 1px 2px rgb(22 21 29 / 4%);
+
+	.vp-migrate-head {
+		display: grid;
+		grid-template-columns: 2.25rem minmax(0, 1fr) auto;
+		gap: 1rem;
+		align-items: center;
+		padding-bottom: 1rem;
+		border-bottom: 1px solid var(--vp-border-soft);
+
+		@media (width <= 782px) {
+			grid-template-columns: 2.25rem minmax(0, 1fr);
+
+			> .buttons-wrapper,
+			> div:last-child {
+				grid-column: 2;
+			}
+		}
+	}
+
+	.vp-migrate-icon {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		align-self: start;
+		width: 2.25rem;
+		height: 2.25rem;
+		border-radius: 0.5rem;
+		background: color-mix(in srgb, var(--vp-primary) 9%, transparent);
+		font-size: 1.125rem;
+		color: var(--vp-primary);
+	}
+
+	.vp-migrate-text {
+		min-width: 0;
+
+		h3 {
+			margin: 0;
+			font-size: 1rem;
+			font-weight: 650;
+			line-height: 1.4;
+			color: var(--vp-ink);
+		}
+
+		p {
+			max-width: 40rem;
+			margin: 0.125rem 0 0;
+			font-size: 0.8125rem;
+			line-height: 1.5;
+			color: var(--vp-muted);
+		}
+	}
+
+	.vp-migrate-sources {
+		padding: 1rem 0 0 3.25rem;
+
+		@media (width <= 782px) {
+			padding-left: 0;
+		}
+	}
+
+	.vp-migrate-sources-title {
+		margin-bottom: 0.5rem;
+		font-size: 0.6875rem;
+		font-weight: 600;
+		letter-spacing: 0.04em;
+		text-transform: uppercase;
+		color: var(--vp-muted);
+	}
+
+	.vp-migrate-empty {
+		margin: 0;
+		font-size: 0.8125rem;
+		line-height: 1.5;
+		color: var(--vp-muted);
+	}
+
+	.vp-migrate-source {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: center;
+		justify-content: space-between;
+		gap: 0.5rem 1rem;
+		padding: 0.625rem 0.875rem;
+		border: 1px solid var(--vp-border-soft);
+		border-radius: 0.5rem;
+		background: #fafafc;
+
+		& + .vp-migrate-source {
+			margin-top: 0.5rem;
+		}
+	}
+
+	.vp-migrate-source-name {
+		font-size: 0.875rem;
+		font-weight: 600;
+		color: var(--vp-ink);
+	}
+
+	.vp-migrate-source-count {
+		font-size: 0.8125rem;
+		color: #067647;
+	}
 }
 
 .vulopilot-migration-row-label {
 	font-weight: 600;
-}
-
-.vulopilot-migration-row-hint {
-	color: #6b7280;
-	font-size: 0.8125rem;
-	margin: 0;
 }
 
 .vulopilot-migration-popup-row {

@@ -155,6 +155,7 @@ const AeoTab = () => {
 				<IssuesSection
 					id="aeo-all-issues-table"
 					title={__('All AEO Findings', 'vulopilot')}
+					desc={__('Every open answer-engine finding, filterable by priority.', 'vulopilot')}
 					scannerIds={ALL_AEO_SCANNER_IDS}
 					categories={AEO_SECTIONS}
 					categoryFocus={categoryFocus}

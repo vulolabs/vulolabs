@@ -16,6 +16,7 @@ import { useEffect, useState } from 'react';
 import { useSchemaInspector } from './useSchemaInspector';
 import type { SchemaCoverageSnapshot, SchemaPageFilter } from './useSchemaCoverage';
 import { RobotsTxtEditor } from '../CrawlRobotsSitemapSection';
+import { columns } from '../../../services/tableColumns';
 
 /**
  * Real per-`type` color + icon - the exact same 3 real post types `GET /schema/inspectable-pages`
@@ -206,7 +207,7 @@ const InspectorSection = ({
 						onRowClick={(row: Record<string, unknown>) =>
 							handleSelectPage((row as unknown as InspectablePage).url)
 						}
-						headers={{
+						headers={columns({
 							page: {
 								key: 'title',
 								type: 'info',
@@ -245,7 +246,7 @@ const InspectorSection = ({
 									},
 								],
 							},
-						}}
+						})}
 						rows={visiblePages.map((page) => ({
 							...page,
 							id: page.url,
@@ -298,7 +299,7 @@ const InspectorSection = ({
 							'What search engines actually receive from this page.',
 							'vulopilot'
 						)}
-						isLoading={isInspecting}
+						isLoading={isInspecting || undefined}
 					>
 						{error && (
 							<NoticeComponent

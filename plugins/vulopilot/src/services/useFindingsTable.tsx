@@ -2,7 +2,7 @@
 import { FixOutcome } from './showFixOutcome';
 import { useFixNotice } from './useFixNotice';
 import { useState } from 'react';
-import type { ReactElement } from 'react';
+import type { ReactElement, ReactNode } from 'react';
 import { __, sprintf } from '@wordpress/i18n';
 import { applyFilters } from '@wordpress/hooks';
 import { getApiLink, sendApiResponse } from '@zyra/core';
@@ -12,6 +12,7 @@ import { useApiList } from './useApiList';
 import { formatWpDate } from './formatWpDate';
 import { getSeverityColor } from './getSeverityClass';
 import TypographyComponent from '../components/TypographyComponent';
+import { columns } from './tableColumns';
 
 /** Categories whose conventional written form isn't plain title-case. */
 const CATEGORY_ACRONYMS: Record<string, string> = {
@@ -80,6 +81,8 @@ export interface UseFindingsTableResult {
 	refetch: () => void;
 	isProPopupOpen: boolean;
 	closeProPopup: () => void;
+	/** The outcome of the last Fix (useFixNotice), shown above the list; null when there is none. */
+	fixNotice: ReactNode;
 	/** The "View" row action's own detail popup, already wired to `viewingFinding`/`closeView`. */
 	viewPopup: ReactElement;
 }
@@ -204,11 +207,11 @@ export const useFindingsTable = ({
 			return;
 		}
 
-		sendApiResponse(
+		sendApiResponse<{ success?: boolean; message?: string }>(
 			vulopilotAppLocalizer,
 			getApiLink(vulopilotAppLocalizer, `findings/${row.id}/actions/snooze-finding`),
 			{}
-		).then((response: { success?: boolean; message?: string } | undefined) => {
+		).then((response) => {
 			NoticeManager.add({
 				uniqueKey: `finding-snooze-${row.id}`,
 				type: response?.success ? 'success' : 'error',
@@ -241,7 +244,7 @@ export const useFindingsTable = ({
 		setIsProPopupOpen(true);
 	};
 
-	const defaultHeaders: Record<string, any> = {
+	const defaultHeaders = columns<Record<string, unknown>>({
 		title: {
 			key: 'title',
 			type: 'info',
@@ -297,9 +300,9 @@ export const useFindingsTable = ({
 				},
 			] as any[],
 		},
-	};
+	});
 
-	const compactHeaders: Record<string, any> = {
+	const compactHeaders = columns<Record<string, unknown>>({
 		title: {
 			key: 'title',
 			type: 'info',
@@ -339,7 +342,7 @@ export const useFindingsTable = ({
 				},
 			],
 		},
-	};
+	});
 
 	const tableCardProps: Omit<TableCardProps, 'title'> = {
 		headers: layout === 'compact' ? compactHeaders : defaultHeaders,
@@ -407,7 +410,10 @@ export const useFindingsTable = ({
 			{ label: __('Ignore Issue', 'vulopilot'), value: 'ignored' },
 			{ label: __('Fix selected', 'vulopilot'), value: '__fix__' },
 		],
-		onBulkActionApply: (action: string, ids: number[]) => {
+		onBulkActionApply: (action, selectedIds) => {
+			// Row ids here are the findings' numeric ids.
+			const ids = selectedIds.map(Number);
+
 			if ('__fix__' === action) {
 				const bulkFixHandler = getFindingBulkFixHandler();
 

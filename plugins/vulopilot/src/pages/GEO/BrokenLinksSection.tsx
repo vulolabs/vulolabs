@@ -23,6 +23,8 @@ import { Finding } from '../../services/useFindingsTable';
 import { formatWpDate } from '../../services/formatWpDate';
 import ShowProPopup from '../../components/Popup/Popup';
 import './SeoVisibility.scss';
+import type { QueryProps } from '@zyra/table';
+import { columns } from '../../services/tableColumns';
 
 const nonceHeaders = { headers: { 'X-WP-Nonce': vulopilotAppLocalizer.nonce } };
 
@@ -651,7 +653,7 @@ const BrokenLinksSection = () => {
 		downloadBrokenLinksCsv(visibleFindings);
 	};
 
-	const headers = {
+	const headers = columns({
 		// Same InformationItemComponent shape other findings tables use. Title links to the page.
 		page: {
 			label: __('Source page', 'vulopilot'),
@@ -754,11 +756,11 @@ const BrokenLinksSection = () => {
 				},
 			],
 		},
-	};
+	});
 
 	return (
 		<>
-			<ContainerComponent General>
+			<ContainerComponent>
 				{!isSeoModuleActive() ? (
 					<CardComponent
 						title={__('Broken Links', 'vulopilot')}
@@ -1018,17 +1020,13 @@ const BrokenLinksSection = () => {
 									bulkActions={[
 										{ label: __('Ignore Issue', 'vulopilot'), value: 'ignored' },
 									]}
-									onBulkActionApply={(action: string, ids: number[]) => {
+									onBulkActionApply={(action, ids) => {
 										if ('ignored' === action) {
-											handleBulkIgnore(ids);
+											// Row ids here are the findings' numeric ids.
+											handleBulkIgnore(ids.map(Number));
 										}
 									}}
-									onQueryUpdate={(query: {
-										paged?: number | string;
-										per_page?: number | string;
-										searchValue?: string;
-										filter?: Record<string, string>;
-									}) => {
+									onQueryUpdate={(query: QueryProps) => {
 										setPaged(Number(query.paged) || 1);
 										setPerPage(Number(query.per_page) || DEFAULT_PER_PAGE);
 										setSearchTerm(query.searchValue ?? '');
@@ -1038,7 +1036,8 @@ const BrokenLinksSection = () => {
 										setLinkTypeFilter(
 											(query.filter?.link_type as LinkTypeFilter) ?? 'all'
 										);
-										setPageFilter(query.filter?.page ?? 'all');
+										// Single-choice filters: each value is one string.
+										setPageFilter((query.filter?.page as string) ?? 'all');
 										setStatusFilter(
 											(query.filter?.status as StatusFilter) ?? 'all'
 										);
@@ -1090,6 +1089,7 @@ const BrokenLinksSection = () => {
 						onChange={(value) => setRedirectTargetUrl(value as string)}
 					/>
 					<SelectInput
+						type="single-select"
 						name="redirect_type"
 						value={redirectType}
 						options={[
@@ -1128,7 +1128,6 @@ const BrokenLinksSection = () => {
 				onClose={closeFixPopup}
 				width={30}
 				height="60%"
-				icon='tools'
 				header={{
 					title:
 						fixFinding && 'broken-images' === fixFinding.scanner_id

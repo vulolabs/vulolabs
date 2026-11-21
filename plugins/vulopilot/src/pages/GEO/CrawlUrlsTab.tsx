@@ -103,7 +103,8 @@ const CrawlUrlsTab = ({ initialSection = 'overview' }: CrawlUrlsTabProps) => {
 	return (
 		<NavigatorComponent
 			className="settings-sub-tabs"
-			variant="tabs"
+			// zyra styles `[data-template=tabs]`; its types only list "tab".
+			variant={'tabs' as 'tab'}
 			settingContent={settingContent}
 			currentSetting={activeSection}
 			getForm={getForm}

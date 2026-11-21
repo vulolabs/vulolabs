@@ -16,7 +16,7 @@ export interface AiChatCardProps<TTurn> {
 	sendingAvatarIcon?: string;
 	/** Passed straight through to ChatComposerCard's own `cardClassName`. */
 	cardClassName?: string;
-	cardTitle: ReactNode;
+	cardTitle?: ReactNode;
 	cardTitleIcon?: string;
 	cardDesc?: ReactNode;
 	showProBadge?: boolean;

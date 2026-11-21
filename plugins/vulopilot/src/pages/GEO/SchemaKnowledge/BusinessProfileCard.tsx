@@ -1,17 +1,17 @@
 /* global vulopilotAppLocalizer */
 import { useEffect, useState } from 'react';
 import { __, _n, sprintf } from '@wordpress/i18n';
-import { getApiLink, getApiResponse, COLOR_PALETTE } from '@zyra/core';
-import { CardComponent, ChartComponent, ColumnComponent, ListComponent, ModuleGuardComponent, PopupComponent, TypographyComponent } from '@zyra/components';
+import { getApiLink, getApiResponse } from '@zyra/core';
+import { CardComponent, ColumnComponent, ListComponent, ModuleGuardComponent, PopupComponent } from '@zyra/components';
 import { ButtonInput } from '@zyra/inputs';
 import type { EntitiesResponse } from './KnowledgeGraphSection';
 import { ENTITY_SETTINGS_URL } from './KnowledgeGraphSection';
 import BusinessNameDetailsPanel from './BusinessNameDetailsPanel';
 import ProductDetailsPanel from './ProductDetailsPanel';
-import { ratingColor } from '../seoRating';
 import { useFilterSlot } from '../../../services/useFilterSlot';
 import { KnowledgeGraphDiagram } from './KnowledgeGraphDiagramCard';
 import ShowProPopup from '../../../components/Popup/Popup';
+import { ScoreRing } from '../../../components/ScoreBreakdown/ScoreBreakdown';
 
 const isBrandModuleActive = () =>
 	vulopilotAppLocalizer.active_modules?.includes('brand-visibility') ?? false;
@@ -247,200 +247,176 @@ const BusinessProfileCard = () => {
 		);
 	}
 
+	// What each row's button does: open its detail panel or popup, or go to Business Information to add it.
+	const actionFor = (row: ProfileRow): { label: string; onClick: () => void } | null => {
+		if (row.notApplicable) {
+			return null;
+		}
+		if (!row.found && 'contact_details' !== row.key) {
+			return { label: __('Add', 'vulopilot'), onClick: () => window.open(ENTITY_SETTINGS_URL, '_self') };
+		}
+		switch (row.key) {
+			case 'business_name':
+				return { label: __('Check', 'vulopilot'), onClick: () => setIsNamePanelOpen(true) };
+			case 'products':
+				return { label: __('View', 'vulopilot'), onClick: () => setIsProductsPanelOpen(true) };
+			case 'people':
+				return { label: __('View', 'vulopilot'), onClick: () => setIsPeopleDropdownOpen(true) };
+			case 'categories':
+				return { label: __('View', 'vulopilot'), onClick: () => setIsCategoriesPopupOpen(true) };
+			case 'contact_details':
+				return entities?.contact_email.edit_url
+					? {
+							label: row.found ? __('View', 'vulopilot') : __('Add', 'vulopilot'),
+							onClick: () => window.open(entities.contact_email.edit_url as string, '_self'),
+						}
+					: null;
+			default:
+				return { label: __('Edit', 'vulopilot'), onClick: () => window.open(ENTITY_SETTINGS_URL, '_self') };
+		}
+	};
+
+	const applicableRows = rows.filter((row) => !row.notApplicable);
+	const foundCount = applicableRows.filter((row) => row.found).length;
+	const totalCount = applicableRows.length;
+	// Missing details first: they are the next thing to do.
+	const orderedRows = [...visibleRows].sort((x, y) => Number(x.found) - Number(y.found));
+
 	return (
 		<>
-			<ColumnComponent grid={5} fullHeight>
+			<ColumnComponent grid={12}>
 				<CardComponent
-					title={__('Business Information', 'vulopilot')}
+					title={__('Business profile', 'vulopilot')}
 					titleIcon="info"
-					desc={__('Overall completeness and accuracy.', 'vulopilot')}
-					isLoading={isLoading}
-				>
-					{null === entityScore ? (
-						<ModuleGuardComponent
-							icon="error"
-							title={__('Brand Intelligence is off', 'vulopilot')}
-							desc={__('Turn it back on to see a real score here.', 'vulopilot')}
-						/>
-					) : (
-						<div className="business-score-gauge">
-							<ChartComponent
-								type="ring"
-								height={200}
-								color={
-									COLOR_PALETTE[
-									ratingColor(entityScore) as keyof typeof COLOR_PALETTE
-									]
-								}
-								// Same `TypographyComponent` h1/h4 centerLabel shape every other real score ring in this plugin uses.
-								centerLabel={
-									<>
-										<TypographyComponent
-											variant={'h1'}
-											color={ratingColor(entityScore)}
-										>
-											{entityScore}
-										</TypographyComponent>
-										<TypographyComponent variant={'h4'}>
-											{getRating(entityScore)}
-										</TypographyComponent>
-									</>
-								}
-								data={[
-									{
-										label: __('Score', 'vulopilot'),
-										value: entityScore,
-										// Same real rating color the ring's own label above already uses (`ratingColor()`/`getRating()`).
-										color: COLOR_PALETTE[
-											ratingColor(entityScore) as keyof typeof COLOR_PALETTE
-										],
-									},
-									{
-										label: __('Remaining', 'vulopilot'),
-										value: 100 - entityScore,
-										color: '#e5e7eb',
-									},
-								]}
-							/>
-							<div className="desc">
-								{missingCount > 0
-									? sprintf(
-										/* translators: %d is how many of the 7 real profile fields below have no real data yet. */
-										_n(
-											'Your business information is mostly complete, but %d important detail is missing.',
-											'Your business information is mostly complete, but %d important details are missing.',
-											missingCount,
-											'vulopilot'
-										),
-										missingCount
-									)
-									: __('Your business information is fully filled in.', 'vulopilot')}
-							</div>
-						</div>
-					)}
-					{KnowledgeGraphVisualizationCard ? (
-						<KnowledgeGraphVisualizationCard />
-					) : (
-						entities && <KnowledgeGraphDiagram entities={entities} />
-					)}
-				</CardComponent>
-			</ColumnComponent>
-
-			<ColumnComponent grid={7} fullHeight>
-				<CardComponent
-					title={__('Key Information Found by AI', 'vulopilot')}
-					titleIcon="module"
-					desc={__(
-						'Here’s what we found about your business and what needs attention.',
-						'vulopilot'
-					)}
-					isLoading={isLoading}
+					desc={__('What search engines and AI assistants know about your business, and what they are missing.', 'vulopilot')}
+					isLoading={isLoading || undefined}
 					action={
 						<ButtonInput
 							buttons={{
 								text: __('Add custom schema', 'vulopilot'),
 								icon: 'plus',
+								color: 'purple',
 								onClick: () => setIsCustomSchemaProPopupOpen(true),
 							}}
 						/>
 					}
 				>
-					{null === entities ? (
-						<ModuleGuardComponent
-							icon="error"
-							title={__('Entity Extraction is off', 'vulopilot')}
-							desc={__('Turn it back on to see real detected fields here.', 'vulopilot')}
-						/>
-					) : (
-						<ListComponent
-							className="mini-card report business-profile-list"
-							items={visibleRows.map((row) => ({
-								id: row.key,
-								icon: ROW_ICON[row.key],
-								title: row.label,
-								desc: row.value,
-								tags: (
-									<div className="business-profile-list-tags">
-										{'n/a' !== row.confidence && (
-											<span className={`admin-badge ${row.notApplicable ? 'info' : row.found ? 'green' : 'red'}`}>
-												{CONFIDENCE_LABEL[row.confidence]}
-											</span>
-										)}
-
-										{row.notApplicable ? (
-											<span className="business-profile-na">-</span>
-										) : 'business_name' === row.key ? (
-											<ButtonInput
-												buttons={{
-													text: __('View', 'vulopilot'),
-													color: 'text-blue',
-													icon: 'eye',
-													onClick: () => setIsNamePanelOpen(true),
-												}}
-											/>
-										) : 'products' === row.key && row.found ? (
-											<ButtonInput
-												buttons={{
-													text: __('View', 'vulopilot'),
-													color: 'text-blue',
-													icon: 'eye',
-													onClick: () => setIsProductsPanelOpen(true),
-												}}
-											/>
-										) : 'people' === row.key && row.found ? (
-											<ButtonInput
-												buttons={{
-													text: __('View', 'vulopilot'),
-													color: 'text-blue',
-													icon: 'eye',
-													onClick: () => setIsPeopleDropdownOpen(true),
-												}}
-											/>
-										) : 'categories' === row.key && row.found ? (
-											<ButtonInput
-												buttons={{
-													text: __('View', 'vulopilot'),
-													icon: 'eye',
-													color: 'text-blue',
-													onClick: () => setIsCategoriesPopupOpen(true),
-												}}
-											/>
-										) : 'contact_details' === row.key ? (
-											// Always "View" (never "Add Details") regardless of `row.found`.
-											entities.contact_email.edit_url && (
-												<ButtonInput
-													buttons={{
-														text: __('View', 'vulopilot'),
-														color: 'text-blue',
-														icon: 'eye',
-														onClick: () =>
-															window.open(
-																entities.contact_email.edit_url as string,
-																'_self'
-															),
-													}}
-												/>
-											)
-										) : (
-											<ButtonInput
-												buttons={{
-													text: row.found
-														? __('View', 'vulopilot')
-														: __('Add Details', 'vulopilot'),
-													icon: row.found
-														? __('eye', 'vulopilot')
-														: __('plus', 'vulopilot'),
-													// Was 'text-purple', which rendered darker than the explicit branches above.
-													color: 'text-blue',
-													onClick: () =>
-														window.open(ENTITY_SETTINGS_URL, '_self'),
-												}}
-											/>
-										)}
+					<div className="vp-profile-hero">
+						<div className="vp-profile-hero-summary">
+							{null !== entityScore && <ScoreRing score={entityScore} label={getRating(entityScore)} />}
+							{entities && (
+								<>
+									<div className="vp-profile-progress">
+										<div>
+											<strong>
+												{sprintf(
+													/* translators: 1: details found, 2: details checked. */
+													__('%1$d of %2$d details found', 'vulopilot'),
+													foundCount,
+													totalCount
+												)}
+											</strong>
+										</div>
+										<span className="vp-profile-progress-bar" aria-hidden="true">
+											<i style={{ width: `${totalCount ? (foundCount / totalCount) * 100 : 0}%` }} />
+										</span>
 									</div>
-								),
-							}))}
-						/>
+									<p>
+										{missingCount > 0
+											? sprintf(
+													/* translators: %d: number of business details not found yet. */
+													_n(
+														'Add the missing detail so AI can describe your business fully and correctly.',
+														'Add the %d missing details so AI can describe your business fully and correctly.',
+														missingCount,
+														'vulopilot'
+													),
+													missingCount
+												)
+											: __('Every detail is in place. AI has a complete picture of your business.', 'vulopilot')}
+									</p>
+									{missingCount > 0 && (
+										<a className="vp-profile-cta" href={ENTITY_SETTINGS_URL}>
+											<i className="adminfont-plus" aria-hidden="true" />
+											{__('Add missing details', 'vulopilot')}
+										</a>
+									)}
+								</>
+							)}
+							{null === entityScore && !entities && !isLoading && (
+								<ModuleGuardComponent
+									icon="error"
+									title={__('Brand Intelligence is off', 'vulopilot')}
+									desc={__('Turn it back on to see a real score here.', 'vulopilot')}
+								/>
+							)}
+						</div>
+
+						{null === entities ? (
+							!isLoading && (
+								<ModuleGuardComponent
+									icon="error"
+									title={__('Entity Extraction is off', 'vulopilot')}
+									desc={__('Turn it back on to see real detected fields here.', 'vulopilot')}
+								/>
+							)
+						) : (
+							<ul className="vp-profile-checklist">
+								{orderedRows.map((row) => {
+									const action = actionFor(row);
+									const state = row.notApplicable ? 'na' : row.found ? 'found' : 'missing';
+
+									return (
+										<li key={row.key} className={`is-${state}`}>
+											<span className="vp-profile-check-icon" aria-hidden="true">
+												<i className={`adminfont-${ROW_ICON[row.key].split(' ')[0]}`} />
+											</span>
+											<span className="vp-profile-check-text">
+												<strong>{row.label}</strong>
+												<span>
+													{row.value}
+													{row.found && 'n/a' !== row.confidence && (
+														<em>
+															{' · '}
+															{sprintf(
+																/* translators: %s: High or Medium. */
+																__('%s confidence', 'vulopilot'),
+																CONFIDENCE_LABEL[row.confidence]
+															)}
+														</em>
+													)}
+												</span>
+											</span>
+											<span className={`vp-profile-check-state is-${state}`}>
+												{'found' === state && __('Found', 'vulopilot')}
+												{'missing' === state && __('Missing', 'vulopilot')}
+												{'na' === state && __('N/A', 'vulopilot')}
+											</span>
+											{action && (
+												<button type="button" className="vp-profile-check-action" onClick={action.onClick}>
+													{action.label}
+												</button>
+											)}
+										</li>
+									);
+								})}
+							</ul>
+						)}
+					</div>
+				</CardComponent>
+			</ColumnComponent>
+
+			<ColumnComponent grid={7} fullHeight>
+				<CardComponent
+					title={__('How AI connects your business', 'vulopilot')}
+					titleIcon="centralized-connections"
+					desc={__('The things AI reads from your site - your organisation, people, places and topics - and how they link up.', 'vulopilot')}
+					isLoading={isLoading || undefined}
+				>
+					{KnowledgeGraphVisualizationCard ? (
+						<KnowledgeGraphVisualizationCard />
+					) : (
+						entities && <KnowledgeGraphDiagram entities={entities} />
 					)}
 				</CardComponent>
 				<PopupComponent

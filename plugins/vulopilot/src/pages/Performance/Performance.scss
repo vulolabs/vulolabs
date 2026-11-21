@@ -3,7 +3,6 @@
 $vulopilot-rating-good: #16a34a;
 $vulopilot-rating-needs-improvement: #e67a2e;
 $vulopilot-rating-poor: #dc2626;
-
 $vulopilot-rating-very-poor: #991b1b;
 
 @mixin vulopilot-rating-colors {
@@ -20,128 +19,6 @@ $vulopilot-rating-very-poor: #991b1b;
 	}
 }
 
-.speed-score-tiles {
-	display: grid;
-	grid-template-columns: 1fr 1fr;
-	gap: 0.75rem;
-
-	.speed-score-tile-single {
-		grid-column: 1 / -1;
-	}
-}
-
-.speed-score-tile {
-	padding: 0.875rem;
-	border-radius: 0.625rem;
-	text-align: center;
-}
-
-.speed-score-tile-label {
-	font-size: 0.8rem;
-	color: $sub-text-color;
-	margin-bottom: 0.25rem;
-}
-
-.speed-score-tile-value {
-	font-size: 1.625rem;
-	font-weight: 700;
-	line-height: 1.2;
-	@include vulopilot-rating-colors;
-
-	.speed-score-tile-max {
-		font-size: 0.9rem;
-		font-weight: 500;
-		color: $sub-text-color;
-	}
-}
-
-.speed-score-tile-rating {
-	display: inline-flex;
-	align-items: center;
-	gap: 0.25rem;
-	margin-top: 0.25rem;
-	font-size: 0.75rem;
-	font-weight: 600;
-	@include vulopilot-rating-colors;
-
-	.speed-score-tile-dot {
-		width: 0.4rem;
-		height: 0.4rem;
-		border-radius: 50%;
-		background: currentColor;
-	}
-}
-
-.speed-score-view-slow-pages {
-	display: block;
-	width: 100%;
-	margin-top: 0.875rem;
-	padding: 0.625rem 1rem;
-	border: $border-light-small;
-	border-radius: 0.5rem;
-	background: $color-white;
-	color: $theme-color;
-	font-weight: 600;
-	cursor: pointer;
-}
-
-.core-web-vitals-ring-row {
-	display: flex;
-	flex-wrap: wrap;
-	gap: 1.5rem;
-}
-
-.core-web-vital-row {
-	display: flex;
-	flex-direction: column;
-	align-items: center;
-	text-align: center;
-	flex: 1 1 29%;
-}
-
-.core-web-vital-row-label {
-	margin-top: 0.5rem;
-	font-size: 0.8125rem;
-	color: $sub-text-color;
-}
-
-.core-web-vital-row-value {
-	font-size: 1.125rem;
-	font-weight: 700;
-	line-height: 1.2;
-	@include vulopilot-rating-colors;
-}
-
-.core-web-vital-row-rating {
-	display: inline-flex;
-	align-items: center;
-	gap: 0.25rem;
-	margin-top: 0.25rem;
-	font-size: 0.75rem;
-	font-weight: 600;
-	@include vulopilot-rating-colors;
-
-	.core-web-vital-row-dot {
-		width: 0.4rem;
-		height: 0.4rem;
-		border-radius: 50%;
-		background: currentColor;
-	}
-}
-
-.core-web-vital-row-caption {
-	margin-top: 0.25rem;
-	font-size: 0.75rem;
-	color: $sub-text-color;
-}
-
-.realtime-monitoring-tile-untracked {
-	display: inline-block;
-	margin-top: 0.375rem;
-	font-size: 0.75rem;
-	color: $sub-text-color;
-}
-
 .performance-quick-action-spinner {
 	animation: vulopilot-performance-spin 1s linear infinite;
 }
@@ -153,28 +30,6 @@ $vulopilot-rating-very-poor: #991b1b;
 
 	to {
 		transform: rotate(360deg);
-	}
-}
-
-.speed-boost-fix-all,
-.ai-speed-optimize {
-	display: inline-flex;
-	align-items: center;
-	justify-content: center;
-	gap: 0.5rem;
-	width: 100%;
-	border-radius: 0.5rem;
-	background: $theme-color;
-	color: $color-white;
-	font-weight: 600;
-	padding: 0.625rem 1rem;
-	margin-top: 0.75rem;
-	cursor: pointer;
-
-	&.disabled {
-		background: $border-color;
-		color: $sub-text-color;
-		cursor: not-allowed;
 	}
 }
 
@@ -292,5 +147,500 @@ $vulopilot-rating-very-poor: #991b1b;
 		.down {
 			color: $vulopilot-rating-poor;
 		}
+	}
+}
+
+// ---- Overview (OverviewTab.tsx). The hero is components/AreaHero; the issue list is AI Copilot's; the rail list
+// is ui.scss `vp-quick`. ----
+// What real visitors experienced: four figures in one strip.
+.vp-speed-figures {
+	display: grid;
+	grid-template-columns: repeat(4, minmax(0, 1fr));
+	margin: 0;
+	border: 1px solid var(--ui-line);
+	border-radius: 0.625rem;
+
+	> div {
+		display: flex;
+		flex-direction: column;
+		gap: 0.125rem;
+		min-width: 0;
+		padding: 0.625rem 0.75rem;
+
+		+ div {
+			border-left: 1px solid var(--ui-line);
+		}
+	}
+
+	dt {
+		font-size: 0.75rem;
+		color: var(--ui-muted);
+	}
+
+	dd {
+		margin: 0.125rem 0 0;
+		font-size: 1.0625rem;
+		font-weight: 700;
+		letter-spacing: -0.01em;
+		color: var(--ui-ink);
+
+		&.is-good {
+			color: var(--ui-good);
+		}
+
+		&.is-warn {
+			color: var(--ui-warn);
+		}
+
+		&.is-bad {
+			color: var(--ui-bad);
+		}
+	}
+
+	span {
+		font-size: 0.6875rem;
+		line-height: 1.4;
+		color: var(--ui-faint);
+	}
+
+	@media (width <= 1300px) and (width > 1100px), (width <= 640px) {
+		grid-template-columns: repeat(2, minmax(0, 1fr));
+
+		> div:nth-child(3) {
+			border-left: 0;
+		}
+
+		> div:nth-child(n + 3) {
+			border-top: 1px solid var(--ui-line);
+		}
+	}
+}
+
+// The one fix worth most: a tinted, clickable card at the top of the rail.
+.vp-opportunity {
+	display: flex;
+	flex-direction: column;
+	align-items: flex-start;
+	gap: 0.375rem;
+	width: 100%;
+	margin: 0;
+	padding: 1.125rem 1.25rem;
+	border-color: #e5deff;
+	background: linear-gradient(135deg, #f6f2ff 0%, #fff 70%);
+	font: inherit;
+	text-align: left;
+	color: inherit;
+	cursor: pointer;
+	transition: border-color 0.15s, box-shadow 0.15s;
+
+	strong {
+		font-size: 1.0625rem;
+		font-weight: 700;
+		line-height: 1.35;
+		color: var(--ui-ink);
+	}
+
+	&:hover,
+	&:focus-visible {
+		border-color: var(--ui-accent);
+		box-shadow: var(--ui-shadow-hover);
+	}
+}
+
+.vp-opportunity-tag {
+	display: inline-flex;
+	align-items: center;
+	gap: 0.375rem;
+	font-size: 0.6875rem;
+	font-weight: 700;
+	letter-spacing: 0.05em;
+	text-transform: uppercase;
+	color: var(--ui-accent);
+}
+
+.vp-opportunity-reach {
+	font-size: 0.8125rem;
+	color: var(--ui-muted);
+}
+
+.vp-opportunity-go {
+	display: inline-flex;
+	align-items: center;
+	gap: 0.375rem;
+	margin-top: 0.25rem;
+	font-size: 0.8125rem;
+	font-weight: 600;
+	color: var(--ui-accent);
+
+	i {
+		font-size: 0.625rem;
+	}
+}
+
+// ---- Server setup: one row per caching check ----
+.vp-setup-details {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 0.125rem 0.875rem;
+	margin: 0.25rem 0 0;
+	padding: 0;
+	list-style: none;
+	font-size: 0.75rem;
+	color: var(--ui-muted);
+
+	li {
+		margin: 0;
+	}
+
+	b {
+		font-weight: 600;
+		color: var(--ui-text);
+	}
+
+	.is-attention b {
+		color: var(--ui-warn);
+	}
+}
+
+.vp-setup-checks {
+	display: grid;
+	grid-template-columns: minmax(0, 1fr);
+	margin: 0;
+	padding: 0;
+	list-style: none;
+
+	> li {
+		display: flex;
+		align-items: flex-start;
+		gap: 0.75rem;
+		margin: 0;
+		padding: 0.75rem 0;
+		border-top: 1px solid var(--ui-line);
+
+		&:first-child {
+			padding-top: 0;
+			border-top: 0;
+		}
+
+		> div {
+			display: flex;
+			flex-direction: column;
+			gap: 0.1875rem;
+			min-width: 0;
+		}
+
+		strong {
+			display: flex;
+			flex-wrap: wrap;
+			align-items: center;
+			gap: 0.5rem;
+			font-size: 0.8125rem;
+			font-weight: 600;
+			color: var(--ui-ink);
+		}
+
+		> div > span {
+			font-size: 0.75rem;
+			line-height: 1.5;
+			color: var(--ui-muted);
+		}
+	}
+}
+
+.vp-setup-badge {
+	padding: 0.0625rem 0.5rem;
+	border-radius: 999px;
+	font-size: 0.6875rem;
+	font-weight: 600;
+
+	&.is-good {
+		background: var(--ui-good-bg);
+		color: var(--ui-good);
+	}
+
+	&.is-attention {
+		background: var(--ui-warn-bg);
+		color: var(--ui-warn);
+	}
+
+	&.is-not-applicable {
+		background: var(--ui-sunken);
+		color: var(--ui-muted);
+	}
+}
+
+
+// ---- What to do next (QuickActionsCard): one action list - recommended fixes first, on a soft tint ----
+.vp-fixes-body {
+	gap: 1.25rem;
+}
+
+.vp-fixes-group {
+	display: flex;
+	flex-direction: column;
+	gap: 0.375rem;
+}
+
+.vp-fixes-group-head {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: baseline;
+	gap: 0.25rem 0.75rem;
+
+	h4 {
+		margin: 0;
+		font-size: 0.75rem;
+		font-weight: 700;
+		letter-spacing: 0.05em;
+		text-transform: uppercase;
+		color: var(--ui-ink);
+	}
+
+	p {
+		margin: 0;
+		font-size: 0.8125rem;
+		color: var(--ui-muted);
+	}
+
+	.is-recommended & h4 {
+		color: var(--ui-accent);
+	}
+}
+
+.vp-fixes-clear {
+	display: flex;
+	align-items: center;
+	gap: 0.5rem;
+	margin: 0;
+	padding: 0.75rem 1rem;
+	border-radius: 0.625rem;
+	background: var(--ui-good-bg);
+	font-size: 0.8125rem;
+	font-weight: 500;
+	color: var(--ui-good);
+}
+
+.vp-actions {
+	margin: 0;
+	padding: 0;
+	list-style: none;
+}
+
+.vp-action {
+	display: grid;
+	grid-template-columns: auto minmax(0, 1fr) auto;
+	align-items: center;
+	gap: 0.75rem;
+	margin: 0;
+	padding: 0.625rem 0.5rem;
+	border-bottom: 1px solid var(--ui-line);
+	transition: background 0.15s;
+
+	&:last-child {
+		border-bottom: 0;
+	}
+
+	&:hover {
+		background: #fafafd;
+	}
+
+	&.is-recommended {
+		border-radius: 0.75rem;
+		border-bottom: 0;
+		background: #f8f5ff;
+
+		+ .is-recommended {
+			margin-top: 0.375rem;
+		}
+	}
+
+	@media (width <= 480px) {
+		grid-template-columns: auto minmax(0, 1fr);
+
+		> .vp-fix-btn {
+			grid-column: 2;
+			justify-self: start;
+		}
+	}
+}
+
+.vp-action-main {
+	display: flex;
+	flex-direction: column;
+	gap: 0.1875rem;
+	min-width: 0;
+
+	> p {
+		margin: 0;
+		font-size: 0.75rem;
+		line-height: 1.5;
+		color: var(--ui-muted);
+	}
+}
+
+.vp-action-name {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 0.375rem 0.5rem;
+
+	.vp-action-title {
+		font-size: 0.875rem;
+		font-weight: 600;
+		color: var(--ui-ink);
+	}
+}
+
+.vp-action-impact,
+.vp-action-kind {
+	font-size: 0.6875rem;
+	font-weight: 600;
+}
+
+.vp-action-impact {
+	padding: 0.0625rem 0.5rem;
+	border-radius: 999px;
+
+	&.is-high {
+		background: var(--ui-good-bg);
+		color: var(--ui-good);
+	}
+
+	&.is-medium {
+		background: var(--ui-info-bg);
+		color: var(--ui-info);
+	}
+
+	&.is-low {
+		background: var(--ui-sunken);
+		color: var(--ui-muted);
+	}
+}
+
+.vp-action-kind {
+	color: var(--ui-faint);
+
+	&::before {
+		content: '·';
+		margin-right: 0.5rem;
+	}
+
+	&.is-cleanup {
+		color: var(--ui-warn);
+	}
+}
+
+.vp-action-why {
+	display: inline-flex;
+	align-items: center;
+	gap: 0.375rem;
+	font-size: 0.75rem;
+	font-weight: 500;
+	color: var(--ui-warn);
+
+	i {
+		font-size: 0.6875rem;
+	}
+}
+
+.vp-action-result {
+	font-weight: 500;
+
+	.vp-action-main > & {
+		color: var(--ui-good);
+	}
+
+	.vp-action-main > &.is-info {
+		color: var(--ui-warn);
+	}
+}
+
+// Speed over time: the chart beside what visitors experienced.
+.vp-speed-trend .vp-card-body {
+	display: flex;
+	flex-direction: column;
+	gap: 1rem;
+}
+
+.vp-speed-chart {
+	display: flex;
+	flex-direction: column;
+	gap: 0.75rem;
+	min-width: 0;
+}
+
+.vp-link-btn {
+	margin: 0;
+	padding: 0;
+	border: 0;
+	background: none;
+	font: inherit;
+	font-weight: 600;
+	color: var(--ui-accent);
+	cursor: pointer;
+
+	&:hover {
+		text-decoration: underline;
+	}
+}
+
+.vp-fix-btn {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	gap: 0.375rem;
+	min-width: 5.75rem;
+	min-height: 2rem;
+	flex: none;
+	margin: 0;
+	padding: 0 0.875rem;
+	border: 0;
+	border-radius: 0.5rem;
+	background: var(--ui-accent);
+	font: inherit;
+	font-size: 0.8125rem;
+	font-weight: 600;
+	color: #fff;
+	cursor: pointer;
+
+	&:disabled {
+		cursor: default;
+		opacity: 0.6;
+	}
+
+	.is-done & {
+		border: 1px solid var(--ui-border);
+		background: #fff;
+		color: var(--ui-text);
+	}
+
+	&:hover:not(:disabled) {
+		background: #3f0588;
+	}
+
+	&.is-careful {
+		border: 1px solid var(--ui-border);
+		background: #fff;
+		color: var(--ui-text);
+
+		&:hover:not(:disabled) {
+			border-color: var(--ui-warn);
+			background: #fff;
+			color: var(--ui-warn);
+		}
+	}
+
+}
+
+// Server setup and Speed over time on the left, What to do next on the right - the two columns end level.
+.vp-perf-split {
+	align-items: stretch;
+
+	> .vp-rail > .vp-card:last-child {
+		flex: 1;
+	}
+
+	> .vp-fixes {
+		height: 100%;
 	}
 }

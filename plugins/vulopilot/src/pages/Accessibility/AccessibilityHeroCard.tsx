@@ -1,184 +1,122 @@
 /* global vulopilotAppLocalizer */
 import { useEffect, useState } from 'react';
-import { __, sprintf } from '@wordpress/i18n';
-import { getApiLink, getApiResponse, COLOR_PALETTE } from '@zyra/core';
-import type { Rating } from './types';
-import {
-	CardComponent,
-	ChartComponent,
-	TypographyComponent,
-} from '@zyra/components';
-import { ButtonInput } from '@zyra/inputs';
+import type { CSSProperties } from 'react';
+import { __, sprintf, _n } from '@wordpress/i18n';
+import { getApiLink, getApiResponse } from '@zyra/core';
+import { Skeleton } from '../../components/ui';
 import { useApiList } from '../../services/useApiList';
 import { ACCESSIBILITY_SCANNER_IDS } from './accessibilityChecks';
 import AccessibilityChecksGrid from './AccessibilityChecksGrid';
 
-interface AccessibilityFinding {
-	id: number;
-	severity: 'critical' | 'high' | 'medium' | 'low' | 'info';
-	page?: string;
-}
-
 interface DashboardSummary {
 	category_scores: { accessibility: number };
-	category_scores_7d_ago: { accessibility: number };
 }
 
 interface AccessibilityHeroCardProps {
-	onReviewIssues: () => void;
+	/** Opens the issues table on a check's tab ('all' for every issue). */
+	// eslint-disable-next-line no-unused-vars
+	onReviewIssues: (tab: string) => void;
 }
 
-/** Same 3-tier band shape as PerformanceScoreCard.tsx's Rating. */
-/** Lighthouse-style 0-100 bands, matching PerformanceScoreCard.tsx's getScoreRating(). */
-const getScoreRating = (score: number): Rating => {
+type Band = 'good' | 'warn' | 'bad';
+
+/** Lighthouse-style bands, as on the Performance page. */
+const bandFor = (score: number): Band => {
 	if (score >= 90) {
-		return { label: __('Good', 'vulopilot'), className: 'good' };
+		return 'good';
 	}
-	if (score >= 50) {
-		return { label: __('Needs Work', 'vulopilot'), className: 'needs-improvement' };
-	}
-	return { label: __('At Risk', 'vulopilot'), className: 'poor' };
+	return score >= 50 ? 'warn' : 'bad';
 };
 
-/** Zyra palette hex (@zyra/core's COLOR_PALETTE). */
-const RATING_COLOR: Record<Rating['className'], string> = {
-	good: COLOR_PALETTE.green,
-	'needs-improvement': COLOR_PALETTE.orange,
-	poor: COLOR_PALETTE.red,
+const BAND_LABEL: Record<Band, string> = {
+	good: __('Good', 'vulopilot'),
+	warn: __('Needs work', 'vulopilot'),
+	bad: __('At risk', 'vulopilot'),
 };
 
-/** Same 3 tiers as RATING_COLOR, mapped to TypographyComponent's palette color names. */
-const TEXT_COLOR: Record<Rating['className'], string> = {
-	good: 'green',
-	'needs-improvement': 'orange',
-	poor: 'red',
-};
-
-/** Maps a score to the rating class key used by the color maps above. */
-const ratingClass = (score: number): Rating['className'] => {
-	return getScoreRating(score).className;
-};
-
-/** Uses category_scores.accessibility from GET /dashboard. */
-const getRating = (score: number): string => {
+const headline = (score: number): string => {
 	if (score >= 90) {
-		return __(
-			'Great job',
-			'vulopilot'
-		);
+		return __('Great job', 'vulopilot');
 	}
 	if (score >= 70) {
-		return __('Accessibility needs some attention.', 'vulopilot');
+		return __('A few things to tidy up', 'vulopilot');
 	}
 	if (score >= 50) {
-		return __('Accessibility needs attention.', 'vulopilot');
+		return __('Needs attention', 'vulopilot');
 	}
-	return __('Accessibility needs urgent attention.', 'vulopilot');
+	return __('Needs urgent attention', 'vulopilot');
 };
 
-/** Hero card showing the accessibility score gauge. */
-const AccessibilityHeroCard = ({
-	onReviewIssues,
-}: AccessibilityHeroCardProps) => {
+/** The accessibility score from GET /dashboard, open issues, and the check list beside them. */
+const AccessibilityHeroCard = ({ onReviewIssues }: AccessibilityHeroCardProps) => {
 	const [score, setScore] = useState<number | null>(null);
 
 	useEffect(() => {
-		getApiResponse<DashboardSummary>(
-			getApiLink(vulopilotAppLocalizer, 'dashboard'),
-			{ headers: { 'X-WP-Nonce': vulopilotAppLocalizer.nonce } }
-		).then((response) => {
+		getApiResponse<DashboardSummary>(getApiLink(vulopilotAppLocalizer, 'dashboard'), {
+			headers: { 'X-WP-Nonce': vulopilotAppLocalizer.nonce },
+		}).then((response) => {
 			if (response) {
 				setScore(response.category_scores.accessibility);
 			}
 		});
 	}, []);
 
-	const { total, isLoading } = useApiList<AccessibilityFinding>(
-		'findings',
-		{
-			scanner_id: ACCESSIBILITY_SCANNER_IDS.join(','),
-			status: 'open',
-			// Limits to the 100 most recent open findings.
-			per_page: 100,
-		}
-	);
+	const { total, isLoading } = useApiList('findings', {
+		scanner_id: ACCESSIBILITY_SCANNER_IDS.join(','),
+		status: 'open',
+		per_page: 1,
+	});
 
-
-	const isReady = !isLoading && score !== null;
-	const overallScore = (score as number) ?? 0;
+	const isReady = !isLoading && null !== score;
+	const value = score ?? 0;
+	const band = bandFor(value);
 
 	return (
-		<CardComponent isLoading={!isReady} className="accessibility-hero">
-			<div className='overall-score-wrapper'>
-				<div className='overall-score-summary'>
-					{isReady && (
-						<>
-							<ChartComponent
-								type="ring"
-								height={200}
-								// type="ring" only paints its stroke from this top-level color prop.
-								color={RATING_COLOR[ratingClass(overallScore)]}
-								centerLabel={
-									<>
-										<TypographyComponent
-											variant={'h1'}
-											color={TEXT_COLOR[ratingClass(overallScore)]}
-										>
-											{overallScore}
-										</TypographyComponent>
-										<TypographyComponent variant={'h4'}>
-											{getScoreRating(overallScore).label}
-										</TypographyComponent>
-									</>
-								}
-								data={[
-									{
-										label: __('Score', 'vulopilot'),
-										value: overallScore,
-										color: RATING_COLOR[ratingClass(overallScore)],
-									},
-									{
-										label: __('Remaining', 'vulopilot'),
-										value: 100 - overallScore,
-										color: '#e5e7eb',
-									},
-								]}
-							/>
-							<TypographyComponent variant={'h3'} color="text-green">
-								{getRating(score as number)}
-								
-							</TypographyComponent>
-							<div className="desc">
-								{total > 0
-									? sprintf(__(
-											'Most visitors can use your site, but some areas could be improved.',
+		<section className="vp-a11y-hero">
+			<div className="vp-a11y-score">
+				{isReady ? (
+					<>
+						<span
+							className={`vp-a11y-ring is-${band}`}
+							style={{ '--vp-a11y-score': value } as CSSProperties}
+							role="img"
+							aria-label={sprintf(
+								/* translators: %d: accessibility score out of 100. */
+								__('Accessibility score %d out of 100', 'vulopilot'),
+								value
+							)}
+						>
+							<b>{value}</b>
+							<small>{BAND_LABEL[band]}</small>
+						</span>
+						<h2 className={`is-${band}`}>{headline(value)}</h2>
+						<p>
+							{total > 0
+								? sprintf(
+										/* translators: %d: number of open accessibility issues. */
+										_n(
+											'%d open issue may stop some visitors using your site. Start with the most important.',
+											'%d open issues may stop some visitors using your site. Start with the most important.',
+											total,
 											'vulopilot'
 										),
+										total
 									)
-									: __(
-										"You're all caught up - no open accessibility issues right now.",
-										'vulopilot'
-									)}
-							</div>
-							<ButtonInput
-								position="left"
-								buttons={[
-									{
-										text: __('Review Important Issues', 'vulopilot'),
-										rightIcon: 'pagination-right-arrow',
-										color: 'border-purple',
-										onClick: onReviewIssues,
-									},
-								]}
-							/>
-						</>
-					)}
-				</div>
-				<div className='overall-score-summary'>
-					<AccessibilityChecksGrid />
-				</div>
+								: __("You're all caught up - no open accessibility issues right now.", 'vulopilot')}
+						</p>
+						{total > 0 && (
+							<button type="button" className="vp-a11y-btn" onClick={() => onReviewIssues('important')}>
+								{__('Review important issues', 'vulopilot')}
+								<i className="adminfont-pagination-right-arrow" aria-hidden="true" />
+							</button>
+						)}
+					</>
+				) : (
+					<Skeleton size="hero" />
+				)}
 			</div>
-		</CardComponent>
+			<AccessibilityChecksGrid onReview={onReviewIssues} />
+		</section>
 	);
 };
 

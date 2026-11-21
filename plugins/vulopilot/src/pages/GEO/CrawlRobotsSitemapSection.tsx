@@ -419,7 +419,7 @@ const CrawlRobotsSitemapSection = () => {
 							'Your live robots.txt, fetched right now (not a cached copy). Edit it below - saving takes effect immediately, and /robots.txt serves your version from the next request. Other active plugins (e.g. WooCommerce) may still add their own rules on top. If a physical robots.txt file exists in your site’s root folder, the web server serves that file instead and these edits won’t apply.',
 							'vulopilot'
 						)}
-						isLoading={isLoadingRobots}
+						isLoading={isLoadingRobots || undefined}
 					>
 						<div className="robots-overview-wrapper">
 							<div className="left-section">
@@ -504,7 +504,6 @@ const CrawlRobotsSitemapSection = () => {
 												/>
 												<ListComponent
 													className="mini-card report"
-													cols={2}
 													items={[
 
 														{
@@ -569,7 +568,6 @@ const CrawlRobotsSitemapSection = () => {
 									<>
 										<SectionComponent
 											title={__('Robots.txt Issues', 'vulopilot')}
-											titleIcon="security"
 											desc={__('Whether robots.txt is reachable and not accidentally blocking every crawler.', 'vulopilot')}
 										/>
 										<>
@@ -591,7 +589,7 @@ const CrawlRobotsSitemapSection = () => {
 							'Pre-filled with an auto-generated index of your published pages and posts - edit and it saves automatically, just like every other setting here, and is written straight to the live /llms.txt file.',
 							'vulopilot'
 						)}
-						isLoading={isLoadingLlmsTxt}
+						isLoading={isLoadingLlmsTxt || undefined}
 					>
 						<div className="robots-overview-wrapper">
 							<div className="left-section">
@@ -637,7 +635,6 @@ const CrawlRobotsSitemapSection = () => {
 							<div className="right-section">
 								<SectionComponent
 									title={__('llms.txt Issues', 'vulopilot')}
-									titleIcon="security"
 									desc={__(
 										'Whether robots.txt is reachable and not accidentally blocking every crawler.',
 										'vulopilot'
@@ -663,7 +660,7 @@ const CrawlRobotsSitemapSection = () => {
 						title={__('XML Sitemap Overview', 'vulopilot')}
 						titleIcon="link"
 						desc={__('Check your live sitemap (fetched right now, not a cached copy).', 'vulopilot')}
-						isLoading={isLoadingSitemap}
+						isLoading={isLoadingSitemap || undefined}
 						action={
 							<ButtonInput
 								buttons={[

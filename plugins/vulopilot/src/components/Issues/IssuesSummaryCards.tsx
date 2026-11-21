@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { type ComponentProps } from 'react';
 import { __ } from '@wordpress/i18n';
 import { AnalyticsComponent } from '@zyra/components';
 
@@ -72,7 +72,8 @@ const IssuesSummaryCards: React.FC<IssuesSummaryCardsProps> = ({
 				<div className="desc">{__('Click a priority level to view matching issues', 'vulopilot')}</div>
 			</div>
 			<AnalyticsComponent
-				data={data}
+				// zyra calls a tile's onClick with the tile it was given, so SummaryTile's handler receives a SummaryTile.
+				data={data as ComponentProps<typeof AnalyticsComponent>['data']}
 				activeIndex={activeIndex}
 				variant="small-card"
 				cols={3}

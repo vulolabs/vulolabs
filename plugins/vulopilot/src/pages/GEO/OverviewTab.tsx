@@ -1,25 +1,23 @@
 /* global vulopilotAppLocalizer */
 import { useEffect, useState } from 'react';
-import { __, sprintf } from '@wordpress/i18n';
+import { __ } from '@wordpress/i18n';
 import { getApiLink, getApiResponse } from '@zyra/core';
 import type { PeriodDays } from './types';
 import {
 	CardComponent,
-	ChartComponent,
 	ColumnComponent,
 	ContainerComponent,
-	IconComponent,
 	ListComponent,
-	TypographyComponent,
 } from '@zyra/components';
 import { ToggleInput } from '@zyra/inputs';
-import { formatWpDate } from '../../services/formatWpDate';
 import type { FindingGroup } from '../../components/Issues/issuesTypes';
 import { useVisibilityScore } from './useVisibilityScore';
 import type { VisibilityScoreResponse } from './useVisibilityScore';
 import type { CrawlUrlsSectionId } from './CrawlUrlsTab';
 import GeoFixTheseFirstCard from './GeoFixTheseFirstCard';
 import VisibilityBySourceCard from './VisibilityBySourceCard';
+import ScoreTrendArea, { TrendHead } from '../../components/ScoreTrendArea/ScoreTrendArea';
+import ScoreBreakdown from '../../components/ScoreBreakdown/ScoreBreakdown';
 import './SeoVisibility.scss';
 
 interface OverviewTabProps {
@@ -43,16 +41,6 @@ const getRating = (score: number): string => {
 	return __('At Risk', 'vulopilot');
 };
 
-const ratingClass = (score: number): string => {
-	if (score >= 70) {
-		return 'green';
-	}
-	if (score >= 40) {
-		return 'blue';
-	}
-	return 'red';
-};
-
 /** Dynamic caption under the ring's own "Overall Score" label. */
 const getRatingSummary = (score: number): string => {
 	if (score >= 70) {
@@ -62,13 +50,6 @@ const getRatingSummary = (score: number): string => {
 		return __('Your visibility could use some improvement.', 'vulopilot');
 	}
 	return __('Your visibility needs attention in several areas.', 'vulopilot');
-};
-
-/** Real CSS hex per `ratingClass()` tier. */
-const RATING_RING_COLOR: Record<string, string> = {
-	green: '#16a34a',
-	blue: '#2563eb',
-	red: '#dc2626',
 };
 
 /** Real per-area tab id `QUICK_LINKS` below already uses for the same 4 areas. */
@@ -236,11 +217,6 @@ const OverviewTab = ({ onNavigateTab }: OverviewTabProps) => {
 
 	const areas = score?.areas;
 
-	const trendUplift =
-		progress && progress.trend.length > 1
-			? progress.trend[progress.trend.length - 1].score - progress.trend[0].score
-			: null;
-
 	return (
 		<ContainerComponent>
 			<ColumnComponent grid={6} fullHeight>
@@ -249,101 +225,23 @@ const OverviewTab = ({ onNavigateTab }: OverviewTabProps) => {
 					title={__('Visibility Score', 'vulopilot')}
 					titleIcon="bar-chart"
 					desc={__('Your real, combined score across Brand, SEO, GEO, and Crawl & URLs.', 'vulopilot')}
-					isLoading={isLoading}
+					isLoading={isLoading || undefined}
 				>
 					{score && (
-						<div className="overall-score-wrapper">
-							<div className="overall-score-summary">
-									<ChartComponent
-										type="ring"
-										height={200}
-										// Top-level `color`, as OverallScoreWidget.tsx's ring reads.
-										color={RATING_RING_COLOR[ratingClass(score.visibility_score)]}
-										centerLabel={
-											<>
-												<TypographyComponent
-													variant={'h1'}
-													color={ratingClass(score.visibility_score)}
-												>
-													{score.visibility_score}
-												</TypographyComponent>
-												<TypographyComponent variant={'h4'}>
-													{getRating(score.visibility_score)}
-												</TypographyComponent>
-											</>
-										}
-										data={[
-											{
-												label: __('Score', 'vulopilot'),
-												value: score.visibility_score,
-												color: RATING_RING_COLOR[ratingClass(score.visibility_score)],
-											},
-											{
-												label: __('Remaining', 'vulopilot'),
-												value: 100 - score.visibility_score,
-												color: '#e5e7eb',
-											},
-										]}
-									/>
-									{/* * "Overall Score" - was a verbatim repeat of this card's * own header title ("Visibility Score") right above it. */}
-									<TypographyComponent variant={'h3'} color="text-green">
-										{__('Overall Score', 'vulopilot')}
-									</TypographyComponent>
-									<div className="desc">
-										{getRatingSummary(score.visibility_score)}
-									</div>
-							</div>
-							<div className="overall-score-summary">
-							<ListComponent
-								className="mini-card report hover seo-health-score-category-list"
-								loading={isLoading}
-								items={(
-									Object.keys(AREA_TILES) as (keyof VisibilityScoreResponse['areas'])[]
-								).map((key) => {
-									const area = areas?.[key];
-									const tile = AREA_TILES[key];
-
-									return {
-										id: key,
-										icon: tile.icon,
-										title: tile.title,
-										tags: area ? (
-											<>
-												<TypographyComponent
-													variant="h5"
-													weight="bold"
-													color={ratingClass(area.score)}
-													className="seo-health-score-row-value"
-												>
-													{area.score}
-													<TypographyComponent
-														as="span"
-														variant="body-md"
-														className="seo-health-score-row-suffix"
-													>
-														/100
-													</TypographyComponent>
-												</TypographyComponent>
-												<TypographyComponent
-													as="span"
-													variant="body-md"
-													weight="bold"
-													color={area.change >= 0 ? 'green' : 'red'}
-													className="seo-health-score-row-delta"
-												>
-													<IconComponent
-														name={area.change >= 0 ? 'arrow-up' : 'arrow-down'}
-													/>
-													{Math.abs(area.change)}
-												</TypographyComponent>
-											</>
-										) : null,
-										action: () => onNavigateTab(AREA_TABS[key]),
-									};
-								})}
-							/>
-							</div>
-						</div>
+						<ScoreBreakdown
+							score={score.visibility_score}
+							ratingLabel={getRating(score.visibility_score)}
+							summary={getRatingSummary(score.visibility_score)}
+							rows={(Object.keys(AREA_TILES) as (keyof VisibilityScoreResponse['areas'])[]).map((key) => ({
+								key,
+								icon: AREA_TILES[key].icon,
+								title: AREA_TILES[key].title,
+								score: areas?.[key]?.score ?? null,
+								change: areas?.[key]?.change ?? null,
+								status: '–',
+								onClick: () => onNavigateTab(AREA_TABS[key]),
+							}))}
+						/>
 					)}
 				</CardComponent>
 			</ColumnComponent>
@@ -351,17 +249,8 @@ const OverviewTab = ({ onNavigateTab }: OverviewTabProps) => {
 				<CardComponent
 					title={__('Visibility Trend', 'vulopilot')}
 					titleIcon='security'
-					desc={
-						null !== trendUplift
-							? sprintf(
-								/* translators: 1: signed real point change, 2: real number of days the chart covers. */
-								__('%1$s points vs %2$d days ago', 'vulopilot'),
-								trendUplift >= 0 ? `+${trendUplift}` : `${trendUplift}`,
-								progress?.days ?? 30
-							)
-							: __('Combined score across Brand, SEO, GEO, and Crawl & URLs.', 'vulopilot')
-					}
-					isLoading={isLoadingProgress}
+					desc={__('Combined score across Brand, SEO, GEO, and Crawl & URLs.', 'vulopilot')}
+					isLoading={isLoadingProgress || undefined}
 					action={
 						<ToggleInput
 							options={PERIOD_OPTIONS}
@@ -373,17 +262,14 @@ const OverviewTab = ({ onNavigateTab }: OverviewTabProps) => {
 					}
 				>
 					{progress && (
-						<ChartComponent
-							type="dynamic-line"
-							data={progress.trend.map((point: { date: string; score: number }) => ({
-								...point,
-								date: formatWpDate(point.date),
-							}))}
-							dataKey="score"
-							xKey="date"
-							height={220}
-							yDomain={[0, 100]}
-						/>
+						<div className="vp-vis-trend">
+							<TrendHead points={progress.trend} days={progress.days ?? Number(period)} />
+							<ScoreTrendArea
+								points={progress.trend}
+								height={230}
+								label={__('Visibility', 'vulopilot')}
+							/>
+						</div>
 					)}
 				</CardComponent>
 			</ColumnComponent>

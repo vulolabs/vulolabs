@@ -1,31 +1,53 @@
 import { __ } from '@wordpress/i18n';
-import { CardComponent, ListComponent } from '@zyra/components';
-import './Accessibility.scss';
+import { Card, IconTile } from '../../components/ui';
+import type { Tone } from '../../components/ui';
 
-const WHY_IT_MATTERS_POINTS = [
-	__('Helps more people use and trust your site', 'vulopilot'),
-	__('Improves SEO and search visibility', 'vulopilot'),
-	__('Better experience for all visitors', 'vulopilot'),
-	__('Meets modern legal and industry expectations', 'vulopilot'),
+const REASONS: { icon: string; tone: Tone; title: string; text: string }[] = [
+	{
+		icon: 'person',
+		tone: 'violet',
+		title: __('More people can use your site', 'vulopilot'),
+		text: __('Around one in six people lives with a disability.', 'vulopilot'),
+	},
+	{
+		icon: 'search-discovery',
+		tone: 'blue',
+		title: __('Better search and AI visibility', 'vulopilot'),
+		text: __('Clear headings, labels and alt text help machines read your pages too.', 'vulopilot'),
+	},
+	{
+		icon: 'security',
+		tone: 'green',
+		title: __('Meets legal expectations', 'vulopilot'),
+		text: __('Laws such as the ADA and the European Accessibility Act point to WCAG.', 'vulopilot'),
+	},
 ];
 
+/** Why the checks above are worth fixing, in three lines. */
 const WhyAccessibilityMattersCard = () => (
-	<CardComponent
+	<Card
 		id="why-accessibility-matters-card"
-		className="why-accessibility-matters-card"
-		title={__('Why accessibility matters', 'vulopilot')}
-		titleIcon="question"
-		desc={__('More than a checkbox - it\'s good for everyone.', 'vulopilot')}
+		className="vp-a11y-why"
+		title={__('Why it matters', 'vulopilot')}
+		icon="question"
+		desc={__('More than a checkbox - it is good for every visitor.', 'vulopilot')}
+		link={{
+			label: __('Learn more', 'vulopilot'),
+			href: 'https://www.w3.org/WAI/fundamentals/accessibility-intro/',
+		}}
 	>
-		<ListComponent
-			className="checklist"
-			items={WHY_IT_MATTERS_POINTS.map((point) => ({
-				id: point,
-				icon: 'check zyra-green-color',
-				title: point,
-			}))}
-		/>
-	</CardComponent>
+		<ul className="vp-a11y-why-list">
+			{REASONS.map((reason) => (
+				<li key={reason.title}>
+					<IconTile icon={reason.icon} tone={reason.tone} size="sm" />
+					<div>
+						<strong>{reason.title}</strong>
+						<span>{reason.text}</span>
+					</div>
+				</li>
+			))}
+		</ul>
+	</Card>
 );
 
 export default WhyAccessibilityMattersCard;

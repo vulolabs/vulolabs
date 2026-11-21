@@ -95,6 +95,8 @@ const PageSpeedStatusPanel = () => {
 				}
 				// Floating notice.
 				NoticeManager.add({
+					// zyra's own fallback key is Date.now(), so each notice still shows.
+					uniqueKey: `vulopilot-pagespeed-${Date.now()}`,
 					message: response.message,
 					type: response.success ? 'success' : 'error',
 					position: 'float',

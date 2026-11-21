@@ -50,9 +50,9 @@ interface ModuleConfig extends BaseConfig {
 	modules?: ModuleItem[];
 }
 
-// Matches templateService.ts's own `Record<string, any>` require.context typing in this same plugin.
+/** A webpack `require.context()` over the config folders. */
 function buildIndexFromContext(
-	context: any,
+	context: ReturnType<typeof require.context>,
 	category: 'modules' | 'settings'
 ): SearchItem[] {
 	return context

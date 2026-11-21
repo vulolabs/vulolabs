@@ -1,81 +1,94 @@
 /* global vulopilotAppLocalizer */
-import { useState } from 'react';
-import { __ } from '@wordpress/i18n';
-import { CardComponent, ModuleGuardComponent } from '@zyra/components';
+import { __, _n, sprintf } from '@wordpress/i18n';
+import { Skeleton } from '../../components/ui';
 import { useApiList } from '../../services/useApiList';
-import { toHistoryRow } from '../../services/historyTypes';
-import HistoryTimeline from '../Reports/HistoryTimeline';
+import { dayLabel, rowTime, rowTitle, toHistoryRow } from '../../services/historyTypes';
 
 interface ActivityLogRow {
 	id: number;
 	message: string;
 	created_at: string;
-	/** Real column on every `activity-logs` row. */
 	event_type: string;
 }
 
-const SECURITY_ACTIVITY_EVENT_TYPES = [
-	'scan.completed.security',
-	'security.alert',
-	'security.new_user',
-].join(',');
+const EVENT_TYPES = ['scan.completed.security', 'security.alert', 'security.new_user'].join(',');
 
-/** The only event types above that Reports → History lists. */
-const HISTORY_LISTED_EVENT_TYPES = ['scan.completed', 'scan.completed.security'];
+/** Event types Reports → History lists, so a row can open there. */
+const IN_HISTORY = ['scan.completed', 'scan.completed.security'];
 
-/** "Recent Activity" - `GET activity-logs` is real and generic (`ActivityLogs.php`). */
+/** "Found 2 issues" / "Nothing found" for a scan row; the message itself for anything else. */
+const outcome = (row: ActivityLogRow): { text: string; flagged: boolean } => {
+	const found = /with (\d+) finding/.exec(row.message);
+
+	if (!found) {
+		return { text: row.message, flagged: 'security.alert' === row.event_type };
+	}
+
+	const count = Number(found[1]);
+
+	return {
+		text: count
+			? sprintf(
+					/* translators: %d: number of findings. */
+					_n('Found %d issue', 'Found %d issues', count, 'vulopilot'),
+					count
+			  )
+			: __('Nothing found', 'vulopilot'),
+		flagged: count > 0,
+	};
+};
+
+/** The latest security events (`GET /activity-logs`): checks that ran and alerts, newest first. */
 const RecentActivityCard = () => {
 	const { data, isLoading } = useApiList<ActivityLogRow>('activity-logs', {
-		event_type: SECURITY_ACTIVITY_EVENT_TYPES,
-		per_page: 4,
+		event_type: EVENT_TYPES,
+		per_page: 6,
 	});
-	// Purely local UI state - this card shows no side detail panel for a selected row.
-	const [selectedRow, setSelectedRow] = useState<ReturnType<
-		typeof toHistoryRow
-	> | null>(null);
-	const historyRows = data.map(toHistoryRow);
+	const historyUrl = (id?: number) =>
+		`${vulopilotAppLocalizer.admin_url}#&tab=reports&subtab=history${undefined === id ? '' : `&vulopilot_history_id=${id}`}`;
 
 	return (
-		<CardComponent
-			id="security-recent-activity-card"
-			title={__('Recent Activity', 'vulopilot')}
-			titleIcon="clock"
-			desc={__('Your last 4 real security-related events.', 'vulopilot')}
-			isLoading={isLoading}
-		>
-			{!isLoading && data.length === 0 && (
-				<ModuleGuardComponent
-					icon="info"
-					title={__('No recent security activity', 'vulopilot')}
-					desc={__(
-						'Security-related activity will appear here as it happens.',
-						'vulopilot'
-					)}
-				/>
-			)}
-			{!isLoading && data.length > 0 && (
-				<HistoryTimeline
-					rows={historyRows}
-					total={historyRows.length}
-					selectedRow={selectedRow}
-					onSelectRow={setSelectedRow}
-					isLoadingMore={false}
-					onLoadMore={() => {}}
-					// "More Details" opens this exact row in Reports → History.
-					onArrowClick={(row) => {
-						if (!HISTORY_LISTED_EVENT_TYPES.includes(row.event_type)) {
-							setSelectedRow(row);
-							return;
-						}
+		<section className="vp-card vp-rail-card" id="security-recent-activity-card">
+			<header className="vp-rail-head">
+				<div>
+					<h3>{__('Recent activity', 'vulopilot')}</h3>
+					<p>{__('Security checks and alerts, newest first.', 'vulopilot')}</p>
+				</div>
+				<a className="vp-card-link" href={historyUrl()}>
+					{__('History', 'vulopilot')}
+					<i className="adminfont-arrow-right" aria-hidden="true" />
+				</a>
+			</header>
 
-						window.open(
-							`${vulopilotAppLocalizer.admin_url}#&tab=reports&subtab=history&vulopilot_history_id=${row.id}`,
-							'_self'
-						);
-					}}
-				/>
+			{isLoading && <Skeleton />}
+			{!isLoading && 0 === data.length && (
+				<p className="vp-rail-note">{__('Nothing yet. Security checks and alerts show up here as they happen.', 'vulopilot')}</p>
 			)}
-		</CardComponent>
+
+			{data.length > 0 && (
+				<ol className="vp-feed">
+					{data.map((row) => {
+						const result = outcome(row);
+						const isScan = row.event_type.startsWith('scan.');
+
+						return (
+							<li key={row.id} className={result.flagged ? 'is-flagged' : ''}>
+								<span className="vp-feed-dot" aria-hidden="true">
+									<i className={`adminfont-${isScan ? 'scan' : 'security'}`} />
+								</span>
+								<a href={historyUrl(IN_HISTORY.includes(row.event_type) ? row.id : undefined)}>
+									<strong>{isScan ? rowTitle(toHistoryRow(row)) : row.message}</strong>
+									<span>
+										{isScan ? `${result.text} · ` : ''}
+										{dayLabel(row.created_at)}, {rowTime(row.created_at)}
+									</span>
+								</a>
+							</li>
+						);
+					})}
+				</ol>
+			)}
+		</section>
 	);
 };
 

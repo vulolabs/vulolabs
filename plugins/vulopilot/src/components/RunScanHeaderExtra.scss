@@ -18,3 +18,16 @@
 	color: $sub-text-color;
 	white-space: nowrap;
 }
+
+// Once the page header stacks (phones), the scan button and its time line up under the title on the left,
+// not centred under a left-aligned greeting.
+@media (width <= 782px) {
+	.run-scan-header-extra {
+		align-items: flex-start;
+
+		.buttons-wrapper {
+			justify-content: flex-start;
+			margin: 0;
+		}
+	}
+}

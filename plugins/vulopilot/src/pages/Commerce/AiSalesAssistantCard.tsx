@@ -31,7 +31,7 @@ const AiSalesAssistantCard = ({
 				title={__('AI Sales Assistant', 'vulopilot')}
 				titleIcon="ai"
 				desc={__('Real open WooCommerce findings, summarized.', 'vulopilot')}
-				isLoading={isLoading}
+				isLoading={isLoading || undefined}
 			>
 				<AiCopilotGuard>
 					{!isLoading && (

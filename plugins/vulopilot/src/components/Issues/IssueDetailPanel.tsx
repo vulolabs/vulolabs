@@ -1,32 +1,16 @@
 /* global vulopilotAppLocalizer */
-import React, { useEffect, useRef, useState, type ReactNode } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { __, sprintf } from '@wordpress/i18n';
 import { applyFilters } from '@wordpress/hooks';
 import { getApiLink, getApiResponse, sendApiResponse } from '@zyra/core';
-import {
-	CardComponent,
-	ListComponent,
-	ModuleGuardComponent,
-	PopupComponent,
-	ClipboardComponent,
-	BadgeComponent,
-	AnalyticsComponent,
-	NoticeComponent
-} from '@zyra/components';
+import { PopupComponent, ClipboardComponent } from '@zyra/components';
 import { ButtonInput } from '@zyra/inputs';
 import ShowProPopup from '../../components/Popup/Popup';
-import DummyDataNotice from '../../components/DummyDataNotice';
 import { formatWpDate } from '../../services/formatWpDate';
-import { getSeverityClass } from '../../services/getSeverityClass';
-import {
-	CATEGORY_ICONS,
-	CATEGORY_LABELS,
-	formatAffected,
-	getObjectTypeNoun,
-	FindingGroup,
-} from './issuesTypes';
+import { CATEGORY_LABELS, formatAffected, getObjectTypeNoun, FindingGroup } from './issuesTypes';
 import { FixOutcome } from '../../services/showFixOutcome';
 import { useFixNotice } from '../../services/useFixNotice';
+import { EmptyState, Skeleton } from '../ui';
 import './IssueDetailPanel.scss';
 
 interface BatchFixOutcome extends Omit<FixOutcome, 'noFixAvailable'> {
@@ -112,16 +96,73 @@ const SEVERITY_LABEL: Record<string, string> = {
 	info: __('Low Priority', 'vulopilot'),
 };
 
+/**
+ * A Pro section on the free plan: its real title, its content blurred (placeholder, never the real data), and
+ * one click to unlock. The blur shows there is more here without giving it away.
+ */
+const LockedBlock = ({
+	title,
+	count,
+	onUnlock,
+	children,
+}: {
+	title: string;
+	count?: number;
+	onUnlock: () => void;
+	children: React.ReactNode;
+}) => (
+	<section className="vp-issue-block">
+		<h4>
+			{title}
+			{undefined !== count && <span>{count}</span>}
+			<b className="vp-pro-chip">
+				<i className="adminfont-pro-tag" aria-hidden="true" />
+				{__('Pro', 'vulopilot')}
+			</b>
+		</h4>
+		{/* A div, not a <button>: the placeholder holds lists and paragraphs, which a button may not contain. */}
+		<div
+			className="vp-issue-locked"
+			role="button"
+			tabIndex={0}
+			onClick={onUnlock}
+			onKeyDown={(event) => {
+				if ('Enter' === event.key || ' ' === event.key) {
+					event.preventDefault();
+					onUnlock();
+				}
+			}}
+			aria-label={sprintf(
+				/* translators: %s: section name, e.g. "Affected accounts". */
+				__('%s - unlock with VuloPilot Pro', 'vulopilot'),
+				title
+			)}
+		>
+			<div className="vp-issue-locked-blur" aria-hidden="true">
+				{children}
+			</div>
+			<span className="vp-issue-locked-cta" aria-hidden="true">
+				<i className="adminfont-lock" />
+				{__('Unlock', 'vulopilot')}
+			</span>
+		</div>
+	</section>
+);
+
 interface IssueDetailPanelProps {
 	group: FindingGroup | null;
 	/** `event` is set for a fix or an undo of `group`, so the host can keep it listed instead of dropping it. */
 	// eslint-disable-next-line no-unused-vars
 	onActionComplete: (event?: { group: FindingGroup; fixed: boolean }) => void;
+	/** Shows "Ask Copilot about this", handing the group to the host's chat (AI Copilot only). */
+	// eslint-disable-next-line no-unused-vars -- parameter name in a type signature.
+	onAsk?: (group: FindingGroup) => void;
 }
 
 const IssueDetailPanel: React.FC<IssueDetailPanelProps> = ({
 	group,
 	onActionComplete,
+	onAsk,
 }) => {
 	const isProActive = !!vulopilotAppLocalizer.khali_dabba;
 	const [isBusy, setIsBusy] = useState(false);
@@ -180,20 +221,16 @@ const IssueDetailPanel: React.FC<IssueDetailPanelProps> = ({
 
 	if (!group) {
 		return (
-			<CardComponent
-				title={__('Issue details', 'vulopilot')}
-				titleIcon="issue"
-				desc={__('More detail on the issue you select from the table.', 'vulopilot')}
-			>
-				<ModuleGuardComponent
-					icon="issue"
-					title={__('Select an issue', 'vulopilot')}
-					desc={__(
-						'Choose a row from the table to see more detail here.',
-						'vulopilot'
-					)}
-				/>
-			</CardComponent>
+			<section className="vp-card vp-issue-detail">
+				<div className="vp-card-body">
+					<EmptyState
+						icon="issue"
+						tone="neutral"
+						title={__('Pick an issue', 'vulopilot')}
+						text={__('Choose one from the list to see what it means and how to fix it.', 'vulopilot')}
+					/>
+				</div>
+			</section>
 		);
 	}
 
@@ -244,46 +281,6 @@ const IssueDetailPanel: React.FC<IssueDetailPanelProps> = ({
 	const otherAffectedItems = (affectedItems ?? []).filter(
 		(row) => row.id !== group.sample?.id
 	);
-
-	const renderProGatedSection = (
-		realContent: ReactNode,
-		dummyContent: ReactNode,
-		showTag: boolean = true
-	): ReactNode => {
-		if (isProActive) {
-			return realContent;
-		}
-
-		return (
-			<div className="issue-detail-pro-gate">
-				{showTag && (
-					<div className="issue-detail-pro-gate-tag">
-						<span className="admin-tag pro-tag">
-							<i className="adminfont-pro-tag" />
-							{__('Pro', 'vulopilot')}
-						</span>
-					</div>
-				)}
-				<div className="issue-detail-pro-gate-dummy" aria-hidden="true">
-					{dummyContent}
-				</div>
-				{showTag && <DummyDataNotice />}
-				<div
-					className="issue-detail-pro-gate-overlay"
-					role="button"
-					tabIndex={0}
-					aria-label={__('Upgrade to Pro', 'vulopilot')}
-					onClick={() => setProPopup('generic')}
-					onKeyDown={(e) => {
-						if ('Enter' === e.key || ' ' === e.key) {
-							e.preventDefault();
-							setProPopup('generic');
-						}
-					}}
-				/>
-			</div>
-		);
-	};
 
 	/** Fetches every finding id for this group, scoped by object_type like the fetch above. */
 	const fetchGroupIds = (
@@ -472,7 +469,11 @@ const IssueDetailPanel: React.FC<IssueDetailPanelProps> = ({
 
 				showPanelNotice(undefined);
 
-				return runBulkFixInBatches(bulkFixHandler, ids).then((outcome) => {
+				return runBulkFixInBatches(
+					// eslint-disable-next-line no-unused-vars -- a parameter name in a type, not a variable.
+					bulkFixHandler as (batchIds: number[]) => Promise<BatchFixOutcome> | undefined,
+					ids
+				).then((outcome) => {
 					if (activeScannerId.current === group.scanner_id) {
 						showPanelNotice({ ...outcome, label: group.label });
 					}
@@ -483,409 +484,305 @@ const IssueDetailPanel: React.FC<IssueDetailPanelProps> = ({
 			.finally(() => setIsBusy(false));
 	};
 
-	/** Header uses the sample's affected-item name/message when available, else group.label/group.sample?.title. */
-	const sampleSplit = group.sample ? splitSampleTitle(group.sample.title) : null;
-	const headerTitle =
-		sampleSplit?.name
-			? `${sampleSplit.name} (${getObjectTypeNoun(1, group.object_type)})`
-			: group.label;
-	const headerDesc = sampleSplit ? sampleSplit.message : group.sample?.title;
+	/** The sample's own message ("{message}: {affected item}") reads best under the check's name. */
+	const headerDesc = group.sample ? splitSampleTitle(group.sample.title).message : '';
+	const hasFix = Boolean(group.fix_action_id) && !isUnfixable;
+	const where = group.sample?.page || __('Site-wide', 'vulopilot');
+	const samplePageLink = group.sample ? getAffectedItemLink(group.sample) : undefined;
+
+	/** Where the sample was found: the location to copy, and a link to it when it is a page. */
+	const whereRow = (
+		<div className="vp-issue-where">
+			<ClipboardComponent
+				text={where}
+				variant="code"
+				copyButtonLabel={__('Copy', 'vulopilot')}
+				copiedLabel={__('Copied!', 'vulopilot')}
+			/>
+			{samplePageLink && (
+				<a href={samplePageLink} target="_blank" rel="noreferrer" className="vp-issue-link">
+					{__('View page', 'vulopilot')}
+					<i className="adminfont-external" aria-hidden="true" />
+				</a>
+			)}
+		</div>
+	);
+
+	/** Pro: the fix steps, or what the check found, or a representative finding - whichever this group has. */
+	let finding: React.ReactNode = null;
+
+	if (showRecommendedFix) {
+		finding = (
+			<section className="vp-issue-block">
+				<h4>{sampleSectionTitle}</h4>
+				<ol className="vp-issue-steps">
+					{recommendedFixSteps.map((step, index) => (
+						<li key={index}>{step}</li>
+					))}
+				</ol>
+			</section>
+		);
+	} else if (group.sample) {
+		finding = (
+			<section className="vp-issue-block">
+				<h4>{sampleSectionTitle}</h4>
+				{showWhatHappened ? (
+					<p>{whatHappened}</p>
+				) : (
+					<>
+						<strong className="vp-issue-sample-title">{group.sample.title}</strong>
+						{group.sample.description && <p>{group.sample.description}</p>}
+					</>
+				)}
+				{whereRow}
+			</section>
+		);
+	}
+
+	/** Pro: why there is no automatic fix, and where to fix it by hand. */
+	const manualFix = !fixNotice && !group.fix_action_id && group.no_fix_reason && (
+		<div className="vp-issue-manual">
+			<strong>{__('Needs a manual fix', 'vulopilot')}</strong>
+			{!showRecommendedFix && <p>{group.no_fix_reason}</p>}
+			{group.no_fix_link && (
+				<a href={group.no_fix_link.url} target="_blank" rel="noreferrer" className="vp-issue-link">
+					{group.no_fix_link.label}
+					<i className="adminfont-external" aria-hidden="true" />
+				</a>
+			)}
+		</div>
+	);
+
+	/** Pro: every other affected item (the sample is shown above), each linking to its page when it has one. */
+	const affectedList = (
+		<section className="vp-issue-block">
+			<h4>
+				{AFFECTED_ITEMS_LABEL[group.object_type ?? ''] ?? __('Affected items', 'vulopilot')}
+				<span>{group.count}</span>
+			</h4>
+
+			{isLoadingAffected && <Skeleton />}
+
+			{!isLoadingAffected && affectedItems && 0 === affectedItems.length && (
+				<p className="vp-issue-note">{__('No individual findings could be loaded for this group right now.', 'vulopilot')}</p>
+			)}
+
+			{!isLoadingAffected && affectedItems && affectedItems.length > 0 && 0 === otherAffectedItems.length && (
+				<p className="vp-issue-note">
+					{sprintf(
+						/* translators: %s: the section above, e.g. "Example finding". */
+						__('This is the only one - its details are under "%s" above.', 'vulopilot'),
+						sampleSectionTitle
+					)}
+				</p>
+			)}
+
+			{otherAffectedItems.length > 0 && (
+				<ul className="vp-issue-items">
+					{otherAffectedItems.map((row) => {
+						const pageLink = getAffectedItemLink(row);
+
+						return (
+							<li key={row.id}>
+								<div>
+									<strong>{row.title}</strong>
+									<span>
+										{sprintf(
+											/* translators: 1: affected page/location, 2: formatted detection date */
+											__('%1$s · Detected %2$s', 'vulopilot'),
+											row.page || __('Site-wide', 'vulopilot'),
+											formatWpDate(row.last_seen_at ?? row.created_at)
+										)}
+									</span>
+								</div>
+								{pageLink && (
+									<a href={pageLink} target="_blank" rel="noreferrer" className="vp-issue-link">
+										{__('View', 'vulopilot')}
+										<i className="adminfont-external" aria-hidden="true" />
+									</a>
+								)}
+							</li>
+						);
+					})}
+				</ul>
+			)}
+
+			{!isLoadingAffected && affectedItems && group.count > affectedItems.length && (
+				<p className="vp-issue-note">
+					{sprintf(
+						/* translators: %d: how many further open findings exist beyond the list shown above */
+						__('+%d more not listed. Resolve all and Ignore all below cover every one.', 'vulopilot'),
+						group.count - affectedItems.length
+					)}
+				</p>
+			)}
+		</section>
+	);
 
 	return (
 		<>
-			<CardComponent
-				className="issue-detail-panel"
-				title={headerTitle}
-				titleIcon="error"
-				desc={headerDesc}
-			>
-				<div className="issue-detail-badges-row">
-					{group.fixed && <BadgeComponent color="green" text={__('Fixed', 'vulopilot')} />}
-					<BadgeComponent
-						color={getSeverityClass(group.severity)}
-						text={SEVERITY_LABEL[group.severity]}
-					/>
-					<BadgeComponent
-						color="blue"
-						text={CATEGORY_LABELS[group.category] ?? group.category}
-					/>
-				</div>
+			<section className={`vp-card vp-issue-detail is-${group.severity}`} aria-label={__('Issue details', 'vulopilot')}>
+				<header className="vp-issue-detail-head">
+					<span className="vp-issue-detail-eyebrow">
+						{group.fixed && <span className="vp-pill">{__('Fixed', 'vulopilot')}</span>}
+						<em>{SEVERITY_LABEL[group.severity]}</em>
+						<span aria-hidden="true">·</span>
+						{CATEGORY_LABELS[group.category] ?? group.category}
+					</span>
+					<h3>{group.label}</h3>
+					{headerDesc && <p>{headerDesc}</p>}
+					{onAsk && (
+						<button type="button" className="vp-issue-ask" onClick={() => onAsk(group)}>
+							<i className="adminfont-ai" aria-hidden="true" />
+							{__('Ask Copilot about this', 'vulopilot')}
+						</button>
+					)}
+				</header>
 
-				<AnalyticsComponent
-					variant="small-priority-card"
-					cols={3}
-					data={[
-						{
-							icon: 'global-community',
-							colorClass: 'blue',
-							text: formatAffected(group.count, group.object_type),
-							number: __('Affected', 'vulopilot'),
-						},
-						{
-							icon: 'calendar',
-							colorClass: 'orange',
-							text: group.sample
-								? formatWpDate(
-									group.sample.last_seen_at ?? group.sample.created_at
-								)
-								: '-',
-							number: __('Detected', 'vulopilot'),
-						},
-						{
-							icon: 'location',
-							colorClass: 'purple',
-							number: group.sample?.page || __('Site-wide', 'vulopilot'),
-							text: __('Scope', 'vulopilot'),
-						},
-					]}
-				/>
-				{whyItMatters && (
-					<div className="issue-detail-why-it-matters">
-						<div className="issue-detail-why-it-matters-icon">
-							<i className="adminfont-info" />
-						</div>
-						<div>
-							<div className="issue-detail-why-it-matters-title">
-								{__('Why it matters', 'vulopilot')}
-							</div>
-							<div className="desc">{whyItMatters}</div>
-						</div>
+				<dl className="vp-issue-facts">
+					<div>
+						<dt>{__('Affected', 'vulopilot')}</dt>
+						<dd>{formatAffected(group.count, group.object_type)}</dd>
 					</div>
-				)}
-
-				{group.sample && (() => {
-					const samplePageLink = getAffectedItemLink(group.sample);
-
-					return (
-						<div className="issue-detail-section">
-							<div className="issue-detail-section-header">
-								{!isProActive && (
-									<i className="adminfont-lock issue-detail-section-lock" />
-								)}
-								<span className="issue-detail-section-title">
-									{sampleSectionTitle}
-								</span>
-								{!isProActive && (
-									<span className="admin-tag pro-tag">
-										<i className="adminfont-pro-tag" />
-										{__('Pro', 'vulopilot')}
-									</span>
-								)}
-							</div>
-							{showRecommendedFix
-								? renderProGatedSection(
-									<ol className="issue-detail-fix-steps">
-										{recommendedFixSteps.map((step, index) => (
-											<li key={index} className="issue-detail-fix-step">
-												<span className="issue-detail-fix-step-number">
-													{index + 1}
-												</span>
-												<span className="issue-detail-fix-step-text">
-													{step}
-												</span>
-											</li>
-										))}
-									</ol>,
-									<span className="desc">
-										{__(
-											'Step-by-step guidance for fixing this specific issue appears here once Pro is active.',
-											'vulopilot'
-										)}
-									</span>,
-									false
-								)
-								: showWhatHappened
-									? renderProGatedSection(
-										<>
-											<div className="desc">{whatHappened}</div>
-											<div className="issue-detail-example-where">
-												<ClipboardComponent
-													text={
-														group.sample.page || __('Site-wide', 'vulopilot')
-													}
-													variant="code"
-													copyButtonLabel={__('Copy', 'vulopilot')}
-													copiedLabel={__('Copied!', 'vulopilot')}
-												/>
-												{samplePageLink && (
-													<a
-														href={samplePageLink}
-														target="_blank"
-														rel="noreferrer"
-														className="issue-detail-example-open-link"
-													>
-														<i className="adminfont-external" />
-														{__('View page', 'vulopilot')}
-													</a>
-												)}
-											</div>
-										</>,
-										<span className="desc">
-											{__(
-												'What this specific check actually found appears here once Pro is active.',
-												'vulopilot'
-											)}
-										</span>,
-										false
-									)
-									: renderProGatedSection(
-										<>
-											<div className="issue-detail-example-title">
-												{group.sample.title}
-											</div>
-											<div className="desc">{group.sample.description}</div>
-											<div className="issue-detail-example-where">
-												<ClipboardComponent
-													text={
-														group.sample.page || __('Site-wide', 'vulopilot')
-													}
-													variant="code"
-													copyButtonLabel={__('Copy', 'vulopilot')}
-													copiedLabel={__('Copied!', 'vulopilot')}
-												/>
-												{samplePageLink && (
-													<a
-														href={samplePageLink}
-														target="_blank"
-														rel="noreferrer"
-														className="issue-detail-example-open-link"
-													>
-														<i className="adminfont-external" />
-														{__('View page', 'vulopilot')}
-													</a>
-												)}
-											</div>
-										</>,
-										<span className="desc">
-											{__(
-												'A real, representative finding from this group - its title, description, and where it was found - appears here once Pro is active.',
-												'vulopilot'
-											)}
-										</span>,
-										false
-									)}
-						</div>
-					);
-				})()}
-
-				{isProActive && !fixNotice && !group.fix_action_id && group.no_fix_reason && (
-					<NoticeComponent
-						type="info"
-						displayPosition="inline-notice"
-						title={__('Why this needs manual intervention', 'vulopilot')}
-						message={[
-							!showRecommendedFix && group.no_fix_reason
-								? `<span class="desc">${group.no_fix_reason}</span>`
-								: '',
-							group.no_fix_link
-								? `<span class="small desc"><a href="${group.no_fix_link.url}" target="_blank" rel="noreferrer" style="color: var(--color-primary); text-decoration: underline;">${group.no_fix_link.label}</a></span>`
-								: '',
-							`<span class="small desc">${__('Check the details above for what to look at.', 'vulopilot')}</span>`,
-						]
-							.filter(Boolean)
-							.join(' ')}
-					/>
-				)}
-
-				<div className="issue-detail-section">
-					<div className="issue-detail-section-header">
-						{!isProActive && (
-							<i className="adminfont-lock issue-detail-section-lock" />
-						)}
-						<span className="issue-detail-section-title">
-							{AFFECTED_ITEMS_LABEL[group.object_type ?? ''] ??
-								__('Affected items', 'vulopilot')}
-						</span>
-						{!isProActive && (
-							<span className="admin-tag pro-tag">
-								<i className="adminfont-pro-tag" />
-								{__('Pro', 'vulopilot')}
-							</span>
-						)}
+					<div>
+						<dt>{__('Last seen', 'vulopilot')}</dt>
+						<dd>{group.sample ? formatWpDate(group.sample.last_seen_at ?? group.sample.created_at) : '-'}</dd>
 					</div>
-					{renderProGatedSection(
+					<div>
+						<dt>{__('Where', 'vulopilot')}</dt>
+						<dd title={where}>{where}</dd>
+					</div>
+				</dl>
+
+				<div className="vp-issue-detail-body">
+					{whyItMatters && (
+						<div className="vp-issue-why">
+							<strong>{__('Why it matters', 'vulopilot')}</strong>
+							<p>{whyItMatters}</p>
+						</div>
+					)}
+
+					{isProActive ? (
 						<>
-							<ListComponent
-								className="mini-card report"
-								loading={isLoadingAffected}
-								items={otherAffectedItems.map((row) => {
-									const pageLink = getAffectedItemLink(row);
-
-									return {
-										id: row.id,
-										icon: CATEGORY_ICONS[group.category] ?? 'ai orange',
-										title: row.title,
-										desc: sprintf(
-											/* translators: 1: affected page/location, 2: formatted detection date */
-											__('%1$s • Detected %2$s', 'vulopilot'),
-											row.page || __('Site-wide', 'vulopilot'),
-											formatWpDate(row.last_seen_at ?? row.created_at)
-										),
-										// `action` - ListComponent's own `<a>` branch for `link` drops the `desc` line entirely.
-										action: pageLink
-											? () =>
-												window.open(
-													pageLink,
-													'_blank',
-													'noopener,noreferrer'
-												)
-											: undefined,
-										// Visible link affordance; stopPropagation avoids double-opening via the row's action.
-										tags: pageLink ? (
-											<a
-												href={pageLink}
-												target="_blank"
-												rel="noreferrer"
-												className="issue-detail-example-open-link"
-												onClick={(e) => e.stopPropagation()}
-											>
-												<i className="adminfont-external" />
-												{__('View page', 'vulopilot')}
-											</a>
-										) : undefined,
-									};
-								})}
-							/>
-							{!isLoadingAffected &&
-								affectedItems &&
-								0 === affectedItems.length && (
-									<span className="desc">
-										{__(
-											'No individual findings could be loaded for this group right now.',
-											'vulopilot'
-										)}
-									</span>
-								)}
-							{!isLoadingAffected &&
-								affectedItems &&
-								affectedItems.length > 0 &&
-								0 === otherAffectedItems.length && (
-									<span className="desc">
-										{sprintf(
-											__(
-												'This group has only one open finding - its full details are in the “%s” section above.',
-												'vulopilot'
-											),
-											sampleSectionTitle
-										)}
-									</span>
-								)}
-							{!isLoadingAffected &&
-								affectedItems &&
-								group.count > affectedItems.length && (
-									<span className="small desc">
-										{sprintf(
-											/* translators: %d: how many further open findings exist beyond the list shown above */
-											__(
-												'+%d more not shown here - use Resolve all/Ignore all below, or open the Issues table to see every one.',
-												'vulopilot'
-											),
-											group.count - affectedItems.length
-										)}
-									</span>
-								)}
-						</>,
-						<span className="desc">
-							{__(
-								'The specific accounts/pages/etc. this group affects appear here once Pro is active.',
-								'vulopilot'
+							{finding}
+							{manualFix}
+							{affectedList}
+						</>
+					) : (
+						<>
+							{/* Free: the real sections, their content blurred - enough to see it is there, not to read it. */}
+							{(showRecommendedFix || group.sample) && (
+								<LockedBlock
+									title={sampleSectionTitle}
+									onUnlock={() => setProPopup('generic')}
+								>
+									{showRecommendedFix ? (
+										<ol className="vp-issue-steps">
+											<li>{__('Open the settings screen where this is configured on your site.', 'vulopilot')}</li>
+											<li>{__('Change the value flagged by the scan to the recommended one.', 'vulopilot')}</li>
+											<li>{__('Save, then run the scan again to confirm it is fixed.', 'vulopilot')}</li>
+										</ol>
+									) : (
+										<>
+											<strong className="vp-issue-sample-title">{group.label}</strong>
+											<p>{__('The exact item this check found, what is wrong with it, and how it affects your visitors and search engines.', 'vulopilot')}</p>
+											<div className="vp-issue-where">
+												<code>/{__('the-affected-page', 'vulopilot')}/</code>
+												<span className="vp-issue-link">{__('View page', 'vulopilot')}</span>
+											</div>
+										</>
+									)}
+								</LockedBlock>
 							)}
-						</span>,
-						false
+
+							<LockedBlock
+								title={AFFECTED_ITEMS_LABEL[group.object_type ?? ''] ?? __('Affected items', 'vulopilot')}
+								count={group.count}
+								onUnlock={() => setProPopup('generic')}
+							>
+								<ul className="vp-issue-items">
+									{Array.from({ length: Math.min(3, Math.max(1, group.count)) }).map((_, index) => (
+										<li key={index}>
+											<div>
+												<strong>{__('An affected item on your site', 'vulopilot')}</strong>
+												<span>{__('/its-page/ · Detected recently', 'vulopilot')}</span>
+											</div>
+											<span className="vp-issue-link">{__('View', 'vulopilot')}</span>
+										</li>
+									))}
+								</ul>
+							</LockedBlock>
+
+							<div className="vp-issue-unlock-cta">
+								<span>
+									{1 === group.count
+										? sprintf(
+												/* translators: %s: the affected item's kind, e.g. "account". */
+												__('See exactly which %s it is, the fix, and fix it with AI in one click.', 'vulopilot'),
+												getObjectTypeNoun(1, group.object_type)
+										  )
+										: sprintf(
+												/* translators: %s: affected items, e.g. "2 pages". */
+												__('See all %s, the exact fix, and fix them with AI in one click.', 'vulopilot'),
+												formatAffected(group.count, group.object_type)
+										  )}
+								</span>
+								<ButtonInput
+									buttons={{
+										text: __('Unlock with Pro', 'vulopilot'),
+										icon: 'pro-tag',
+										color: 'purple-bg',
+										onClick: () => setProPopup('generic'),
+									}}
+								/>
+							</div>
+						</>
 					)}
 				</div>
 
-				{!isProActive && (
-					<div className="issue-detail-upgrade-banner">
-						<i className="adminfont-info" />
-						<span>
-							{showRecommendedFix
-								? __(
-									'Detailed recommendations, setup guidance, and AI fixes are included in Pro.',
-									'vulopilot'
-								)
-								: __(
-									'Detailed examples, the full affected list, and AI-assisted fixes are included in Pro.',
-									'vulopilot'
-								)}
-						</span>
-					</div>
-				)}
-
-				{isProActive && fixNotice}
-
-				{isProActive ? (
-					<ButtonInput
-						position="full-width"
-						buttons={[
-							{
-								text: __('Ignore all', 'vulopilot'),
-								color: 'border-red',
-								rightIcon: 'rejecte',
-								onClick: () =>
-									handleBulkStatus(
-										'ignored',
-										__(
-											'All findings in this group ignored.',
-											'vulopilot'
-										)
-									),
-								disabled: isBusy,
-							},
-							// No automatic fix exists for this issue; don't offer a button that can only fail again.
-							...(isUnfixable || !group.fix_action_id
-								? []
-								: [
+				{isProActive && (
+					<footer className="vp-issue-detail-actions">
+						{fixNotice}
+						<div className="vp-issue-detail-buttons">
+							<button
+								type="button"
+								className="vp-text-btn is-danger"
+								disabled={isBusy}
+								onClick={() => handleBulkStatus('ignored', __('All findings in this group ignored.', 'vulopilot'))}
+							>
+								{__('Ignore all', 'vulopilot')}
+							</button>
+							<ButtonInput
+								buttons={[
 									{
-										text: __('Fix with AI', 'vulopilot'),
-										icon: 'ai',
-										color: 'orange-bg',
-										onClick: handleFix,
+										text: __('Resolve all', 'vulopilot'),
+										icon: 'check',
+										color: hasFix ? 'purple' : 'purple-bg',
 										disabled: isBusy,
+										onClick: () =>
+											handleBulkStatus('resolved', __('All findings in this group marked resolved.', 'vulopilot')),
 									},
-								]),
-							{
-								text: __('Resolve all', 'vulopilot'),
-								color: 'purple-bg',
-								rightIcon: 'resolve',
-								onClick: () =>
-									handleBulkStatus(
-										'resolved',
-										__(
-											'All findings in this group marked resolved.',
-											'vulopilot'
-										)
-									),
-								disabled: isBusy,
-							},
-							
-						]}
-					/>
-				) : (
-					<ButtonInput
-						position="full-width"
-						buttons={[
-							{
-								text: __('Unlock to pro see details', 'vulopilot'),
-								icon: 'pro-tag',
-								onClick: () => setProPopup('generic'),
-							},
-						]}
-					/>
+									// No automatic fix exists for this issue; don't offer a button that can only fail again.
+									...(hasFix
+										? [
+												{
+													text: __('Fix with AI', 'vulopilot'),
+													icon: 'ai',
+													color: 'purple-bg',
+													disabled: isBusy,
+													onClick: handleFix,
+												},
+										  ]
+										: []),
+								]}
+							/>
+						</div>
+					</footer>
 				)}
-			</CardComponent>
-			<PopupComponent
-				open={!!proPopup}
-				onClose={() => setProPopup(null)}
-				width={31.25}
-				height="auto"
-				position="lightbox"
-			>
-				{'one-click-fix' === proPopup ? (
-					<ShowProPopup moduleName="one-click-fix" />
-				) : (
-					<ShowProPopup />
-				)}
+			</section>
+
+			<PopupComponent open={!!proPopup} onClose={() => setProPopup(null)} width={31.25} height="auto" position="lightbox">
+				{'one-click-fix' === proPopup ? <ShowProPopup moduleName="one-click-fix" /> : <ShowProPopup />}
 			</PopupComponent>
 		</>
 	);

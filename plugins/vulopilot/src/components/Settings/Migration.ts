@@ -10,6 +10,7 @@ export default {
 		'vulopilot'
 	),
 	headerIcon: 'import',
+	hideSettingHeader: true,
 	submitUrl: 'migration',
 	modal: [],
 };

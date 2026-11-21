@@ -1,20 +1,27 @@
 
 /* global vulopilotAppLocalizer */
 
-import { useEffect, useState } from 'react';
-import { __, sprintf } from '@wordpress/i18n';
+import { useEffect, useRef, useState } from 'react';
+import { __, _n, sprintf } from '@wordpress/i18n';
 import { getApiLink, getApiResponse } from '@zyra/core';
 
 import {
 	ColumnComponent,
 	ContainerComponent,
-	ModuleGuardComponent,
 	NavigatorHeaderComponent,
 } from '@zyra/components';
 
 import RunScanHeaderExtra from '../../components/RunScanHeaderExtra';
 import DashboardGrid from '../../dashboard-widgets/DashboardGrid';
-import GettingStartedCard from './GettingStartedCard';
+import { ButtonInput } from '@zyra/inputs';
+import HealthHero from './HealthHero';
+import type { HeroAction } from './HealthHero';
+import NextSteps from './NextSteps';
+import type { StepFilter } from './NextSteps';
+import AutopilotCard from './AutopilotCard';
+import ActivityFeed from './ActivityFeed';
+import { EmptyState, SectionHead, greeting } from '../../components/ui';
+import '../../dashboard-widgets/dashboard.scss';
 
 import type { DashboardSummary } from '../../dashboard-widgets/types';
 
@@ -78,21 +85,6 @@ const EMPTY_SUMMARY: DashboardSummary = {
 		wp_version: '',
 		php_version: '',
 	},
-};
-
-/** Dashboard greeting. */
-const getGreeting = (): string => {
-	const hour = new Date().getHours();
-
-	if (hour < 12) {
-		return __('Good morning', 'vulopilot');
-	}
-
-	if (hour < 18) {
-		return __('Good afternoon', 'vulopilot');
-	}
-
-	return __('Good evening', 'vulopilot');
 };
 
 /** Dashboard page. */
@@ -174,71 +166,104 @@ const Dashboard = () => {
 		loadDashboard();
 	}, []);
 
-	/** Dashboard header actions. */
-	const headerCustomContent = (
-		<RunScanHeaderExtra
-			settingsSubtab="general"
-			hideSettingsButton
-			hideRunScanButton={isCustomizing}
-			replaceRunScanButton={
-				isCustomizing
-					? {
-						text: __(
-							'Reset to default',
-							'vulopilot'
-						),
-						icon: 'refresh',
-						color: 'border-purple',
+	// The queue's filter lives here so the hero's main button can open the right slice of it.
+	const [stepFilter, setStepFilter] = useState<StepFilter>('all');
+	// Bumped after a scan, so the queue and the feed fetch again.
+	const [refreshKey, setRefreshKey] = useState(0);
+	const stepsRef = useRef<HTMLDivElement>(null);
 
-						onClick: () => {
-							setRestoreDefaultSignal(
-								(signal) => signal + 1
-							);
+	const openSteps = (filter: StepFilter) => {
+		setStepFilter(filter);
+		stepsRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+	};
 
-							setIsCustomizing(false);
-						},
-					}
-					: undefined
-			}
-			onSuccess={loadDashboard}
-			trailingButtons={[
-				isCustomizing
-					? {
-						icon: 'form-checkboxes',
-						color: 'text-green',
+	/** The one thing most worth doing now, as the hero's button. */
+	let primary: HeroAction | null = null;
 
-						onClick: () =>
-							setIsCustomizing(false),
-					}
-					: {
-						icon: 'edit',
-						color: 'text-purple',
+	if (summary.pending_approvals > 0) {
+		primary = {
+			label: sprintf(
+				/* translators: %d: number of AI changes waiting for approval. */
+				_n('Review %d approval', 'Review %d approvals', summary.pending_approvals, 'vulopilot'),
+				summary.pending_approvals
+			),
+			icon: 'approval',
+			onClick: () => openSteps('approvals'),
+		};
+	} else if (summary.critical_findings > 0) {
+		primary = {
+			label: sprintf(
+				/* translators: %d: number of critical issues. */
+				_n('Fix %d critical issue', 'Fix %d critical issues', summary.critical_findings, 'vulopilot'),
+				summary.critical_findings
+			),
+			icon: 'error',
+			onClick: () => openSteps('urgent'),
+		};
+	} else if (summary.open_findings > 0) {
+		primary = {
+			label: __('Work through next steps', 'vulopilot'),
+			icon: 'arrow-down',
+			onClick: () => openSteps('all'),
+		};
+	}
 
-						onClick: () =>
-							setIsCustomizing(true),
-					},
-			]}
-		/>
-	);
+	/** Page header: the greeting, what is waiting, and a scan. */
+	const waiting = summary.critical_findings + summary.pending_approvals;
+	let headline = __("Here's how your site is doing.", 'vulopilot');
 
-	/** Page header. */
+	if (!isLoading) {
+		const parts: string[] = [];
+
+		if (summary.critical_findings > 0) {
+			parts.push(
+				sprintf(
+					/* translators: %d: number of critical issues. */
+					_n('%d critical issue', '%d critical issues', summary.critical_findings, 'vulopilot'),
+					summary.critical_findings
+				)
+			);
+		}
+		if (summary.pending_approvals > 0) {
+			parts.push(
+				sprintf(
+					/* translators: %d: number of approvals. */
+					_n('%d approval', '%d approvals', summary.pending_approvals, 'vulopilot'),
+					summary.pending_approvals
+				)
+			);
+		}
+
+		headline =
+			waiting > 0
+				? sprintf(
+						/* translators: %s: what needs the user, e.g. "1 critical issue and 2 approvals". */
+						_n('%s needs you today.', '%s need you today.', waiting, 'vulopilot'),
+						parts.join(__(' and ', 'vulopilot'))
+				  )
+				: __('Nothing urgent today. Your site is on autopilot.', 'vulopilot');
+	}
+
 	const pageHeader = (
 		<NavigatorHeaderComponent
 			headerTitle={sprintf(
 				/* translators: 1: time-of-day greeting (e.g. "Good morning"), 2: current user's display name. */
-				__(
-					'%1$s, %2$s! \u{1F44B}',
-					'vulopilot'
-				),
-				getGreeting(),
-				vulopilotAppLocalizer.current_user_display_name
+				__('%1$s, %2$s', 'vulopilot'),
+				greeting(),
+				vulopilotAppLocalizer.current_user_display_name || __('there', 'vulopilot')
 			)}
-			headerIcon="module"
-			headerDescription={__(
-				"Here's how your site is doing.",
-				'vulopilot'
-			)}
-			headerCustomContent={headerCustomContent}
+			headerIcon="analytics"
+			headerDescription={headline}
+			headerCustomContent={
+				<RunScanHeaderExtra
+					settingsSubtab="general"
+					hideSettingsButton
+					onSuccess={() => {
+						loadDashboard(true);
+						setRefreshKey((key) => key + 1);
+					}}
+				/>
+			}
 		/>
 	);
 
@@ -248,39 +273,101 @@ const Dashboard = () => {
 			<>
 				{pageHeader}
 
-				<ColumnComponent>
-					<ModuleGuardComponent
-						icon="error"
-						title={__(
-							'Could not load the dashboard',
-							'vulopilot'
-						)}
-						desc={error}
-					/>
-				</ColumnComponent>
+				<ContainerComponent general>
+					<ColumnComponent>
+						<section className="vp-card">
+							<div className="vp-card-body">
+								<EmptyState
+									icon="error"
+									tone="red"
+									title={__('Could not load the dashboard', 'vulopilot')}
+									text={error}
+									action={
+										<ButtonInput
+											buttons={{ text: __('Try again', 'vulopilot'), icon: 'refresh', color: 'purple', onClick: () => loadDashboard() }}
+										/>
+									}
+								/>
+							</div>
+						</section>
+					</ColumnComponent>
+				</ContainerComponent>
 			</>
 		);
 	}
 
-	/** Dashboard layout. */
 	return (
 		<>
 			{pageHeader}
 
 			<ContainerComponent general>
-				{/* Getting started */}
-				<GettingStartedCard />
-				<DashboardGrid
-					summary={summary}
-					isLoading={isLoading}
-					isCustomizing={isCustomizing}
-					restoreDefaultSignal={
-						restoreDefaultSignal
-					}
-					onRefreshSummary={() =>
-						loadDashboard(true)
-					}
-				/>
+				<ColumnComponent>
+					<div className="vp-page vp-dashboard">
+						{/* 1. How the site is doing, and the one thing to do about it. */}
+						<HealthHero summary={summary} isLoading={isLoading} primary={primary} />
+
+						{/* 2. Everything waiting on the user, beside what runs on its own and what just happened. */}
+						<div className="vp-command" ref={stepsRef}>
+							<NextSteps
+								key={`steps-${refreshKey}`}
+								id="vp-next-steps"
+								filter={stepFilter}
+								onFilterChange={setStepFilter}
+								openTotal={summary.open_findings}
+								onChanged={() => loadDashboard(true)}
+							/>
+							<aside className="vp-rail">
+								<AutopilotCard key={`autopilot-${refreshKey}`} onChanged={() => loadDashboard(true)} />
+								<ActivityFeed key={`feed-${refreshKey}`} />
+							</aside>
+						</div>
+
+						{/* 3. Deeper analysis, arranged the way the user likes. */}
+						<SectionHead title={__('More insights', 'vulopilot')}>
+							{isCustomizing ? (
+								<ButtonInput
+									buttons={[
+										{
+											text: __('Reset to default', 'vulopilot'),
+											icon: 'refresh',
+											color: 'purple',
+											onClick: () => {
+												setRestoreDefaultSignal((signal) => signal + 1);
+												setIsCustomizing(false);
+											},
+										},
+										{
+											text: __('Done', 'vulopilot'),
+											icon: 'check',
+											color: 'purple-bg',
+											onClick: () => setIsCustomizing(false),
+										},
+									]}
+								/>
+							) : (
+								<button type="button" className="vp-widget-tool" onClick={() => setIsCustomizing(true)}>
+									<i className="adminfont-edit" aria-hidden="true" />
+									{__('Customize', 'vulopilot')}
+								</button>
+							)}
+						</SectionHead>
+
+						{isCustomizing && (
+							<p className="vp-customize-note">
+								<i className="adminfont-move" aria-hidden="true" />
+								{__('Drag cards by their handle to reorder them, or hide the ones you do not need. Changes save as you go.', 'vulopilot')}
+							</p>
+						)}
+
+						<DashboardGrid
+							summary={summary}
+							isLoading={isLoading}
+							isCustomizing={isCustomizing}
+							restoreDefaultSignal={restoreDefaultSignal}
+							onRefreshSummary={() => loadDashboard(true)}
+						/>
+					</div>
+				</ColumnComponent>
 			</ContainerComponent>
 		</>
 	);

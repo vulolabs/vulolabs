@@ -1,0 +1,133 @@
+// ProSample.tsx: a Pro-only section's sample content (faded, opens the Pro popup), then a strip with the Pro tag, one
+// line and the action - VuloCart's pattern (vulocart/src/components/Popup/pro-sample.scss) in VuloPilot's tokens.
+.vp-sample {
+	overflow: hidden;
+	border: 1px solid var(--ui-border);
+	border-radius: 0.625rem;
+	background: #fff;
+}
+
+.vp-sample-preview {
+	position: relative;
+	padding: 1rem 1.125rem;
+	cursor: pointer;
+
+	.vp-sample-content {
+		opacity: 0.85;
+		pointer-events: none;
+		transition: opacity 0.15s ease;
+		user-select: none;
+	}
+
+	&:hover .vp-sample-content,
+	&:focus-visible .vp-sample-content {
+		opacity: 1;
+	}
+
+	&:focus-visible {
+		outline: 2px solid var(--ui-accent);
+		outline-offset: -2px;
+	}
+}
+
+// "Sample data", top right.
+.vp-sample-label {
+	position: absolute;
+	top: 0.5rem;
+	right: 0.75rem;
+	padding: 0.125rem 0.5rem;
+	border: 1px dashed #d6d9e4;
+	border-radius: 999px;
+	background: #fff;
+	font-size: 0.6875rem;
+	font-weight: 500;
+	color: var(--ui-muted);
+}
+
+.vp-sample-bar {
+	display: flex;
+	align-items: center;
+	gap: 0.75rem;
+	padding: 0.75rem 1rem;
+	border-top: 1px solid var(--ui-line);
+	background: #faf8ff;
+
+	p {
+		flex: 1;
+		min-width: 0;
+		margin: 0;
+		font-size: 0.8125rem;
+		line-height: 1.45;
+		color: var(--ui-text);
+	}
+
+	@media (width <= 782px) {
+		flex-wrap: wrap;
+
+		p {
+			flex-basis: 100%;
+			order: -1;
+		}
+	}
+}
+
+.vp-sample-tag {
+	display: inline-flex;
+	flex: none;
+	align-items: center;
+	gap: 0.25rem;
+	padding: 0.125rem 0.5rem;
+	border-radius: 999px;
+	background: var(--ui-accent-soft);
+	font-size: 0.6875rem;
+	font-weight: 600;
+	color: var(--ui-accent);
+
+	i {
+		font-size: 0.6875rem;
+	}
+}
+
+// The one action: the brand's filled button.
+.vp-sample-cta {
+	display: inline-flex;
+	flex: none;
+	align-items: center;
+	min-height: 2.25rem;
+	margin: 0;
+	padding: 0 1rem;
+	border: 0;
+	border-radius: 0.5rem;
+	background: var(--ui-accent);
+	font: inherit;
+	font-size: 0.8125rem;
+	font-weight: 600;
+	color: #fff;
+	cursor: pointer;
+
+	&:hover {
+		background: #3f0588;
+	}
+
+	&:focus-visible {
+		outline: 2px solid var(--ui-accent);
+		outline-offset: 2px;
+	}
+}
+
+// ---- The same sample, for a Pro table that is empty because nothing is set up yet (Pro src/components/EmptySample):
+// no Pro tag - the strip names what is missing and its button runs the real next step. ----
+.vp-sample.is-empty-sample {
+	.vp-sample-bar {
+		background: #f8f9fc;
+	}
+
+	.vp-sample-content {
+		opacity: 0.7;
+	}
+}
+
+.vp-sample-tag.is-start {
+	background: #eef0f6;
+	color: var(--ui-text);
+}

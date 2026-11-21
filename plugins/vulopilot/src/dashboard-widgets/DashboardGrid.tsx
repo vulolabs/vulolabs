@@ -3,9 +3,8 @@ import React, { useEffect, useRef, useState } from 'react';
 import { ReactSortable } from 'react-sortablejs';
 import { __ } from '@wordpress/i18n';
 import { getApiLink, getApiResponse, sendApiResponse } from '@zyra/core';
-import { ColumnComponent, BadgeComponent } from '@zyra/components';
-import { DEFAULT_DASHBOARD_WIDGETS } from './registry';
-import { DashboardSummary, WidgetLayoutEntry } from './types';
+import { useDashboardWidgets } from './registry';
+import { DashboardSummary, WidgetDefinition, WidgetLayoutEntry } from './types';
 import './DashboardGrid.scss';
 
 interface DashboardGridProps {
@@ -24,9 +23,10 @@ interface SortableEntry extends WidgetLayoutEntry {
 	key: string;
 }
 
-const WIDGETS_BY_ID = new Map(
-	DEFAULT_DASHBOARD_WIDGETS.map((widget) => [widget.id, widget])
-);
+/** Columns (of 12) a widget spans: its `grid`, else Pro's `size: 'small'` as half width, else the full row. */
+const spanOf = (widget: WidgetDefinition): number =>
+	widget.grid ?? ('small' === widget.size ? 6 : 12);
+
 
 /** Drag-and-drop widget grid. */
 const DashboardGrid: React.FC<DashboardGridProps> = ({
@@ -36,6 +36,8 @@ const DashboardGrid: React.FC<DashboardGridProps> = ({
 	restoreDefaultSignal,
 	onRefreshSummary,
 }) => {
+	const widgets = useDashboardWidgets();
+	const widgetsById = new Map(widgets.map((widget) => [widget.id, widget]));
 	const [layout, setLayout] = useState<WidgetLayoutEntry[]>([]);
 	const [isLayoutLoading, setIsLayoutLoading] = useState(true);
 
@@ -50,7 +52,7 @@ const DashboardGrid: React.FC<DashboardGridProps> = ({
 					setLayout(response);
 				} else {
 					setLayout(
-						DEFAULT_DASHBOARD_WIDGETS.map((widget) => ({
+						widgets.map((widget) => ({
 							id: widget.id,
 							enabled: true,
 						}))
@@ -78,7 +80,7 @@ const DashboardGrid: React.FC<DashboardGridProps> = ({
 		}
 
 		persistLayout(
-			DEFAULT_DASHBOARD_WIDGETS.map((widget) => ({
+			widgets.map((widget) => ({
 				id: widget.id,
 				enabled: true,
 			}))
@@ -111,47 +113,48 @@ const DashboardGrid: React.FC<DashboardGridProps> = ({
 
 	if (isLoading || isLayoutLoading) {
 		return (
-			<>
-				{DEFAULT_DASHBOARD_WIDGETS.slice(0, 4).map((widget) => {
+			<div className="vp-dash-grid">
+				{widgets.slice(0, 4).map((widget) => {
 					const Widget = widget.component;
 					return (
-						<ColumnComponent
+						<div
 							key={widget.id}
-							grid={widget.grid}
-							className="dashboard-widget-cell"
+							className="vp-dash-cell"
+							style={{ gridColumn: `span ${spanOf(widget)}` }}
 						>
 							<Widget
 								summary={summary}
 								isLoading
 								onHide={() => {}}
 								isCustomizing={false}
+								onRefreshSummary={onRefreshSummary}
 							/>
-						</ColumnComponent>
+						</div>
 					);
 				})}
-			</>
+			</div>
 		);
 	}
 
 	const visible: SortableEntry[] = layout
-		.filter((entry) => entry.enabled && WIDGETS_BY_ID.has(entry.id))
+		.filter((entry) => entry.enabled && widgetsById.has(entry.id))
 		.map((entry) => ({ ...entry, key: entry.id }));
 
 	const hidden = layout.filter(
-		(entry) => !entry.enabled && WIDGETS_BY_ID.has(entry.id)
+		(entry) => !entry.enabled && widgetsById.has(entry.id)
 	);
 
 	const renderWidgetCell = (entry: SortableEntry) => {
-		const widget = WIDGETS_BY_ID.get(entry.id);
+		const widget = widgetsById.get(entry.id);
 		if (!widget) {
 			return null;
 		}
 		const Widget = widget.component;
 		return (
-			<ColumnComponent
+			<div
 				key={widget.id}
-				grid={widget.grid}
-				className={`dashboard-widget-cell${isCustomizing ? ' is-customizing' : ''}`}
+				className={`vp-dash-cell${isCustomizing ? ' is-customizing' : ''}`}
+				style={{ gridColumn: `span ${spanOf(widget)}` }}
 			>
 				<Widget
 					summary={summary}
@@ -160,7 +163,7 @@ const DashboardGrid: React.FC<DashboardGridProps> = ({
 					isCustomizing={isCustomizing}
 					onRefreshSummary={onRefreshSummary}
 				/>
-			</ColumnComponent>
+			</div>
 		);
 	};
 
@@ -173,34 +176,32 @@ const DashboardGrid: React.FC<DashboardGridProps> = ({
 					setList={handleReorder}
 					handle=".widget-drag-handle"
 					animation={150}
-					className="container-wrapper"
+					className="vp-dash-grid is-customizing"
 				>
 					{visible.map(renderWidgetCell)}
 				</ReactSortable>
 			) : (
-				<>{visible.map(renderWidgetCell)}</>
+				<div className="vp-dash-grid">{visible.map(renderWidgetCell)}</div>
 			)}
 
 			{isCustomizing && hidden.length > 0 && (
-				<div className="dashboard-hidden-widgets">
-					<span className="dashboard-hidden-widgets-label">
-						{__('Hidden widgets:', 'vulopilot')}
-					</span>
+				<div className="vp-hidden-widgets">
+					<span>{__('Hidden widgets', 'vulopilot')}</span>
 					{hidden.map((entry) => {
-						const widget = WIDGETS_BY_ID.get(entry.id);
+						const widget = widgetsById.get(entry.id);
 						if (!widget) {
 							return null;
 						}
 						return (
-							<BadgeComponent
+							<button
 								key={widget.id}
-								className="dashboard-hidden-widget-chip"
-								icon="plus"
-								text={widget.title}
-								role="button"
-								tabIndex={0}
+								type="button"
+								className="vp-chip-link"
 								onClick={() => handleRestore(widget.id)}
-							/>
+							>
+								<i className="adminfont-plus" aria-hidden="true" />
+								{widget.title}
+							</button>
 						);
 					})}
 				</div>

@@ -1,12 +1,9 @@
 /* global vulopilotAppLocalizer */
-import React, { useState } from 'react';
-import { __ } from '@wordpress/i18n';
-import {
-	ListComponent,
-	ModuleGuardComponent,
-	PopupComponent,
-} from '@zyra/components';
+import React, { useEffect, useRef, useState } from 'react';
+import { __, sprintf } from '@wordpress/i18n';
+import { PopupComponent } from '@zyra/components';
 import { getApiLink, getApiResponse } from '@zyra/core';
+import { Skeleton } from '../../components/ui';
 import { useApiList } from '../../services/useApiList';
 import { ChatMarkdown } from '../../components/ChatMarkdown';
 import { ChatMessage } from '../../components/ChatComposerCard';
@@ -24,145 +21,144 @@ interface ConversationPreviewTurn {
 	content: string;
 }
 
-interface ConversationPreviewResponse {
+interface ConversationPreview {
 	id: number;
 	title: string;
 	turns: ConversationPreviewTurn[];
 }
 
-/** Relative "2h ago"/"3d ago" formatting. */
+/** "just now", "5m ago", "3h ago", "2d ago". */
 const timeAgo = (dateString: string): string => {
-	const seconds = Math.max(
-		0,
-		Math.floor((Date.now() - new Date(dateString).getTime()) / 1000)
-	);
+	const seconds = Math.max(0, Math.floor((Date.now() - new Date(dateString).getTime()) / 1000));
 
 	if (seconds < 60) {
 		return __('just now', 'vulopilot');
 	}
+
 	const minutes = Math.floor(seconds / 60);
+
 	if (minutes < 60) {
-		return `${minutes}m ago`;
+		/* translators: %d: minutes. */
+		return sprintf(__('%dm ago', 'vulopilot'), minutes);
 	}
+
 	const hours = Math.floor(minutes / 60);
+
 	if (hours < 24) {
-		return `${hours}h ago`;
+		/* translators: %d: hours. */
+		return sprintf(__('%dh ago', 'vulopilot'), hours);
 	}
-	const days = Math.floor(hours / 24);
-	return `${days}d ago`;
+
+	/* translators: %d: days. */
+	return sprintf(__('%dd ago', 'vulopilot'), Math.floor(hours / 24));
 };
 
-interface RecentConversationsCardProps {
-	/** Called with a row's real `vulopilot_ai_conversations.id` when clicked. */
-	 
-	// eslint-disable-next-line no-unused-vars
+/**
+ * "Recent chats": the five most recently updated conversations. A row reopens it in the chat; the eye previews it
+ * without leaving the current one. Refetches whenever `refreshToken` changes (after each reply).
+ */
+const RecentConversationsCard: React.FC<{
+	activeId: number | null;
+	refreshToken: number;
+	// eslint-disable-next-line no-unused-vars -- parameter name in a type signature.
 	onSelectConversation: (id: number) => void;
-}
-
-/** AI Copilot's "Recent conversations" card - the 5 most recently-updated real. */
-const RecentConversationsCard: React.FC<RecentConversationsCardProps> = ({
-	onSelectConversation,
-}) => {
-	const { data, isLoading, error } = useApiList<RecentConversationRow>(
-		'copilot/conversations',
-		{ per_page: 5 }
-	);
-	/** The conversation currently shown in the preview popup - null closes it. */
-	const [previewConversation, setPreviewConversation] = useState<{
-		id: number;
-		title: string;
-		turns: ConversationPreviewTurn[];
-	} | null>(null);
+}> = ({ activeId, refreshToken, onSelectConversation }) => {
+	const { data, isLoading, error, refetch } = useApiList<RecentConversationRow>('copilot/conversations', { per_page: 5 });
+	const [preview, setPreview] = useState<ConversationPreview | null>(null);
 	const [isLoadingPreview, setIsLoadingPreview] = useState(false);
+	const isFirstRender = useRef(true);
 
-	/** Opens the popup immediately and fetches GET /copilot/conversations/{id}. */
-	const handlePreview = (
-		row: RecentConversationRow,
-		e: React.MouseEvent
-	) => {
-		e.stopPropagation();
-		setPreviewConversation({ id: row.id, title: row.title, turns: [] });
+	useEffect(() => {
+		if (isFirstRender.current) {
+			isFirstRender.current = false;
+			return;
+		}
+
+		refetch({ silent: true });
+	}, [refreshToken]);
+
+	const openPreview = (row: RecentConversationRow) => {
+		setPreview({ id: row.id, title: row.title, turns: [] });
 		setIsLoadingPreview(true);
 
-		getApiResponse<ConversationPreviewResponse>(
-			getApiLink(vulopilotAppLocalizer, `copilot/conversations/${row.id}`),
-			{ headers: { 'X-WP-Nonce': vulopilotAppLocalizer.nonce } }
-		)
+		getApiResponse<ConversationPreview>(getApiLink(vulopilotAppLocalizer, `copilot/conversations/${row.id}`), {
+			headers: { 'X-WP-Nonce': vulopilotAppLocalizer.nonce },
+		})
 			.then((response) => {
 				if (response) {
-					setPreviewConversation({
-						id: response.id,
-						title: response.title,
-						turns: response.turns,
-					});
+					setPreview(response);
 				}
 			})
 			.finally(() => setIsLoadingPreview(false));
 	};
 
 	return (
-		<>
-			{/* No own CardComponent wrapper - header/action chrome lives in AIAssistant.tsx's popup instead. */}
-			{error ? (
-				<ModuleGuardComponent
-					icon="error"
-					title={__('Could not load recent conversations', 'vulopilot')}
-					desc={error}
-				/>
-			) : !isLoading && data.length === 0 ? (
-				<ModuleGuardComponent
-					icon="live-chat"
-					title={__('No AI activity yet', 'vulopilot')}
-					desc={__(
-						'VuloPilot will log every AI-assisted action here.',
-						'vulopilot'
-					)}
-				/>
-			) : (
-				<ListComponent
-					className="mini-card report"
-					isLoading={isLoading}
-					items={data.map((row) => ({
-						id: row.id,
-						icon: 'live-chat',
-						title: row.title,
-						tags: (
-							<>
-								<div className="small desc">
-									{timeAgo(row.updated_at)}
-								</div>
-								<i
-									className="adminfont-eye recent-conversation-preview-icon"
-									title={__('Preview', 'vulopilot')}
-									onClick={(e) => handlePreview(row, e)}
-								/>
-							</>
-						),
-						action: () =>
-							onSelectConversation(Number(row.id)),
-					}))}
-				/>
+		<section className="vp-card vp-rail-card">
+			<header className="vp-rail-head">
+				<div>
+					<h3>{__('Recent chats', 'vulopilot')}</h3>
+					<p>{__('Pick up where you left off.', 'vulopilot')}</p>
+				</div>
+				<a className="vp-card-link" href="?page=vulopilot#&tab=reports&subtab=history">
+					{__('History', 'vulopilot')}
+					<i className="adminfont-arrow-right" aria-hidden="true" />
+				</a>
+			</header>
+
+			{isLoading && <Skeleton />}
+			{!isLoading && error && <p className="vp-rail-note is-bad">{error}</p>}
+			{!isLoading && !error && 0 === data.length && (
+				<p className="vp-rail-note">{__('Your conversations show up here, so you can come back to them.', 'vulopilot')}</p>
+			)}
+
+			{data.length > 0 && (
+				<ul className="vp-list vp-chats">
+					{data.map((row) => (
+						<li key={row.id} className={activeId === row.id ? 'is-active' : ''}>
+							<button
+								type="button"
+								className="vp-list-main"
+								onClick={() => onSelectConversation(row.id)}
+								aria-current={activeId === row.id ? 'true' : undefined}
+							>
+								<strong>{row.title}</strong>
+								<span>{activeId === row.id ? __('Open now', 'vulopilot') : timeAgo(row.updated_at)}</span>
+							</button>
+							<button
+								type="button"
+								className="vp-icon-btn"
+								onClick={() => openPreview(row)}
+								aria-label={sprintf(
+									/* translators: %s: conversation title. */
+									__('Preview "%s"', 'vulopilot'),
+									row.title
+								)}
+							>
+								<i className="adminfont-eye" aria-hidden="true" />
+							</button>
+						</li>
+					))}
+				</ul>
 			)}
 
 			<PopupComponent
-				open={null !== previewConversation}
-				onClose={() => setPreviewConversation(null)}
+				open={null !== preview}
+				onClose={() => setPreview(null)}
 				width={31.25}
 				height="auto"
 				position="lightbox"
 			>
-				{previewConversation && (
-					<div className="recent-conversation-preview">
-						<div className="recent-conversation-preview-title">
-							{previewConversation.title}
-						</div>
-						{isLoadingPreview && 0 === previewConversation.turns.length ? (
+				{preview && (
+					<div className="recent-conversation-preview vp-chat-preview">
+						<div className="recent-conversation-preview-title">{preview.title}</div>
+						{isLoadingPreview && 0 === preview.turns.length ? (
 							<p>{__('Loading…', 'vulopilot')}</p>
 						) : (
-							previewConversation.turns.map((turn, index) => (
+							preview.turns.map((turn, index) => (
 								<ChatMessage
 									key={index}
 									sender={'user' === turn.role ? 'user' : 'ai'}
+									avatarIcon={'user' === turn.role ? undefined : 'ai'}
 								>
 									<ChatMarkdown text={turn.content} />
 								</ChatMessage>
@@ -171,7 +167,7 @@ const RecentConversationsCard: React.FC<RecentConversationsCardProps> = ({
 					</div>
 				)}
 			</PopupComponent>
-		</>
+		</section>
 	);
 };
 

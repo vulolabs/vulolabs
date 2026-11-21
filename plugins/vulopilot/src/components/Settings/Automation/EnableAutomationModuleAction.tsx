@@ -72,11 +72,12 @@ const EnableAutomationModuleAction: React.FC = () => {
 						key: AUTOMATION_MODULE_ID,
 						value: AUTOMATION_MODULE_ID,
 						label: '',
+						// zyra disables per option; it has no component-wide `disabled`.
+						disabled: isToggling,
 					},
 				]}
 				value={isActive ? [AUTOMATION_MODULE_ID] : []}
 				onChange={handleToggle}
-				disabled={isToggling}
 				// Real "Enabled"/"Disabled" status text next to the switch.
 				toggleStatusLabel={{
 					on: __('Enabled', 'vulopilot'),

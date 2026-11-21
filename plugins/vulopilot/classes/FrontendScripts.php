@@ -95,8 +95,21 @@ class FrontendScripts {
 			'vulopilot-admin-style',
 			self::get_asset_url() . 'styles/index.css',
 			array(),
-			VULOPILOT_PLUGIN_VERSION
+			// The file's build time, so a rebuilt stylesheet gets a new URL instead of the browser's cached copy.
+			self::asset_version( 'styles/index.css' )
 		);
+	}
+
+	/**
+	 * Version string for a built asset: its modification time, or the plugin version when it is missing.
+	 *
+	 * @param string $relative_path Path under the plugin's assets/ folder.
+	 * @return string
+	 */
+	private static function asset_version( $relative_path ) {
+		$path = VuloPilot()->plugin_path . 'assets/' . $relative_path;
+
+		return file_exists( $path ) ? (string) filemtime( $path ) : VULOPILOT_PLUGIN_VERSION;
 	}
 
 	/**

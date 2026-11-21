@@ -4,12 +4,10 @@ import PageAnalysisTab from './PageAnalysisTab';
 import SocialTab from './SocialTab';
 import SchemaTab from './SchemaTab';
 
-import type { SeoIssueEditorTab } from '../../services/seoIssueEditorTarget';
-
 interface OnPageTabProps {
 	highlightTarget?: string;
 	// eslint-disable-next-line no-unused-vars
-	onNavigate?: ( tab: SeoIssueEditorTab, target?: string ) => void;
+	onNavigate?: ( tab: string, target?: string ) => void;
 }
 
 /** Groups the three on-page settings tabs. */

@@ -301,7 +301,6 @@
 }
 
 .geo-by-topic-section {
-
 	width: 100%;
 	margin: 1.5rem 0;
 }
@@ -655,7 +654,6 @@
 
 .seo-health-score-stats-severity {
 	flex: 0 1 16rem;
-
 	grid-template-columns: 1fr;
 	gap: 0.75rem;
 }
@@ -691,7 +689,6 @@
 }
 
 .seo-issues-section {
-
 	flex: 1 1 100%;
 	max-width: 100%;
 
@@ -705,7 +702,6 @@
 }
 
 .seo-issues-by-page-card {
-
 	.admin-row.variation-row {
 		background: $theme-background-color !important;
 		font-size: 0.8125rem;
@@ -1194,7 +1190,6 @@
 	display: grid;
 	grid-template-columns: repeat(auto-fit, minmax(11rem, 1fr));
 	gap: 1.5rem;
-
 	margin-bottom: 1.5rem;
 	padding-bottom: 1.5rem;
 	border-bottom: $border-light-small;
@@ -1263,7 +1258,6 @@
 	display: inline-flex;
 	align-items: center;
 	gap: 0.25rem;
-
 	background: none;
 	border: none;
 	padding: 0;
@@ -1449,7 +1443,6 @@
 }
 
 .schema-inspector-jsonld-block {
-
 	margin: 0 0 0.75rem;
 
 	&:last-child {
@@ -1572,7 +1565,6 @@
 .aeo-score-summary-gauge {
 	display: flex;
 	flex-direction: column;
-
 	gap: 1rem;
 	flex: 0 0 14rem;
 }
@@ -1639,7 +1631,6 @@
 .geo-score-ring-col {
 	display: flex;
 	justify-content: center;
-
 	flex: 0 0 14rem;
 }
 
@@ -2249,4 +2240,315 @@
 
 .keywords-locked-tag {
 	margin-bottom: 0.75rem;
+}
+
+// Crawl & URLs → Overall Crawl Health: the line under each check is its result, in the quiet text colour.
+.admin-main-wrapper.admin-main-wrapper .crawl-check-list .item .details .typography-desc {
+	color: var(--vp-muted, #6b7280);
+}
+
+// Brand Visibility: Brand, Trust and Authority, each a card with its ring on the right.
+.admin-main-wrapper.admin-main-wrapper .vp-brand-scores {
+	display: grid;
+	grid-template-columns: repeat(3, minmax(0, 1fr));
+	gap: 1rem;
+
+	@media (width <= 1100px) {
+		grid-template-columns: minmax(0, 1fr);
+	}
+
+	.vp-brand-score {
+		--vp-part: #7c5cff;
+		--vp-part-soft: #f4f1fe;
+
+		display: flex;
+		align-items: center;
+		gap: 1rem;
+		box-sizing: border-box;
+		padding: 1.125rem 1.25rem;
+		border: 1px solid var(--vp-border);
+		border-radius: 0.625rem;
+		background: var(--vp-surface);
+		box-shadow: 0 1px 2px rgb(22 21 29 / 4%);
+
+		&:nth-child(2) {
+			--vp-part: #3b82f6;
+			--vp-part-soft: #eff5ff;
+		}
+
+		&:nth-child(3) {
+			--vp-part: #e5658b;
+			--vp-part-soft: #fff1f3;
+		}
+	}
+
+	.vp-brand-score-text {
+		flex: 1;
+		min-width: 0;
+
+		h3 {
+			margin: 0.625rem 0 0.25rem;
+			font-size: 0.9375rem;
+			font-weight: 650;
+			color: var(--vp-ink);
+		}
+
+		p {
+			margin: 0;
+			font-size: 0.8125rem;
+			line-height: 1.45;
+			color: var(--vp-muted);
+		}
+	}
+
+	.vp-brand-score-icon {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		width: 2.25rem;
+		height: 2.25rem;
+		border-radius: 0.5rem;
+		background: var(--vp-part-soft);
+		color: var(--vp-part);
+	}
+
+	.vp-brand-score-skel {
+		flex: 0 0 auto;
+		width: 6rem;
+		height: 6rem;
+		border-radius: 50%;
+		background: #f3f4f8;
+	}
+}
+
+// ---- Business Identity & Schema ----
+// A numbered heading over each half of the page.
+.admin-main-wrapper.admin-main-wrapper .vp-schema-section {
+	display: flex;
+	align-items: center;
+	gap: 0.75rem;
+	margin: 0.5rem 0 -0.25rem;
+
+	h2 {
+		margin: 0;
+		font-size: 1.0625rem;
+		font-weight: 700;
+		color: var(--vp-ink);
+	}
+
+	p {
+		margin: 0.125rem 0 0;
+		font-size: 0.8125rem;
+		color: var(--vp-muted);
+	}
+}
+
+.admin-main-wrapper.admin-main-wrapper .vp-schema-section-step {
+	display: inline-flex;
+	flex: 0 0 auto;
+	align-items: center;
+	justify-content: center;
+	width: 1.75rem;
+	height: 1.75rem;
+	border-radius: 50%;
+	background: color-mix(in srgb, var(--vp-primary) 10%, #fff);
+	font-size: 0.8125rem;
+	font-weight: 700;
+	color: var(--vp-primary);
+}
+
+// Business profile: the score and progress on the left, the checklist on the right.
+.admin-main-wrapper.admin-main-wrapper .vp-profile-hero {
+	display: grid;
+	grid-template-columns: minmax(14rem, 1fr) minmax(0, 2.4fr);
+	gap: 2rem;
+	align-items: start;
+
+	@media (width <= 1000px) {
+		grid-template-columns: minmax(0, 1fr);
+	}
+}
+
+.admin-main-wrapper.admin-main-wrapper .vp-profile-hero-summary {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: 1rem;
+	padding: 1.25rem;
+	border-radius: 0.625rem;
+	background: linear-gradient(180deg, #faf9ff, #fff);
+	text-align: center;
+
+	> p {
+		max-width: 16rem;
+		margin: 0;
+		font-size: 0.8125rem;
+		line-height: 1.5;
+		color: var(--vp-muted);
+	}
+}
+
+.admin-main-wrapper.admin-main-wrapper .vp-profile-progress {
+	width: 100%;
+	max-width: 16rem;
+
+	strong {
+		font-size: 0.875rem;
+		font-weight: 600;
+		color: var(--vp-ink);
+	}
+}
+
+.admin-main-wrapper.admin-main-wrapper .vp-profile-progress-bar {
+	display: block;
+	height: 0.4375rem;
+	margin-top: 0.5rem;
+	overflow: hidden;
+	border-radius: 1rem;
+	background: #eef0f6;
+
+	i {
+		display: block;
+		height: 100%;
+		border-radius: inherit;
+		background: linear-gradient(90deg, #7c5cff, var(--vp-primary));
+	}
+}
+
+.admin-main-wrapper.admin-main-wrapper .vp-profile-cta {
+	display: inline-flex;
+	align-items: center;
+	gap: 0.375rem;
+	padding: 0.5rem 1rem;
+	border-radius: 0.375rem;
+	background: var(--vp-primary);
+	font-size: 0.8125rem;
+	font-weight: 600;
+	color: #fff;
+	text-decoration: none;
+
+	&:hover,
+	&:focus {
+		background: color-mix(in srgb, var(--vp-primary) 86%, #000);
+		color: #fff;
+	}
+}
+
+.admin-main-wrapper.admin-main-wrapper .vp-profile-checklist {
+	display: grid;
+	grid-template-columns: repeat(2, minmax(0, 1fr));
+	gap: 0.625rem;
+	margin: 0;
+	padding: 0;
+	list-style: none;
+
+	@media (width <= 700px) {
+		grid-template-columns: minmax(0, 1fr);
+	}
+
+	li {
+		display: grid;
+		grid-template-columns: 2.25rem minmax(0, 1fr) auto;
+		grid-template-rows: auto auto;
+		gap: 0.25rem 0.75rem;
+		align-items: center;
+		margin: 0;
+		padding: 0.75rem 0.875rem;
+		border: 1px solid var(--vp-border-soft);
+		border-radius: 0.5rem;
+		background: #fff;
+
+		&.is-missing {
+			border-color: #fbe2c4;
+			background: #fffaf3;
+		}
+	}
+}
+
+.admin-main-wrapper.admin-main-wrapper .vp-profile-check-icon {
+	display: inline-flex;
+	grid-row: 1 / span 2;
+	align-items: center;
+	justify-content: center;
+	width: 2.25rem;
+	height: 2.25rem;
+	border-radius: 0.5rem;
+	background: #edfbf3;
+	color: #12a26b;
+
+	.is-missing & {
+		background: #fff1e0;
+		color: #c4670a;
+	}
+
+	.is-na & {
+		background: #f4f5f9;
+		color: #8a8fa3;
+	}
+}
+
+.admin-main-wrapper.admin-main-wrapper .vp-profile-check-text {
+	display: flex;
+	grid-row: 1 / span 2;
+	flex-direction: column;
+	min-width: 0;
+
+	strong {
+		font-size: 0.875rem;
+		font-weight: 600;
+		color: var(--vp-ink);
+	}
+
+	span {
+		overflow: hidden;
+		font-size: 0.8125rem;
+		color: var(--vp-muted);
+		text-overflow: ellipsis;
+		white-space: nowrap;
+	}
+
+	em {
+		font-style: normal;
+		color: #a0a4b5;
+	}
+}
+
+.admin-main-wrapper.admin-main-wrapper .vp-profile-check-state {
+	justify-self: end;
+	padding: 0.0625rem 0.5rem;
+	border-radius: 1rem;
+	font-size: 0.6875rem;
+	font-weight: 600;
+
+	&.is-found {
+		background: #ecfdf3;
+		color: #067647;
+	}
+
+	&.is-missing {
+		background: #fff1e0;
+		color: #b54708;
+	}
+
+	&.is-na {
+		background: #f4f5f9;
+		color: #8a8fa3;
+	}
+}
+
+.admin-main-wrapper.admin-main-wrapper .vp-profile-check-action {
+	grid-column: 3;
+	justify-self: end;
+	padding: 0;
+	border: 0;
+	background: none;
+	font: inherit;
+	font-size: 0.8125rem;
+	font-weight: 600;
+	color: var(--vp-primary);
+	cursor: pointer;
+
+	&:hover {
+		text-decoration: underline;
+	}
 }

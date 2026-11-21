@@ -1,0 +1,83 @@
+// ---- Security, free (pages/Security). The hero is components/AreaHero; the ring, feed and trend header are the
+// dashboard's (dashboard-widgets/dashboard.scss); the issue list is AI Copilot's (AIAssistant/copilot.scss). ----
+
+// ---- Score over time ----
+.vp-sec-trend .vp-card-body {
+	gap: 1rem;
+}
+
+.vp-sec-period {
+	padding: 0.25rem 0;
+}
+
+// ---- Incident reports sample (Pro) ----
+.vp-incidents {
+	margin: 0;
+	padding: 0.5rem 0 0;
+	list-style: none;
+
+	li {
+		display: grid;
+		grid-template-columns: 5rem minmax(0, 1fr) 9rem 7rem;
+		gap: 1rem;
+		align-items: center;
+		margin: 0;
+		padding: 0.75rem 0;
+
+		+ li {
+			border-top: 1px solid var(--ui-line);
+		}
+
+		@media (width <= 760px) {
+			grid-template-columns: 5rem minmax(0, 1fr);
+
+			.vp-incident-by,
+			.vp-incident-when {
+				display: none;
+			}
+		}
+	}
+
+	strong {
+		overflow: hidden;
+		font-size: 0.8125rem;
+		font-weight: 600;
+		text-overflow: ellipsis;
+		white-space: nowrap;
+		color: var(--ui-ink);
+	}
+}
+
+.vp-incident-sev {
+	justify-self: start;
+	padding: 0.125rem 0.5rem;
+	border-radius: 999px;
+	font-size: 0.6875rem;
+	font-weight: 600;
+
+	&.is-critical,
+	&.is-high {
+		background: var(--ui-bad-bg);
+		color: var(--ui-bad);
+	}
+
+	&.is-medium {
+		background: var(--ui-warn-bg);
+		color: var(--ui-warn);
+	}
+
+	&.is-low {
+		background: var(--ui-info-bg);
+		color: var(--ui-info);
+	}
+}
+
+.vp-incident-by,
+.vp-incident-when {
+	font-size: 0.75rem;
+	color: var(--ui-muted);
+}
+
+.vp-incident-when {
+	text-align: right;
+}

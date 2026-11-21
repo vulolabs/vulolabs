@@ -1,96 +1,72 @@
 import { __ } from '@wordpress/i18n';
-import { CardComponent, ListComponent } from '@zyra/components';
-import { ButtonInput } from '@zyra/inputs';
+import { Card, IconTile } from '../../components/ui';
+import type { Tone } from '../../components/ui';
 
 interface ManualCheck {
 	key: string;
 	icon: string;
+	tone: Tone;
 	title: string;
-	description: string;
+	question: string;
+	/** One concrete way to try it, in a minute or two. */
+	howTo: string;
 }
 
 const MANUAL_CHECKS: ManualCheck[] = [
 	{
 		key: 'keyboard-navigation',
-		icon: 'coding lime',
+		icon: 'coding',
+		tone: 'blue',
 		title: __('Keyboard navigation', 'vulopilot'),
-		description: __(
-			'Can you reach and use everything without a mouse?',
-			'vulopilot'
-		),
+		question: __('Can you reach and use everything without a mouse?', 'vulopilot'),
+		howTo: __('Press Tab through a page: every link and button should get a visible outline, in a sensible order.', 'vulopilot'),
 	},
 	{
 		key: 'screen-reader',
-		icon: 'person pink',
+		icon: 'person',
+		tone: 'violet',
 		title: __('Screen-reader experience', 'vulopilot'),
-		description: __(
-			'Does the content make sense when read aloud?',
-			'vulopilot'
-		),
+		question: __('Does the content make sense when read aloud?', 'vulopilot'),
+		howTo: __('Turn on VoiceOver (Mac) or NVDA (Windows) and listen to your home page and a form.', 'vulopilot'),
 	},
 	{
 		key: 'zoom-resizing',
-		icon: 'text-fields blue',
+		icon: 'text-fields',
+		tone: 'amber',
 		title: __('Zoom & text resizing', 'vulopilot'),
-		description: __(
-			'Does the page still work when text is enlarged?',
-			'vulopilot'
-		),
+		question: __('Does the page still work when text is enlarged?', 'vulopilot'),
+		howTo: __('Zoom the browser to 200%: nothing should overlap, get cut off or need sideways scrolling.', 'vulopilot'),
 	},
 ];
 
-/** The mockup's "Some accessibility checks need a person" panel. */
+/** The checks no scanner can make for you, each with a quick way to try it. */
 const AccessibilityManualTestingPanel = () => (
-	<CardComponent
+	<Card
 		id="accessibility-manual-testing-card"
-		title={__('Some accessibility checks need a person', 'vulopilot')}
-		titleIcon="person"
-		desc={__(
-			'Automated tests can find many technical issues, but real user experiences need to be checked manually.',
-			'vulopilot'
-		)}
-		badges={[
-			{
-				text: __('Manual testing recommended', 'vulopilot'),
-				color: 'blue',
-			},
-		]}
+		className="vp-a11y-manual"
+		title={__('Checks that need a person', 'vulopilot')}
+		icon="person"
+		desc={__('Scans catch technical problems. These three take a few minutes by hand.', 'vulopilot')}
+		link={{
+			label: __('WCAG quick reference', 'vulopilot'),
+			href: 'https://www.w3.org/WAI/WCAG21/quickref/',
+		}}
 	>
-		<ListComponent
-			className="mini-card report"
-			items={MANUAL_CHECKS.map((check) => ({
-				id: check.key,
-				icon: check.icon,
-				title: check.title,
-				desc: check.description,
-			}))}
-		/>
-			<ButtonInput
-				position="left"
-				buttons={[
-					{
-						text: __('Open Manual Checklist', 'vulopilot'),
-						rightIcon: 'pagination-right-arrow',
-						color: 'purple-bg',
-						onClick: () =>
-							window.open(
-								'https://www.w3.org/WAI/WCAG21/quickref/',
-								'_blank'
-							),
-					},
-					{
-						text: __('Learn more about accessibility', 'vulopilot'),
-						color: 'border-purple',
-						rightIcon: 'pagination-right-arrow',
-						onClick: () =>
-							window.open(
-								'https://www.w3.org/WAI/fundamentals/accessibility-intro/',
-								'_blank'
-							),
-					},
-				]}
-			/>
-	</CardComponent>
+		<ol className="vp-a11y-manual-list">
+			{MANUAL_CHECKS.map((check) => (
+				<li key={check.key}>
+					<IconTile icon={check.icon} tone={check.tone} />
+					<div>
+						<strong>{check.title}</strong>
+						<span className="vp-a11y-manual-q">{check.question}</span>
+						<span className="vp-a11y-manual-how">
+							<b>{__('Try it:', 'vulopilot')}</b> {check.howTo}
+						</span>
+					</div>
+				</li>
+			))}
+		</ol>
+	</Card>
 );
 
 export default AccessibilityManualTestingPanel;

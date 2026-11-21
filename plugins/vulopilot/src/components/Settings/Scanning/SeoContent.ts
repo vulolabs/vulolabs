@@ -21,7 +21,7 @@ export default {
             type: 'section',
             title: __('About Page', 'vulopilot'),
             icon: 'web-page-website',
-            desc: __('Checks whether your sites About or Company page gives visitors (and search engines) enough real information to trust it. Only runs if your site has a page that looks like an About page.',
+            desc: __('Checks whether your site’s About or Company page gives visitors (and search engines) enough real information to trust it. Only runs if your site has a page that looks like an About page.',
                 'vulopilot'
             ),
         },
@@ -133,7 +133,7 @@ export default {
 
 			label: __('Flag broken images', 'vulopilot'),
 			settingDescription: __(
-				'Image that fail to load because their source URL returns an error.',
+				'Images that fail to load because their source URL returns an error.',
 				'vulopilot'
 			),
 			options: [
@@ -191,7 +191,7 @@ export default {
 			moduleEnabled: 'technical-seo',
 			label: __('Add canonical URL tags', 'vulopilot'),
 			settingDescription: __(
-				'canonical tags to indicate the preferred URL for pages with duplicate or similar content. WordPress already adds these by default - only turn this on if the "Canonical URLs" finding shows them missing.',
+				'Canonical tags indicate the preferred URL for pages with duplicate or similar content. WordPress already adds these by default - only turn this on if the "Canonical URLs" finding shows them missing.',
 				'vulopilot'
 			),
 			options: [

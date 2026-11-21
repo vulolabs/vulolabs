@@ -16,6 +16,7 @@ import { FixOutcome } from '../../services/showFixOutcome';
 import { useFixNotice } from '../../services/useFixNotice';
 import { PRIORITY_SEVERITIES, Priority, RawFinding } from './seoIssuesShared';
 import './SeoVisibility.scss';
+import { columns } from '../../services/tableColumns';
 
 const getFindingFixHandler = () => applyFilters('vulopilot_finding_fix_handler', null);
 
@@ -175,7 +176,7 @@ const SeoSiteWideIssuesTable = ({
 				showMenu={false}
 				variant="transparent"
 				hideHeader={true}
-				headers={{
+				headers={columns({
 					title: {
 						key: 'title',
 						type: 'info',
@@ -233,7 +234,7 @@ const SeoSiteWideIssuesTable = ({
 							},
 						],
 					},
-				}}
+				})}
 				rows={visibleFindings.map((finding) => ({
 					...finding,
 					titleBadges: [

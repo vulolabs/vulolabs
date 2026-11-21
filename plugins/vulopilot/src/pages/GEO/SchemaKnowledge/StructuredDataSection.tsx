@@ -17,6 +17,7 @@ import type {
 	SchemaCoveragePage,
 	SchemaCoverageSnapshot,
 } from './useSchemaCoverage';
+import { columns, tableRows } from '../../../services/tableColumns';
 
 interface StructuredDataSectionProps {
 	coverage: {
@@ -127,11 +128,9 @@ const StructuredDataSection = ({ coverage }: StructuredDataSectionProps) => {
 			.catch(() => setSchemaFindings([]));
 	}, [snapshot]);
 
-	const selectedIssues = useMemo(() => {
-		if (!selectedRow) {
-			return [];
-		}
-		return selectedRow.pages.flatMap((page) =>
+	/** The open schema findings that sit on this type's own pages. */
+	const issuesOn = (row: SchemaCoverageRow) =>
+		row.pages.flatMap((page) =>
 			schemaFindings
 				.filter(
 					(finding) =>
@@ -140,7 +139,21 @@ const StructuredDataSection = ({ coverage }: StructuredDataSectionProps) => {
 				)
 				.map((finding) => ({ finding, page }))
 		);
-	}, [selectedRow, schemaFindings]);
+
+	/**
+	 * The snapshot's `problems` shares every open schema finding out across the types by how common each is, so a type
+	 * could show problems that sit on other pages (WebSite "2 problems" for two posts' author schema). The badge and the
+	 * count use the findings really on the type's pages instead - the same list the side panel shows.
+	 */
+	const withRealProblems = (row: SchemaCoverageRow): SchemaCoverageRow => ({
+		...row,
+		problems: issuesOn(row).length,
+	});
+
+	const selectedIssues = useMemo(
+		() => (selectedRow ? issuesOn(selectedRow) : []),
+		[selectedRow, schemaFindings]
+	);
 
 	return (
 		<>
@@ -150,10 +163,10 @@ const StructuredDataSection = ({ coverage }: StructuredDataSectionProps) => {
 					titleIcon="attachment"
 					id="schema-knowledge-structured-data"
 					desc={__(
-						'VuloPilot checked how your website describes its pages, products, articles and business to search engines - see what structured information is there and where something is missing or incorrect, a real sample from its own live pages.',
+						'The schema types found on a sample of your live pages, and whether each one has problems.',
 						'vulopilot'
 					)}
-					isLoading={isLoading}
+					isLoading={isLoading || undefined}
 				>
 					{!isLoading && !snapshot && (
 						<ModuleGuardComponent
@@ -180,7 +193,7 @@ const StructuredDataSection = ({ coverage }: StructuredDataSectionProps) => {
 									showMenu={false}
 									hideHeader={true}
 									variant="transparent"
-									headers={{
+									headers={columns({
 										type: {
 											key: 'type',
 											type: 'info',
@@ -195,7 +208,7 @@ const StructuredDataSection = ({ coverage }: StructuredDataSectionProps) => {
 											render: (row: SchemaCoverageRow) =>
 												sprintf(
 													/* translators: %d is how many of the real sampled pages carried this schema type. */
-													__('%d pages', 'vulopilot'),
+													_n('%d page', '%d pages', row.found_on, 'vulopilot'),
 													row.found_on
 												),
 										},
@@ -223,17 +236,17 @@ const StructuredDataSection = ({ coverage }: StructuredDataSectionProps) => {
 												},
 											],
 										},
-									}}
-									rows={snapshot.coverage.map((row) => ({
+									})}
+									rows={tableRows(snapshot.coverage.map((row) => ({
 										...row,
 										typeIcon: getTypeIcon(row.type),
 										statusBadges: [
 											{
-												text: STATUS_CONFIG[getRowStatus(row)].label,
-												color: `badge-${STATUS_SEVERITY_CLASS[getRowStatus(row)]}`,
+												text: STATUS_CONFIG[getRowStatus(withRealProblems(row))].label,
+												color: `badge-${STATUS_SEVERITY_CLASS[getRowStatus(withRealProblems(row))]}`,
 											},
 										],
-									}))}
+									})))}
 									ids={snapshot.coverage.map((row) => row.type)}
 									totalRows={snapshot.coverage.length}
 									isLoading={isLoading}
@@ -264,9 +277,9 @@ const StructuredDataSection = ({ coverage }: StructuredDataSectionProps) => {
 					>
 						<div className="schema-detail-stats">
 							<BadgeComponent
-								color={STATUS_CONFIG[getRowStatus(selectedRow)].color}
-								icon={STATUS_CONFIG[getRowStatus(selectedRow)].icon}
-								text={STATUS_CONFIG[getRowStatus(selectedRow)].label}
+								color={STATUS_CONFIG[getRowStatus(withRealProblems(selectedRow))].color}
+								icon={STATUS_CONFIG[getRowStatus(withRealProblems(selectedRow))].icon}
+								text={STATUS_CONFIG[getRowStatus(withRealProblems(selectedRow))].label}
 							/>
 							<span className="desc">
 								{sprintf(
@@ -279,8 +292,8 @@ const StructuredDataSection = ({ coverage }: StructuredDataSectionProps) => {
 									),
 									sprintf(
 										/* translators: %d: number of problems. */
-										_n('%d problem', '%d problems', selectedRow.problems, 'vulopilot'),
-										selectedRow.problems
+										_n('%d problem', '%d problems', selectedIssues.length, 'vulopilot'),
+										selectedIssues.length
 									)
 								)}
 							</span>

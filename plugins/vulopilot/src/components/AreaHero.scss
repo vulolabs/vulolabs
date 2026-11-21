@@ -1,0 +1,71 @@
+// ---- AreaHero: the hero's areas - icon, name, state. A clear area is not a link. The rest of the hero is the
+// dashboard's `vp-hero` (dashboard-widgets/dashboard.scss). ----
+.vp-area-list button {
+	display: grid;
+	grid-template-columns: 1.25rem minmax(0, 1fr) auto;
+	gap: 0.75rem;
+	align-items: center;
+	width: 100%;
+	padding: 0.5625rem 0.625rem;
+	border: 0;
+	border-radius: 0.5rem;
+	background: none;
+	font: inherit;
+	text-align: left;
+	color: inherit;
+	cursor: pointer;
+	transition: background 0.15s;
+
+	> i {
+		font-size: 0.875rem;
+		color: var(--ui-muted);
+	}
+
+	&:hover:not(:disabled),
+	&:focus-visible {
+		background: var(--ui-sunken);
+
+		.vp-area-name {
+			color: var(--ui-accent);
+		}
+	}
+
+	&:disabled {
+		cursor: default;
+	}
+}
+
+.vp-area-state {
+	display: inline-flex;
+	align-items: center;
+	gap: 0.3125rem;
+	padding: 0.1875rem 0.625rem;
+	border-radius: 999px;
+	font-size: 0.75rem;
+	font-weight: 600;
+	white-space: nowrap;
+
+	i {
+		font-size: 0.625rem;
+	}
+
+	.is-good & {
+		background: var(--ui-good-bg);
+		color: var(--ui-good);
+	}
+
+	.is-bad & {
+		background: var(--ui-bad-bg);
+		color: var(--ui-bad);
+	}
+
+	.is-warn & {
+		background: var(--ui-warn-bg);
+		color: var(--ui-warn);
+	}
+
+	.is-info & {
+		background: var(--ui-info-bg);
+		color: var(--ui-info);
+	}
+}

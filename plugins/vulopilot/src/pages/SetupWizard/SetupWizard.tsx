@@ -172,7 +172,7 @@ const SetupWizard = () => {
 				type="single-select"
 				isClearable={false}
 				value={selectedId}
-				onChange={(value: string) => setSelectedId(value)}
+				onChange={(value) => setSelectedId(value as string)}
 				options={sources.map((source) => ({
 					label: sprintf(
 						/* translators: 1: plugin name, 2: number of items found. */

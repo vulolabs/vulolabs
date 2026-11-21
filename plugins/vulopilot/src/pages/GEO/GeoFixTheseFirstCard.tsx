@@ -58,7 +58,7 @@ const GeoFixTheseFirstCard = ({
 			title={title || __('Fix These First', 'vulopilot')}
 			titleIcon="error"
 			desc={__('The worst-severity open findings, ranked first.', 'vulopilot')}
-			isLoading={isLoading}
+			isLoading={isLoading || undefined}
 			badges={[{ text: String(total), color: 'red' }]}
 			action={
 				<ButtonInput

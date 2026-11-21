@@ -1,13 +1,14 @@
 /* global vulopilotAppLocalizer */
 import { useEffect, useState } from '@wordpress/element';
-import { __, sprintf } from '@wordpress/i18n';
-import { COLOR_PALETTE, getApiLink, getApiResponse } from '@zyra/core';
-import { AnalyticsComponent, CardComponent, ChartComponent, ColumnComponent, IconComponent, ListComponent, TypographyComponent } from '@zyra/components';
+import { __, _n, sprintf } from '@wordpress/i18n';
+import { getApiLink, getApiResponse } from '@zyra/core';
+import { CardComponent, ColumnComponent } from '@zyra/components';
 import { ToggleInput } from '@zyra/inputs';
-import { formatWpDate } from '../../services/formatWpDate';
 import { useGeoScore } from './useGeoScore';
 import type { GeoSignalScore } from './useGeoScore';
 import './SeoVisibility.scss';
+import ScoreBreakdown from '../../components/ScoreBreakdown/ScoreBreakdown';
+import ScoreTrendArea, { TrendHead } from '../../components/ScoreTrendArea/ScoreTrendArea';
 import type { PeriodDays } from './types';
 
 const getRating = (score: number): string => {
@@ -18,16 +19,6 @@ const getRating = (score: number): string => {
 		return __('Needs Work', 'vulopilot');
 	}
 	return __('At Risk', 'vulopilot');
-};
-
-const ratingClass = (score: number): string => {
-	if (score >= 70) {
-		return 'green';
-	}
-	if (score >= 40) {
-		return 'yellow';
-	}
-	return 'red';
 };
 
 /** This card's own 7 `SIGNAL_META` keys → GeoTab.tsx's own 5 real `GEO_TOPICS` keys. */
@@ -179,67 +170,26 @@ const GeoScoreSection = ({ onSelectSignal }: GeoScoreSectionProps) => {
 						__('Based on %d published pages.', 'vulopilot'),
 						score?.pages_checked ?? 0
 					)}
-					isLoading={isLoading}
+					isLoading={isLoading || undefined}
 				>
-					<div className="overall-score-wrapper">
-						<div className="overall-score-summary">
-								<ChartComponent
-									type="ring"
-									height={200}
-									// Top-level `color` - `type="ring"` only ever paints its stroke from this prop.
-									color={
-										COLOR_PALETTE[
-											ratingClass(overall) as keyof typeof COLOR_PALETTE
-										]
-									}
-									centerLabel={
-										<>
-											<TypographyComponent variant={'h1'} color={ratingClass(overall)}>
-												{overall}
-											</TypographyComponent>
-											<TypographyComponent variant={'h4'}>
-												{getRating(overall)}
-											</TypographyComponent>
-										</>
-									}
-									data={[
-										{
-											label: __('Score', 'vulopilot'),
-											value: overall,
-											// Same real rating color the ring's own Good/Needs Work/Poor label above already uses (`ratingClass()`/`getRating()`).
-											color: COLOR_PALETTE[
-												ratingClass(overall) as keyof typeof COLOR_PALETTE
-											],
-										},
-										{ label: __('Remaining', 'vulopilot'), value: 100 - overall, color: '#e5e7eb' },
-									]}
-								/>
-								<TypographyComponent variant={'h3'} color="text-green">
-									{__('GEO Score', 'vulopilot')}
-								</TypographyComponent>
-								<div className="desc">
-									{sprintf(
-										/* translators: %d: real number of published pages/posts every GEO scanner scans. */
-										__('Based on %d published pages.', 'vulopilot'),
-										score?.pages_checked ?? 0
-									)}
-								</div>
-						</div>
-						{/* * Same real `ListComponent` "mini-card report" row * shape SeoTab.tsx's own "SEO Health" card uses for * its 6 category rows. */}
-						 <div className="overall-score-summary">
-						<ListComponent
-							className="mini-card report hover without-border seo-health-score-category-list"
-							loading={isLoading}
-							items={SIGNAL_META.map((meta) => {
-								const signal = score?.signals[meta.key];
+					{score && (
+						<ScoreBreakdown
+							score={overall}
+							ratingLabel={getRating(overall)}
+							summary={sprintf(
+								/* translators: %d: number of published pages every GEO check scans. */
+								__('How ready your %d published pages are to be understood and quoted by AI.', 'vulopilot'),
+								score.pages_checked
+							)}
+							rows={SIGNAL_META.map((meta) => {
+								const signal = score.signals[meta.key];
 								const signalScore = signal?.score ?? null;
-								const delta = signal ? signalScoreDelta(signal) : null;
 
 								return {
-									id: meta.key,
-									icon: meta.icon,
+									key: meta.key,
+									icon: meta.icon.split(' ')[0],
 									title: meta.label,
-									desc:
+									sub:
 										null === signalScore
 											? mainProblemText(meta.key, signal ?? {
 													score: null,
@@ -249,74 +199,27 @@ const GeoScoreSection = ({ onSelectSignal }: GeoScoreSectionProps) => {
 													trend: null,
 												})
 											: sprintf(
-													/* translators: %d: real number of open findings. */
-													__('%d issues', 'vulopilot'),
+													/* translators: %d: number of open findings. */
+													_n('%d issue', '%d issues', signal?.open_count ?? 0, 'vulopilot'),
 													signal?.open_count ?? 0
 												),
-									tags: (
-										<>
-											
-											{null !== signalScore && (
-												<TypographyComponent
-													variant="h5"
-													weight="bold"
-													color={ratingClass(signalScore)}
-													className="seo-health-score-row-value"
-												>
-													{signalScore}
-													<TypographyComponent
-														as="span"
-														variant="body-md"
-														className="seo-health-score-row-suffix"
-													>
-														/100
-													</TypographyComponent>
-												</TypographyComponent>
-											)}
-											{null !== delta && (
-												<TypographyComponent
-													as="span"
-													variant="body-md"
-													weight="bold"
-													color={delta >= 0 ? 'green' : 'red'}
-													className="seo-health-score-row-delta"
-												>
-													<IconComponent
-														name={delta >= 0 ? 'arrow-up' : 'arrow-down'}
-													/>
-													{Math.abs(delta)}
-												</TypographyComponent>
-											)}
-										</>
-									),
-									action: () =>
+									score: signalScore,
+									change: signal ? signalScoreDelta(signal) : null,
+									status: __('Not scored', 'vulopilot'),
+									onClick: () =>
 										onSelectSignal
 											? onSelectSignal(SIGNAL_TO_TOPIC_KEY[meta.key])
 											: scrollToBreakdown(),
 								};
 							})}
-						/>
-						</div>
-					</div>
-					{score && (
-						<AnalyticsComponent
-							variant="with-out-boxshadow"
-							cols={2}
-							isLoading={isLoading}
-							data={[
+							stats={[
+								{ label: __('Pages checked', 'vulopilot'), value: score.pages_checked },
 								{
-									number: score.pages_checked,
-									text: __('Pages checked', 'vulopilot'),
-									iconClass: 'admin-bg-color2',
-								},
-								{
-									// Real sum of every signal's own real `open_count`.
-									number: Object.values(score.signals).reduce(
+									label: __('Issues found', 'vulopilot'),
+									value: Object.values(score.signals).reduce(
 										(sum, signal) => sum + (signal.open_count ?? 0),
 										0
 									),
-									text: __('Issues found', 'vulopilot'),
-									iconClass: 'admin-bg-color3',
 								},
 							]}
 						/>
@@ -328,7 +231,7 @@ const GeoScoreSection = ({ onSelectSignal }: GeoScoreSectionProps) => {
 					title={__('Score Snapshot', 'vulopilot')}
 					desc={__('How your GEO score has trended over the selected period.', 'vulopilot')}
 					titleIcon='tools'
-					isLoading={isLoadingProgress}
+					isLoading={isLoadingProgress || undefined}
 					action={
 						<ToggleInput
 							options={PERIOD_OPTIONS}
@@ -340,17 +243,10 @@ const GeoScoreSection = ({ onSelectSignal }: GeoScoreSectionProps) => {
 					}
 				>
 					{progress && (
-						<ChartComponent
-							type="dynamic-line"
-							data={progress.trend.map((point) => ({
-								...point,
-								date: formatWpDate(point.date),
-							}))}
-							dataKey="score"
-							xKey="date"
-							height={300}
-							yDomain={[0, 100]}
-						/>
+						<>
+							<TrendHead points={progress.trend} days={Number(period)} />
+							<ScoreTrendArea points={progress.trend} height={260} label={__('GEO', 'vulopilot')} />
+						</>
 					)}
 				</CardComponent>
 			</ColumnComponent>

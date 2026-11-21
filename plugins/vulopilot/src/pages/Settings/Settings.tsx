@@ -25,7 +25,69 @@ import IndexNowPanel from '../../components/Settings/SEO/IndexNowPanel';
 import ShowProPopup from '../../components/Popup/Popup';
 import { CLOUD_STORAGE_LOCKED_METHODS } from '../../components/Settings/Backups';
 import { useFilterSlot } from '../../services/useFilterSlot';
-import type { ComponentType } from 'react';
+import type { ComponentProps, ComponentType } from 'react';
+
+type RendererProps = ComponentProps<typeof InputRenderer>;
+
+/**
+ * One settings tab as this plugin's config files (components/Settings/) declare it. zyra's core helpers type a tab's
+ * `modal` as a node and leave out the extras InputRenderer and this page read, so tabs are read through this type.
+ */
+type SettingsTab = RendererProps['settings'] & {
+	PanelComponent?: ComponentType;
+	groupBySections?: boolean;
+};
+
+/**
+ * The save state, floating at the top right: settings save as you change them, and the header's own status is out
+ * of sight once you scroll. Shown only while that header status is scrolled away, so the two never show together. Shows "Saving…", then "All changes saved" for a few seconds, or the error.
+ */
+const SaveToast = ({ status, changeTick }: { status: SaveStatus; changeTick: number }) => {
+	const [visible, setVisible] = useState(false);
+
+	useEffect(() => {
+		if ('idle' === status) {
+			return undefined;
+		}
+
+		// The header shows the same status while it is in view; float a copy only once it has scrolled away.
+		const headerStatus = document.querySelector('.vulopilot-settings .save-status, .admin-settings [class*="save-status"]');
+		const headerInView = headerStatus
+			? headerStatus.getBoundingClientRect().bottom > 32
+			: window.scrollY < 120;
+
+		setVisible(!headerInView);
+
+		if ('saved' !== status) {
+			return undefined;
+		}
+
+		const timer = setTimeout(() => setVisible(false), 2500);
+		return () => clearTimeout(timer);
+		// Every change shows it again, even when the status was already "saved" and stays so.
+	}, [status, changeTick]);
+
+	let icon = 'check';
+	let text = __('All changes saved', 'vulopilot');
+	if ('saving' === status) {
+		icon = 'refresh';
+		text = __('Saving…', 'vulopilot');
+	} else if ('error' === status) {
+		icon = 'error';
+		text = __('Could not save your changes. Please try again.', 'vulopilot');
+	}
+
+	return (
+		<div
+			className={`vp-save-toast is-${status}${visible && 'idle' !== status ? ' is-visible' : ''}`}
+			role="status"
+			aria-live="polite"
+		>
+			<i className={`adminfont-${icon}`} aria-hidden="true" />
+			{text}
+		</div>
+	);
+};
 
 /** Settings page built on zyra's settings framework. */
 
@@ -33,6 +95,8 @@ const Settings = () => {
 	const [isLoading, setIsLoading] = useState(true);
 	const [error, setError] = useState<string | null>(null);
 	const [saveStatus, setSaveStatus] = useState<SaveStatus>('idle');
+	// Bumped on every setting change, so the save toast reappears for each one.
+	const [changeTick, setChangeTick] = useState(0);
 	const settingsRef = useRef<Record<string, unknown>>({});
 	// Remounts the navigator (via `key`) when a filter adds tabs after this page first rendered.
 	const [proTabsTick, setProTabsTick] = useState(0);
@@ -79,7 +143,9 @@ const Settings = () => {
 		);
 		const [isCloudStoragePopupOpen, setIsCloudStoragePopupOpen] = useState(false);
 
-		const settingModal = currentTab ? getSettingById(settingsArray, currentTab) : null;
+		const settingModal = currentTab
+			? (getSettingById(settingsArray, currentTab) as unknown as SettingsTab | null)
+			: null;
 		const fieldKeys: string[] = (settingModal?.modal ?? []).map(
 			(field: { key: string }) => field.key
 		);
@@ -95,6 +161,7 @@ const Settings = () => {
 			}
 
 			updateSetting(key, value);
+			setChangeTick((tick) => tick + 1);
 		};
 
 		// Was a synchronous `setSetting()` call made straight in the render body.
@@ -151,7 +218,7 @@ const Settings = () => {
 						{settingModal ? (
 							<InputRenderer
 								settings={settingModal}
-								setting={setting}
+								setting={setting as RendererProps['setting']}
 								updateSetting={guardedUpdateSetting}
 								Popup={ShowProPopup}
 								// Per-tab opt-in into InputRenderer's card-grouped layout.
@@ -262,18 +329,20 @@ const Settings = () => {
 		<SettingProvider>
 			<NavigatorComponent
 				key={proTabsTick}
-				settingContent={settingsArray}
+				// The same tree getTemplateData() builds; zyra's core and components packages type it differently.
+				settingContent={settingsArray as unknown as ComponentProps<typeof NavigatorComponent>['settingContent']}
 				currentSetting={location.get('subtab') as string}
 				getForm={GetForm}
 				prepareUrl={(subTab: string) =>
 					`?page=vulopilot#&tab=settings&subtab=${subTab}`
 				}
-				appLocalizer={vulopilotAppLocalizer}
 				Link={Link}
 				settingName={'Settings'}
-				className="admin-settings"
+				className="admin-settings vulopilot-settings"
+				menuIcon
 				saveStatus={saveStatus}
 			/>
+			<SaveToast status={saveStatus} changeTick={changeTick} />
 		</SettingProvider>
 	);
 };

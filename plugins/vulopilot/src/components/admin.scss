@@ -1,0 +1,70 @@
+// VuloPilot's admin look: the VuloCart design layer (design-system.scss), the same one VuloForm and VuloMail use,
+// plus the UI kit (ui.scss) every screen builds on. Loaded once from index.tsx, so Free's screens and every Pro
+// module screen (drawn inside the same `.admin-main-wrapper`) share it.
+@import './design-system';
+@import './ui';
+@import './header';
+@import './settings-pages';
+
+// ---- VuloPilot settings: calmer rows ----
+// VuloPilot's settings cards are long (a dozen fields is common), so a hairline over every row reads as a ruled
+// sheet. One divider under each card's header, then the rows are separated by space alone; text areas start
+// compact and grow by hand.
+.admin-main-wrapper.admin-main-wrapper .settings-wrapper.vulopilot-settings.vulopilot-settings[data-template] {
+	.settings-left-section {
+		margin-bottom: 0.25rem;
+		border-bottom: 1px solid var(--vp-border-soft);
+	}
+
+	.settings-right-section .form-group {
+		padding: 0.875rem 0;
+		border-top: 0;
+	}
+
+	.settings-right-section .form-group-wrapper > .form-group:last-child {
+		padding-bottom: 1.125rem;
+	}
+
+	// zyra gives every text area six rows; three is enough to start with, and they can be dragged taller.
+	.settings-input-content textarea {
+		height: 5rem;
+		min-height: 3.5rem;
+		resize: vertical;
+	}
+}
+
+// ---- Address dropdowns (Settings/fields/AddressFields.tsx): the same type size and height as the text inputs ----
+/* stylelint-disable selector-class-pattern -- react-select's own class names. */
+.admin-main-wrapper .vp-address-field {
+	width: 100%;
+
+	.select-prefix__control {
+		min-height: 2.125rem;
+	}
+
+	.select-prefix__single-value,
+	.select-prefix__placeholder,
+	.select-prefix__input-container,
+	.select-prefix__option {
+		font-size: 0.875rem;
+	}
+}
+/* stylelint-enable selector-class-pattern */
+
+// ---- "Nothing added yet" inside a repeater (e.g. Competitors): a quiet dashed placeholder, not a blue alert ----
+.admin-main-wrapper.admin-main-wrapper .repeater-field-wrapper > .ui-notice.display-inline-notice {
+	border: 1px dashed #d9dbe5;
+	border-radius: 0.625rem;
+	background: #fafafd;
+	box-shadow: none;
+	color: #6b7086;
+
+	i {
+		color: #a9aec0;
+	}
+
+	.notice-desc,
+	.notice-text {
+		color: #6b7086;
+	}
+}

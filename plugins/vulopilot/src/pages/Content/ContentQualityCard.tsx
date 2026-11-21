@@ -12,7 +12,6 @@ import {
 	ListComponent,
 	SectionComponent
 } from '@zyra/components';
-import type { NoticeType } from '@zyra/components';
 import { ButtonInput, SelectInput } from '@zyra/inputs';
 import { SEO_ISSUE_QUERY_PARAM } from '../../services/seoIssueEditorTarget';
 
@@ -44,7 +43,7 @@ interface ContentQualityResponse {
 
 type ScoreTone = 'green' | 'orange' | 'red';
 
-/** Same 3-band green/orange/red split NeedsAttentionCard.tsx's own getScoreTone uses for a 0-100 score. */
+/** A 3-band green/orange/red split for a 0-100 score. */
 const getScoreTone = (percent: number): ScoreTone => {
 	if (percent >= 75) {
 		return 'green';
@@ -55,8 +54,8 @@ const getScoreTone = (percent: number): ScoreTone => {
 	return 'red';
 };
 
-/** Real `OnPageCheck.status` → NoticeComponent's own `NoticeType`. */
-const STATUS_NOTICE_TYPE: Record<OnPageCheck['status'], NoticeType> = {
+/** `OnPageCheck.status` → the list item's icon classes (icon name plus colour). */
+const STATUS_NOTICE_TYPE: Record<OnPageCheck['status'], string> = {
 	pass: 'success green',
 	warning: 'info yellow',
 	fail: 'error red',
@@ -226,7 +225,7 @@ const ContentQualityCard = ({ postId: externalPostId, title: externalTitle, onCl
 					? __("A single page's real content-quality signals, checked live.", 'vulopilot')
 					: __('Real AI-assessed quality signals for the selected page.', 'vulopilot')
 			}
-			isLoading={isExternal ? isLoadingQuality : isLoadingOptions}
+			isLoading={(isExternal ? isLoadingQuality : isLoadingOptions) || undefined}
 			action={
 				isExternal && onClose ? (
 					<ButtonInput
@@ -253,7 +252,7 @@ const ContentQualityCard = ({ postId: externalPostId, title: externalTitle, onCl
 							size={10}
 							type="single-select"
 							value={selectedId ? String(selectedId) : ''}
-							onChange={(value: string) => setSelectedId(Number(value))}
+							onChange={(value) => setSelectedId(Number(value))}
 							options={options.map((option: ContentOption) => ({
 								label: option.title,
 								value: String(option.id),

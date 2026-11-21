@@ -16,6 +16,7 @@ import { MultiCheckboxInput, SelectInput, TextInput } from '@zyra/inputs';
 import { TableCard } from '@zyra/table';
 import { useSetting } from '../../../contexts/SettingContext';
 import './SeoTitlesPanel.scss';
+import { columns, tableRows } from '../../../services/tableColumns';
 
 type BadgeClass = 'green' | 'info' | 'red';
 
@@ -30,7 +31,7 @@ interface ContextConfig {
 	/** Real, one-line explanation of which real frontend pages this template applies to. */
 	description: string;
 	urlExample: string;
-	vars: Record<string, string>;
+	vars: Record<string, string | undefined>;
 	hasRealUrl: boolean;
 }
 
@@ -73,7 +74,7 @@ const SEPARATOR_OPTIONS: Array<{ value: string; label: string; char: string }> =
 ];
 
 /** Same token-replacement + leading/trailing-separator-trim logic as TitleFormatter::resolve(). */
-const resolveTemplate = (template: string, vars: Record<string, string>, separator: string): string => {
+const resolveTemplate = (template: string, vars: Record<string, string | undefined>, separator: string): string => {
 	const resolved = template.replace(/%([a-z_]+)%/g, (_match, token: string) => {
 		if ('sep' === token) {
 			return separator;
@@ -426,6 +427,7 @@ const SeoTitlesPanel = () => {
 									{__('Separator', 'vulopilot')}
 								</label>
 								<SelectInput
+									type="single-select"
 									name="title-separator-input"
 									value={
 										SEPARATOR_OPTIONS.find((option) => option.char === separator)?.value ??
@@ -449,7 +451,7 @@ const SeoTitlesPanel = () => {
 							showMenu={false}
 							hideHeader={true}
 							variant="transparent"
-							headers={{
+							headers={columns({
 								preview: {
 									label: __('Format', 'vulopilot'),
 									width: '80%',
@@ -481,15 +483,15 @@ const SeoTitlesPanel = () => {
 									actions: [
 										{
 											type: 'button',
-											label: (row: Record<string, unknown>) =>
+											label: (row) =>
 												(row as unknown as PreviewRow).key === editingKey
 													? __('Editing', 'vulopilot')
 													: __('Edit', 'vulopilot'),
-											color: (row: Record<string, unknown>) =>
+											color: (row) =>
 												(row as unknown as PreviewRow).key === editingKey
 													? 'text-green'
 													: 'text-purple',
-											icon: (row: Record<string, unknown>) =>
+											icon: (row) =>
 												(row as unknown as PreviewRow).key === editingKey
 													? 'eye'
 													: 'edit',
@@ -498,8 +500,8 @@ const SeoTitlesPanel = () => {
 										},
 									],
 								},
-							}}
-							rows={previewRows}
+							})}
+							rows={tableRows(previewRows)}
 							ids={previewRows.map((row) => row.key)}
 							totalRows={previewRows.length}
 							isLoading={false}

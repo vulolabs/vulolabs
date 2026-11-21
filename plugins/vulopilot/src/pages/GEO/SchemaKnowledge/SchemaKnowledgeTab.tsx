@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { scrollToId } from '@zyra/core';
-import { ContainerComponent } from '@zyra/components';
+import { ColumnComponent, ContainerComponent } from '@zyra/components';
+import { __ } from '@wordpress/i18n';
 import '../SeoVisibility.scss';
 import BusinessProfileCard from './BusinessProfileCard';
 import KnowledgeGraphSection from './KnowledgeGraphSection';
@@ -20,6 +21,19 @@ interface SchemaKnowledgeTabProps {
 	initialSection?: SchemaKnowledgeSectionId;
 }
 
+/** A numbered heading between the page's two halves. */
+const SectionTitle = ({ step, title, desc }: { step: number; title: string; desc: string }) => (
+	<div className="vp-schema-section">
+		<span className="vp-schema-section-step" aria-hidden="true">
+			{step}
+		</span>
+		<div>
+			<h2>{title}</h2>
+			<p>{desc}</p>
+		</div>
+	</div>
+);
+
 /** "Business Identity & Schema" tab of "SEO & Visibility". */
 const SchemaKnowledgeTab = ({
 	initialSection = 'overview',
@@ -36,9 +50,24 @@ const SchemaKnowledgeTab = ({
 
 	return (
 		<ContainerComponent>
-			<BusinessProfileCard />
+			<ColumnComponent>
+				<SectionTitle
+					step={1}
+					title={__('Who you are', 'vulopilot')}
+					desc={__('The business details AI assistants and search engines use to describe you.', 'vulopilot')}
+				/>
+			</ColumnComponent>
 
-			<KnowledgeGraphSection />
+			<BusinessProfileCard />
+			<KnowledgeGraphSection part="recommendations" grid={5} />
+
+			<ColumnComponent>
+				<SectionTitle
+					step={2}
+					title={__('How your pages describe it', 'vulopilot')}
+					desc={__('The structured data (schema) on your pages, and exactly what each page sends.', 'vulopilot')}
+				/>
+			</ColumnComponent>
 
 			<StructuredDataSection coverage={coverage} />
 
@@ -47,6 +76,8 @@ const SchemaKnowledgeTab = ({
 				pageFilter={pageFilter}
 				onPageFilterChange={setPageFilter}
 			/>
+
+			<KnowledgeGraphSection part="health" grid={12} />
 		</ContainerComponent>
 	);
 };

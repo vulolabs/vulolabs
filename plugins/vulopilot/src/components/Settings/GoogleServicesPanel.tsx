@@ -12,6 +12,7 @@ import CardHeader from '../CardHeader';
 import ShowProPopup from '../Popup/Popup';
 import { useSetting } from '../../contexts/SettingContext';
 import { formatWpDate } from '../../services/formatWpDate';
+import FieldError from '../FieldError/FieldError';
 import {
 	useGoogleServicesConnection,
 	GoogleServicesStatus,
@@ -392,7 +393,7 @@ const GoogleServicesPanel = () => {
 								</li>
 							) ) }
 						</ul>
-						{ connectError && <div className="desc gsc-connect-error">{ connectError }</div> }
+						{ connectError && <FieldError variant="block">{ connectError }</FieldError> }
 					</CardHeader>
 				) }
 			</>
@@ -505,6 +506,7 @@ const GoogleServicesPanel = () => {
 
 				<div className="gsc-select-row">
 					<SelectInput
+						type="single-select"
 						name="ga4_account"
 						placeholder={ __( 'Account', 'vulopilot' ) }
 						value={ selectedAccountId }
@@ -519,6 +521,7 @@ const GoogleServicesPanel = () => {
 						size="14rem"
 					/>
 					<SelectInput
+						type="single-select"
 						name="ga4_property"
 						placeholder={ __( 'Property', 'vulopilot' ) }
 						value={ selectedPropertyId }
@@ -530,6 +533,7 @@ const GoogleServicesPanel = () => {
 						size="14rem"
 					/>
 					<SelectInput
+						type="single-select"
 						name="ga4_data_stream"
 						placeholder={ __( 'Data Stream', 'vulopilot' ) }
 						value={ status.ga4_measurement_id }

@@ -18,6 +18,8 @@ import { useApiList } from '../../services/useApiList';
 import { formatWpDate } from '../../services/formatWpDate';
 import ShowProPopup from '../../components/Popup/Popup';
 import './ProtectMySite.scss';
+import { columns } from '../../services/tableColumns';
+import type { QueryProps } from '@zyra/table';
 
 interface BackupRow {
 	id: number;
@@ -396,7 +398,7 @@ const BackupsTab = forwardRef<BackupsTabHandle, BackupsTabProps>(({
 					'Real database + file archives, always stored on this server - also uploaded to Amazon S3/Google Drive if you set a remote destination in Settings.',
 					'vulopilot'
 				)}
-				isLoading={isLoading}
+				isLoading={isLoading || undefined}
 			>
 				{!isLoading && 0 === data.length ? (
 					<ModuleGuardComponent
@@ -460,16 +462,14 @@ const BackupsTab = forwardRef<BackupsTabHandle, BackupsTabProps>(({
 								options: destinationFilterOptions,
 							},
 						]}
-						onQueryUpdate={(query: {
-							searchValue?: string;
-							filter?: Record<string, string>;
-						}) => {
+						onQueryUpdate={(query: QueryProps) => {
 							setSearchValue(query.searchValue ?? '');
-							setTriggerFilter(query.filter?.trigger_type ?? '');
-							setStatusFilter(query.filter?.status ?? '');
-							setDestinationFilter(query.filter?.destination ?? '');
+							// Single-choice filters: each value is one string.
+							setTriggerFilter((query.filter?.trigger_type as string) ?? '');
+							setStatusFilter((query.filter?.status as string) ?? '');
+							setDestinationFilter((query.filter?.destination as string) ?? '');
 						}}
-						headers={{
+						headers={columns({
 							date: {
 								label: __('Date', 'vulopilot'),
 								type: 'info',
@@ -564,7 +564,7 @@ const BackupsTab = forwardRef<BackupsTabHandle, BackupsTabProps>(({
 									},
 								],
 							},
-						}}
+						})}
 						rows={filteredData.map((row) => {
 							// Real trigger/status badges + the same real "Finished in/Failed after/Elapsed" subtext `statusSubtext()` already computes.
 							const statusBadge =

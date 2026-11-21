@@ -242,7 +242,7 @@ const IndexNowPanel = () => {
 				title={__('Recent submissions', 'vulopilot')}
 				titleIcon="clock"
 				desc={__('Your last 100 requests to search engines, and whether each was received.', 'vulopilot')}
-				isLoading={isLoadingHistory}
+				isLoading={isLoadingHistory || undefined}
 				action={
 					<ButtonInput
 						buttons={{

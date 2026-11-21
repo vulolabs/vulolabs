@@ -1,0 +1,87 @@
+// ScoreTrendArea.tsx: the chart box, its empty state and its tooltip.
+.vp-trend-area {
+	width: 100%;
+	min-width: 0;
+
+	&.is-empty {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		border: 1px dashed #e3e6ef;
+		border-radius: 0.5rem;
+		background: #fafafc;
+		font-size: 0.8125rem;
+		color: #6b7280;
+		text-align: center;
+
+		span {
+			max-width: 18rem;
+		}
+	}
+
+	.recharts-surface {
+		overflow: visible;
+	}
+}
+
+.vp-trend-tip {
+	display: flex;
+	flex-direction: column;
+	gap: 0.125rem;
+	padding: 0.5rem 0.625rem;
+	border: 1px solid #e3e6ef;
+	border-radius: 0.5rem;
+	background: #fff;
+	box-shadow: 0 6px 18px rgb(22 21 29 / 10%);
+
+	span {
+		font-size: 0.6875rem;
+		color: #6b7280;
+	}
+
+	strong {
+		font-size: 0.8125rem;
+		font-weight: 600;
+		color: #1f1b3e;
+	}
+}
+
+// TrendHead: today's value and its change.
+.vp-trend-head {
+	display: flex;
+	align-items: baseline;
+	gap: 0.75rem;
+	margin-bottom: 0.75rem;
+
+	strong {
+		font-size: 1.75rem;
+		font-weight: 700;
+		letter-spacing: -0.01em;
+		color: #1f1b3e;
+	}
+
+	small {
+		font-size: 0.875rem;
+		font-weight: 500;
+		color: #6b7280;
+	}
+}
+
+.vp-trend-delta {
+	padding: 0.125rem 0.5rem;
+	border-radius: 1rem;
+	background: #f4f5f9;
+	font-size: 0.75rem;
+	font-weight: 600;
+	color: #6b7280;
+
+	&.is-up {
+		background: #ecfdf3;
+		color: #067647;
+	}
+
+	&.is-down {
+		background: #fef3f2;
+		color: #b42318;
+	}
+}

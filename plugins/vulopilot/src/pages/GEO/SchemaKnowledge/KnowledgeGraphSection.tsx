@@ -53,8 +53,14 @@ const isEntityExtractionModuleActive = () =>
 
 
 
-/** "Knowledge Graph" section of the merged "Business Identity & Schema" tab. */
-const KnowledgeGraphSection = () => {
+interface KnowledgeGraphSectionProps {
+	/** Which Pro card to place: the recommendations beside the diagram, or the history further down. */
+	part: 'recommendations' | 'health';
+	grid?: number;
+}
+
+/** "Knowledge Graph" cards of the "Business Identity & Schema" tab, placed one at a time. */
+const KnowledgeGraphSection = ({ part, grid = 6 }: KnowledgeGraphSectionProps) => {
 	const [error, setError] = useState<string | null>(null);
 
 	const EntityRecommendationsCard = useFilterSlot(
@@ -87,8 +93,11 @@ const KnowledgeGraphSection = () => {
 	}, []);
 
 	if (!isEntityExtractionModuleActive()) {
+		if ('health' === part) {
+			return null;
+		}
 		return (
-			<ColumnComponent grid={6}>
+			<ColumnComponent grid={grid}>
 				<CardComponent
 					title={__('Entity Extraction', 'vulopilot')}
 					titleIcon="centralized-connections"
@@ -114,8 +123,11 @@ const KnowledgeGraphSection = () => {
 	}
 
 	if (error) {
+		if ('health' === part) {
+			return null;
+		}
 		return (
-			<ColumnComponent>
+			<ColumnComponent grid={grid}>
 				<CardComponent
 					title={__('Knowledge Graph', 'vulopilot')}
 					titleIcon="centralized-connections"
@@ -141,20 +153,13 @@ const KnowledgeGraphSection = () => {
 
 
 
-	return (
-		<>
-			{KnowledgeGraphHealthCard &&
-				<ColumnComponent grid={6} fullHeight>
-					<KnowledgeGraphHealthCard />
-				</ColumnComponent>
-			}
-			{EntityRecommendationsCard &&
-				<ColumnComponent grid={6} fullHeight>
-					<EntityRecommendationsCard />
-				</ColumnComponent>
-			}
-		</>
-	);
+	const Card = 'health' === part ? KnowledgeGraphHealthCard : EntityRecommendationsCard;
+
+	return Card ? (
+		<ColumnComponent grid={grid} fullHeight>
+			<Card />
+		</ColumnComponent>
+	) : null;
 };
 
 export default KnowledgeGraphSection;

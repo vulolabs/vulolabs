@@ -2,7 +2,7 @@
 import { useEffect, useState } from 'react';
 import { __, sprintf } from '@wordpress/i18n';
 import { getApiLink, getApiResponse, sendApiResponse } from '@zyra/core';
-import { CardComponent, IconComponent, NoticeManager, PopupComponent } from '@zyra/components';
+import { IconComponent, NoticeManager, PopupComponent } from '@zyra/components';
 import { ButtonInput, SelectInput } from '@zyra/inputs';
 import './MigrationPanel.scss';
 
@@ -134,28 +134,56 @@ const MigrationPanel = () => {
 
 	return (
 		<>
-			<CardComponent>
-				<div className="vulopilot-migration-row">
-					<div className="vulopilot-migration-row-label">
-						{__('SEO migration', 'vulopilot')}
+			<section className="vp-migrate">
+				<header className="vp-migrate-head">
+					<i className="vp-migrate-icon adminfont-import" aria-hidden="true" />
+					<div className="vp-migrate-text">
+						<h3>{__('Import from another SEO plugin', 'vulopilot')}</h3>
+						<p>
+							{__(
+								'Bring your titles, descriptions, focus keywords and other SEO data across, so nothing is lost when you switch to VuloPilot.',
+								'vulopilot'
+							)}
+						</p>
 					</div>
-
 					<ButtonInput
 						buttons={{
-							text: __('Run Migration Wizard', 'vulopilot'),
+							text: __('Start migration', 'vulopilot'),
+							icon: 'import',
 							color: 'purple-bg',
 							onClick: openWizard,
 						}}
 					/>
-				</div>
+				</header>
 
-				<p className="vulopilot-migration-row-hint">
-					{__(
-						'Seamlessly transfer your SEO data from your previous SEO plugin (i.e. Yoast SEO, Rank Math, All in One SEO) using this migration tool.',
-						'vulopilot'
+				<div className="vp-migrate-sources">
+					<div className="vp-migrate-sources-title">{__('Found on this site', 'vulopilot')}</div>
+					{isLoadingSources && (
+						<p className="vp-migrate-empty">{__('Looking for SEO plugin data…', 'vulopilot')}</p>
 					)}
-				</p>
-			</CardComponent>
+					{!isLoadingSources && 0 === sources.length && (
+						<p className="vp-migrate-empty">
+							{__(
+								'No data from Yoast SEO, Rank Math or All in One SEO was found. Install or reactivate the old plugin first if you still need its data.',
+								'vulopilot'
+							)}
+						</p>
+					)}
+					{!isLoadingSources &&
+						sources.map((source) => (
+							<div key={source.id} className="vp-migrate-source">
+								<span className="vp-migrate-source-name">{source.label}</span>
+								<span className="vp-migrate-source-count">
+									{sprintf(
+										/* translators: %d: number of posts with SEO data. */
+										__('%d item(s) ready to import', 'vulopilot'),
+										source.count
+									)}
+								</span>
+							</div>
+						))}
+				</div>
+			</section>
 
 			<PopupComponent
 				open={isWizardOpen}
@@ -185,7 +213,7 @@ const MigrationPanel = () => {
 							type="single-select"
 							isClearable={false}
 							value={selectedId}
-							onChange={(value: string) => setSelectedId(value)}
+							onChange={(value) => setSelectedId(value as string)}
 							options={sources.map((source) => ({
 								label: sourceCountLabel(source),
 								value: source.id,

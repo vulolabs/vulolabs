@@ -24,6 +24,7 @@ const AeoEngineTestingCard = ({ isActive, pages }: AeoEngineTestingCardProps) =>
 	const dummyContent = (
 		<div className="aeo-engine-testing-controls">
 			<SelectInput
+				type="single-select"
 				name="engine_testing_post_id_dummy"
 				value=""
 				placeholder={__('Select a page…', 'vulopilot')}

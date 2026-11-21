@@ -1,0 +1,50 @@
+// FieldError.tsx: one look for every inline error in the settings.
+
+// An input and its error, stacked; the input takes the full width of the field.
+.vp-field {
+	display: flex;
+	flex-direction: column;
+	gap: 0.375rem;
+	width: 100%;
+	max-width: 25rem;
+	min-width: 0;
+	margin-left: auto;
+
+	.input-wrapper,
+	.setting-form-input {
+		box-sizing: border-box;
+		width: 100%;
+		max-width: 100%;
+	}
+
+	&.is-invalid .input-wrapper {
+		border-color: #d92d20;
+		box-shadow: 0 0 0 3px rgb(217 45 32 / 10%);
+	}
+}
+
+.vp-field-error {
+	display: flex;
+	align-items: flex-start;
+	gap: 0.4375rem;
+	margin: 0;
+	font-size: 0.8125rem;
+	font-weight: 400;
+	line-height: 1.45;
+	text-align: left;
+	color: #b42318;
+
+	i {
+		flex: none;
+		margin-top: 0.1875rem;
+		font-size: 0.8125rem;
+	}
+
+	// A whole card's error: a soft box rather than a bare line.
+	&.is-block {
+		padding: 0.625rem 0.875rem;
+		border: 1px solid #fecdca;
+		border-radius: 0.5rem;
+		background: #fef3f2;
+	}
+}

@@ -3,16 +3,15 @@ import { useEffect, useState } from 'react';
 import type { ComponentType, FC } from 'react';
 import { __ } from '@wordpress/i18n';
 import { getApiLink, getApiResponse } from '@zyra/core';
-import { PopupComponent, CardComponent } from '@zyra/components';
-import { ButtonInput } from '@zyra/inputs';
+import { PopupComponent } from '@zyra/components';
 import ShowProPopup from '../../components/Popup/Popup';
 import { useFilterSlot } from '../../services/useFilterSlot';
 import { formatAffected } from '../../components/Issues/issuesTypes';
-import { IssuesFilter } from './NeedsAttentionCard';
-import './AICopilot.scss';
+import { Card, IconTile } from '../../components/ui';
+import type { Tone } from '../../components/ui';
+import type { IssuesFilter } from './types';
 
 interface RecommendedActionsCardProps {
-	 
 	// eslint-disable-next-line no-unused-vars
 	onNavigateTab: (tab: string, filter?: IssuesFilter) => void;
 }
@@ -31,13 +30,10 @@ interface AttentionSummaryResponse {
 	recommendations: Recommendation[];
 }
 
-const BUCKET_META: Record<
-	Recommendation['bucket'],
-	{ icon: string; tone: string; ctaFallback: string }
-> = {
-	security: { icon: 'security', tone: 'red', ctaFallback: __('Security', 'vulopilot') },
-	performance: { icon: 'bar-chart', tone: 'green', ctaFallback: __('Performance', 'vulopilot') },
-	'ai-visibility': { icon: 'geo-location', tone: 'teal', ctaFallback: __('AI Visibility', 'vulopilot') },
+const BUCKET_META: Record<Recommendation['bucket'], { icon: string; tone: Tone; label: string }> = {
+	security: { icon: 'security', tone: 'amber', label: __('Security', 'vulopilot') },
+	performance: { icon: 'bar-chart', tone: 'green', label: __('Performance', 'vulopilot') },
+	'ai-visibility': { icon: 'geo-location', tone: 'blue', label: __('AI Visibility', 'vulopilot') },
 };
 
 const isUrgent = (severity: Recommendation['severity']): boolean =>
@@ -49,10 +45,9 @@ const RecommendedActionsFreeCard: FC<RecommendedActionsCardProps> = () => {
 	const [isProPopupOpen, setIsProPopupOpen] = useState(false);
 
 	useEffect(() => {
-		getApiResponse<AttentionSummaryResponse>(
-			getApiLink(vulopilotAppLocalizer, 'findings/attention-summary'),
-			{ headers: { 'X-WP-Nonce': vulopilotAppLocalizer.nonce } }
-		)
+		getApiResponse<AttentionSummaryResponse>(getApiLink(vulopilotAppLocalizer, 'findings/attention-summary'), {
+			headers: { 'X-WP-Nonce': vulopilotAppLocalizer.nonce },
+		})
 			.then((response) => {
 				if (response) {
 					setRecommendations(response.recommendations ?? []);
@@ -61,79 +56,57 @@ const RecommendedActionsFreeCard: FC<RecommendedActionsCardProps> = () => {
 			.finally(() => setIsLoading(false));
 	}, []);
 
-	if (!isLoading && 0 === recommendations.length) {
+	if (isLoading || 0 === recommendations.length) {
 		return null;
 	}
 
 	return (
-		<>
-			<CardComponent
-				title={__('Recommended by VuloPilot', 'vulopilot')}
-				desc={__('High impact actions suggested by AI', 'vulopilot')}
-			>
-				<div className="recommended-actions-grid">
-					{recommendations.map((rec) => {
-						const meta = BUCKET_META[rec.bucket];
-						const urgent = isUrgent(rec.severity);
+		<Card
+			className="vp-suggest-card"
+			icon="ai"
+			title={__('Suggested by VuloPilot', 'vulopilot')}
+			desc={__('The highest-impact fix in each area, ready for the AI to work on with VuloPilot Pro.', 'vulopilot')}
+		>
+			<div className="vp-suggest">
+				{recommendations.map((rec) => {
+					const meta = BUCKET_META[rec.bucket];
+					const urgent = isUrgent(rec.severity);
 
-						return (
-							<div
-								className={`recommended-actions-card tone-${meta.tone}`}
-								key={rec.bucket}
-								role="button"
-								tabIndex={0}
-								onClick={() => setIsProPopupOpen(true)}
-								onKeyDown={(e) => {
-									if ('Enter' === e.key || ' ' === e.key) {
-										e.preventDefault();
-										setIsProPopupOpen(true);
-									}
-								}}
-							>
-								<div className={`recommended-actions-details ${meta.tone}`}>
-									<div className="recommended-actions-card-eyebrow">
-										<i className={`recommended-actions-card-icon adminfont-${meta.icon}`} />
-										<span>{urgent ? __('Critical', 'vulopilot') : meta.ctaFallback}</span>
-										<span className="admin-tag pro-tag pro-tag-inline">
-											<i className="adminfont-pro-tag" />
-											{__('Pro', 'vulopilot')}
-										</span>
-									</div>
-									<div className="recommended-actions-card-title">{rec.label}</div>
-									<div className="recommended-actions-card-detail">
-										{formatAffected(rec.count, rec.object_type)}
-									</div>
-								</div>
-								<ButtonInput
-									position="left"
-									buttons={{
-										text: urgent
-											? __('Investigate with AI', 'vulopilot')
-											: __('Improve with AI', 'vulopilot'),
-										rightIcon: 'arrow-right',
-										color: `text-${meta.tone}`,
-										onClick: () => setIsProPopupOpen(true),
-									}}
-								/>
-							</div>
-						);
-					})}
-				</div>
-				<PopupComponent
-					open={isProPopupOpen}
-					onClose={() => setIsProPopupOpen(false)}
-					width={31.25}
-					height="auto"
-					position="lightbox"
-				>
-					{vulopilotAppLocalizer.khali_dabba ? (
-						<ShowProPopup moduleName="copilot-chat" />
-					) : (
-						<ShowProPopup />
-					)}
-				</PopupComponent>
-			</CardComponent>
-		</>
+					return (
+						<button
+							type="button"
+							key={rec.bucket}
+							className={`vp-suggest-tile is-${urgent ? 'red' : meta.tone}`}
+							onClick={() => setIsProPopupOpen(true)}
+						>
+							<span className="vp-suggest-eyebrow">
+								<IconTile icon={meta.icon} tone={urgent ? 'red' : meta.tone} size="sm" />
+								{urgent ? __('Critical', 'vulopilot') : meta.label}
+								<span className="vp-pro-tag">
+									<i className="adminfont-pro-tag" aria-hidden="true" />
+									{__('Pro', 'vulopilot')}
+								</span>
+							</span>
+							<strong>{rec.label}</strong>
+							<span className="vp-suggest-detail">{formatAffected(rec.count, rec.object_type)}</span>
+							<span className="vp-suggest-cta">
+								<i className="adminfont-ai" aria-hidden="true" />
+								{urgent ? __('Investigate with AI', 'vulopilot') : __('Improve with AI', 'vulopilot')}
+							</span>
+						</button>
+					);
+				})}
+			</div>
+			<PopupComponent
+				open={isProPopupOpen}
+				onClose={() => setIsProPopupOpen(false)}
+				width={31.25}
+				height="auto"
+				position="lightbox"
+			>
+				{vulopilotAppLocalizer.khali_dabba ? <ShowProPopup moduleName="copilot-chat" /> : <ShowProPopup />}
+			</PopupComponent>
+		</Card>
 	);
 };
 

@@ -255,7 +255,10 @@ export const fetchPagesByIds = async (
 					'wp/v2'
 				),
 				nonceHeaders
-			).catch(() => [] as WpRestPost[])
+			)
+				// A chunk the API answered with nothing adds no posts.
+				.then((posts) => posts ?? [])
+				.catch(() => [] as WpRestPost[])
 		)
 	);
 

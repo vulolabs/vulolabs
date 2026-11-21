@@ -125,7 +125,7 @@ const GeoAeoPageAnalysisPanel = ({
 					</button>
 				</div>
 			}
-			isLoading={isLoading}
+			isLoading={isLoading || undefined}
 		>
 			{error && (
 				<ModuleGuardComponent

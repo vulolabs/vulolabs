@@ -9,6 +9,7 @@ import Brand from './assets/images/brand-logo.png';
 import { searchIndex, SearchItem } from './searchIndex';
 import AiCreditsIndicator from './components/AiCredits/AiCreditsIndicator';
 import InsufficientCreditsNotice from './components/AiCredits/InsufficientCreditsNotice';
+import { CONSULTATION_URL, CONTACT_URL, DOCS_URL } from './services/links';
 import './routeRegistry';
 import './routes';
 
@@ -30,7 +31,9 @@ const Route = () => {
 	}, []);
 
 	const tab = new URLSearchParams(location.hash).get('tab') || 'dashboard';
-	const route = routes.find((r) => r.tab === tab);
+	// The last registration for a tab wins, so VuloPilot Pro (whose script runs after this one) can replace a page
+	// that free shows as a preview - e.g. Automations, where free has only its two built-ins and samples.
+	const route = [...routes].reverse().find((r) => r.tab === tab);
 	const Component = route?.component;
 
 	if (!Component) {
@@ -133,11 +136,45 @@ const App = () => {
 			});
 	}, [currentTab]);
 
+	// The account menu in the header's top-right corner, as on MooWoodle and MultiVendorX: help links, each in a new tab.
+	const utilityList = [
+		{
+			toggleIcon: 'admin-icon adminfont-user-circle',
+			tooltipName: __('Account', 'vulopilot'),
+			// Anchored to the icon's right edge: centred, the tooltip ran past the window at the header's far right.
+			tooltipPosition: 'bottom-right' as const,
+			items: [
+				{
+					title: __('Explore docs', 'vulopilot'),
+					icon: 'document',
+					link: DOCS_URL,
+					targetBlank: true,
+				},
+				{
+					title: __('Book a consultation', 'vulopilot'),
+					icon: 'live-chat',
+					link: CONSULTATION_URL,
+					targetBlank: true,
+				},
+				{
+					title: __('Contact us', 'vulopilot'),
+					icon: 'global-community',
+					link: CONTACT_URL,
+					targetBlank: true,
+				},
+			],
+		},
+	];
+
 	return (
 		<>
 			<InsufficientCreditsNotice />
 			<HeaderComponent
 				brandImg={Brand}
+				logoAlt={__('VuloPilot', 'vulopilot')}
+				freePrefix={__('Free:', 'vulopilot')}
+				// zyra prints the Pro label as plain text right against the version; the space keeps "Pro: 1.0.1" like "Free: 1.0.1".
+				proPrefix={`${__('Pro:', 'vulopilot')} `}
 				results={results}
 				beforeSearch={<AiCreditsIndicator />}
 				search={{
@@ -145,7 +182,7 @@ const App = () => {
 					options: [
 						{
 							value: 'all',
-							label: __('Every Where', 'vulopilot'),
+							label: __('Everything', 'vulopilot'),
 						},
 						{
 							value: 'modules',
@@ -162,9 +199,11 @@ const App = () => {
 					],
 				}}
 				onQueryUpdate={handleQueryUpdate}
-				onResultClick={handleResultClick}
+				// zyra hands back the result object it was given: one of this app's SearchItems.
+				onResultClick={(item) => handleResultClick(item as SearchItem)}
 				free={vulopilotAppLocalizer.version}
-				pro={vulopilotAppLocalizer.pro_data.version}
+				pro={vulopilotAppLocalizer.pro_data.version || undefined}
+				utilityList={utilityList}
 				searchSize={7}
 			/>
 			<Route />

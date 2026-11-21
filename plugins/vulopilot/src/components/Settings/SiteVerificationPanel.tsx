@@ -80,6 +80,8 @@ const PlainCodeField = ({ fieldKey, icon, title, steps, guideLabel, guideUrl }: 
 			setting: { [fieldKey]: nextValue },
 		}).then((response) => {
 			NoticeManager.add({
+				// zyra's own fallback key is Date.now(), so each notice still shows.
+				uniqueKey: `vulopilot-site-verification-${Date.now()}`,
 				message: response ? __('Saved.', 'vulopilot') : __('Could not save. Please try again.', 'vulopilot'),
 				type: response ? 'success' : 'error',
 				position: 'float',
@@ -165,6 +167,8 @@ const ProviderRow = ({ provider, icon, title, steps, guideLabel, guideUrl }: Pro
 				}
 				// Floating notice.
 				NoticeManager.add({
+					// zyra's own fallback key is Date.now(), so each notice still shows.
+					uniqueKey: `vulopilot-site-verification-${Date.now()}`,
 					message: response.message,
 					type: response.success ? 'success' : 'error',
 					position: 'float',
@@ -244,6 +248,8 @@ const CustomTagsField = () => {
 			setting: { webmaster_custom_tags: nextValue },
 		}).then((response) => {
 			NoticeManager.add({
+				// zyra's own fallback key is Date.now(), so each notice still shows.
+				uniqueKey: `vulopilot-site-verification-${Date.now()}`,
 				message: response ? __('Saved.', 'vulopilot') : __('Could not save. Please try again.', 'vulopilot'),
 				type: response ? 'success' : 'error',
 				position: 'float',

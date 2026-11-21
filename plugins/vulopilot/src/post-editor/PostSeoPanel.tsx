@@ -90,8 +90,9 @@ export default function PostSeoPanel( { initialTabName, highlightTarget, navigat
 	const activeTabName = deepLinkTab ? DEEP_LINK_TAB_GROUP[ deepLinkTab ] : undefined;
 	const activeHighlight = navTarget ? navTarget.target : highlightTarget;
 
-	const navigateTo = ( tab: SeoIssueEditorTab, target?: string ) => {
-		setNavTarget( { tab, target } );
+	// The tabs pass their own tab names, which are SeoIssueEditorTab values.
+	const navigateTo = ( tab: string, target?: string ) => {
+		setNavTarget( { tab: tab as SeoIssueEditorTab, target } );
 	};
 
 	return (

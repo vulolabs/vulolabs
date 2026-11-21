@@ -1,0 +1,1284 @@
+// ---- AI Copilot (pages/AIAssistant): the parts only it draws, in the dashboard's language (ui.scss tokens). ----
+// Layout: .vp-command (dashboard.scss) puts the chat beside the rail, as the dashboard puts Next steps beside it.
+// The shared chat bubbles (components/ChatComposerCard) keep their own look elsewhere; here they are restyled
+// under .vp-chat only.
+
+// ---- Page header: connection state and its fix, right-aligned like the dashboard's "Run scan" ----
+.vp-copilot-status {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	justify-content: flex-end;
+	gap: 0.75rem;
+
+	.buttons-wrapper {
+		margin: 0;
+	}
+
+	@media (width <= 782px) {
+		justify-content: flex-start;
+	}
+}
+
+.vp-copilot .vp-command {
+	// The rail is as tall as the chat at most; it never stretches the chat.
+	align-items: start;
+}
+
+.vp-copilot-main {
+	min-width: 0;
+	scroll-margin-top: 3.5rem;
+}
+
+// ---- The chat card ----
+.vp-chat {
+	overflow: hidden;
+}
+
+.vp-chat-head {
+	display: flex;
+	align-items: flex-start;
+	justify-content: space-between;
+	gap: 1rem;
+	padding: 1.25rem 1.5rem 1rem;
+	border-bottom: 1px solid var(--ui-line);
+
+	h3 {
+		margin: 0;
+		font-size: 1rem;
+		font-weight: 700;
+		line-height: 1.4;
+		color: var(--ui-ink);
+	}
+
+	p {
+		margin: 0.125rem 0 0;
+		font-size: 0.8125rem;
+		line-height: 1.5;
+		color: var(--ui-muted);
+	}
+
+	.vp-widget-tool {
+		flex: none;
+	}
+}
+
+// The guard's "AI Copilot is turned off" state, inside the card.
+.vp-chat > .module-guard,
+.vp-chat .module-guard-wrapper {
+	margin: 1.5rem;
+}
+
+.vp-chat-stream {
+	height: clamp(24rem, calc(100vh - 25rem), 38rem);
+	overflow-y: auto;
+	overscroll-behavior: contain;
+	padding: 1.5rem;
+	background: #fcfcfe;
+	scroll-behavior: smooth;
+
+	@media (prefers-reduced-motion: reduce) {
+		scroll-behavior: auto;
+	}
+}
+
+// ---- Nothing sent yet: a greeting and the starter prompts ----
+// Centred by auto margins, not justify-content: when the prompts outgrow the stream (phones), a centred flex
+// column would push its top out of reach; this way it falls back to starting at the top.
+.vp-chat-welcome {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: 0.375rem;
+	min-height: 100%;
+	text-align: center;
+
+	> :first-child {
+		margin-top: auto;
+	}
+
+	> :last-child {
+		margin-bottom: auto;
+	}
+
+	h4 {
+		margin: 0.625rem 0 0;
+		font-size: 1.125rem;
+		font-weight: 700;
+		color: var(--ui-ink);
+	}
+
+	p {
+		margin: 0 0 1rem;
+		font-size: 0.875rem;
+		color: var(--ui-muted);
+	}
+}
+
+.vp-prompts {
+	display: grid;
+	grid-template-columns: repeat(3, minmax(0, 1fr));
+	gap: 0.625rem;
+	width: 100%;
+	max-width: 44rem;
+
+	@media (width <= 1280px) {
+		grid-template-columns: repeat(2, minmax(0, 1fr));
+	}
+
+	@media (width <= 480px) {
+		grid-template-columns: minmax(0, 1fr);
+	}
+
+	button {
+		display: flex;
+		align-items: center;
+		gap: 0.625rem;
+		min-height: 2.75rem;
+		margin: 0;
+		padding: 0.5rem 0.875rem;
+		border: 1px solid var(--ui-border);
+		border-radius: 0.625rem;
+		background: #fff;
+		box-shadow: var(--ui-shadow);
+		font-size: 0.8125rem;
+		font-weight: 500;
+		line-height: 1.35;
+		color: var(--ui-text);
+		text-align: left;
+		cursor: pointer;
+		transition: border-color 0.15s, color 0.15s, box-shadow 0.15s;
+
+		i {
+			flex: none;
+			font-size: 0.9375rem;
+			color: var(--ui-muted);
+			transition: color 0.15s;
+		}
+
+		&:hover,
+		&:focus-visible {
+			border-color: var(--ui-accent);
+			box-shadow: var(--ui-shadow-hover);
+			color: var(--ui-accent);
+
+			i {
+				color: var(--ui-accent);
+			}
+		}
+
+		&:focus-visible {
+			outline: 2px solid var(--ui-accent);
+			outline-offset: 1px;
+		}
+	}
+}
+
+// ---- Messages: the assistant on the left in white, the user on the right in the accent's tint ----
+.vp-chat-turns {
+	display: flex;
+	flex-direction: column;
+	gap: 1.25rem;
+}
+
+.vp-chat,
+.vp-chat-preview {
+	.chat-message {
+		display: flex;
+		align-items: flex-start;
+		gap: 0.75rem;
+		padding: 0;
+	}
+
+	.chat-message-avatar {
+		width: 2rem;
+		height: 2rem;
+		border-radius: 0.5rem;
+		background: #f3effd;
+		color: #6d28d9;
+
+		i {
+			font-size: 0.9375rem;
+		}
+	}
+
+	.chat-message .chat-message-content {
+		flex: 0 1 auto;
+		max-width: min(46rem, 100%);
+		padding: 0.75rem 1rem;
+		border: 1px solid var(--ui-border);
+		border-radius: 0.25rem 0.75rem 0.75rem;
+		background: #fff;
+		box-shadow: var(--ui-shadow);
+		font-size: 0.875rem;
+		line-height: 1.6;
+		color: var(--ui-text);
+		overflow-wrap: anywhere;
+
+		> :first-child {
+			margin-top: 0;
+		}
+
+		> :last-child {
+			margin-bottom: 0;
+		}
+	}
+
+	.chat-message-user {
+		flex-direction: row-reverse;
+
+		// The user's own words need no face beside them.
+		.chat-message-avatar {
+			display: none;
+		}
+
+		.chat-message-content {
+			border-color: transparent;
+			border-radius: 0.75rem 0.25rem 0.75rem 0.75rem;
+			background: var(--ui-accent-soft);
+			box-shadow: none;
+			color: var(--ui-ink);
+		}
+	}
+
+	.copilot-created-link {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: center;
+		gap: 0.75rem;
+		margin-top: 0.75rem;
+		padding-top: 0.75rem;
+		border-top: 1px solid var(--ui-line);
+	}
+
+	.copilot-created-link-anchor {
+		color: var(--ui-accent);
+		text-decoration: none;
+
+		&:hover {
+			text-decoration: underline;
+		}
+	}
+
+	.copilot-created-undo {
+		margin: 0;
+		color: var(--ui-bad);
+	}
+}
+
+.vp-chat-thinking {
+	display: inline-flex;
+	align-items: center;
+	gap: 0.625rem;
+	color: var(--ui-muted);
+}
+
+.vp-dots {
+	display: inline-flex;
+	gap: 0.25rem;
+
+	i {
+		width: 0.375rem;
+		height: 0.375rem;
+		border-radius: 50%;
+		background: var(--ui-accent);
+		opacity: 0.25;
+		animation: vp-dot 1.2s ease-in-out infinite;
+
+		&:nth-child(2) {
+			animation-delay: 0.15s;
+		}
+
+		&:nth-child(3) {
+			animation-delay: 0.3s;
+		}
+	}
+
+	@media (prefers-reduced-motion: reduce) {
+		i {
+			animation: none;
+			opacity: 0.6;
+		}
+	}
+}
+
+@keyframes vp-dot {
+	0%,
+	80%,
+	100% {
+		opacity: 0.25;
+	}
+
+	40% {
+		opacity: 1;
+	}
+}
+
+.vp-chat-note {
+	margin: 0;
+	font-size: 0.8125rem;
+	color: var(--ui-muted);
+}
+
+// ---- A starter prompt's guided questions, answered by tapping a choice ----
+.vp-chat-guided {
+	display: flex;
+	flex-direction: column;
+	gap: 1.25rem;
+}
+
+.vp-chat-guided-actions {
+	display: flex;
+	flex-direction: column;
+	align-items: flex-start;
+	gap: 0.75rem;
+	padding-left: 2.75rem;
+}
+
+.vp-chat-choices {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 0.5rem;
+
+	button {
+		display: inline-flex;
+		align-items: center;
+		gap: 0.375rem;
+		margin: 0;
+		padding: 0.4375rem 0.875rem;
+		border: 1px solid #d9dbe5;
+		border-radius: 999px;
+		background: #fff;
+		font-size: 0.8125rem;
+		font-weight: 500;
+		color: var(--ui-text);
+		cursor: pointer;
+		transition: border-color 0.15s, color 0.15s, background 0.15s;
+
+		i {
+			font-size: 0.75rem;
+			color: var(--ui-warn);
+		}
+
+		&:hover,
+		&:focus-visible {
+			border-color: var(--ui-accent);
+			background: var(--ui-accent-soft);
+			color: var(--ui-accent);
+		}
+	}
+}
+
+.vp-chat-other {
+	display: flex;
+	gap: 0.5rem;
+	width: 100%;
+	max-width: 28rem;
+
+	input {
+		flex: 1;
+		min-width: 0;
+		min-height: 2.25rem;
+		padding: 0 0.75rem;
+		border: 1px solid #d9dbe5;
+		border-radius: 0.5rem;
+		font-size: 0.8125rem;
+
+		&:focus {
+			border-color: var(--ui-accent);
+			outline: none;
+			box-shadow: 0 0 0 3px rgb(80 7 170 / 12%);
+		}
+	}
+
+	button {
+		padding: 0 0.875rem;
+		border: 0;
+		border-radius: 0.5rem;
+		background: var(--ui-accent);
+		font-size: 0.8125rem;
+		font-weight: 600;
+		color: #fff;
+		cursor: pointer;
+
+		&:disabled {
+			opacity: 0.4;
+			cursor: not-allowed;
+		}
+	}
+}
+
+.vp-chat-cancel {
+	padding: 0;
+	border: 0;
+	background: none;
+	font-size: 0.8125rem;
+	font-weight: 500;
+	color: var(--ui-muted);
+	cursor: pointer;
+
+	&:hover,
+	&:focus-visible {
+		color: var(--ui-bad);
+		text-decoration: underline;
+	}
+}
+
+// ---- Composer ----
+.vp-composer {
+	display: flex;
+	flex-direction: column;
+	gap: 0.625rem;
+	padding: 1rem 1.5rem 1.25rem;
+	border-top: 1px solid var(--ui-line);
+	background: #fff;
+}
+
+.vp-composer-box {
+	border: 1px solid #d9dbe5;
+	border-radius: 0.75rem;
+	background: #fff;
+	transition: border-color 0.15s, box-shadow 0.15s;
+
+	&:focus-within {
+		border-color: var(--ui-accent);
+		box-shadow: 0 0 0 3px rgb(80 7 170 / 10%);
+	}
+
+	&.is-locked {
+		background: var(--ui-sunken);
+	}
+
+	textarea {
+		display: block;
+		width: 100%;
+		min-height: 2.75rem;
+		box-sizing: border-box;
+		margin: 0;
+		padding: 0.75rem 1rem 0.25rem;
+		border: 0;
+		background: transparent;
+		box-shadow: none;
+		font-family: inherit;
+		font-size: 0.9375rem;
+		line-height: 1.5;
+		color: var(--ui-ink);
+		resize: none;
+
+		&:focus {
+			outline: none;
+			box-shadow: none;
+		}
+
+		&::placeholder {
+			color: var(--ui-faint);
+		}
+
+		&:disabled {
+			cursor: not-allowed;
+		}
+	}
+}
+
+.vp-composer-bar {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 0.5rem 1rem;
+	padding: 0.375rem 0.5rem 0.5rem 0.625rem;
+}
+
+.vp-composer-tool {
+	display: inline-flex;
+	align-items: center;
+	gap: 0.375rem;
+	min-height: 2rem;
+	margin: 0;
+	padding: 0 0.625rem;
+	border: 0;
+	border-radius: 0.5rem;
+	background: transparent;
+	font-size: 0.8125rem;
+	font-weight: 500;
+	color: var(--ui-muted);
+	cursor: pointer;
+	transition: background 0.15s, color 0.15s;
+
+	i {
+		font-size: 0.9375rem;
+	}
+
+	b {
+		display: inline-grid;
+		place-items: center;
+		min-width: 1.125rem;
+		height: 1.125rem;
+		border-radius: 999px;
+		background: var(--ui-accent);
+		font-size: 0.6875rem;
+		color: #fff;
+	}
+
+	&:hover,
+	&.is-active {
+		background: var(--ui-sunken);
+		color: var(--ui-ink);
+	}
+
+	&:focus-visible {
+		outline: 2px solid var(--ui-accent);
+		outline-offset: 1px;
+	}
+}
+
+.vp-composer-auto {
+	display: inline-flex;
+	align-items: center;
+	gap: 0.5rem;
+	font-size: 0.8125rem;
+	font-weight: 500;
+	color: var(--ui-text);
+
+	.vp-switch {
+		width: 2.125rem;
+		height: 1.25rem;
+
+		.vp-switch-track::before {
+			width: 0.9375rem;
+			height: 0.9375rem;
+		}
+
+		input:checked + .vp-switch-track::before {
+			transform: translateX(0.875rem);
+		}
+	}
+
+	i {
+		font-size: 0.875rem;
+		color: var(--ui-faint);
+		cursor: help;
+	}
+}
+
+.vp-composer-hint {
+	margin-left: auto;
+	font-size: 0.75rem;
+	color: var(--ui-faint);
+
+	@media (width <= 700px) {
+		display: none;
+	}
+}
+
+.vp-composer-send {
+	display: inline-grid;
+	flex: none;
+	place-items: center;
+	width: 2.25rem;
+	height: 2.25rem;
+	margin: 0 0 0 auto;
+	padding: 0;
+	border: 0;
+	border-radius: 0.625rem;
+	background: var(--ui-accent);
+	color: #fff;
+	cursor: pointer;
+	transition: background 0.15s, opacity 0.15s;
+
+	.vp-composer-hint + & {
+		margin-left: 0;
+	}
+
+	i {
+		font-size: 1rem;
+	}
+
+	&:hover:not(:disabled) {
+		background: #3f0588;
+	}
+
+	&:focus-visible {
+		outline: 2px solid var(--ui-accent);
+		outline-offset: 2px;
+	}
+
+	&:disabled {
+		background: #d9dbe5;
+		cursor: not-allowed;
+	}
+}
+
+.vp-composer-files {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 0.5rem;
+	margin: 0;
+	padding: 0;
+	list-style: none;
+
+	li {
+		display: inline-flex;
+		align-items: center;
+		gap: 0.375rem;
+		max-width: 16rem;
+		margin: 0;
+		padding: 0.25rem 0.375rem 0.25rem 0.625rem;
+		border-radius: 999px;
+		background: var(--ui-accent-soft);
+		font-size: 0.75rem;
+		font-weight: 500;
+		color: var(--ui-accent);
+
+		span {
+			overflow: hidden;
+			text-overflow: ellipsis;
+			white-space: nowrap;
+		}
+	}
+
+	button {
+		display: inline-grid;
+		place-items: center;
+		width: 1.25rem;
+		height: 1.25rem;
+		padding: 0;
+		border: 0;
+		border-radius: 50%;
+		background: transparent;
+		color: inherit;
+		cursor: pointer;
+
+		i {
+			font-size: 0.625rem;
+		}
+
+		&:hover,
+		&:focus-visible {
+			background: rgb(80 7 170 / 12%);
+		}
+	}
+}
+
+.vp-composer-attach {
+	max-height: 14rem;
+	overflow-y: auto;
+	padding: 0.875rem 1rem;
+	border: 1px dashed #d9dbe5;
+	border-radius: 0.75rem;
+	background: var(--ui-sunken);
+
+	p {
+		margin: 0 0 0.625rem;
+		font-size: 0.8125rem;
+		color: var(--ui-muted);
+	}
+}
+
+// ---- Rail cards ----
+.vp-copilot .vp-rail {
+	.vp-list-main:is(button) {
+		margin: 0;
+		padding: 0;
+		border: 0;
+		background: none;
+		text-align: left;
+		cursor: pointer;
+
+		&:hover strong,
+		&:focus-visible strong {
+			color: var(--ui-accent);
+		}
+
+		&:focus-visible {
+			outline: 2px solid var(--ui-accent);
+			outline-offset: 2px;
+			border-radius: 0.25rem;
+		}
+	}
+}
+
+.vp-rail-more {
+	align-self: flex-start;
+	margin: 0;
+	padding: 0;
+	border: 0;
+	background: none;
+	cursor: pointer;
+}
+
+// "Start from an issue": a severity dot, the issue, and an Ask button.
+.vp-list.vp-starters > li {
+	--sev: var(--ui-faint);
+
+	flex-wrap: nowrap;
+
+	&.is-critical {
+		--sev: var(--ui-bad);
+	}
+
+	&.is-high {
+		--sev: #e59a0b;
+	}
+
+	&.is-medium {
+		--sev: #3b82f6;
+	}
+
+	> .vp-list-main {
+		flex-basis: auto;
+	}
+}
+
+.vp-starter-mark {
+	flex: none;
+	align-self: flex-start;
+	width: 0.5rem;
+	height: 0.5rem;
+	margin-top: 0.4375rem;
+	border-radius: 50%;
+	background: var(--sev);
+	box-shadow: 0 0 0 3px color-mix(in srgb, var(--sev) 15%, transparent);
+}
+
+.vp-ask {
+	display: inline-flex;
+	flex: none;
+	align-items: center;
+	gap: 0.3125rem;
+	padding: 0.3125rem 0.75rem;
+	border: 1px solid var(--ui-border);
+	border-radius: 999px;
+	background: #fff;
+	font-size: 0.75rem;
+	font-weight: 600;
+	color: var(--ui-accent);
+	cursor: pointer;
+	transition: border-color 0.15s, background 0.15s;
+
+	i {
+		font-size: 0.75rem;
+	}
+
+	&:hover:not(:disabled),
+	&:focus-visible {
+		border-color: var(--ui-accent);
+		background: var(--ui-accent-soft);
+	}
+
+	&:focus-visible {
+		outline: 2px solid var(--ui-accent);
+		outline-offset: 1px;
+	}
+
+	&:disabled {
+		color: var(--ui-faint);
+		cursor: not-allowed;
+	}
+}
+
+// "Recent chats": the open conversation is marked; the eye previews.
+.vp-list.vp-chats > li {
+	flex-wrap: nowrap;
+
+	> .vp-list-main {
+		flex-basis: auto;
+	}
+
+	&.is-active strong {
+		color: var(--ui-accent);
+	}
+
+	&.is-active .vp-list-main span {
+		font-weight: 600;
+		color: var(--ui-good);
+	}
+}
+
+.vp-icon-btn {
+	display: inline-grid;
+	flex: none;
+	place-items: center;
+	width: 1.875rem;
+	height: 1.875rem;
+	padding: 0;
+	border: 0;
+	border-radius: 0.5rem;
+	background: transparent;
+	color: var(--ui-faint);
+	cursor: pointer;
+	transition: background 0.15s, color 0.15s;
+
+	i {
+		font-size: 0.875rem;
+	}
+
+	&:hover,
+	&:focus-visible {
+		background: var(--ui-sunken);
+		color: var(--ui-accent);
+	}
+}
+
+.vp-list.vp-scope > li {
+	align-items: flex-start;
+	flex-wrap: nowrap;
+
+	> .vp-list-main {
+		flex-basis: auto;
+
+		strong {
+			white-space: normal;
+		}
+	}
+}
+
+// ---- Suggested by VuloPilot (the free card; Pro draws its own through the slot) ----
+.vp-suggest {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));
+	gap: 1rem;
+}
+
+.vp-suggest-tile {
+	display: flex;
+	flex-direction: column;
+	align-items: flex-start;
+	gap: 0.375rem;
+	min-width: 0;
+	margin: 0;
+	padding: 1rem 1.125rem;
+	border: 1px solid var(--ui-border);
+	border-radius: var(--ui-radius);
+	background: #fff;
+	font: inherit;
+	text-align: left;
+	cursor: pointer;
+	transition: border-color 0.15s, box-shadow 0.15s;
+
+	strong {
+		font-size: 0.9375rem;
+		font-weight: 600;
+		line-height: 1.4;
+		color: var(--ui-ink);
+	}
+
+	&:hover,
+	&:focus-visible {
+		border-color: #d9dbe5;
+		box-shadow: var(--ui-shadow-hover);
+
+		.vp-suggest-cta {
+			color: var(--ui-accent);
+		}
+	}
+
+	&:focus-visible {
+		outline: 2px solid var(--ui-accent);
+		outline-offset: 2px;
+	}
+}
+
+.vp-suggest-eyebrow {
+	display: flex;
+	align-items: center;
+	gap: 0.5rem;
+	width: 100%;
+	margin-bottom: 0.25rem;
+	font-size: 0.75rem;
+	font-weight: 600;
+	letter-spacing: 0.04em;
+	text-transform: uppercase;
+	color: var(--ui-muted);
+
+	.is-red & {
+		color: var(--ui-bad);
+	}
+}
+
+.vp-pro-tag {
+	display: inline-flex;
+	align-items: center;
+	gap: 0.25rem;
+	margin-left: auto;
+	padding: 0.0625rem 0.5rem;
+	border-radius: 999px;
+	background: var(--ui-accent-soft);
+	font-size: 0.6875rem;
+	letter-spacing: 0;
+	text-transform: none;
+	color: var(--ui-accent);
+
+	i {
+		font-size: 0.6875rem;
+	}
+}
+
+.vp-suggest-detail {
+	font-size: 0.8125rem;
+	color: var(--ui-muted);
+}
+
+.vp-suggest-cta {
+	display: inline-flex;
+	align-items: center;
+	gap: 0.375rem;
+	margin-top: auto;
+	padding-top: 0.625rem;
+	font-size: 0.8125rem;
+	font-weight: 600;
+	color: var(--ui-text);
+	transition: color 0.15s;
+
+	i {
+		font-size: 0.8125rem;
+		color: var(--ui-accent);
+	}
+}
+
+// ---- Issues: one card of issue rows beside the chosen issue's details ----
+.vp-issues {
+	display: flex;
+	flex-direction: column;
+	gap: 1rem;
+	scroll-margin-top: 3.5rem;
+
+	.vp-section-head p {
+		margin: 0.125rem 0 0;
+		font-size: 0.8125rem;
+		color: var(--ui-muted);
+	}
+}
+
+.vp-issues-layout {
+	display: grid;
+	grid-template-columns: minmax(0, 1fr) 24rem;
+	gap: 1.25rem;
+	align-items: start;
+
+	&.is-single {
+		grid-template-columns: minmax(0, 1fr);
+	}
+
+	@media (width <= 1100px) {
+		grid-template-columns: minmax(0, 1fr);
+	}
+}
+
+.vp-issue-browser {
+	overflow: hidden;
+}
+
+// Area tabs on the left, the priority switch on the right; they stack when the card is narrow.
+.vp-issue-toolbar {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	justify-content: space-between;
+	gap: 0.75rem 1rem;
+	padding: 1rem 1.5rem;
+	border-bottom: 1px solid var(--ui-line);
+
+	.vp-seg {
+		max-width: 100%;
+		overflow-x: auto;
+	}
+}
+
+.vp-tabs {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 0.375rem;
+	min-width: 0;
+
+	button {
+		display: inline-flex;
+		align-items: center;
+		gap: 0.375rem;
+		min-height: 1.875rem;
+		margin: 0;
+		padding: 0 0.75rem;
+		border: 1px solid var(--ui-border);
+		border-radius: 999px;
+		background: #fff;
+		font-size: 0.8125rem;
+		font-weight: 500;
+		color: var(--ui-text);
+		white-space: nowrap;
+		cursor: pointer;
+		transition: border-color 0.15s, background 0.15s, color 0.15s;
+
+		b {
+			font-size: 0.75rem;
+			font-weight: 600;
+			color: var(--ui-faint);
+		}
+
+		&:hover {
+			border-color: #d9dbe5;
+			color: var(--ui-ink);
+		}
+
+		&:focus-visible {
+			outline: 2px solid var(--ui-accent);
+			outline-offset: 1px;
+		}
+
+		&.is-active {
+			border-color: var(--ui-ink);
+			background: var(--ui-ink);
+			color: #fff;
+
+			b {
+				color: rgb(255 255 255 / 70%);
+			}
+		}
+	}
+}
+
+.vp-issue-list {
+	margin: 0;
+	padding: 0;
+	list-style: none;
+	transition: opacity 0.2s;
+
+	&.is-loading {
+		opacity: 0.55;
+		pointer-events: none;
+	}
+
+	li {
+		margin: 0;
+
+		+ li {
+			border-top: 1px solid var(--ui-line);
+		}
+	}
+}
+
+.vp-issue-row {
+	--sev: var(--ui-faint);
+	--sev-bg: #f3f4f8;
+
+	display: flex;
+	align-items: center;
+	gap: 0.875rem;
+	width: 100%;
+	margin: 0;
+	padding: 0.875rem 1.5rem;
+	border: 0;
+	background: #fff;
+	box-shadow: inset 3px 0 0 var(--sev);
+	font: inherit;
+	text-align: left;
+	cursor: pointer;
+	transition: background 0.15s;
+
+	&.is-critical {
+		--sev: var(--ui-bad);
+		--sev-bg: var(--ui-bad-bg);
+	}
+
+	&.is-high {
+		--sev: #e59a0b;
+		--sev-bg: var(--ui-warn-bg);
+	}
+
+	&.is-medium {
+		--sev: #3b82f6;
+		--sev-bg: var(--ui-info-bg);
+	}
+
+	&.is-low .vp-issue-meta em,
+	&.is-info .vp-issue-meta em {
+		color: var(--ui-muted);
+	}
+
+	&:hover {
+		background: #fcfbff;
+
+		strong {
+			color: var(--ui-accent);
+		}
+	}
+
+	&:focus-visible {
+		outline: 2px solid var(--ui-accent);
+		outline-offset: -2px;
+	}
+
+	// The chosen issue: tinted, and the arrow points at its details.
+	&.is-active {
+		background: #f8f5ff;
+
+		strong {
+			color: var(--ui-accent);
+		}
+
+		.vp-issue-go {
+			color: var(--ui-accent);
+			opacity: 1;
+		}
+	}
+
+	@media (width <= 600px) {
+		flex-wrap: wrap;
+		padding: 0.875rem 1rem;
+
+		.vp-issue-main {
+			flex-basis: calc(100% - 3rem);
+		}
+
+		.vp-issue-count {
+			margin-left: 2.875rem;
+		}
+
+		.vp-issue-go {
+			display: none;
+		}
+	}
+}
+
+.vp-issue-mark {
+	display: inline-grid;
+	flex: none;
+	place-items: center;
+	width: 2rem;
+	height: 2rem;
+	border-radius: 0.5rem;
+	background: var(--sev-bg);
+	color: var(--sev);
+
+	i {
+		font-size: 0.9375rem;
+	}
+}
+
+.vp-issue-main {
+	display: flex;
+	flex: 1;
+	flex-direction: column;
+	gap: 0.1875rem;
+	min-width: 0;
+
+	strong {
+		font-size: 0.875rem;
+		font-weight: 600;
+		line-height: 1.4;
+		color: var(--ui-ink);
+		transition: color 0.15s;
+	}
+}
+
+// Severity in its colour, then the area, as one quiet line above the title.
+.vp-issue-meta {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 0.375rem;
+	font-size: 0.75rem;
+	color: var(--ui-muted);
+
+	em {
+		font-size: 0.6875rem;
+		font-style: normal;
+		font-weight: 700;
+		letter-spacing: 0.05em;
+		text-transform: uppercase;
+		color: var(--sev);
+	}
+}
+
+.vp-issue-ai {
+	display: inline-flex;
+	align-items: center;
+	gap: 0.25rem;
+	padding: 0 0.5rem;
+	border-radius: 999px;
+	background: var(--ui-accent-soft);
+	font-size: 0.6875rem;
+	font-weight: 600;
+	line-height: 1.6;
+	color: var(--ui-accent);
+
+	i {
+		font-size: 0.6875rem;
+	}
+}
+
+.vp-issue-desc {
+	display: -webkit-box;
+	overflow: hidden;
+	font-size: 0.8125rem;
+	line-height: 1.5;
+	color: var(--ui-muted);
+	-webkit-line-clamp: 1;
+	-webkit-box-orient: vertical;
+}
+
+.vp-issue-count {
+	flex: none;
+	font-size: 0.8125rem;
+	font-weight: 600;
+	color: var(--ui-text);
+	white-space: nowrap;
+}
+
+.vp-issue-go {
+	flex: none;
+	font-size: 0.625rem;
+	color: var(--ui-faint);
+	opacity: 0.6;
+	transition: color 0.15s, opacity 0.15s;
+}
+
+.vp-pager {
+	flex-wrap: wrap;
+}
+
+.vp-pager-nav {
+	display: inline-flex;
+	align-items: center;
+	gap: 0.5rem;
+
+	button {
+		display: inline-grid;
+		place-items: center;
+		width: 1.875rem;
+		height: 1.875rem;
+		margin: 0;
+		padding: 0;
+		border: 1px solid var(--ui-border);
+		border-radius: 0.5rem;
+		background: #fff;
+		color: var(--ui-text);
+		cursor: pointer;
+		transition: border-color 0.15s, color 0.15s;
+
+		i {
+			font-size: 0.625rem;
+		}
+
+		&:hover:not(:disabled),
+		&:focus-visible {
+			border-color: var(--ui-accent);
+			color: var(--ui-accent);
+		}
+
+		&:disabled {
+			opacity: 0.4;
+			cursor: not-allowed;
+		}
+	}
+}
+
+// ---- The chosen issue's details (IssueDetailPanel, look="card") ----
+.vp-issues-detail {
+	position: sticky;
+	top: 3.5rem;
+	min-width: 0;
+	scroll-margin-top: 3.5rem;
+
+	@media (width <= 1100px) {
+		position: static;
+	}
+}

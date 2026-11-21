@@ -28,26 +28,40 @@ const AiCreditsIndicator = () => {
 		return null;
 	}
 
+	// The chip's state: an offer before connecting, then the balance - amber when low, red when spent.
+	let state = 'claim';
+	let label = __('Get 100 free AI credits', 'vulopilot');
+
+	if (isConnecting) {
+		state = 'busy';
+		label = __('Connecting…', 'vulopilot');
+	} else if (status.connected) {
+		state = status.credits <= 0 ? 'empty' : status.credits < 10 ? 'low' : 'ok';
+		label = sprintf(
+			/* translators: %s: remaining AI credit balance, e.g. "76.550". */
+			__('%s credits', 'vulopilot'),
+			formatCredits(status.credits)
+		);
+	}
+
 	return (
 		<div className="ai-credits-indicator">
-			<ButtonInput
-				buttons={{
-					text: status.connected
-						? `⚡ ${sprintf(
-							/* translators: %s: real remaining AI Credit balance, e.g. "76.550". */
-							__('%s AI Credits', 'vulopilot'),
-							formatCredits(status.credits)
-						)}`
-						: isConnecting
-							? __('Connecting…', 'vulopilot')
-							: `⚡ ${__('Claim free AI Credits', 'vulopilot')}`,
-					color: 'orange-bg',
-					disabled: isConnecting,
-					onClick: status.connected
-						? () => setIsOpen(!isOpen)
-						: handleConnect,
-				}}
-			/>
+			<button
+				type="button"
+				className={`vp-credits is-${state}`}
+				disabled={isConnecting}
+				aria-haspopup={status.connected ? 'dialog' : undefined}
+				title={status.connected ? __('AI credits balance', 'vulopilot') : __('Connect to VuloCloud and claim free AI credits', 'vulopilot')}
+				onClick={status.connected ? () => setIsOpen(!isOpen) : handleConnect}
+			>
+				<span className="vp-credits-bolt" aria-hidden="true">
+					<svg viewBox="0 0 16 16" width="12" height="12">
+						<path d="M9.2 1 3 9.2h4.3L6.6 15 13 6.6H8.6L9.2 1Z" fill="currentColor" />
+					</svg>
+				</span>
+				<span className="vp-credits-text">{label}</span>
+				{status.connected && <i className="adminfont-keyboard-arrow-down" aria-hidden="true" />}
+			</button>
 
 			{status.connected && (
 				<PopupComponent

@@ -101,6 +101,8 @@
 		"sortablejs": "^1.15.7"
 	},
 	"devDependencies": {
+		"@types/react": "19.2.15",
+		"@types/react-dom": "19.2.3",
 		"@wordpress/jest-preset-default": "^13.0.0",
 		"wireit": "^0.14.13"
 	}

@@ -1,0 +1,142 @@
+// Settings → Developer Tools: a Maintenance card and a Danger zone card, rows laid out as on the other settings cards.
+.admin-main-wrapper.admin-main-wrapper .vp-tools {
+	display: flex;
+	flex-direction: column;
+	gap: 1rem;
+
+	.vp-tools-card {
+		box-sizing: border-box;
+		padding: 1.125rem 1.375rem 0.25rem;
+		border: 1px solid var(--vp-border);
+		border-radius: 0.625rem;
+		background: var(--vp-surface);
+		box-shadow: 0 1px 2px rgb(22 21 29 / 4%);
+	}
+
+	.vp-tools-head {
+		padding-bottom: 0.875rem;
+		border-bottom: 1px solid var(--vp-border-soft);
+
+		h3 {
+			display: flex;
+			align-items: center;
+			gap: 0.5rem;
+			margin: 0;
+			font-size: 1rem;
+			font-weight: 650;
+			line-height: 1.4;
+			color: var(--vp-ink);
+		}
+
+		p {
+			margin: 0.125rem 0 0;
+			font-size: 0.8125rem;
+			line-height: 1.45;
+			color: var(--vp-muted);
+		}
+	}
+
+	.vp-tool-row {
+		display: grid;
+		grid-template-columns: 2.25rem minmax(0, 1fr) auto;
+		gap: 0 1rem;
+		align-items: center;
+		padding: 1rem 0;
+
+		& + .vp-tool-row {
+			border-top: 1px solid var(--vp-border-soft);
+		}
+
+		@media (width <= 782px) {
+			grid-template-columns: 2.25rem minmax(0, 1fr);
+
+			.vp-tool-control {
+				grid-column: 2;
+				justify-content: flex-start;
+				margin-top: 0.75rem;
+			}
+		}
+	}
+
+	.vp-tool-icon {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		align-self: start;
+		width: 2.25rem;
+		height: 2.25rem;
+		border-radius: 0.5rem;
+		background: color-mix(in srgb, var(--vp-primary) 9%, transparent);
+		font-size: 1.125rem;
+		color: var(--vp-primary);
+	}
+
+	.vp-tool-text {
+		min-width: 0;
+		max-width: 40rem;
+	}
+
+	.vp-tool-title {
+		font-size: 0.9375rem;
+		font-weight: 600;
+		line-height: 1.4;
+		color: var(--vp-ink);
+	}
+
+	.vp-tool-desc {
+		margin-top: 0.125rem;
+		font-size: 0.8125rem;
+		line-height: 1.5;
+		color: var(--vp-muted);
+	}
+
+	.vp-tool-control {
+		display: flex;
+		justify-content: flex-end;
+		min-width: 0;
+
+		.toggle-setting-wrapper,
+		.settings-input-content {
+			margin: 0;
+		}
+	}
+
+	// ---- Danger zone: a red edge and heading, red icon tiles, and a red outlined reset button. ----
+	.is-danger {
+		border-color: #f3c9c9;
+
+		.vp-tools-head h3,
+		.vp-tools-head h3 i {
+			color: #b42318;
+		}
+
+		.vp-tool-icon {
+			background: #fdecec;
+			color: #b42318;
+		}
+	}
+
+	.vp-danger-btn .admin-btn {
+		border: 1px solid #f0b8b8;
+		background: var(--vp-surface);
+		color: #b42318;
+		font-weight: 500;
+
+		i {
+			color: inherit;
+		}
+
+		&:hover:not(:disabled) {
+			border-color: #b42318;
+			background: #fef3f2;
+		}
+	}
+
+	// Asked to confirm: the button turns solid red until it is clicked again or the question times out.
+	.vp-danger-btn.is-confirming .admin-btn,
+	.vp-danger-btn.is-confirming .admin-btn:hover:not(:disabled) {
+		border-color: #b42318;
+		background: #b42318;
+		color: #fff;
+	}
+}

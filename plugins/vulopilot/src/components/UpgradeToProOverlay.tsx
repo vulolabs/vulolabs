@@ -14,10 +14,10 @@ interface OverlayCopy {
 
 export const UpgradeToProOverlay = ({
 	onClick,
-	icon = 'lock purple',
-	title = __('Upgrade to Pro', 'vulopilot'),
+	icon = 'pro-tag',
+	title = __('Available with VuloPilot Pro', 'vulopilot'),
 	desc = __('Unlock the full VuloPilot toolkit', 'vulopilot'),
-	buttonText = __('Upgrade to pro', 'vulopilot'),
+	buttonText = __('Unlock with Pro', 'vulopilot'),
 	buttonColor = 'purple-bg',
 }: { onClick?: () => void } & OverlayCopy) => (
 	<div
@@ -74,6 +74,7 @@ export const BlurredProContent = ({
 		<UpgradeToProOverlay onClick={onClick} {...overlayCopy} />
 		<div
 			className={`${contentClassName} blur-wrapper-content`}
+			data-sample-label={__('Sample', 'vulopilot')}
 			role="button"
 			tabIndex={0}
 			onClick={onClick}

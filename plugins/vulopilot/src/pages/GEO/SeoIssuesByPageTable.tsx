@@ -14,6 +14,7 @@ import {
 	RawFinding,
 	VisibilityCell,
 } from './seoIssuesShared';
+import { columns, tableRows } from '../../services/tableColumns';
 
 /** One inline sub-row under a page's row. */
 interface FindingRow {
@@ -103,9 +104,9 @@ interface SeoIssuesByPageTableProps {
 	onAnalyze?: (postId: number) => void;
 	/** SeoTab.tsx's own `analyzingPostId` - which row's panel (if any) is currently open. */
 	activePostId?: number | null;
-	/** Called with `true` when this tab's "Pages & Posts" list has nothing to show, `false` otherwise. */
+	/** Called with the ids of the pages the list shows (after its tab, priority and search filters) whenever they change. */
 	// eslint-disable-next-line no-unused-vars
-	onEmptyChange?: (isEmpty: boolean) => void;
+	onVisibleRowsChange?: (ids: number[]) => void;
 	/** Only set by SeoTab.tsx's own SEO usage (`IssuesSection.tsx`'s own `pageScore` prop). */
 	showScoreChange?: boolean;
 	/** Only set by `IssuesSection.tsx`'s own `content` mode. */
@@ -132,7 +133,7 @@ const SeoIssuesByPageTable = ({
 	onExportCsv,
 	onAnalyze,
 	activePostId,
-	onEmptyChange,
+	onVisibleRowsChange,
 	showScoreChange,
 	showContentScore,
 	hideSearch,
@@ -208,11 +209,15 @@ const SeoIssuesByPageTable = ({
 
 	const isEmptyForTab = !isLoading && 0 === visibleRows.length && '' === searchValue.trim();
 
+	// Tells the parent which pages are on screen, so its detail panel can follow the list.
+	const visibleKey = isLoading ? '' : visibleRows.map((row) => row.id).join(',');
+
 	useEffect(() => {
-		onEmptyChange?.(isEmptyForTab);
-		// `onEmptyChange` is a fresh function reference every render from every real call site; re-run only when the actual empty/not-empty verdict changes.
-		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, [isEmptyForTab]);
+		if (!isLoading) {
+			onVisibleRowsChange?.(visibleRows.map((row) => row.id));
+		}
+		// `onVisibleRowsChange` is a fresh function every render; re-run only when the shown pages change.
+	}, [visibleKey, isLoading]);
 
 	if (hasError) {
 		return (
@@ -283,7 +288,7 @@ const SeoIssuesByPageTable = ({
 						setSortBy(query.orderby || null);
 						setSortOrder('asc' === query.order ? 'asc' : 'desc');
 					}}
-					headers={{
+					headers={columns({
 						title: {
 							label: __('Page', 'vulopilot'),
 							width: '65%',
@@ -316,7 +321,6 @@ const SeoIssuesByPageTable = ({
 										<InformationItemComponent
 											title={row.title || __('(no title)', 'vulopilot')}
 											titleLink={row.editLink}
-											icon={row.categoryIcon}
 											badges={[
 												{
 													text: formatStatusLabel(row.status),
@@ -491,15 +495,15 @@ const SeoIssuesByPageTable = ({
 								{
 									type: 'button',
 									// Same "More Details"/"Showing" toggle wording as the other issues tables.
-									label: (row: Record<string, unknown>) =>
+									label: (row) =>
 										(row as unknown as PageRow).id === activePostId
 											? __('Showing', 'vulopilot')
 											: __('More Details', 'vulopilot'),
-									color: (row: Record<string, unknown>) =>
+									color: (row) =>
 										(row as unknown as PageRow).id === activePostId
 											? 'text-green'
 											: 'text-purple',
-									icon: (row: Record<string, unknown>) =>
+									icon: (row) =>
 										(row as unknown as PageRow).id === activePostId
 											? 'eye'
 											: 'pagination-next-arrow',
@@ -513,7 +517,7 @@ const SeoIssuesByPageTable = ({
 								},
 								{
 									type: 'button',
-									label: (row: Record<string, unknown>) =>
+									label: (row) =>
 										deletingId === (row as unknown as PageRow).id
 											? __('Deleting…', 'vulopilot')
 											: __('Delete', 'vulopilot'),
@@ -533,11 +537,11 @@ const SeoIssuesByPageTable = ({
 								},
 							],
 						},
-					}}
-					rows={visibleRows.map((row) => ({
+					})}
+					rows={tableRows(visibleRows.map((row) => ({
 						...row,
 						variation: buildVariationRows(row),
-					}))}
+					})))}
 					ids={visibleRows.map((row) => row.id)}
 					totalRows={visibleRows.length}
 					isLoading={isLoading}

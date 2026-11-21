@@ -6,6 +6,8 @@ use VuloPilot\Dashboard\ActivityLogRepository;
 use VuloPilot\AiAssistant\AiHistoryRepository;
 use VuloPilot\Utill\FindingRepository;
 use VuloPilot\Utill\ScanRepository;
+use VuloPilot\Utill\ScanPersistenceListener;
+use VuloPilot\Utill\ScanResult;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -557,6 +559,15 @@ class History extends \WP_REST_Controller {
 
 		if ( 'scan' === $row['category'] && ! empty( $row['object_id'] ) ) {
 			$row['scan'] = $this->build_scan_detail( (int) $row['object_id'] );
+
+			// Older rows were logged with the raw scanner id; rebuild the line from the scan itself.
+			if ( $row['scan'] ) {
+				$row['message'] = ScanPersistenceListener::describe_scan(
+					(string) $row['scan']['scanner_id'],
+					(int) $row['scan']['total'],
+					ScanResult::STATUS_FAILED === $row['scan']['status']
+				);
+			}
 		} elseif ( 'change' === $row['category'] && ! empty( $row['object_id'] ) ) {
 			$row['change'] = $this->build_change_detail( (int) $row['object_id'] );
 		}

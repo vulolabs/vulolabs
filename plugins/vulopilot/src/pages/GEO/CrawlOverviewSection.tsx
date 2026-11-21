@@ -9,6 +9,7 @@ import { useApiList } from '../../services/useApiList';
 import CrawlerAnalyticsSection from './CrawlerAnalyticsSection';
 import { useCrawlerAnalytics } from './useCrawlerAnalytics';
 import type { PeriodDays } from './types';
+import { columns } from '../../services/tableColumns';
 
 const HistoricalCrawlTrendsCard = applyFilters(
 	'vulopilot_crawler_historical_trends_card',
@@ -147,7 +148,7 @@ const CrawlOverviewSection = () => {
 								showMenu={false}
 								hideHeader={true}
 								format={vulopilotAppLocalizer.date_format_js}
-								headers={{
+								headers={columns({
 									bot_name: {
 										label: __('Bot', 'vulopilot'),
 									},
@@ -170,7 +171,7 @@ const CrawlOverviewSection = () => {
 										defaultSort: true,
 										defaultOrder: 'desc',
 									},
-								}}
+								})}
 								rows={data}
 								ids={data.map((row) => row.id)}
 								totalRows={total}
