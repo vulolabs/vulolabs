@@ -1,6 +1,6 @@
 # VuloMail integration API
 
-API version: **1.0** (`VULOMAIL_API_VERSION`, `vulomail_api_version()`).
+API version: **1.1** (`VULOMAIL_API_VERSION`, `vulomail_api_version()`).
 
 The functions, hooks and interfaces on this page are the supported surface. The minor version rises when something is added; the major version rises only on a breaking change. Anything not listed here is internal and may change.
 
@@ -21,8 +21,11 @@ if ( function_exists( 'vulomail_send_sms' ) && vulomail_is_sms_ready() ) {
 | `vulomail_is_sms_ready()` | `bool` | A usable SMS connection exists and SMS is on. |
 | `vulomail_send_email( array $args )` | `true\|WP_Error` | `to`, `subject`, `message` required; `headers`, `attachments`, `source` optional. |
 | `vulomail_send_sms( string $to, string $message, array $args = [] )` | `true\|WP_Error` | `source` optional. |
+| `vulomail_substitute_tags( string $text, array $tags, bool $strip_newlines = false )` | `string` | Case-insensitive `{tag}` replacement. `$strip_newlines` for a subject line. |
 
 `vulomail_send_email()` is `wp_mail()` with a labelled log entry and a real error on failure. With no connection configured it still sends, through WordPress's own mailer. Plain `wp_mail()` calls are routed through VuloMail too; you only need this function for the `source` label and the error detail.
+
+`vulomail_substitute_tags()` fills `{tag}` placeholders into your own subject/content before you send it. Use it instead of your own `str_ireplace()`/`strtr()` pass: it's case-insensitive (a template edited in VuloMail's own editor may not keep your tags' exact casing) and, with `$strip_newlines` true, strips CR/LF from values first -- pass that for a subject line, since a tag's value can come from an unauthenticated form submission and a stray newline there becomes a real extra mail header once PHPMailer parses it.
 
 `vulomail_send_sms()` accepts international numbers (`+14155550123`) or national numbers when a default country code is set. HTML is stripped. Messages over 1530 characters are refused.
 

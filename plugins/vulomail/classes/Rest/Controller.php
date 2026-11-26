@@ -13,12 +13,16 @@ use VuloMail\Utill;
 defined( 'ABSPATH' ) || exit;
 
 /**
- * Shared permission check: every route is admin-only. Core's REST cookie auth already verifies the `wp_rest` nonce, so a logged-in admin's browser can't be tricked into calling these routes cross-site.
+ * Base REST controller for VuloMail's own routes: the shared permission check (capability +
+ * translated forbidden message), and `with_causes()`, used by delivery-log/diagnostics endpoints
+ * to annotate which failed attempt is worth surfacing advice for.
  */
 abstract class Controller extends \WP_REST_Controller {
 
 	/**
-	 * Checks that the current user may manage VuloMail.
+	 * Checks that the current user may manage VuloMail. Core's REST cookie authentication
+	 * verifies the `wp_rest` nonce before this runs, so a logged-in admin's browser can't be
+	 * tricked into calling these routes cross-site.
 	 *
 	 * @return bool|\WP_Error
 	 */

@@ -52,3 +52,43 @@ if ( ! function_exists( 'vuloform_get_submission' ) ) {
 		return VuloForm()->submissions->get( (int) $submission_id );
 	}
 }
+
+if ( ! function_exists( 'vuloform_preview_available' ) ) {
+	/**
+	 * Whether a consumer's own admin preview of a VuloForm-built form can render right now --
+	 * true once `vuloform_render()`/`vuloform_get_form()` are safe to call. Combine with your own
+	 * `class_exists( '\VuloForm\VuloForm' )` check (VuloForm's classes only autoload while active)
+	 * to tell "not installed" apart from "installed but this old a version".
+	 *
+	 * @since 1.0.1
+	 *
+	 * @return bool
+	 */
+	function vuloform_preview_available() {
+		return function_exists( 'vuloform_render' ) && function_exists( 'vuloform_get_form' );
+	}
+}
+
+if ( ! function_exists( 'vuloform_get_preview_fields' ) ) {
+	/**
+	 * The fields every consumer's own "preview this form, edit it in VuloForm" admin panel needs
+	 * once a form id has been resolved: the rendered HTML, its edit-screen URL, and its stylesheet
+	 * URL. Consumers (CatalogX, Notifima, ...) each still resolve/create their own default form id
+	 * and build their own REST route -- this is only the part that's identical once a form id is
+	 * in hand, so it isn't duplicated per consumer.
+	 *
+	 * @since 1.0.1
+	 *
+	 * @param int $form_id Form id, already confirmed to exist via `vuloform_get_form()`.
+	 * @return array{edit_url: string, style_url: string, html: string}
+	 */
+	function vuloform_get_preview_fields( $form_id ) {
+		$form_id = (int) $form_id;
+
+		return array(
+			'edit_url'  => admin_url( 'admin.php?page=vuloform#&tab=forms&form=' . $form_id ),
+			'style_url' => VuloForm()->plugin_url . 'assets/styles/public/vuloform-form.min.css',
+			'html'      => vuloform_render( $form_id ),
+		);
+	}
+}

@@ -111,8 +111,68 @@ if ( ! function_exists( 'vulomail_send_sms' ) ) {
 	}
 }
 
+if ( ! function_exists( 'vulomail_get_template_edit_url' ) ) {
+	/**
+	 * The admin URL to edit a registered email template in VuloMail's own Email Customizer. Keeps
+	 * knowledge of VuloMail's admin page/tab/query-arg structure in one place rather than each
+	 * consumer (CatalogX, ...) hardcoding `admin.php?page=vulomail#&tab=email-templates&template=`
+	 * itself.
+	 *
+	 * @since 1.1.0
+	 *
+	 * @param string $name `plugin/name` registered via `vulomail_register_email_template()`.
+	 * @return string
+	 */
+	function vulomail_get_template_edit_url( $name ) {
+		return admin_url( 'admin.php?page=vulomail#&tab=email-templates&template=' . $name );
+	}
+}
+
 if ( ! function_exists( 'vulomail_register_email_template' ) ) {
 	function vulomail_register_email_template( $name, array $args = array() ) {
 		return \VuloMail\Templates\Registry::register( $name, $args );
+	}
+}
+
+if ( ! function_exists( 'vulomail_substitute_tags' ) ) {
+	/**
+	 * Fills `{tag}` placeholders into a template registered via `vulomail_email_templates` (or any
+	 * other string). Several VuloLabs plugins (CatalogX, MultiVendorX, Notifima, ...) send their
+	 * own transactional email with their own subject/content and only hand the final string to
+	 * `vulomail_send_email()` -- each one used to carry its own copy of this substitution, and
+	 * they'd quietly drifted apart (one used case-sensitive `strtr()`, so a template edited in
+	 * VuloMail's own editor with different tag casing silently kept the literal `{TAG}` text).
+	 * This is the one substitution path all of them should call instead.
+	 *
+	 * @since 1.1.0
+	 *
+	 * @param string $text           Subject or content, `{tag}` placeholders intact.
+	 * @param array  $tags           `{tag}` => replacement value.
+	 * @param bool   $strip_newlines True for a subject line. A tag's value can come from an
+	 *                               unauthenticated form submission (e.g. an enquiry form's
+	 *                               name/email); CR/LF there becomes a real extra mail header once
+	 *                               PHPMailer/wp_mail parses it, so it's stripped before the value
+	 *                               ever lands in a subject. (The caller is still responsible for
+	 *                               validating/newline-stripping anything it puts directly into a
+	 *                               `headers` argument itself, e.g. a Reply-To built from submitter
+	 *                               input.)
+	 * @return string
+	 */
+	function vulomail_substitute_tags( $text, array $tags, $strip_newlines = false ) {
+		if ( $strip_newlines ) {
+			$tags = array_map(
+				static function ( $value ) {
+					return str_replace( array( "\r", "\n" ), ' ', (string) $value );
+				},
+				$tags
+			);
+		}
+
+		// Case-insensitive: once a template's content/subject is edited in VuloMail's own editor,
+		// its tags are whatever casing was typed/pasted there (e.g. a generic "{PRODUCT_NAME}"
+		// placeholder), not necessarily the exact lowercase `{product_name}` the registering plugin
+		// uses. A case-sensitive replace silently leaves an unmatched tag as literal text instead
+		// of the real value.
+		return str_ireplace( array_keys( $tags ), array_values( $tags ), (string) $text );
 	}
 }

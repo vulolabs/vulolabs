@@ -12,12 +12,17 @@ use VuloForm\Utill;
 defined( 'ABSPATH' ) || exit;
 
 /**
- * Shared permission check for every private route. Core's REST cookie authentication verifies the
- * `wp_rest` nonce before this runs.
+ * Base REST controller for VuloForm's own routes: the shared permission check (capability +
+ * translated forbidden message), a `route()` helper for registering routes, and a shared
+ * `not_found()` error.
  */
 abstract class Controller extends \WP_REST_Controller {
 
 	/**
+	 * Checks that the current user may manage VuloForm. Core's REST cookie authentication
+	 * verifies the `wp_rest` nonce before this runs, so a logged-in admin's browser can't be
+	 * tricked into calling these routes cross-site.
+	 *
 	 * @return bool|\WP_Error
 	 */
 	public function check_permission() {
@@ -29,6 +34,8 @@ abstract class Controller extends \WP_REST_Controller {
 	}
 
 	/**
+	 * Registers one route under VuloForm's own namespace.
+	 *
 	 * @param string $path     Route path under the namespace.
 	 * @param string $methods  HTTP methods.
 	 * @param string $callback Method name on this controller.
@@ -50,6 +57,8 @@ abstract class Controller extends \WP_REST_Controller {
 	}
 
 	/**
+	 * A standard "that item no longer exists" error.
+	 *
 	 * @return \WP_Error
 	 */
 	protected function not_found() {
