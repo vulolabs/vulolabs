@@ -83,7 +83,7 @@ class PublicForms extends Controller {
 			return $form;
 		}
 
-		$result = VuloForm()->processor->handle( $form, (array) $request->get_body_params(), (array) $request->get_file_params() );
+		$result = VuloForm()->processor->handle( $form, (array) $request->get_body_params(), (array) $request->get_file_params(), get_current_user_id() );
 
 		// The submission id is the site owner's business, not the visitor's.
 		unset( $result['submission_id'] );

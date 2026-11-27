@@ -192,6 +192,18 @@
 
 		form.vuloformReady = true;
 
+		function requestOptions( extra ) {
+			var options = config.restNonce
+				? { credentials: 'same-origin', headers: { 'X-WP-Nonce': config.restNonce } }
+				: { credentials: 'omit' };
+
+			Object.keys( extra || {} ).forEach( function ( key ) {
+				options[ key ] = extra[ key ];
+			} );
+
+			return options;
+		}
+
 		var wrap = form.parentNode;
 		var pages = form.querySelectorAll( '.vuloform-page' );
 		var messageBox = form.querySelector( '.vuloform-message' );
@@ -816,7 +828,7 @@
 
 			tokenFetched = true;
 
-			return fetch( config.token, { credentials: 'omit', cache: 'no-store' } )
+			return fetch( config.token, requestOptions( { cache: 'no-store' } ) )
 				.then( function ( response ) {
 					return response.json();
 				} )
@@ -1012,7 +1024,7 @@
 					return fetchToken();
 				} )
 				.then( function () {
-					return fetch( config.endpoint, { method: 'POST', body: new FormData( form ), credentials: 'omit' } );
+					return fetch( config.endpoint, requestOptions( { method: 'POST', body: new FormData( form ) } ) );
 				} )
 				.then( function ( response ) {
 					return response.json();
