@@ -243,6 +243,7 @@ class Renderer {
 			'recaptcha' => ! $preview && Recaptcha::is_active( $form ) ? Recaptcha::client_config() : null,
 			'endpoint'  => esc_url_raw( rest_url( 'vuloform/v1/public/forms/' . (int) $form['id'] . '/submit' ) ),
 			'token'     => esc_url_raw( rest_url( 'vuloform/v1/public/forms/' . (int) $form['id'] . '/token' ) ),
+			'restNonce' => ! $preview && is_user_logged_in() ? wp_create_nonce( 'wp_rest' ) : null,
 			'progress'  => $settings['progress'],
 			'dynamic'   => $dynamic,
 			'messages'  => array_merge(

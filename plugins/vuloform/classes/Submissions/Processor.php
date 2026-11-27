@@ -42,7 +42,7 @@ class Processor {
 	 * @param array $files `$_FILES`-shaped uploads, keyed `vf_file_{field key}`.
 	 * @return array{success: bool, message: string, errors: array<string, string>, redirect: string, submission_id: int}
 	 */
-	public function handle( array $form, array $post, array $files = array() ) {
+	public function handle( array $form, array $post, array $files = array(), $user_id = 0 ) {
 		$settings = $form['schema']['settings'];
 
 		if ( 'published' !== $form['status'] ) {
@@ -111,7 +111,7 @@ class Processor {
 				return self::failure( __( 'Your message could not be saved. Please try again later.', 'vuloform' ) );
 			}
 		}
-
+		
 		if ( 'spam' !== $status ) {
 			/**
 			 * Fires after a submission is accepted. Notifications and webhooks run from here.
@@ -120,7 +120,7 @@ class Processor {
 			 * @param array $values Field key => value.
 			 * @param array $form   Form.
 			 */
-			do_action( 'vuloform_submission_created', $id, $values, $form );
+			do_action( 'vuloform_submission_created', $id, $values, $form, $user_id );
 		}
 
 		$confirmation = self::confirmation_for( $settings['confirmation'], $values );
